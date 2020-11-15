@@ -1,0 +1,94 @@
+{
+    "compilerOptions": {
+        "target": "ES5",
+        "lib": [
+            "ESNext"
+        ],
+        "strict": false,
+        "skipLibCheck": true,
+        "outFile": "../main.js",
+        "newLine": "LF"
+    },
+    "include": [
+
+        "header.ts",
+        "util/BlockModel.ts",
+        "util/Sound.ts",
+
+        "smeltery/MoltenLiquid.ts",
+        "smeltery/recipe/SmelteryFuel.ts",
+        "smeltery/recipe/MeltingRecipe.ts",
+        "smeltery/recipe/AlloyRecipe.ts",
+        "smeltery/recipe/CastingRecipe.ts",
+        "smeltery/stone.ts",
+        "smeltery/tank.ts",
+        "smeltery/drain.ts",
+        "smeltery/faucet.ts",
+        "smeltery/casting_table.ts",
+        "smeltery/casting_basin.ts",
+        "smeltery/controller.ts",
+
+        "tool/TinkersMaterial.ts",
+        "tool/ToolStats.ts",
+        "tool/ToolData.ts",
+        "tool/PartRegistry.ts",
+        "tool/ToolTexture.ts",
+
+        "resource/ore.ts",
+        "resource/material.ts",
+        "resource/cast.ts",
+
+        "tool/modifier/TinkersModifier.ts",
+        "tool/modifier/haste.ts",
+        "tool/modifier/luck.ts",
+        "tool/modifier/sharp.ts",
+        "tool/modifier/diamond.ts",
+        "tool/modifier/emerald.ts",
+        "tool/modifier/silk.ts",
+        "tool/modifier/reinforced.ts",
+        "tool/modifier/beheading.ts",
+        "tool/modifier/smite.ts",
+        "tool/modifier/spider.ts",
+        "tool/modifier/fiery.ts",
+        "tool/modifier/necrotic.ts",
+        "tool/modifier/knockback.ts",
+        "tool/modifier/mending.ts",
+        "tool/modifier/shulking.ts",
+        "tool/modifier/web.ts",
+        
+        "table/PatternChest.ts",
+        "table/TableBase.ts",
+        "teble/CraftingStation.ts",
+        "table/StencilTable.ts",
+        "table/PartBuilder.ts",
+        "table/ToolForge.ts",
+
+        "tool/type/TinkersTool.ts",
+        "tool/type/pickaxe.ts",
+        "tool/type/shovel.ts",
+        "tool/type/hatchet.ts",
+        "tool/type/mattock.ts",
+        "tool/type/sword.ts",
+        "tool/type/hammer.ts",
+        "tool/type/excavator.ts",
+        "tool/type/lumberaxe.ts",
+
+        "integration/industrialcraft.ts",
+        "integration/forestry.ts",
+        "integration/recipe_viewer.ts",
+        "integration/guide_api.ts",
+
+        "footer.ts"
+        
+      ],
+    "files": [
+        "../../../_MODULE_/android-declarations.d.ts",
+        "../../../_MODULE_/android.d.ts",
+        "../../../_MODULE_/core-engine.d.ts",
+        "../../../_MODULE_/ToolLib.d.ts",
+        "../../../_MODULE_/LiquidLib.d.ts",
+        "../../../_MODULE_/TileRender.d.ts",
+        "../../../_MODULE_/StorageInterface.d.ts",
+        "../../../_MODULE_/additional.d.ts"
+    ]
+}

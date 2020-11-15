@@ -1,0 +1,65 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+        {
+            "label": "Compile Pre",
+            "type": "typescript",
+            "tsconfig": "src/pre/tsconfig.json",
+            "problemMatcher": [
+                "$tsc"
+            ],
+            "group": "build"
+        },
+        {
+            "label": "Compile Dev",
+            "type": "typescript",
+            "tsconfig": "src/dev/tsconfig.json",
+            "problemMatcher": [
+                "$tsc"
+            ],
+            "group": "build"
+        },
+        {
+            "label": "Push All",
+            "type": "shell",
+            "command": "adb push 'D:/icmod/Tinkers Construct/src/.' '/storage/emulated/0/games/horizon/packs/Inner_Core_Test/innercore/mods/Tinkers Construct/.'",
+            "group": "build",
+            "problemMatcher": []
+        },
+        {
+            "label": "Push Libs",
+            "type": "shell",
+            "command": "adb push 'D:/icmod/Tinkers Construct/src/lib/.' '/storage/emulated/0/games/horizon/packs/Inner_Core_Test/innercore/mods/Tinkers Construct/lib/.'",
+            "group": "build",
+            "problemMatcher": []
+        },
+        {
+            "label": "Push Pre Code",
+            "type": "shell",
+            "command": "adb push 'D:/icmod/Tinkers Construct/src/preloader.js' '/storage/emulated/0/games/horizon/packs/Inner_Core_Test/innercore/mods/Tinkers Construct/preloader.js'",
+            "group": "build",
+            "problemMatcher": []
+        },
+        {
+            "label": "Push Code",
+            "type": "shell",
+            "command": "adb push 'D:/icmod/Tinkers Construct/src/main.js' '/storage/emulated/0/games/horizon/packs/Inner_Core_Test/innercore/mods/Tinkers Construct/main.js'",
+            "group": "build",
+            "problemMatcher": []
+        },
+        {
+            "label": "Build And Push All",
+            "dependsOn": [
+                "Compile",
+                "Push All"
+            ]
+        },
+        {
+            "label": "Build And Push Code",
+            "dependsOn": [
+                "Compile",
+                "Push Code"
+            ]
+        }
+    ]
+}
