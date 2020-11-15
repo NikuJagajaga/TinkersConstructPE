@@ -30,6 +30,8 @@ Item.addCreativeGroup("tcon_pattern", "Pattern", [
     ItemID.tcon_pattern_largeplate
 ]);
 
+Recipes2.addShapedWith2x2({item: "item:tcon_pattern_blank", count: 4}, "ab:ba", {a: "planks", b: "stick"});
+
 
 createItem("tcon_claycast_pickaxe", "Pickaxe Head Clay Cast");
 createItem("tcon_claycast_shovel", "Shovel Head Clay Cast");

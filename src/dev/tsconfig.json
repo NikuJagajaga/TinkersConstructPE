@@ -89,6 +89,7 @@
         "../../../_MODULE_/LiquidLib.d.ts",
         "../../../_MODULE_/TileRender.d.ts",
         "../../../_MODULE_/StorageInterface.d.ts",
+        "../../../_MODULE_/VanillaRecipe.d.ts",
         "../../../_MODULE_/additional.d.ts"
     ]
 }

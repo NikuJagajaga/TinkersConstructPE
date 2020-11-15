@@ -6,13 +6,13 @@ class TinkersModifier {
     constructor(private key: string, private name: string, private texIndex: number, recipe: ({id: number, data: number} | number)[], public max: number, multi: boolean, hate?: string[]){
         this.recipe = recipe.map(item => (typeof item === "number" ? {id: item, data: -1} : item));
         this.hate = {};
-        if(multi){
+        if(!multi){
             this.hate[key] = true;
         }
         if(hate){
-            for(let i = 0; i < hate.length; i++){
-                this.hate[hate[i]] = true;
-            }
+            hate.forEach(mod => {
+                this.hate[mod] = true;
+            });
         }
     }
 

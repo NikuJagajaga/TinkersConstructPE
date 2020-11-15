@@ -268,6 +268,9 @@ class ToolForgeHandler {
                                         addMod[key] = Math.min(addMod[key], Modifier[key].max);
                                         modifiers.push({type: key, level: addMod[key]});
                                     }
+                                    else{
+                                        delete addMod[key];
+                                    }
                                 }
 
                                 const mat = toolData.toolData.getRepairParts().map(index => Material[toolData.materials[index]].getItem());
@@ -477,7 +480,7 @@ Callback.addCallback("PreLoaded", () => {
 
 
 createBlock("tcon_toolstation", [{name: "Tool Station"}], "wood");
-Recipes2.addShaped(BlockID.tcon_toolstation, "a:b", {a: ItemID.tcon_pattern_blank, b: VanillaBlockID.crafting_table});
+Recipes2.addShapedWith2x2("block:tcon_toolstation", "a:b", {a: "item:tcon_pattern_blank", b: "crafting_table"});
 BlockModel.register(BlockID.tcon_toolstation, (model, index) => {
     model.addBox( 0/16, 12/16,  0/16,  16/16, 16/16, 16/16, [["tcon_toolstation", 0], ["tcon_toolstation", 0], ["tcon_table_side", 0]]);
     model.addBox( 0/16,  0/16,  0/16,   4/16, 12/16,  4/16, "tcon_table_side", 0);

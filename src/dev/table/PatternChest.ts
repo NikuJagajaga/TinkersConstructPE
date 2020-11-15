@@ -166,6 +166,7 @@ class PatternChest extends TileBase {
 
 
 createBlock("tcon_patternchest", [{name: "Pattern Chest", texture: [["itemframe_background", 0]]}]);
+Recipes2.addShapedWith2x2("block:tcon_patternchest", "a:b", {a: "item:tcon_pattern_blank", b: "chest"});
 Block.setShape(BlockID.tcon_patternchest, 0, 0, 0, 1, 14/16, 1);
 Block.registerDropFunction(BlockID.tcon_patternchest, () => []);
 

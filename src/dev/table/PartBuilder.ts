@@ -20,13 +20,12 @@ BlockModel.register(BlockID.tcon_partbuilder, (model, index) => {
     return model;
 }, 6);
 
-
-Recipes2.addShaped({id: BlockID.tcon_partbuilder, data: 0}, "a:b", {a: ItemID.tcon_pattern_blank, b: {id: VanillaBlockID.log, data: 0}});
-Recipes2.addShaped({id: BlockID.tcon_partbuilder, data: 1}, "a:b", {a: ItemID.tcon_pattern_blank, b: {id: VanillaBlockID.log, data: 1}});
-Recipes2.addShaped({id: BlockID.tcon_partbuilder, data: 2}, "a:b", {a: ItemID.tcon_pattern_blank, b: {id: VanillaBlockID.log, data: 2}});
-Recipes2.addShaped({id: BlockID.tcon_partbuilder, data: 3}, "a:b", {a: ItemID.tcon_pattern_blank, b: {id: VanillaBlockID.log, data: 3}});
-Recipes2.addShaped({id: BlockID.tcon_partbuilder, data: 4}, "a:b", {a: ItemID.tcon_pattern_blank, b: {id: VanillaBlockID.log2, data: 0}});
-Recipes2.addShaped({id: BlockID.tcon_partbuilder, data: 5}, "a:b", {a: ItemID.tcon_pattern_blank, b: {id: VanillaBlockID.log2, data: 1}});
+Recipes2.addShapedWith2x2({item: "block:tcon_partbuilder", data: 0}, "a:b", {a: "item:tcon_pattern_blank", b: {item: "log", data: 0}}, "tcon_partbuilder_0");
+Recipes2.addShapedWith2x2({item: "block:tcon_partbuilder", data: 1}, "a:b", {a: "item:tcon_pattern_blank", b: {item: "log", data: 1}}, "tcon_partbuilder_1");
+Recipes2.addShapedWith2x2({item: "block:tcon_partbuilder", data: 2}, "a:b", {a: "item:tcon_pattern_blank", b: {item: "log", data: 2}}, "tcon_partbuilder_2");
+Recipes2.addShapedWith2x2({item: "block:tcon_partbuilder", data: 3}, "a:b", {a: "item:tcon_pattern_blank", b: {item: "log", data: 3}}, "tcon_partbuilder_3");
+Recipes2.addShapedWith2x2({item: "block:tcon_partbuilder", data: 4}, "a:b", {a: "item:tcon_pattern_blank", b: {item: "log2", data: 0}}, "tcon_partbuilder_4");
+Recipes2.addShapedWith2x2({item: "block:tcon_partbuilder", data: 5}, "a:b", {a: "item:tcon_pattern_blank", b: {item: "log2", data: 1}}, "tcon_partbuilder_5");
 
 
 class PartBuilder extends TableBase {

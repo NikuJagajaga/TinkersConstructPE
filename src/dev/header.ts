@@ -1,7 +1,6 @@
 IMPORT("ToolLib");
 IMPORT("TileRender");
 IMPORT("StorageInterface");
-IMPORT("VanillaRecipe");
 IMPORT("EnhancedRecipes");
 IMPORT("ConnectedTexture");
 

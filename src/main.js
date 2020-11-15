@@ -33,7 +33,6 @@ var _a, _b, _c, _d, _e, _f, _g;
 IMPORT("ToolLib");
 IMPORT("TileRender");
 IMPORT("StorageInterface");
-IMPORT("VanillaRecipe");
 IMPORT("EnhancedRecipes");
 IMPORT("ConnectedTexture");
 var Color = android.graphics.Color;
@@ -660,7 +659,7 @@ var CastingRecipe = /** @class */ (function () {
     return CastingRecipe;
 }());
 createBlock("tcon_grout", [{ name: "Grout" }]);
-Recipes2.addShapeless({ id: BlockID.tcon_grout, count: 2 }, [VanillaBlockID.sand, VanillaBlockID.gravel, VanillaItemID.clay_ball]);
+Recipes2.addShapelessWith2x2({ item: "block:tcon_grout", count: 2 }, ["sand", "gravel", "clay_ball"]);
 Recipes2.addShapeless({ id: BlockID.tcon_grout, count: 8 }, [{ id: VanillaBlockID.sand, count: 4 }, { id: VanillaBlockID.gravel, count: 4 }, VanillaBlockID.clay]);
 createItem("tcon_brick", "Seared Brick");
 Recipes.addFurnace(BlockID.tcon_grout, ItemID.tcon_brick);
@@ -685,11 +684,11 @@ MeltingRecipe.addRecipeForAmount(BlockID.tcon_grout, "molten_stone", MatValue.SE
 CastingRecipe.addTableRecipeForBoth("ingot", "molten_stone", ItemID.tcon_brick, MatValue.SEARED_MATERIAL);
 CastingRecipe.addBasinRecipe(0, "molten_stone", { id: BlockID.tcon_stone, data: 0 }, MatValue.SEARED_BLOCK);
 CastingRecipe.addBasinRecipe(VanillaBlockID.cobblestone, "molten_stone", { id: BlockID.tcon_stone, data: 1 }, MatValue.SEARED_MATERIAL * 3);
-Recipes2.addShaped({ id: BlockID.tcon_stone, data: 3 }, "aa:aa", { a: ItemID.tcon_brick });
+Recipes2.addShapedWith2x2({ item: "block:tcon_stone", data: 3 }, "aa:aa", { a: "item:tcon_brick" });
 Recipes.addFurnace(BlockID.tcon_stone, 3, BlockID.tcon_stone, 4);
 (function () {
     var addRecipe = function (input, output) {
-        Recipes2.addShapeless({ id: BlockID.tcon_stone, data: output }, [{ id: BlockID.tcon_stone, data: input }]);
+        Recipes2.addShapelessWith2x2({ item: "block:tcon_stone", data: output }, [{ item: "block:tcon_stone", data: input }], "tcon_stone_" + output);
     };
     addRecipe(0, 2);
     addRecipe(7, 2);
@@ -2115,6 +2114,8 @@ Block.createBlock("oreArdite", [{ name: "Ardite Ore", texture: [["tcon_ore_ardit
 ToolAPI.registerBlockMaterial(BlockID.oreArdite, "stone", TinkersMaterial.COBALT, true);
 Block.setDestroyLevel(BlockID.oreArdite, TinkersMaterial.COBALT);
 Item.addCreativeGroup("ores", Translation.translate("Ores"), [BlockID.oreCobalt, BlockID.oreArdite]);
+MeltingRecipe.addRecipe(BlockID.oreCobalt, "molten_cobalt", MatValue.ORE);
+MeltingRecipe.addRecipe(BlockID.oreArdite, "molten_ardite", MatValue.ORE);
 var generateNetherOre = function (id, rate, x, z, random) {
     for (var i = 0; i < rate; i += 2) {
         GenerationUtils.generateOre(x + random.nextInt(16), 32 + random.nextInt(64), z + random.nextInt(16), id, 0, 5, false, random.nextInt());
@@ -2170,15 +2171,15 @@ Recipes.addFurnace(BlockID.oreArdite, ItemID.ingotArdite);
     addRecipes("molten_alubrass", BlockID.blockAlubrass, ItemID.ingotAlubrass /*, ItemID.nuggetAlubrass*/);
 })();
 createItem("tcon_paperstack", "Paper Stack");
-Recipes2.addShapeless(ItemID.tcon_paperstack, [{ id: VanillaItemID.paper, count: 4 }]);
+Recipes2.addShapelessWith2x2("item:tcon_paperstack", [{ item: "paper", count: 4 }]);
 createBlock("tcon_lavawood", [{ name: "Lavawood" }]);
 createBlock("tcon_firewood", [{ name: "Firewood" }]);
 CastingRecipe.addBasinRecipe(VanillaBlockID.planks, "lava", BlockID.tcon_lavawood, 250);
-Recipes2.addShapeless(BlockID.tcon_firewood, [BlockID.tcon_lavawood, { id: VanillaItemID.blaze_powder, count: 2 }]);
+Recipes2.addShapelessWith2x2("block:tcon_firewood", ["block:tcon_lavawood", { item: "blaze_powder", count: 2 }]);
 createItem("tcon_slimeball_blue", "Blue Slime");
 createItem("tcon_slimeball_purple", "Purple Slime");
-Recipes2.addShapeless(ItemID.tcon_slimeball_blue, [VanillaItemID.slime_ball, { id: VanillaItemID.dye, count: 2, data: 4 }]);
-Recipes2.addShapeless(ItemID.tcon_slimeball_purple, [ItemID.tcon_slimeball_blue, { id: VanillaItemID.redstone, count: 2 }]);
+Recipes2.addShapelessWith2x2("item:tcon_slimeball_blue", ["slime_ball", { item: "dye", count: 2, data: 4 }]);
+Recipes2.addShapelessWith2x2("item:tcon_slimeball_purple", ["item:tcon_slimeball_blue", { item: "redstone", count: 2 }]);
 MeltingRecipe.addRecipe(ItemID.tcon_slimeball_purple, "purpleslime", MatValue.SLIME_BALL);
 createBlock("tcon_slimymud_green", [{ name: "Slimy Mud" }]);
 createBlock("tcon_slimymud_blue", [{ name: "Blue Slimy Mud" }]);
@@ -2231,6 +2232,7 @@ Item.addCreativeGroup("tcon_pattern", "Pattern", [
     ItemID.tcon_pattern_guard,
     ItemID.tcon_pattern_largeplate
 ]);
+Recipes2.addShapedWith2x2({ item: "item:tcon_pattern_blank", count: 4 }, "ab:ba", { a: "planks", b: "stick" });
 createItem("tcon_claycast_pickaxe", "Pickaxe Head Clay Cast");
 createItem("tcon_claycast_shovel", "Shovel Head Clay Cast");
 createItem("tcon_claycast_axe", "Axe Head Clay Cast");
@@ -2345,19 +2347,20 @@ CastingRecipe.addTableRecipeForBoth("nugget", "molten_gold", VanillaItemID.gold_
 CastingRecipe.addTableRecipeForBoth("gem", "molten_emerald", VanillaItemID.emerald);
 var TinkersModifier = /** @class */ (function () {
     function TinkersModifier(key, name, texIndex, recipe, max, multi, hate) {
+        var _this = this;
         this.key = key;
         this.name = name;
         this.texIndex = texIndex;
         this.max = max;
         this.recipe = recipe.map(function (item) { return (typeof item === "number" ? { id: item, data: -1 } : item); });
         this.hate = {};
-        if (multi) {
+        if (!multi) {
             this.hate[key] = true;
         }
         if (hate) {
-            for (var i = 0; i < hate.length; i++) {
-                this.hate[hate[i]] = true;
-            }
+            hate.forEach(function (mod) {
+                _this.hate[mod] = true;
+            });
         }
     }
     TinkersModifier.prototype.getKey = function () {
@@ -2824,6 +2827,7 @@ var PatternChest = /** @class */ (function (_super) {
     return PatternChest;
 }(TileBase));
 createBlock("tcon_patternchest", [{ name: "Pattern Chest", texture: [["itemframe_background", 0]] }]);
+Recipes2.addShapedWith2x2("block:tcon_patternchest", "a:b", { a: "item:tcon_pattern_blank", b: "chest" });
 Block.setShape(BlockID.tcon_patternchest, 0, 0, 0, 1, 14 / 16, 1);
 Block.registerDropFunction(BlockID.tcon_patternchest, function () { return []; });
 Block.registerPlaceFunction(BlockID.tcon_patternchest, function (coords, item, block) {
@@ -2913,12 +2917,12 @@ BlockModel.register(BlockID.tcon_stenciltable, function (model, index) {
     model.addBox(0 / 16, 0 / 16, 12 / 16, 4 / 16, 12 / 16, 16 / 16, "planks", index);
     return model;
 }, 6);
-Recipes2.addShaped({ id: BlockID.tcon_stenciltable, data: 0 }, "a:b", { a: ItemID.tcon_pattern_blank, b: { id: VanillaBlockID.planks, data: 0 } });
-Recipes2.addShaped({ id: BlockID.tcon_stenciltable, data: 1 }, "a:b", { a: ItemID.tcon_pattern_blank, b: { id: VanillaBlockID.planks, data: 1 } });
-Recipes2.addShaped({ id: BlockID.tcon_stenciltable, data: 2 }, "a:b", { a: ItemID.tcon_pattern_blank, b: { id: VanillaBlockID.planks, data: 2 } });
-Recipes2.addShaped({ id: BlockID.tcon_stenciltable, data: 3 }, "a:b", { a: ItemID.tcon_pattern_blank, b: { id: VanillaBlockID.planks, data: 3 } });
-Recipes2.addShaped({ id: BlockID.tcon_stenciltable, data: 4 }, "a:b", { a: ItemID.tcon_pattern_blank, b: { id: VanillaBlockID.planks, data: 4 } });
-Recipes2.addShaped({ id: BlockID.tcon_stenciltable, data: 5 }, "a:b", { a: ItemID.tcon_pattern_blank, b: { id: VanillaBlockID.planks, data: 5 } });
+Recipes2.addShapedWith2x2({ item: "block:tcon_stenciltable", data: 0 }, "a:b", { a: "item:tcon_pattern_blank", b: { item: "planks", data: 0 } }, "tcon_stenciltable_0");
+Recipes2.addShapedWith2x2({ item: "block:tcon_stenciltable", data: 1 }, "a:b", { a: "item:tcon_pattern_blank", b: { item: "planks", data: 1 } }, "tcon_stenciltable_1");
+Recipes2.addShapedWith2x2({ item: "block:tcon_stenciltable", data: 2 }, "a:b", { a: "item:tcon_pattern_blank", b: { item: "planks", data: 2 } }, "tcon_stenciltable_2");
+Recipes2.addShapedWith2x2({ item: "block:tcon_stenciltable", data: 3 }, "a:b", { a: "item:tcon_pattern_blank", b: { item: "planks", data: 3 } }, "tcon_stenciltable_3");
+Recipes2.addShapedWith2x2({ item: "block:tcon_stenciltable", data: 4 }, "a:b", { a: "item:tcon_pattern_blank", b: { item: "planks", data: 4 } }, "tcon_stenciltable_4");
+Recipes2.addShapedWith2x2({ item: "block:tcon_stenciltable", data: 5 }, "a:b", { a: "item:tcon_pattern_blank", b: { item: "planks", data: 5 } }, "tcon_stenciltable_5");
 var StencilTable = /** @class */ (function (_super) {
     __extends(StencilTable, _super);
     function StencilTable() {
@@ -3040,12 +3044,12 @@ BlockModel.register(BlockID.tcon_partbuilder, function (model, index) {
     model.addBox(0 / 16, 0 / 16, 12 / 16, 4 / 16, 12 / 16, 16 / 16, tex, meta);
     return model;
 }, 6);
-Recipes2.addShaped({ id: BlockID.tcon_partbuilder, data: 0 }, "a:b", { a: ItemID.tcon_pattern_blank, b: { id: VanillaBlockID.log, data: 0 } });
-Recipes2.addShaped({ id: BlockID.tcon_partbuilder, data: 1 }, "a:b", { a: ItemID.tcon_pattern_blank, b: { id: VanillaBlockID.log, data: 1 } });
-Recipes2.addShaped({ id: BlockID.tcon_partbuilder, data: 2 }, "a:b", { a: ItemID.tcon_pattern_blank, b: { id: VanillaBlockID.log, data: 2 } });
-Recipes2.addShaped({ id: BlockID.tcon_partbuilder, data: 3 }, "a:b", { a: ItemID.tcon_pattern_blank, b: { id: VanillaBlockID.log, data: 3 } });
-Recipes2.addShaped({ id: BlockID.tcon_partbuilder, data: 4 }, "a:b", { a: ItemID.tcon_pattern_blank, b: { id: VanillaBlockID.log2, data: 0 } });
-Recipes2.addShaped({ id: BlockID.tcon_partbuilder, data: 5 }, "a:b", { a: ItemID.tcon_pattern_blank, b: { id: VanillaBlockID.log2, data: 1 } });
+Recipes2.addShapedWith2x2({ item: "block:tcon_partbuilder", data: 0 }, "a:b", { a: "item:tcon_pattern_blank", b: { item: "log", data: 0 } }, "tcon_partbuilder_0");
+Recipes2.addShapedWith2x2({ item: "block:tcon_partbuilder", data: 1 }, "a:b", { a: "item:tcon_pattern_blank", b: { item: "log", data: 1 } }, "tcon_partbuilder_1");
+Recipes2.addShapedWith2x2({ item: "block:tcon_partbuilder", data: 2 }, "a:b", { a: "item:tcon_pattern_blank", b: { item: "log", data: 2 } }, "tcon_partbuilder_2");
+Recipes2.addShapedWith2x2({ item: "block:tcon_partbuilder", data: 3 }, "a:b", { a: "item:tcon_pattern_blank", b: { item: "log", data: 3 } }, "tcon_partbuilder_3");
+Recipes2.addShapedWith2x2({ item: "block:tcon_partbuilder", data: 4 }, "a:b", { a: "item:tcon_pattern_blank", b: { item: "log2", data: 0 } }, "tcon_partbuilder_4");
+Recipes2.addShapedWith2x2({ item: "block:tcon_partbuilder", data: 5 }, "a:b", { a: "item:tcon_pattern_blank", b: { item: "log2", data: 1 } }, "tcon_partbuilder_5");
 var PartBuilder = /** @class */ (function (_super) {
     __extends(PartBuilder, _super);
     function PartBuilder() {
@@ -3542,9 +3546,13 @@ var ToolForgeHandler = /** @class */ (function () {
                                         find3.level += addMod_1[key];
                                         return "continue";
                                     }
+                                    container.setText("textDebug", JSON.stringify(modifiers));
                                     if (Modifier[key].canBeTogether(modifiers) && modifiers.length < Cfg.modifierSlots + toolData_1.getLevel()) {
                                         addMod_1[key] = Math.min(addMod_1[key], Modifier[key].max);
                                         modifiers.push({ type: key, level: addMod_1[key] });
+                                    }
+                                    else {
+                                        delete addMod_1[key];
                                     }
                                 };
                                 for (var key in addMod_1) {
@@ -3703,7 +3711,7 @@ Callback.addCallback("PreLoaded", function () {
     ToolForgeHandler.createForge();
 });
 createBlock("tcon_toolstation", [{ name: "Tool Station" }], "wood");
-Recipes2.addShaped(BlockID.tcon_toolstation, "a:b", { a: ItemID.tcon_pattern_blank, b: VanillaBlockID.crafting_table });
+Recipes2.addShapedWith2x2("block:tcon_toolstation", "a:b", { a: "item:tcon_pattern_blank", b: "crafting_table" });
 BlockModel.register(BlockID.tcon_toolstation, function (model, index) {
     model.addBox(0 / 16, 12 / 16, 0 / 16, 16 / 16, 16 / 16, 16 / 16, [["tcon_toolstation", 0], ["tcon_toolstation", 0], ["tcon_table_side", 0]]);
     model.addBox(0 / 16, 0 / 16, 0 / 16, 4 / 16, 12 / 16, 4 / 16, "tcon_table_side", 0);

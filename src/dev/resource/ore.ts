@@ -10,6 +10,9 @@ Block.setDestroyLevel(BlockID.oreArdite, TinkersMaterial.COBALT);
 
 Item.addCreativeGroup("ores", Translation.translate("Ores"), [BlockID.oreCobalt, BlockID.oreArdite]);
 
+MeltingRecipe.addRecipe(BlockID.oreCobalt, "molten_cobalt", MatValue.ORE);
+MeltingRecipe.addRecipe(BlockID.oreArdite, "molten_ardite", MatValue.ORE);
+
 
 const generateNetherOre = (id: number, rate: number, x: number, z: number, random: java.util.Random) => {
     for(let i = 0; i < rate; i += 2){
