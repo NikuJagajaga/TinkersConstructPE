@@ -23,7 +23,7 @@ class CastingRecipe {
 
     private static getLimits(type: "table" | "basin", id: number): {[liquid: string]: number} {
         const limits: {[liquid: string]: number} = {};
-        if(this[type][id]){
+        if(this[type][id] && typeof this[type][id] === "object"){
             if(this.capacity[id]){
                 limits.__global = this.capacity[id];
             }
@@ -90,11 +90,17 @@ class CastingRecipe {
     }
 
     static isValidLiquidForTable(id: number, liquid: string): boolean {
-        return liquid in this.table[id];
+        if(id in this.table){
+            return liquid in this.table[id];
+        }
+        return false;
     }
 
     static isValidLiquidForBasin(id: number, liquid: string): boolean {
-        return liquid in this.basin[id];
+        if(id in this.basin){
+            return liquid in this.basin[id];
+        }
+        return false;
     }
 
     static calcCooldownTime(liquid: string, amount: number): number {
@@ -102,3 +108,18 @@ class CastingRecipe {
     }
 
 }
+
+
+CastingRecipe.setDefaultCapacity(VanillaItemID.bucket, 1000);
+
+Callback.addCallback("PostLoaded", () => {
+    let empty: {id: number, data: number, liquid: string};
+    let full: number[];
+    for(let key in LiquidRegistry.EmptyByFull){
+        empty = LiquidRegistry.EmptyByFull[key];
+        if(empty.id === VanillaItemID.bucket && empty.data === 0){
+            full = key.split(":").map(v => parseInt(v));
+            CastingRecipe.addTableRecipe(VanillaItemID.bucket, empty.liquid, {id: full[0], data: full[1] === -1 ? 0 : full[1]}, true);
+        }
+    }
+});

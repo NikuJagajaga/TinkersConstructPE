@@ -545,7 +545,7 @@ var AlloyRecipe = /** @class */ (function () {
         for (var _i = 1; _i < arguments.length; _i++) {
             inputs[_i - 1] = arguments[_i];
         }
-        result.amount /= 1000;
+        result.amount;
         this.data.push({ inputs: inputs.map(function (input) { return ({ liquid: input.liquid, amount: input.amount }); }), result: result });
     };
     AlloyRecipe.alloyAlloys = function (liquids, liquidStorage) {
@@ -589,7 +589,7 @@ var CastingRecipe = /** @class */ (function () {
     };
     CastingRecipe.getLimits = function (type, id) {
         var limits = {};
-        if (this[type][id]) {
+        if (this[type][id] && typeof this[type][id] === "object") {
             if (this.capacity[id]) {
                 limits.__global = this.capacity[id];
             }
@@ -645,10 +645,16 @@ var CastingRecipe = /** @class */ (function () {
         return this.getLimits("basin", id);
     };
     CastingRecipe.isValidLiquidForTable = function (id, liquid) {
-        return liquid in this.table[id];
+        if (id in this.table) {
+            return liquid in this.table[id];
+        }
+        return false;
     };
     CastingRecipe.isValidLiquidForBasin = function (id, liquid) {
-        return liquid in this.basin[id];
+        if (id in this.basin) {
+            return liquid in this.basin[id];
+        }
+        return false;
     };
     CastingRecipe.calcCooldownTime = function (liquid, amount) {
         return 24 + MoltenLiquid.getTemp(liquid) * amount / 1600;
@@ -658,6 +664,18 @@ var CastingRecipe = /** @class */ (function () {
     CastingRecipe.capacity = {};
     return CastingRecipe;
 }());
+CastingRecipe.setDefaultCapacity(VanillaItemID.bucket, 1000);
+Callback.addCallback("PostLoaded", function () {
+    var empty;
+    var full;
+    for (var key in LiquidRegistry.EmptyByFull) {
+        empty = LiquidRegistry.EmptyByFull[key];
+        if (empty.id === VanillaItemID.bucket && empty.data === 0) {
+            full = key.split(":").map(function (v) { return parseInt(v); });
+            CastingRecipe.addTableRecipe(VanillaItemID.bucket, empty.liquid, { id: full[0], data: full[1] === -1 ? 0 : full[1] }, true);
+        }
+    }
+});
 createBlock("tcon_grout", [{ name: "Grout" }]);
 Recipes2.addShapelessWith2x2({ item: "block:tcon_grout", count: 2 }, ["sand", "gravel", "clay_ball"]);
 Recipes2.addShapeless({ id: BlockID.tcon_grout, count: 8 }, [{ id: VanillaBlockID.sand, count: 4 }, { id: VanillaBlockID.gravel, count: 4 }, VanillaBlockID.clay]);
@@ -2548,7 +2566,7 @@ var ModBeheading = /** @class */ (function (_super) {
 var _a;
 createBlock("tcon_graveyard_soil", [{ name: "Graveyard Soil" }], "dirt");
 createBlock("tcon_consecrated_soil", [{ name: "Consecrated Soil" }], "dirt");
-Recipes2.addShapeless(BlockID.tcon_graveyard_soil, [VanillaBlockID.dirt, VanillaItemID.rotten_flesh, { id: VanillaItemID.dye, data: 15 }]);
+Recipes2.addShapelessWith2x2("block:tcon_graveyard_soil", ["dirt", "rotten_flesh", { item: "dye", data: 15 }]);
 Recipes.addFurnace(BlockID.tcon_graveyard_soil, BlockID.tcon_consecrated_soil);
 var ModSmite = /** @class */ (function (_super) {
     __extends(ModSmite, _super);
@@ -3546,7 +3564,6 @@ var ToolForgeHandler = /** @class */ (function () {
                                         find3.level += addMod_1[key];
                                         return "continue";
                                     }
-                                    container.setText("textDebug", JSON.stringify(modifiers));
                                     if (Modifier[key].canBeTogether(modifiers) && modifiers.length < Cfg.modifierSlots + toolData_1.getLevel()) {
                                         addMod_1[key] = Math.min(addMod_1[key], Modifier[key].max);
                                         modifiers.push({ type: key, level: addMod_1[key] });
@@ -3778,82 +3795,80 @@ var TinkersToolHandler = /** @class */ (function () {
                 alert("nameError: " + e);
             }
         });
-        ItemModel.getFor(id, -1).setModelOverrideCallback(function (item) {
-            try {
-                if (!item.extra) {
-                    return null;
-                }
-                var toolData_3 = new ToolData(item);
-                var texture = toolData_3.toolData.getTexture();
-                var path = texture.getPath();
-                var mesh = _this.getMesh(item)[toolData_3.isBroken() ? "broken" : "normal"];
-                toolData_3.toolData.model.setModel(mesh.hand, path);
-                toolData_3.toolData.model.setUiModel(mesh.ui, path);
-                toolData_3.toolData.model.setSpriteUiRender(true);
-                return toolData_3.toolData.model;
-            }
-            catch (e) {
-                alert("iconError: " + e);
-            }
-        });
+        ItemModel.getFor(id, -1).setModelOverrideCallback(function (item) { return item.extra ? _this.getModel(item) : null; });
         this.tools[id] = true;
     };
     TinkersToolHandler.isTool = function (id) {
         return this.tools[id] || false;
     };
-    TinkersToolHandler.getMesh = function (item) {
-        var materials = new String(item.extra.getString("materials")).split("_");
-        var modifiers = TinkersModifierHandler.decodeToObj(item.extra.getString("modifiers"));
-        var code = __spreadArrays(materials, Object.keys(modifiers)).join("_");
-        if (this.meshes[code]) {
-            return this.meshes[code];
-        }
-        var toolData = ToolAPI.getToolData(item.id);
-        var texture = toolData.getTexture();
-        var mesh = [new RenderMesh(), new RenderMesh(), new RenderMesh(), new RenderMesh()];
-        var coordsNormal = [];
-        var coordsBroken = [];
-        var index;
-        for (var i = 0; i < toolData.partsCount; i++) {
-            index = Material[materials[i]].getTexIndex();
-            coordsNormal.push(texture.getCoords(i, index));
-            coordsBroken.push(texture.getCoords(toolData.partsCount, index));
-        }
-        for (var key in modifiers) {
-            index = Modifier[key].getTexIndex();
-            coordsNormal.push(texture.getModCoords(index));
-            coordsBroken.push(texture.getModCoords(index));
-        }
-        mesh.forEach(function (m, i) {
-            var coords = i >> 1 ? coordsBroken : coordsNormal;
-            var z;
-            for (var j = 0; j < coords.length; j++) {
-                z = i & 1 ? -0.001 * (coords.length - j) : 0.001 * (coords.length - j);
-                m.setColor(1, 1, 1);
-                m.setNormal(1, 1, 0);
-                m.addVertex(0, 1, z, coords[j].x, coords[j].y);
-                m.addVertex(1, 1, z, coords[j].x + 0.0625, coords[j].y);
-                m.addVertex(0, 0, z, coords[j].x, coords[j].y + 0.0625);
-                m.addVertex(1, 1, z, coords[j].x + 0.0625, coords[j].y);
-                m.addVertex(0, 0, z, coords[j].x, coords[j].y + 0.0625);
-                m.addVertex(1, 0, z, coords[j].x + 0.0625, coords[j].y + 0.0625);
+    TinkersToolHandler.getModel = function (item) {
+        try {
+            var toolData = new ToolData(item);
+            var suffix = toolData.isBroken() ? "broken" : "normal";
+            var texture = toolData.toolData.getTexture();
+            var path = texture.getPath();
+            var materials = new String(item.extra.getString("materials")).split("_");
+            var modifiers = TinkersModifierHandler.decodeToObj(item.extra.getString("modifiers"));
+            var code = __spreadArrays(materials, Object.keys(modifiers)).join("_");
+            if (this.models[code]) {
+                return this.models[code][suffix];
             }
-            if ((i & 1) === 0) {
-                m.translate(0.4, -0.1, 0.2);
-                m.rotate(0.5, 0.5, 0.5, 0, -2.1, 0.4);
-                m.scale(2, 2, 2);
+            var mesh = [new RenderMesh(), new RenderMesh(), new RenderMesh(), new RenderMesh()];
+            var coordsNormal_1 = [];
+            var coordsBroken_1 = [];
+            var index = void 0;
+            for (var i = 0; i < toolData.toolData.partsCount; i++) {
+                index = Material[materials[i]].getTexIndex();
+                coordsNormal_1.push(texture.getCoords(i, index));
+                coordsBroken_1.push(texture.getCoords(toolData.toolData.partsCount, index));
             }
-        });
-        var data = {
-            normal: { hand: mesh[0], ui: mesh[1] },
-            broken: { hand: mesh[2], ui: mesh[3] }
-        };
-        this.meshes[code] = data;
-        Game.message("[TCon]: Tool Model has been generated");
-        return data;
+            for (var key in modifiers) {
+                index = Modifier[key].getTexIndex();
+                coordsNormal_1.push(texture.getModCoords(index));
+                coordsBroken_1.push(texture.getModCoords(index));
+            }
+            mesh.forEach(function (m, i) {
+                var coords = i >> 1 ? coordsBroken_1 : coordsNormal_1;
+                var z;
+                for (var j = 0; j < coords.length; j++) {
+                    z = i & 1 ? -0.001 * (coords.length - j) : 0.001 * (coords.length - j);
+                    m.setColor(1, 1, 1);
+                    m.setNormal(1, 1, 0);
+                    m.addVertex(0, 1, z, coords[j].x, coords[j].y);
+                    m.addVertex(1, 1, z, coords[j].x + 0.0625, coords[j].y);
+                    m.addVertex(0, 0, z, coords[j].x, coords[j].y + 0.0625);
+                    m.addVertex(1, 1, z, coords[j].x + 0.0625, coords[j].y);
+                    m.addVertex(0, 0, z, coords[j].x, coords[j].y + 0.0625);
+                    m.addVertex(1, 0, z, coords[j].x + 0.0625, coords[j].y + 0.0625);
+                }
+                if ((i & 1) === 0) {
+                    m.translate(0.4, -0.1, 0.2);
+                    m.rotate(0.5, 0.5, 0.5, 0, -2.1, 0.4);
+                    m.scale(2, 2, 2);
+                }
+            });
+            var data = {
+                normal: { hand: mesh[0], ui: mesh[1] },
+                broken: { hand: mesh[2], ui: mesh[3] }
+            };
+            var modelNormal = ItemModel.newStandalone();
+            var modelBroken = ItemModel.newStandalone();
+            modelNormal.setModel(data.normal.hand, path);
+            modelNormal.setUiModel(data.normal.ui, path);
+            modelNormal.setSpriteUiRender(true);
+            modelBroken.setModel(data.broken.hand, path);
+            modelBroken.setUiModel(data.broken.ui, path);
+            modelBroken.setSpriteUiRender(true);
+            this.models[code] = { normal: modelNormal, broken: modelBroken };
+            Game.message("[TCon]: Tool Model has been generated");
+            return this.models[code][suffix];
+        }
+        catch (e) {
+            alert("iconError: " + e);
+        }
     };
     TinkersToolHandler.tools = {};
-    TinkersToolHandler.meshes = {};
+    TinkersToolHandler.models = {};
     return TinkersToolHandler;
 }());
 var TinkersTool = /** @class */ (function () {
@@ -3863,7 +3878,6 @@ var TinkersTool = /** @class */ (function () {
         this.brokenIndex = brokenIndex;
         this.isWeapon = isWeapon;
         this.is3x3 = false;
-        this.model = ItemModel.newStandalone();
     }
     TinkersTool.prototype.miningSpeedModifier = function () {
         return 1;

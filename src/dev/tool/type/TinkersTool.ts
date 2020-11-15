@@ -38,24 +38,7 @@ class TinkersToolHandler {
                 alert("nameError: " + e);
             }
         });
-        ItemModel.getFor(id, -1).setModelOverrideCallback(item => {
-            try{
-                if(!item.extra){
-                    return null;
-                }
-                const toolData = new ToolData(item);
-                const texture = toolData.toolData.getTexture();
-                const path = texture.getPath();
-                const mesh = this.getMesh(item)[toolData.isBroken() ? "broken" : "normal"];
-                toolData.toolData.model.setModel(mesh.hand, path);
-                toolData.toolData.model.setUiModel(mesh.ui, path);
-                toolData.toolData.model.setSpriteUiRender(true);
-                return toolData.toolData.model;
-            }
-            catch(e){
-                alert("iconError: " + e);
-            }
-        });
+        ItemModel.getFor(id, -1).setModelOverrideCallback(item => item.extra ? this.getModel(item) : null);
         this.tools[id] = true;
     }
 
@@ -63,58 +46,73 @@ class TinkersToolHandler {
         return this.tools[id] || false;
     }
 
-    private static meshes = {};
+    private static models = {};
 
-    private static getMesh(item: ItemInstance): {normal: {hand: any, ui: any}, broken: {hand: any, ui: any}} {
-        const materials = new String(item.extra.getString("materials")).split("_");
-        const modifiers = TinkersModifierHandler.decodeToObj(item.extra.getString("modifiers"));
-        const code = [...materials, ...Object.keys(modifiers)].join("_");
-        if(this.meshes[code]){
-            return this.meshes[code];
-        }
-        const toolData: TinkersToolParams = ToolAPI.getToolData(item.id);
-        const texture = toolData.getTexture();
-        const mesh = [new RenderMesh(), new RenderMesh(), new RenderMesh(), new RenderMesh()];
-        const coordsNormal: {x: number, y: number}[] = [];
-        const coordsBroken: {x: number, y: number}[] = [];
-        let index: number;
-        for(let i = 0; i < toolData.partsCount; i++){
-            index = Material[materials[i]].getTexIndex();
-            coordsNormal.push(texture.getCoords(i, index));
-            coordsBroken.push(texture.getCoords(toolData.partsCount, index));
-        }
-        for(let key in modifiers){
-            index = Modifier[key].getTexIndex();
-            coordsNormal.push(texture.getModCoords(index));
-            coordsBroken.push(texture.getModCoords(index));
-        }
-        mesh.forEach((m, i) => {
-            const coords = i >> 1 ? coordsBroken : coordsNormal;
-            let z: number;
-            for(let j = 0; j < coords.length; j++){
-                z = i & 1 ? -0.001 * (coords.length - j) : 0.001 * (coords.length - j);
-                m.setColor(1, 1, 1);
-                m.setNormal(1, 1, 0);
-                m.addVertex(0, 1, z, coords[j].x, coords[j].y);
-                m.addVertex(1, 1, z, coords[j].x + 0.0625, coords[j].y);
-                m.addVertex(0, 0, z, coords[j].x, coords[j].y + 0.0625);
-                m.addVertex(1, 1, z, coords[j].x + 0.0625, coords[j].y);
-                m.addVertex(0, 0, z, coords[j].x, coords[j].y + 0.0625);
-                m.addVertex(1, 0, z, coords[j].x + 0.0625, coords[j].y + 0.0625);
+    private static getModel(item: ItemInstance): any {
+        try{
+            const toolData = new ToolData(item);
+            const suffix = toolData.isBroken() ? "broken" : "normal";
+            const texture = toolData.toolData.getTexture();
+            const path = texture.getPath();
+            const materials = new String(item.extra.getString("materials")).split("_");
+            const modifiers = TinkersModifierHandler.decodeToObj(item.extra.getString("modifiers"));
+            const code = [...materials, ...Object.keys(modifiers)].join("_");
+            if(this.models[code]){
+                return this.models[code][suffix];
             }
-            if((i & 1) === 0){
-                m.translate(0.4, -0.1, 0.2);
-                m.rotate(0.5, 0.5, 0.5, 0, -2.1, 0.4);
-                m.scale(2, 2, 2);
+            const mesh = [new RenderMesh(), new RenderMesh(), new RenderMesh(), new RenderMesh()];
+            const coordsNormal: {x: number, y: number}[] = [];
+            const coordsBroken: {x: number, y: number}[] = [];
+            let index: number;
+            for(let i = 0; i < toolData.toolData.partsCount; i++){
+                index = Material[materials[i]].getTexIndex();
+                coordsNormal.push(texture.getCoords(i, index));
+                coordsBroken.push(texture.getCoords(toolData.toolData.partsCount, index));
             }
-        });
-        const data = {
-            normal: {hand: mesh[0], ui: mesh[1]},
-            broken: {hand: mesh[2], ui: mesh[3]}
-        };
-        this.meshes[code] = data;
-        Game.message("[TCon]: Tool Model has been generated");
-        return data;
+            for(let key in modifiers){
+                index = Modifier[key].getTexIndex();
+                coordsNormal.push(texture.getModCoords(index));
+                coordsBroken.push(texture.getModCoords(index));
+            }
+            mesh.forEach((m, i) => {
+                const coords = i >> 1 ? coordsBroken : coordsNormal;
+                let z: number;
+                for(let j = 0; j < coords.length; j++){
+                    z = i & 1 ? -0.001 * (coords.length - j) : 0.001 * (coords.length - j);
+                    m.setColor(1, 1, 1);
+                    m.setNormal(1, 1, 0);
+                    m.addVertex(0, 1, z, coords[j].x, coords[j].y);
+                    m.addVertex(1, 1, z, coords[j].x + 0.0625, coords[j].y);
+                    m.addVertex(0, 0, z, coords[j].x, coords[j].y + 0.0625);
+                    m.addVertex(1, 1, z, coords[j].x + 0.0625, coords[j].y);
+                    m.addVertex(0, 0, z, coords[j].x, coords[j].y + 0.0625);
+                    m.addVertex(1, 0, z, coords[j].x + 0.0625, coords[j].y + 0.0625);
+                }
+                if((i & 1) === 0){
+                    m.translate(0.4, -0.1, 0.2);
+                    m.rotate(0.5, 0.5, 0.5, 0, -2.1, 0.4);
+                    m.scale(2, 2, 2);
+                }
+            });
+            const data = {
+                normal: {hand: mesh[0], ui: mesh[1]},
+                broken: {hand: mesh[2], ui: mesh[3]}
+            };
+            const modelNormal = ItemModel.newStandalone();
+            const modelBroken = ItemModel.newStandalone();
+            modelNormal.setModel(data.normal.hand, path);
+            modelNormal.setUiModel(data.normal.ui, path);
+            modelNormal.setSpriteUiRender(true);
+            modelBroken.setModel(data.broken.hand, path);
+            modelBroken.setUiModel(data.broken.ui, path);
+            modelBroken.setSpriteUiRender(true);
+            this.models[code] = {normal: modelNormal, broken: modelBroken};
+            Game.message("[TCon]: Tool Model has been generated");
+            return this.models[code][suffix];
+        }
+        catch(e){
+            alert("iconError: " + e);
+        }
     }
 
 }
@@ -129,10 +127,8 @@ abstract class TinkersTool implements TinkersToolParams {
     blockMaterials: {[key: string]: true};
     toolMaterial: ToolAPI.ToolMaterial;
     is3x3 = false;
-    model: any;
 
     constructor(public blockTypes: string[], public partsCount: number, public brokenIndex: number, public isWeapon?: boolean){
-        this.model = ItemModel.newStandalone();
     }
 
     miningSpeedModifier(): number {
