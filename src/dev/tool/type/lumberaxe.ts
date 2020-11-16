@@ -157,7 +157,7 @@ class TinkersLumberaxe extends TinkersTool {
 
 
 TinkersToolHandler.registerTool("lumberaxe", "Lumber Axe", new TinkersLumberaxe());
-ToolForgeHandler.addRecipe(ItemID.tcontool_lumberaxe, ["rod2", "broadaxe", "plate", "binding2"]);
+ToolForgeHandler.addRecipe(ItemID.tcontool_lumberaxe, ["rod2", "broadaxe", "largeplate", "binding2"]);
 ToolForgeHandler.addContents({
     title: "Lumber Axe",
     background: "tcon.icon.lumberaxe",

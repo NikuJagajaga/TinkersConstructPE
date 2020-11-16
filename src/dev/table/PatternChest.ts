@@ -138,12 +138,20 @@ class PatternChest extends TileBase {
 
     click(id: number, count: number, data: number): boolean {
         if(id in PatternChest.mask){
-            if(this.upFlag(id)){
-                Player.decreaseCarriedItem();
+            if(Entity.getSneaking(player)){
+                let inv: ItemInstance;
+                for(let i = 0; i < 36; i++){
+                    inv = Player.getInventorySlot(i);
+                    if(inv.id in PatternChest.mask && this.upFlag(inv.id)){
+                        if(--inv.count <= 0){
+                            inv.id = inv.data = 0;
+                        }
+                        Player.setInventorySlot(i, inv.id, inv.count, inv.data);
+                    }
+                }
+                return true;
             }
-            else{
-                Game.tipMessage("already has this pattern inside");
-            }
+            this.upFlag(id) ? Player.decreaseCarriedItem() : Game.tipMessage("already has this pattern inside");
             return true;
         }
         return false;

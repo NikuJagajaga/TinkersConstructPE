@@ -42,7 +42,7 @@ class TinkersExcavator extends TinkersTool3x3 {
 
 
 TinkersToolHandler.registerTool("excavator", "Excavator", new TinkersExcavator());
-ToolForgeHandler.addRecipe(ItemID.tcontool_excavator, ["rod2", "excavator", "plate", "binding2"]);
+ToolForgeHandler.addRecipe(ItemID.tcontool_excavator, ["rod2", "excavator", "largeplate", "binding2"]);
 ToolForgeHandler.addContents({
     title: "Excavator",
     background: "tcon.icon.excavator",

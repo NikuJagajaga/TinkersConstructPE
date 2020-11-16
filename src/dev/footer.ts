@@ -3,5 +3,7 @@ ModAPI.registerAPI("TConAPI", {
     SmelteryFuel: SmelteryFuel,
     MeltingRecipe: MeltingRecipe,
     AlloyRecipe: AlloyRecipe,
-    CastingRecipe: CastingRecipe
+    CastingRecipe: CastingRecipe,
+    BlockModel: BlockModel,
+    Sound: Sound
 });

@@ -2749,12 +2749,20 @@ var PatternChest = /** @class */ (function (_super) {
     };
     PatternChest.prototype.click = function (id, count, data) {
         if (id in PatternChest.mask) {
-            if (this.upFlag(id)) {
-                Player.decreaseCarriedItem();
+            if (Entity.getSneaking(player)) {
+                var inv = void 0;
+                for (var i = 0; i < 36; i++) {
+                    inv = Player.getInventorySlot(i);
+                    if (inv.id in PatternChest.mask && this.upFlag(inv.id)) {
+                        if (--inv.count <= 0) {
+                            inv.id = inv.data = 0;
+                        }
+                        Player.setInventorySlot(i, inv.id, inv.count, inv.data);
+                    }
+                }
+                return true;
             }
-            else {
-                Game.tipMessage("already has this pattern inside");
-            }
+            this.upFlag(id) ? Player.decreaseCarriedItem() : Game.tipMessage("already has this pattern inside");
             return true;
         }
         return false;
@@ -3860,7 +3868,7 @@ var TinkersToolHandler = /** @class */ (function () {
             modelBroken.setUiModel(data.broken.ui, path);
             modelBroken.setSpriteUiRender(true);
             this.models[code] = { normal: modelNormal, broken: modelBroken };
-            Game.message("[TCon]: Tool Model has been generated");
+            //Game.message("[TCon]: Tool Model has been generated");
             return this.models[code][suffix];
         }
         catch (e) {
@@ -4359,7 +4367,7 @@ var TinkersHammer = /** @class */ (function (_super) {
     return TinkersHammer;
 }(TinkersTool3x3));
 TinkersToolHandler.registerTool("hammer", "Hammer", new TinkersHammer());
-ToolForgeHandler.addRecipe(ItemID.tcontool_hammer, ["rod2", "hammer", "plate", "plate"]);
+ToolForgeHandler.addRecipe(ItemID.tcontool_hammer, ["rod2", "hammer", "largeplate", "largeplate"]);
 ToolForgeHandler.addContents({
     title: "Hammer",
     background: "tcon.icon.hammer",
@@ -4405,7 +4413,7 @@ var TinkersExcavator = /** @class */ (function (_super) {
     return TinkersExcavator;
 }(TinkersTool3x3));
 TinkersToolHandler.registerTool("excavator", "Excavator", new TinkersExcavator());
-ToolForgeHandler.addRecipe(ItemID.tcontool_excavator, ["rod2", "excavator", "plate", "binding2"]);
+ToolForgeHandler.addRecipe(ItemID.tcontool_excavator, ["rod2", "excavator", "largeplate", "binding2"]);
 ToolForgeHandler.addContents({
     title: "Excavator",
     background: "tcon.icon.excavator",
@@ -4550,7 +4558,7 @@ var TinkersLumberaxe = /** @class */ (function (_super) {
     return TinkersLumberaxe;
 }(TinkersTool));
 TinkersToolHandler.registerTool("lumberaxe", "Lumber Axe", new TinkersLumberaxe());
-ToolForgeHandler.addRecipe(ItemID.tcontool_lumberaxe, ["rod2", "broadaxe", "plate", "binding2"]);
+ToolForgeHandler.addRecipe(ItemID.tcontool_lumberaxe, ["rod2", "broadaxe", "largeplate", "binding2"]);
 ToolForgeHandler.addContents({
     title: "Lumber Axe",
     background: "tcon.icon.lumberaxe",
@@ -4657,5 +4665,7 @@ ModAPI.registerAPI("TConAPI", {
     SmelteryFuel: SmelteryFuel,
     MeltingRecipe: MeltingRecipe,
     AlloyRecipe: AlloyRecipe,
-    CastingRecipe: CastingRecipe
+    CastingRecipe: CastingRecipe,
+    BlockModel: BlockModel,
+    Sound: Sound
 });

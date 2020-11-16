@@ -107,7 +107,7 @@ class TinkersToolHandler {
             modelBroken.setUiModel(data.broken.ui, path);
             modelBroken.setSpriteUiRender(true);
             this.models[code] = {normal: modelNormal, broken: modelBroken};
-            Game.message("[TCon]: Tool Model has been generated");
+            //Game.message("[TCon]: Tool Model has been generated");
             return this.models[code][suffix];
         }
         catch(e){

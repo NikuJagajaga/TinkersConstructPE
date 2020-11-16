@@ -42,7 +42,7 @@ class TinkersHammer extends TinkersTool3x3 {
 
 
 TinkersToolHandler.registerTool("hammer", "Hammer", new TinkersHammer());
-ToolForgeHandler.addRecipe(ItemID.tcontool_hammer, ["rod2", "hammer", "plate", "plate"]);
+ToolForgeHandler.addRecipe(ItemID.tcontool_hammer, ["rod2", "hammer", "largeplate", "largeplate"]);
 ToolForgeHandler.addContents({
     title: "Hammer",
     background: "tcon.icon.hammer",
