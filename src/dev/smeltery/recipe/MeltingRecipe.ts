@@ -4,16 +4,17 @@ interface IMeltingRecipe extends LiquidInstance {
 
 class MeltingRecipe {
 
-    private static LOG9_2 = Math.LN2 / Math.log(9);
+    private static readonly LOG9_2 = Math.LN2 / Math.log(9);
 
-    private static data: {[key: string]: IMeltingRecipe} = {};
+    private static recipeItem: {[key: string]: IMeltingRecipe} = {};
+    private static recipeEnt: {[key: number]: LiquidInstance} = {};
 
     private static calcTemp(liquid: string, amount: number): number {
         return (amount / MatValue.BLOCK) ** this.LOG9_2 * MoltenLiquid.getTemp(liquid) | 0;
     }
 
     static addRecipe(item: number | Tile, liquid: string, amount: number, temp: number = this.calcTemp(liquid, amount)): void {
-        this.data[typeof item === "number" ? item : item.id + ":" + item.data] = {
+        this.recipeItem[typeof item === "number" ? item : item.id + ":" + item.data] = {
             liquid: liquid,
             amount: amount,
             temp: temp
@@ -25,11 +26,35 @@ class MeltingRecipe {
     }
 
     static getRecipe(id: number, data: number): IMeltingRecipe {
-        return this.data[id + ":" + data] || this.data[id];
+        return this.recipeItem[id + ":" + data] || this.recipeItem[id];
     }
 
     static isExist(id: number, data: number): boolean {
-        return (id + ":" + data) in this.data || id in this.data || false;
+        return (id + ":" + data) in this.recipeItem || id in this.recipeItem || false;
+    }
+
+    static getAllRecipeForRV(): {input: ItemInstance[], output: ItemInstance[], outputLiq: LiquidInstance, temp: number}[] {
+        const list = [];
+        let split: string[];
+        for(let key in this.recipeItem){
+            split = key.split(":");
+            list.push({
+                input: [{id: parseInt(split[0]), count: 1, data: split[1] ? parseInt(split[1]) : -1}],
+                output: [],
+                outputLiq: {liquid: this.recipeItem[key].liquid, amount: this.recipeItem[key].amount},
+                temp: this.recipeItem[key].temp
+            });
+        }
+        return list;
+    }
+
+    static addEntRecipe(entityType: number, liquid: string, amount: number): void {
+        this.recipeEnt[entityType] = {liquid: liquid, amount: amount};
+    }
+
+    static getEntRecipe(ent: number): LiquidInstance {
+        const entityType = Entity.getType(ent);
+        return this.recipeEnt[entityType];
     }
 
 }
@@ -113,3 +138,30 @@ MeltingRecipe.addRecipe(VanillaBlockID.tripwire_hook, "molten_iron", MatValue.IN
 MeltingRecipe.addRecipe(VanillaBlockID.iron_door, "molten_iron", MatValue.INGOT * 2);
 MeltingRecipe.addRecipe(VanillaBlockID.cauldron, "molten_iron", MatValue.INGOT * 7);
 MeltingRecipe.addRecipe(VanillaBlockID.anvil, "molten_iron", MatValue.BLOCK * 3 + MatValue.INGOT * 4);
+
+MeltingRecipe.addRecipe(VanillaBlockID.iron_ore, "molten_iron", MatValue.ORE);
+MeltingRecipe.addRecipe(VanillaBlockID.gold_ore, "molten_iron", MatValue.ORE);
+
+
+MeltingRecipe.addEntRecipe(1, "blood", 20);//Native.EntityType.PLAYER
+MeltingRecipe.addEntRecipe(Native.EntityType.ZOMBIE, "blood", 20);
+MeltingRecipe.addEntRecipe(Native.EntityType.ZOMBIE_VILLAGER, "blood", 20);
+MeltingRecipe.addEntRecipe(Native.EntityType.ZOMBIE_VILLAGE_V2, "blood", 20);
+MeltingRecipe.addEntRecipe(Native.EntityType.PIG_ZOMBIE, "blood", 20);
+MeltingRecipe.addEntRecipe(Native.EntityType.ZOMBIE_HORSE, "blood", 20);
+MeltingRecipe.addEntRecipe(Native.EntityType.COW, "blood", 20);
+MeltingRecipe.addEntRecipe(Native.EntityType.PIG, "blood", 20);
+MeltingRecipe.addEntRecipe(Native.EntityType.SHEEP, "blood", 20);
+MeltingRecipe.addEntRecipe(Native.EntityType.CHICKEN, "blood", 20);
+MeltingRecipe.addEntRecipe(Native.EntityType.WOLF, "blood", 20);
+MeltingRecipe.addEntRecipe(Native.EntityType.CAT, "blood", 20);
+MeltingRecipe.addEntRecipe(Native.EntityType.RABBIT, "blood", 20);
+MeltingRecipe.addEntRecipe(Native.EntityType.HORSE, "blood", 20);
+MeltingRecipe.addEntRecipe(Native.EntityType.LLAMA, "blood", 20);
+MeltingRecipe.addEntRecipe(Native.EntityType.IRON_GOLEM, "molten_iron", 18);
+MeltingRecipe.addEntRecipe(Native.EntityType.SNOW_GOLEM, "water", 100);
+MeltingRecipe.addEntRecipe(Native.EntityType.VILLAGER, "molten_emerald", 6);
+MeltingRecipe.addEntRecipe(Native.EntityType.VILLAGER_V2, "molten_emerald", 6);
+MeltingRecipe.addEntRecipe(Native.EntityType.VINDICATOR, "molten_emerald", 6);
+MeltingRecipe.addEntRecipe(Native.EntityType.EVOCATION_ILLAGER, "molten_emerald", 6);
+//MeltingRecipe.addEntRecipe(Native.EntityType.ILLUSIONER, "molten_emerald", 6);

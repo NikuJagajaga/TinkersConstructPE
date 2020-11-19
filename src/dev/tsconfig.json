@@ -74,6 +74,7 @@
         "tool/type/lumberaxe.ts",
 
         "integration/industrialcraft.ts",
+        "integration/redpower.ts",
         "integration/forestry.ts",
         "integration/recipe_viewer.ts",
         "integration/guide_api.ts",

@@ -35,7 +35,7 @@ class SearedTank extends TileBase {
 
     init(): void {
         this.liquidStorage.setLimit(null, 4000);
-        MoltenLiquid.initAnim(this, 0.5, 0, 0.5, 31/32, 31/32, 31/32);
+        MoltenLiquid.initAnim(this, 0.5, 0, 0.5, 31/32, 31/32, 31/32, true);
     }
 
     destroy(): void {
@@ -77,6 +77,7 @@ class SearedTank extends TileBase {
     }
 
     destroyBlock(): void {
+        
         const liquid = this.liquidStorage.getLiquidStored();
         let extra: ItemExtraData;
         if(liquid){

@@ -66,7 +66,7 @@ class CastingRecipe {
     }
 
     static addBasinRecipe(id: number, liquid: string, result: Tile | number, amount: number = MatValue.BLOCK): void {
-        this.addRecipe("basin", id, liquid, result, true, amount);
+        this.addRecipe("basin", id, liquid, result, id !== 0, amount);
     }
 
     static getTableRecipe(id: number, liquid: string): ICastingRecipe {
@@ -75,6 +75,29 @@ class CastingRecipe {
 
     static getBasinRecipe(id: number, liquid: string): ICastingRecipe {
         return this.basin[id] ? this.basin[id][liquid] : undefined;
+    }
+
+    static getAllRecipeForRV(type: "table" | "basin"): {input: ItemInstance[], output: ItemInstance[], inputLiq: LiquidInstance, consume: boolean}[] {
+        const list = [];
+        let key: string;
+        let liquid: string;
+        let id: number;
+        let limits: {[liq: string]: number};
+        let result: ICastingRecipe;
+        for(key in this[type]){
+            id = parseInt(key);
+            limits = this.getLimits(type, id);
+            for(liquid in this[type][id]){
+                result = this[type][id][liquid];
+                list.push({
+                    input: [{id: id, count: 1, data: 0}],
+                    output: [{id: result.id, count: 1, data: result.data}],
+                    inputLiq: {liquid: liquid, amount: limits[liquid] || limits.__global},
+                    consume: result.consume
+                });
+            }
+        }
+        return list;
     }
 
     static setDefaultCapacity(id: number, capacity: number): void {
@@ -110,9 +133,25 @@ class CastingRecipe {
 }
 
 
+CastingRecipe.addTableRecipe(0, "molten_glass", VanillaBlockID.glass_pane, false, MatValue.GLASS * 6 / 16);
+CastingRecipe.addBasinRecipe(0, "molten_iron", VanillaBlockID.iron_block);
+CastingRecipe.addBasinRecipe(0, "molten_gold", VanillaBlockID.gold_block);
+CastingRecipe.addBasinRecipe(0, "molten_obsidian", VanillaBlockID.obsidian, 288);
+CastingRecipe.addTableRecipeForBoth("ingot", "molten_iron", VanillaItemID.iron_ingot);
+CastingRecipe.addTableRecipeForBoth("ingot", "molten_gold", VanillaItemID.gold_ingot);
+CastingRecipe.addTableRecipeForBoth("ingot", "molten_clay", VanillaItemID.brick);
+CastingRecipe.addTableRecipeForBoth("nugget", "molten_iron", VanillaItemID.iron_nugget);
+CastingRecipe.addTableRecipeForBoth("nugget", "molten_gold", VanillaItemID.gold_nugget);
+CastingRecipe.addTableRecipeForBoth("gem", "molten_emerald", VanillaItemID.emerald);
+CastingRecipe.addBasinRecipe(0, "molten_emerald", VanillaBlockID.emerald_block, MatValue.GEM * 9);
+CastingRecipe.addBasinRecipe(0, "molten_clay", VanillaBlockID.hardened_clay, MatValue.INGOT * 4);
+CastingRecipe.addBasinRecipe(VanillaBlockID.stained_hardened_clay, "water", VanillaBlockID.hardened_clay, 250);
+CastingRecipe.addBasinRecipe(VanillaBlockID.sand, "blood", {id: VanillaBlockID.sand, data: 1}, 10);
+
+
 CastingRecipe.setDefaultCapacity(VanillaItemID.bucket, 1000);
 
-Callback.addCallback("PostLoaded", () => {
+Callback.addCallback("PreLoaded", () => {
     let empty: {id: number, data: number, liquid: string};
     let full: number[];
     for(let key in LiquidRegistry.EmptyByFull){

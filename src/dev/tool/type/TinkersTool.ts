@@ -56,9 +56,9 @@ class TinkersToolHandler {
             const path = texture.getPath();
             const materials = new String(item.extra.getString("materials")).split("_");
             const modifiers = TinkersModifierHandler.decodeToObj(item.extra.getString("modifiers"));
-            const code = [...materials, ...Object.keys(modifiers)].join("_");
-            if(this.models[code]){
-                return this.models[code][suffix];
+            const uniqueKey = toolData.uniqueKey();
+            if(this.models[uniqueKey]){
+                return this.models[uniqueKey][suffix];
             }
             const mesh = [new RenderMesh(), new RenderMesh(), new RenderMesh(), new RenderMesh()];
             const coordsNormal: {x: number, y: number}[] = [];
@@ -106,9 +106,9 @@ class TinkersToolHandler {
             modelBroken.setModel(data.broken.hand, path);
             modelBroken.setUiModel(data.broken.ui, path);
             modelBroken.setSpriteUiRender(true);
-            this.models[code] = {normal: modelNormal, broken: modelBroken};
-            //Game.message("[TCon]: Tool Model has been generated");
-            return this.models[code][suffix];
+            this.models[uniqueKey] = {normal: modelNormal, broken: modelBroken};
+            //Game.message(uniqueKey);
+            return this.models[uniqueKey][suffix];
         }
         catch(e){
             alert("iconError: " + e);

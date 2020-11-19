@@ -1,10 +1,10 @@
 createBlock("tcon_stenciltable", [
-    {name: "Stencil Table"},
-    {name: "Stencil Table"},
-    {name: "Stencil Table"},
-    {name: "Stencil Table"},
-    {name: "Stencil Table"},
-    {name: "Stencil Table"}
+    {name: "Stencil Table", texture: [0, 0, ["planks", 0]]},
+    {name: "Stencil Table", texture: [0, 0, ["planks", 1]]},
+    {name: "Stencil Table", texture: [0, 0, ["planks", 2]]},
+    {name: "Stencil Table", texture: [0, 0, ["planks", 3]]},
+    {name: "Stencil Table", texture: [0, 0, ["planks", 4]]},
+    {name: "Stencil Table", texture: [0, 0, ["planks", 5]]}
 ], "wood");
 
 Item.addCreativeGroup("tcon_stenciltable", "Stencil Table", [BlockID.tcon_stenciltable]);

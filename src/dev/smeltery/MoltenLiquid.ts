@@ -91,11 +91,13 @@ class MoltenLiquid {
 
     }
 
-    static initAnim(tile: any, posX: number, posY: number, posZ: number, scaleX: number, scaleY: number, scaleZ: number): void {
-        tile.liquidStorage.setAmount = (liquid: string, amount: number) => {
-            tile.liquidStorage.liquidAmounts[liquid] = amount;
-            this.updateAnimInThread(tile);
-        };
+    static initAnim(tile: any, posX: number, posY: number, posZ: number, scaleX: number, scaleY: number, scaleZ: number, useThread?: boolean): void {
+        if(useThread){
+            tile.liquidStorage.setAmount = (liquid: string, amount: number) => {
+                tile.liquidStorage.liquidAmounts[liquid] = amount;
+                this.updateAnimInThread(tile);
+            };
+        }
         tile.render = new Render();
         tile.anim = new Animation.Base(tile.x + posX, tile.y + posY - 1.5, tile.z + posZ);
         tile.anim.height = 0;

@@ -1,10 +1,10 @@
 createBlock("tcon_partbuilder", [
-    {name: "Part Builder"},
-    {name: "Part Builder"},
-    {name: "Part Builder"},
-    {name: "Part Builder"},
-    {name: "Part Builder"},
-    {name: "Part Builder"}
+    {name: "Part Builder", texture: [0, 0, ["log_side", 0]]},
+    {name: "Part Builder", texture: [0, 0, ["log_side", 1]]},
+    {name: "Part Builder", texture: [0, 0, ["log_side", 2]]},
+    {name: "Part Builder", texture: [0, 0, ["log_side", 3]]},
+    {name: "Part Builder", texture: [0, 0, ["log2", 0]]},
+    {name: "Part Builder", texture: [0, 0, ["log2", 2]]}
 ], "wood");
 
 Item.addCreativeGroup("tcon_partbuilder", "Part Builder", [BlockID.tcon_partbuilder]);
@@ -33,22 +33,6 @@ class PartBuilder extends TableBase {
     private static readonly window = (() => {
 
         const tutorial = addLineBreaks(18, "Here you can craft tool parts to fulfill your tinkering fantasies") + "\n\n" + addLineBreaks(18, "To craft a part simply put its pattern into the left slot. The two right slot hold the material you want to craft your part out of.");
-    
-        const recipes: {[id: number]: {type: string, cost: number}} = {
-            [ItemID.tcon_pattern_pickaxe]: {type: "pickaxe", cost: 2},
-            [ItemID.tcon_pattern_shovel]: {type: "shovel", cost: 2},
-            [ItemID.tcon_pattern_axe]: {type: "axe", cost: 2},
-            [ItemID.tcon_pattern_broadaxe]: {type: "broadaxe", cost: 8},
-            [ItemID.tcon_pattern_sword]: {type: "sword", cost: 2},
-            [ItemID.tcon_pattern_hammer]: {type: "hammer", cost: 8},
-            [ItemID.tcon_pattern_excavator]: {type: "excavator", cost: 8},
-            [ItemID.tcon_pattern_rod]: {type: "rod", cost: 1},
-            [ItemID.tcon_pattern_rod2]: {type: "rod2", cost: 3},
-            [ItemID.tcon_pattern_binding]: {type: "binding", cost: 1},
-            [ItemID.tcon_pattern_binding2]: {type: "binding2", cost: 3},
-            [ItemID.tcon_pattern_guard]: {type: "guard", cost: 1},
-            [ItemID.tcon_pattern_largeplate]: {type: "largeplate", cost: 8}
-        };
 
         const findPatternchest = (coords: TileEntity) => {
             const nears = StorageInterface.getNearestContainers(coords, -1);
@@ -68,7 +52,7 @@ class PartBuilder extends TableBase {
                 let list: number[] = pc.getList();
                 if(list.length > 0){
                     const slot = tile.container.getSlot("slot0");
-                    if(!recipes[slot.id]){
+                    if(!PatternRegistry.isPattern(slot.id)){
                         return;
                     }
                     const index = PatternChest.getIndex(slot.id);
@@ -97,7 +81,7 @@ class PartBuilder extends TableBase {
         };
     
         const elements: UI.UIElementSet = {
-            slot0: {type: "slot", x: 200, y: 90, size: 100, isValid: id => id in recipes, bitmap: "tcon.slot.pattern"},
+            slot0: {type: "slot", x: 200, y: 90, size: 100, isValid: id => PatternRegistry.isPattern(id), bitmap: "tcon.slot.pattern"},
             slot1: {type: "slot", x: 300, y: 90, size: 100, isValid: id => {
                 for(let key in Material){
                     if(Material[key].getItem() === id){
@@ -109,7 +93,7 @@ class PartBuilder extends TableBase {
             slotResult: {type: "slot", x: 600, y: 90, size: 100, isValid: () => false, clicker: {
                 onClick: (container, tile) => {
                     const slot = container.getSlot("slot1");
-                    const recipe = recipes[container.getSlot("slot0").id];
+                    const recipe = PatternRegistry.getData(container.getSlot("slot0").id);
                     let result: number
                     for(let key in Material){
                         result = 0;
@@ -138,7 +122,12 @@ class PartBuilder extends TableBase {
                     turnPage(tile, 1);
                 }
             }},
-            buttonExit: {type: "closeButton", x: 907, y: 18, bitmap: "classic_close_button", bitmap2: "classic_close_button_down", scale: 5}
+            buttonExit: {type: "closeButton", x: 907, y: 18, bitmap: "classic_close_button", bitmap2: "classic_close_button_down", scale: 5},
+            imageArrow: {type: "image", x: 434, y: 95, bitmap: "tcon.arrow", scale: 6, clicker: {
+                onClick: container => {
+                    RV && RV.openRecipePage("tcon_partbuilder", container);
+                }
+            }}
         };
     
         for(let i = 0; i < 36; i++){
@@ -157,8 +146,7 @@ class PartBuilder extends TableBase {
                 {type: "background", color: Color.TRANSPARENT},
                 {type: "frame", x: 0, y: 0, width: 1000, height: 750, bitmap: "classic_frame_bg_light", scale: 6},
                 {type: "text", x: 50, y: 60, text: "Part Builder", font: {size: 40}},
-                {type: "text", x: 50, y: 290, text: "Inventory", font: {size: 40}},
-                {type: "bitmap", x: 434, y: 95, bitmap: "tcon.arrow", scale: 6}
+                {type: "text", x: 50, y: 290, text: "Inventory", font: {size: 40}}
             ],
             elements: elements
         });
@@ -197,7 +185,7 @@ class PartBuilder extends TableBase {
                         let textStats: string;
                         while(win.isOpened()){
                             slot = container.getSlot("slot1");
-                            recipe = recipes[container.getSlot("slot0").id];
+                            recipe = PatternRegistry.getData(container.getSlot("slot0").id);
                             result = 0;
                             textCost = "";
                             textTitle = "";

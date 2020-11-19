@@ -1,5 +1,5 @@
 createBlock("tcon_blockcast", [{name: "Casting Basin", texture: [0, 1, 2]}]);
-Recipes2.addShaped(BlockID.tcon_blockcast, "aaa:a_a:a_a", {a: ItemID.tcon_brick});
+Recipes2.addShaped(BlockID.tcon_blockcast, "a_a:a_a:aaa", {a: ItemID.tcon_brick});
 
 BlockModel.register(BlockID.tcon_blockcast, model => {
     const addBox = (x1: number, y1: number, z1: number, x2: number, y2: number, z2: number, rotation?: boolean): void => {
@@ -26,7 +26,7 @@ class CastingBasin extends CastingTable {
         this.animOutput = createAnimItem(this.x + 0.5, this.y + 10/16, this.z + 0.5);
         this.setAnimItem();
         this.setLiquidLimit();
-        MoltenLiquid.initAnim(this, 0.5, 5/16, 0.5, 12/16, 11/16, 12/16);
+        MoltenLiquid.initAnim(this, 0.5, 5/16, 0.5, 12/16, 11/16, 12/16, true);
     }
 
     setAnimItem(): void {

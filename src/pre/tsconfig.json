@@ -21,6 +21,7 @@
 		"colorfilter/PatternFilter.ts",
 		"colorfilter/CastFilter.ts",
 		"parts.ts",
+		"tools.ts",
 		"ores.ts"
   	],
 	"files": [

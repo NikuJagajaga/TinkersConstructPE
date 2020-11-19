@@ -10,5 +10,6 @@
     },
     "modifierSlots": 3,
     "oreToIngotRatio": 2,
-    "showItemOnTable": true
+    "showItemOnTable": true,
+    "checkInsideSmeltery": true
 }

@@ -37,7 +37,7 @@ class TinkersMaterial {
     }
 
     getMoltenLiquid(): string {
-        return this.isMetal ? this.moltenLiquid : "";
+        return this.moltenLiquid || "";
     }
 
     setItem(id: number): void {
@@ -161,7 +161,7 @@ Material.sponge.setHeadStats(1050, 3.02, 0, TinkersMaterial.STONE);
 Material.sponge.setHandleStats(1.2, 250);
 Material.sponge.setExtraStats(250);
 
-Material.firewood.setItem(ItemID.tcon_firewood);
+Material.firewood.setItem(BlockID.tcon_firewood);
 Material.firewood.setHeadStats(550, 6, 5.5, TinkersMaterial.STONE);
 Material.firewood.setHandleStats(1, -200);
 Material.firewood.setExtraStats(150);

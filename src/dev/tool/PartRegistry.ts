@@ -29,13 +29,10 @@ class PartRegistry {
             const id = createItem(`tconpart_${type.key}_${key}`, `${name} ${type.name}`);
             Item.addCreativeGroup("tconpart_" + type.key, type.name, [id]);
             this.data[id] = {type: type.key, material: key};
-            if(material.isMetal){
-                const liquid = material.getMoltenLiquid();
+            const liquid = material.getMoltenLiquid();
+            if(liquid){
                 MeltingRecipe.addRecipe(id, liquid, MatValue.INGOT * type.cost);
                 CastingRecipe.addTableRecipeForBoth(type.key, liquid, id);
-            }
-            else{
-                
             }
             CastingRecipe.addMakeCastRecipes(id, type.key);
         });

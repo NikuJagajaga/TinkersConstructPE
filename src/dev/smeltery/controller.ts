@@ -18,9 +18,9 @@ class SmelteryHandler {
 
     private static elements: UI.UIElementSet = {
             line: {type: "image", x: 93 * SCALE, y: 11 * SCALE, z: 1, bitmap: "tcon.smeltery_line", scale: SCALE},
-            slot0: {type: "slot", x: 24 * SCALE, y: 10 * SCALE, size: 18 * SCALE, isValid: (id, count, data) => MeltingRecipe.isExist(id, data)},
-            slot1: {type: "slot", x: 24 * SCALE, y: 28 * SCALE, size: 18 * SCALE, isValid: (id, count, data) => MeltingRecipe.isExist(id, data)},
-            slot2: {type: "slot", x: 24 * SCALE, y: 46 * SCALE, size: 18 * SCALE, isValid: (id, count, data) => MeltingRecipe.isExist(id, data)},
+            slot0: {type: "slot", x: 24 * SCALE, y: 10 * SCALE, size: 18 * SCALE/*, isValid: (id, count, data) => MeltingRecipe.isExist(id, data)*/},
+            slot1: {type: "slot", x: 24 * SCALE, y: 28 * SCALE, size: 18 * SCALE/*, isValid: (id, count, data) => MeltingRecipe.isExist(id, data)*/},
+            slot2: {type: "slot", x: 24 * SCALE, y: 46 * SCALE, size: 18 * SCALE/*, isValid: (id, count, data) => MeltingRecipe.isExist(id, data)*/},
             gauge0: {type: "scale", x: 21 * SCALE, y: 11 * SCALE, bitmap: "tcon.heat_gauge_0", scale: SCALE, direction: 1},
             gauge1: {type: "scale", x: 21 * SCALE, y: 29 * SCALE, bitmap: "tcon.heat_gauge_0", scale: SCALE, direction: 1},
             gauge2: {type: "scale", x: 21 * SCALE, y: 47 * SCALE, bitmap: "tcon.heat_gauge_0", scale: SCALE, direction: 1},
@@ -241,7 +241,6 @@ class SmelteryControler extends TileBase {
         this.area.to.y = y - 1;
         this.area.to.z = to.z;
         this.tanks = tanks;
-        this.liquidStorage.setLimit(null, Math.max(0, this.getLiquidCapacity()));
         return true;
     }
 
@@ -286,6 +285,7 @@ class SmelteryControler extends TileBase {
         const isOpened = this.container.isOpened();
 
         SmelteryHandler.updateScale();
+        this.liquidStorage.setLimit(null, Math.max(0, liquidCapacity));
 
         if((tick & 63) === 0){
             this.setActive(this.checkStructure());
@@ -295,6 +295,10 @@ class SmelteryControler extends TileBase {
 
         if(!this.data.isActive){
             return;
+        }
+
+        if(Cfg.checkInsideSmeltery && tick % 20 === 0){
+            this.interactWithEntitiesInside();
         }
 
         if((tick & 3) === 0){
@@ -389,6 +393,33 @@ class SmelteryControler extends TileBase {
 
     }
 
+    interactWithEntitiesInside(): void {
+        const allEnt = Entity.getAll();
+        const entities: number[] = [];
+        let pos: Vector;
+        for(let i = 0; i < allEnt.length; i++){
+            pos = Entity.getPosition(allEnt[i]);
+            if(this.area.from.x <= pos.x && this.area.to.x >= pos.x && this.area.from.y <= pos.y && this.area.to.y >= pos.y && this.area.from.z <= pos.z && this.area.to.z >= pos.z){
+                if(MeltingRecipe.getEntRecipe(allEnt[i])){
+                    entities.push(allEnt[i]);
+                }
+            }
+        }
+        const liquidCapacity = this.getLiquidCapacity();
+        entities.forEach(ent => {
+            const result = MeltingRecipe.getEntRecipe(ent);
+            if(this.totalLiquidAmount() + result.amount <= liquidCapacity){
+                this.liquidStorage.addLiquid(result.liquid, result.amount);
+            }
+            Entity.damageEntity(ent, 2);
+        });
+        /*
+        for(let i = 0; i < items.length; i++){
+
+        }
+        */
+    }
+
     setAnim(): void {
         const boxes = [];
         const sizeX = this.area.to.x - this.area.from.x - 1;
@@ -426,31 +457,16 @@ class SmelteryControler extends TileBase {
     }
 
     spawnParticle(): void {
+        //270, 90, 180, 0 degree
+        const cos = [0, 0, -1, 1][this.data.meta];
+        const sin = [-1, 1, 0, 0][this.data.meta];
+        const x = 0.52;
+        const z = Math.random() * 0.6 - 0.3;
         const coords = {
-            x: this.x + 0.5,
+            x: this.x + 0.5 + x * cos - z * sin,
             y: this.y + 0.5 + (Math.random() * 6) / 16,
-            z: this.z + 0.5
+            z: this.z + 0.5 + x * sin + z * cos
         };
-        const num1 = 0.52;
-        const num2 = Math.random() * 0.6 - 0.3;
-        switch(this.data.meta){
-            case 0:
-                coords.x += num2;
-                coords.z -= num1;
-                break;
-            case 1:
-                coords.x += num2;
-                coords.z += num1;
-                break;
-            case 2:
-                coords.x += num1;
-                coords.z += num2;
-                break;
-            case 3:
-                coords.x -= num1;
-                coords.z += num2;
-                break;
-        }
         Particles.addParticle(Native.ParticleType.smoke, coords.x, coords.y, coords.z, 0, 0, 0);
         Particles.addParticle(Native.ParticleType.flame, coords.x, coords.y, coords.z, 0, 0, 0);
     }

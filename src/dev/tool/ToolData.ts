@@ -148,5 +148,59 @@ class ToolData {
             Modifier[key] && func(Modifier[key], this.modifiers[key]);
         }
     }
+    
+    uniqueKey(): string {
+        const hash = this.materials.reduce((a, v) => 31 * a + Material[v].getTexIndex(), 0);
+        let mask = 0;
+        for(let key in this.modifiers){
+            mask |= 1 << Modifier[key].getTexIndex();
+        }
+        return this.item.id + ":" + hash.toString(16) + ":" + mask.toString(16);
+    }
 
 }
+
+
+/*
+(() => {
+
+    const time = Debug.sysTime();
+
+    const genHash = (o1: number, o2: number, o3: number, o4: number): number => {
+        let result = 0;
+        result = 31 * result + o1;
+        result = 31 * result + o2;
+        result = 31 * result + o3;
+        result = 31 * result + o4;
+        return result;
+    };
+
+    const cache = {};
+
+    let hash: number;
+    loop:
+    for(let i = 0; i < 27; i++){
+    for(let j = 0; j < 27; j++){
+    for(let k = 0; k < 27; k++){
+    for(let l = 0; l < 27; l++){
+        hash = genHash(i, j, k, l);
+        if(hash !== [i, j, k, l].reduce((current, v) => 31 * current + v, 0)){
+            alert("chigauyo!!");
+            break loop;
+        }
+        if(hash in cache){
+            alert("break: " + hash);
+            break loop;
+        }
+        else{
+            cache[hash] = true;
+        }
+    }
+    }
+    }
+    }
+
+    alert("finish: " + (Debug.sysTime() - time) + "ms");
+
+})();
+*/

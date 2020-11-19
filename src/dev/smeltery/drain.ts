@@ -19,6 +19,32 @@ class SearedDrain extends TileBase {
         BlockRenderer.unmapAtCoords(this.x, this.y, this.z);
     }
 
+    click(id: number, count: number, data: number): boolean {
+        if(this.controller && this.controller.isLoaded){
+            let liquid = LiquidRegistry.getItemLiquid(id, data);
+            if(MoltenLiquid.isExist(liquid)){
+                const total = this.controller.totalLiquidAmount();
+                const capacity = this.controller.getLiquidCapacity();
+                if(total + 1000 <= capacity){
+                    const empty = LiquidRegistry.getEmptyItem(id, data);
+                    this.interface.addLiquid(liquid, 1, true);
+                    Player.decreaseCarriedItem();
+                    Player.addItemToInventory(empty.id, 1, empty.data);
+                }
+                return true;
+            }
+            liquid = this.interface.getLiquidStored();
+            const full = LiquidRegistry.getFullItem(id, data, liquid);
+            if(full && this.controller.liquidStorage.getAmount(liquid) >= 1000){
+                this.interface.getLiquid(liquid, 1, true);
+                Player.decreaseCarriedItem();
+                Player.addItemToInventory(full.id, 1, full.data);
+                return true;
+            }
+        }
+        return false;
+    }
+
 }
 
 

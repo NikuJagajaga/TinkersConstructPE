@@ -45,14 +45,14 @@ const PARTS: {key: string, path?: string, slide?: {x: number, y: number}}[] = [
 ];
 
 const TOOLS = [
-    {name: "pickaxe", parts: 4},
-    {name: "shovel", parts: 4},
-    {name: "hatchet", parts: 4},
-    {name: "mattock", parts: 4},
-    {name: "sword", parts: 4},
-    {name: "hammer", parts: 5},
-    {name: "excavator", parts: 5},
-    {name: "lumberaxe", parts: 5}
+    {name: "pickaxe", parts: 3},
+    {name: "shovel", parts: 3},
+    {name: "hatchet", parts: 3},
+    {name: "mattock", parts: 3},
+    {name: "sword", parts: 3},
+    {name: "hammer", parts: 4},
+    {name: "excavator", parts: 4},
+    {name: "lumberaxe", parts: 4}
 ];
 
 const MODIFIERS = [
@@ -120,7 +120,7 @@ TOOLS.forEach(tool => {
     let baseTex: android.graphics.Bitmap;
     let texture: android.graphics.Bitmap;
     let path: string;
-    for(i = 0; i < tool.parts; i++){
+    for(i = 0; i < tool.parts + 1; i++){
         baseTex = FileUtil.readImage(dir + "part" + i + ".png");
         for(j = 0; j < MATERIAL.length; j++){
             texture = baseTex;
@@ -135,23 +135,6 @@ TOOLS.forEach(tool => {
     }
     for(i = 0; i < MODIFIERS.length; i++){
         canvas.drawBitmap(FileUtil.readImage(dir + "mod_" + MODIFIERS[i] + ".png"), i << 4, 15 << 4, null);
-    }
-    FileUtil.writeImage(outputPath, bitmap);
-});
-
-
-TOOLS.forEach(tool => {
-    const outputPath = __dir__ + "res/items-opaque/tcontool_" + tool.name + ".png";
-    if(FileUtil.isExist(outputPath)){
-        return;
-    }
-    const dir = __dir__ + "texture-source/tool/" + tool.name + "/";
-    const bitmap: android.graphics.Bitmap = new Bitmap.createBitmap(16, 16, Bitmap.Config.ARGB_8888);
-    const canvas = new Canvas(bitmap);
-    let texture: android.graphics.Bitmap;
-    for(let i = 0; i < tool.parts - 1; i++){
-        texture = FileUtil.readImage(dir + "part" + i + ".png");
-        canvas.drawBitmap(texture, 0, 0, null);
     }
     FileUtil.writeImage(outputPath, bitmap);
 });

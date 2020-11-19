@@ -14,6 +14,7 @@ var __extends = (this && this.__extends) || (function () {
 var Color = android.graphics.Color;
 var Bitmap = android.graphics.Bitmap;
 var Canvas = android.graphics.Canvas;
+var Paint = android.graphics.Paint;
 var FileUtil = /** @class */ (function () {
     function FileUtil() {
     }
@@ -419,14 +420,14 @@ var PARTS = [
     { key: "largeplate" }
 ];
 var TOOLS = [
-    { name: "pickaxe", parts: 4 },
-    { name: "shovel", parts: 4 },
-    { name: "hatchet", parts: 4 },
-    { name: "mattock", parts: 4 },
-    { name: "sword", parts: 4 },
-    { name: "hammer", parts: 5 },
-    { name: "excavator", parts: 5 },
-    { name: "lumberaxe", parts: 5 }
+    { name: "pickaxe", parts: 3 },
+    { name: "shovel", parts: 3 },
+    { name: "hatchet", parts: 3 },
+    { name: "mattock", parts: 3 },
+    { name: "sword", parts: 3 },
+    { name: "hammer", parts: 4 },
+    { name: "excavator", parts: 4 },
+    { name: "lumberaxe", parts: 4 }
 ];
 var MODIFIERS = [
     "haste",
@@ -489,7 +490,7 @@ TOOLS.forEach(function (tool) {
     var baseTex;
     var texture;
     var path;
-    for (i = 0; i < tool.parts; i++) {
+    for (i = 0; i < tool.parts + 1; i++) {
         baseTex = FileUtil.readImage(dir + "part" + i + ".png");
         for (j = 0; j < MATERIAL.length; j++) {
             texture = baseTex;
@@ -507,20 +508,33 @@ TOOLS.forEach(function (tool) {
     }
     FileUtil.writeImage(outputPath, bitmap);
 });
+var SampleFilter = [
+    new SingleColorFilter("#684e1e"),
+    new SingleColorFilter("#c1c1c1"),
+    new SingleColorFilter("#2376dd"),
+    new SingleColorFilter("#7146b0")
+];
 TOOLS.forEach(function (tool) {
-    var outputPath = __dir__ + "res/items-opaque/tcontool_" + tool.name + ".png";
-    if (FileUtil.isExist(outputPath)) {
+    var outputPath1 = __dir__ + "res/items-opaque/tcontool_" + tool.name + ".png";
+    var outputPath2 = __dir__ + "gui/tcon/icon/" + tool.name + ".png";
+    if (FileUtil.isExist(outputPath1) && FileUtil.isExist(outputPath2)) {
         return;
     }
     var dir = __dir__ + "texture-source/tool/" + tool.name + "/";
-    var bitmap = new Bitmap.createBitmap(16, 16, Bitmap.Config.ARGB_8888);
-    var canvas = new Canvas(bitmap);
+    var bitmap1 = new Bitmap.createBitmap(16, 16, Bitmap.Config.ARGB_8888);
+    var canvas1 = new Canvas(bitmap1);
     var texture;
-    for (var i = 0; i < tool.parts - 1; i++) {
+    for (var i = 0; i < tool.parts; i++) {
         texture = FileUtil.readImage(dir + "part" + i + ".png");
-        canvas.drawBitmap(texture, 0, 0, null);
+        canvas1.drawBitmap(SampleFilter[i].applyTo(texture), 0, 0, null);
     }
-    FileUtil.writeImage(outputPath, bitmap);
+    var bitmap2 = new Bitmap.createBitmap(16, 16, Bitmap.Config.ARGB_8888);
+    var canvas2 = new Canvas(bitmap2);
+    var paint2 = new Paint();
+    paint2.setAlpha(127);
+    canvas2.drawBitmap(bitmap1, 0, 0, paint2);
+    FileUtil.writeImage(outputPath1, bitmap1);
+    FileUtil.writeImage(outputPath2, bitmap2);
 });
 var genOreTex = function (overlay, file) {
     var outputPath = __dir__ + "res/terrain-atlas/" + file;

@@ -12,7 +12,10 @@ const ColorFilter = android.graphics.PorterDuffColorFilter;
 const PorterDuff = android.graphics.PorterDuff;
 const Thread = java.lang.Thread;
 const ScreenHeight = UI.getScreenHeight();
+
 const setLoadingTip = ModAPI.requireGlobal("MCSystem.setLoadingTip");
+//const getAllEntity = ModAPI.requireGlobal("EntityDataRegistry.getAllData");
+//const getEntityForType = ModAPI.requireGlobal("EntityDataRegistry.getDataForType");
 
 const SCALE = 5; //GUI Scale
 
@@ -27,8 +30,8 @@ const Cfg = {
     },
     oreToIngotRatio: __config__.getNumber("oreToIngotRatio") - 0 ?? 2,
     modifierSlots: __config__.getNumber("modifierSlots") - 0 ?? 3,
-    showItemOnTable: __config__.getBool("showItemOnTable") ?? true
-    
+    showItemOnTable: __config__.getBool("showItemOnTable") ?? true,
+    checkInsideSmeltery: __config__.getBool("checkInsideSmeltery") ?? true
 };
 
 class MatValue {

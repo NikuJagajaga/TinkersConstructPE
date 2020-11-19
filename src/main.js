@@ -22,14 +22,7 @@ var __assign = (this && this.__assign) || function () {
     };
     return __assign.apply(this, arguments);
 };
-var __spreadArrays = (this && this.__spreadArrays) || function () {
-    for (var s = 0, i = 0, il = arguments.length; i < il; i++) s += arguments[i].length;
-    for (var r = Array(s), k = 0, i = 0; i < il; i++)
-        for (var a = arguments[i], j = 0, jl = a.length; j < jl; j++, k++)
-            r[k] = a[j];
-    return r;
-};
-var _a, _b, _c, _d, _e, _f, _g;
+var _a, _b, _c, _d, _e, _f, _g, _h;
 IMPORT("ToolLib");
 IMPORT("TileRender");
 IMPORT("StorageInterface");
@@ -44,6 +37,8 @@ var PorterDuff = android.graphics.PorterDuff;
 var Thread = java.lang.Thread;
 var ScreenHeight = UI.getScreenHeight();
 var setLoadingTip = ModAPI.requireGlobal("MCSystem.setLoadingTip");
+//const getAllEntity = ModAPI.requireGlobal("EntityDataRegistry.getAllData");
+//const getEntityForType = ModAPI.requireGlobal("EntityDataRegistry.getDataForType");
 var SCALE = 5; //GUI Scale
 var Cfg = {
     toolLeveling: {
@@ -56,7 +51,8 @@ var Cfg = {
     },
     oreToIngotRatio: (_e = __config__.getNumber("oreToIngotRatio") - 0) !== null && _e !== void 0 ? _e : 2,
     modifierSlots: (_f = __config__.getNumber("modifierSlots") - 0) !== null && _f !== void 0 ? _f : 3,
-    showItemOnTable: (_g = __config__.getBool("showItemOnTable")) !== null && _g !== void 0 ? _g : true
+    showItemOnTable: (_g = __config__.getBool("showItemOnTable")) !== null && _g !== void 0 ? _g : true,
+    checkInsideSmeltery: (_h = __config__.getBool("checkInsideSmeltery")) !== null && _h !== void 0 ? _h : true
 };
 var MatValue = /** @class */ (function () {
     function MatValue() {
@@ -289,12 +285,14 @@ var MoltenLiquid = /** @class */ (function () {
             LiquidRegistry.registerItem(liq, { id: VanillaItemID.bucket, data: 0 }, { id: id, data: i });
         });
     };
-    MoltenLiquid.initAnim = function (tile, posX, posY, posZ, scaleX, scaleY, scaleZ) {
+    MoltenLiquid.initAnim = function (tile, posX, posY, posZ, scaleX, scaleY, scaleZ, useThread) {
         var _this = this;
-        tile.liquidStorage.setAmount = function (liquid, amount) {
-            tile.liquidStorage.liquidAmounts[liquid] = amount;
-            _this.updateAnimInThread(tile);
-        };
+        if (useThread) {
+            tile.liquidStorage.setAmount = function (liquid, amount) {
+                tile.liquidStorage.liquidAmounts[liquid] = amount;
+                _this.updateAnimInThread(tile);
+            };
+        }
         tile.render = new Render();
         tile.anim = new Animation.Base(tile.x + posX, tile.y + posY - 1.5, tile.z + posZ);
         tile.anim.height = 0;
@@ -456,7 +454,7 @@ var MeltingRecipe = /** @class */ (function () {
     };
     MeltingRecipe.addRecipe = function (item, liquid, amount, temp) {
         if (temp === void 0) { temp = this.calcTemp(liquid, amount); }
-        this.data[typeof item === "number" ? item : item.id + ":" + item.data] = {
+        this.recipeItem[typeof item === "number" ? item : item.id + ":" + item.data] = {
             liquid: liquid,
             amount: amount,
             temp: temp
@@ -466,13 +464,35 @@ var MeltingRecipe = /** @class */ (function () {
         this.addRecipe(item, liquid, amount, this.calcTemp(liquid, timeAmount));
     };
     MeltingRecipe.getRecipe = function (id, data) {
-        return this.data[id + ":" + data] || this.data[id];
+        return this.recipeItem[id + ":" + data] || this.recipeItem[id];
     };
     MeltingRecipe.isExist = function (id, data) {
-        return (id + ":" + data) in this.data || id in this.data || false;
+        return (id + ":" + data) in this.recipeItem || id in this.recipeItem || false;
+    };
+    MeltingRecipe.getAllRecipeForRV = function () {
+        var list = [];
+        var split;
+        for (var key in this.recipeItem) {
+            split = key.split(":");
+            list.push({
+                input: [{ id: parseInt(split[0]), count: 1, data: split[1] ? parseInt(split[1]) : -1 }],
+                output: [],
+                outputLiq: { liquid: this.recipeItem[key].liquid, amount: this.recipeItem[key].amount },
+                temp: this.recipeItem[key].temp
+            });
+        }
+        return list;
+    };
+    MeltingRecipe.addEntRecipe = function (entityType, liquid, amount) {
+        this.recipeEnt[entityType] = { liquid: liquid, amount: amount };
+    };
+    MeltingRecipe.getEntRecipe = function (ent) {
+        var entityType = Entity.getType(ent);
+        return this.recipeEnt[entityType];
     };
     MeltingRecipe.LOG9_2 = Math.LN2 / Math.log(9);
-    MeltingRecipe.data = {};
+    MeltingRecipe.recipeItem = {};
+    MeltingRecipe.recipeEnt = {};
     return MeltingRecipe;
 }());
 MeltingRecipe.addRecipe(VanillaBlockID.ice, "water", 1000, 305 - 300);
@@ -537,6 +557,30 @@ MeltingRecipe.addRecipe(VanillaBlockID.tripwire_hook, "molten_iron", MatValue.IN
 MeltingRecipe.addRecipe(VanillaBlockID.iron_door, "molten_iron", MatValue.INGOT * 2);
 MeltingRecipe.addRecipe(VanillaBlockID.cauldron, "molten_iron", MatValue.INGOT * 7);
 MeltingRecipe.addRecipe(VanillaBlockID.anvil, "molten_iron", MatValue.BLOCK * 3 + MatValue.INGOT * 4);
+MeltingRecipe.addRecipe(VanillaBlockID.iron_ore, "molten_iron", MatValue.ORE);
+MeltingRecipe.addRecipe(VanillaBlockID.gold_ore, "molten_iron", MatValue.ORE);
+MeltingRecipe.addEntRecipe(1, "blood", 20); //Native.EntityType.PLAYER
+MeltingRecipe.addEntRecipe(Native.EntityType.ZOMBIE, "blood", 20);
+MeltingRecipe.addEntRecipe(Native.EntityType.ZOMBIE_VILLAGER, "blood", 20);
+MeltingRecipe.addEntRecipe(Native.EntityType.ZOMBIE_VILLAGE_V2, "blood", 20);
+MeltingRecipe.addEntRecipe(Native.EntityType.PIG_ZOMBIE, "blood", 20);
+MeltingRecipe.addEntRecipe(Native.EntityType.ZOMBIE_HORSE, "blood", 20);
+MeltingRecipe.addEntRecipe(Native.EntityType.COW, "blood", 20);
+MeltingRecipe.addEntRecipe(Native.EntityType.PIG, "blood", 20);
+MeltingRecipe.addEntRecipe(Native.EntityType.SHEEP, "blood", 20);
+MeltingRecipe.addEntRecipe(Native.EntityType.CHICKEN, "blood", 20);
+MeltingRecipe.addEntRecipe(Native.EntityType.WOLF, "blood", 20);
+MeltingRecipe.addEntRecipe(Native.EntityType.CAT, "blood", 20);
+MeltingRecipe.addEntRecipe(Native.EntityType.RABBIT, "blood", 20);
+MeltingRecipe.addEntRecipe(Native.EntityType.HORSE, "blood", 20);
+MeltingRecipe.addEntRecipe(Native.EntityType.LLAMA, "blood", 20);
+MeltingRecipe.addEntRecipe(Native.EntityType.IRON_GOLEM, "molten_iron", 18);
+MeltingRecipe.addEntRecipe(Native.EntityType.SNOW_GOLEM, "water", 100);
+MeltingRecipe.addEntRecipe(Native.EntityType.VILLAGER, "molten_emerald", 6);
+MeltingRecipe.addEntRecipe(Native.EntityType.VILLAGER_V2, "molten_emerald", 6);
+MeltingRecipe.addEntRecipe(Native.EntityType.VINDICATOR, "molten_emerald", 6);
+MeltingRecipe.addEntRecipe(Native.EntityType.EVOCATION_ILLAGER, "molten_emerald", 6);
+//MeltingRecipe.addEntRecipe(Native.EntityType.ILLUSIONER, "molten_emerald", 6);
 var AlloyRecipe = /** @class */ (function () {
     function AlloyRecipe() {
     }
@@ -627,13 +671,35 @@ var CastingRecipe = /** @class */ (function () {
     };
     CastingRecipe.addBasinRecipe = function (id, liquid, result, amount) {
         if (amount === void 0) { amount = MatValue.BLOCK; }
-        this.addRecipe("basin", id, liquid, result, true, amount);
+        this.addRecipe("basin", id, liquid, result, id !== 0, amount);
     };
     CastingRecipe.getTableRecipe = function (id, liquid) {
         return this.table[id] ? this.table[id][liquid] : undefined;
     };
     CastingRecipe.getBasinRecipe = function (id, liquid) {
         return this.basin[id] ? this.basin[id][liquid] : undefined;
+    };
+    CastingRecipe.getAllRecipeForRV = function (type) {
+        var list = [];
+        var key;
+        var liquid;
+        var id;
+        var limits;
+        var result;
+        for (key in this[type]) {
+            id = parseInt(key);
+            limits = this.getLimits(type, id);
+            for (liquid in this[type][id]) {
+                result = this[type][id][liquid];
+                list.push({
+                    input: [{ id: id, count: 1, data: 0 }],
+                    output: [{ id: result.id, count: 1, data: result.data }],
+                    inputLiq: { liquid: liquid, amount: limits[liquid] || limits.__global },
+                    consume: result.consume
+                });
+            }
+        }
+        return list;
     };
     CastingRecipe.setDefaultCapacity = function (id, capacity) {
         this.capacity[id] = capacity;
@@ -664,8 +730,22 @@ var CastingRecipe = /** @class */ (function () {
     CastingRecipe.capacity = {};
     return CastingRecipe;
 }());
+CastingRecipe.addTableRecipe(0, "molten_glass", VanillaBlockID.glass_pane, false, MatValue.GLASS * 6 / 16);
+CastingRecipe.addBasinRecipe(0, "molten_iron", VanillaBlockID.iron_block);
+CastingRecipe.addBasinRecipe(0, "molten_gold", VanillaBlockID.gold_block);
+CastingRecipe.addBasinRecipe(0, "molten_obsidian", VanillaBlockID.obsidian, 288);
+CastingRecipe.addTableRecipeForBoth("ingot", "molten_iron", VanillaItemID.iron_ingot);
+CastingRecipe.addTableRecipeForBoth("ingot", "molten_gold", VanillaItemID.gold_ingot);
+CastingRecipe.addTableRecipeForBoth("ingot", "molten_clay", VanillaItemID.brick);
+CastingRecipe.addTableRecipeForBoth("nugget", "molten_iron", VanillaItemID.iron_nugget);
+CastingRecipe.addTableRecipeForBoth("nugget", "molten_gold", VanillaItemID.gold_nugget);
+CastingRecipe.addTableRecipeForBoth("gem", "molten_emerald", VanillaItemID.emerald);
+CastingRecipe.addBasinRecipe(0, "molten_emerald", VanillaBlockID.emerald_block, MatValue.GEM * 9);
+CastingRecipe.addBasinRecipe(0, "molten_clay", VanillaBlockID.hardened_clay, MatValue.INGOT * 4);
+CastingRecipe.addBasinRecipe(VanillaBlockID.stained_hardened_clay, "water", VanillaBlockID.hardened_clay, 250);
+CastingRecipe.addBasinRecipe(VanillaBlockID.sand, "blood", { id: VanillaBlockID.sand, data: 1 }, 10);
 CastingRecipe.setDefaultCapacity(VanillaItemID.bucket, 1000);
-Callback.addCallback("PostLoaded", function () {
+Callback.addCallback("PreLoaded", function () {
     var empty;
     var full;
     for (var key in LiquidRegistry.EmptyByFull) {
@@ -748,7 +828,7 @@ var SearedTank = /** @class */ (function (_super) {
     }
     SearedTank.prototype.init = function () {
         this.liquidStorage.setLimit(null, 4000);
-        MoltenLiquid.initAnim(this, 0.5, 0, 0.5, 31 / 32, 31 / 32, 31 / 32);
+        MoltenLiquid.initAnim(this, 0.5, 0, 0.5, 31 / 32, 31 / 32, 31 / 32, true);
     };
     SearedTank.prototype.destroy = function () {
         this.anim && this.anim.destroy();
@@ -860,6 +940,31 @@ var SearedDrain = /** @class */ (function (_super) {
     };
     SearedDrain.prototype.destroy = function () {
         BlockRenderer.unmapAtCoords(this.x, this.y, this.z);
+    };
+    SearedDrain.prototype.click = function (id, count, data) {
+        if (this.controller && this.controller.isLoaded) {
+            var liquid = LiquidRegistry.getItemLiquid(id, data);
+            if (MoltenLiquid.isExist(liquid)) {
+                var total = this.controller.totalLiquidAmount();
+                var capacity = this.controller.getLiquidCapacity();
+                if (total + 1000 <= capacity) {
+                    var empty = LiquidRegistry.getEmptyItem(id, data);
+                    this.interface.addLiquid(liquid, 1, true);
+                    Player.decreaseCarriedItem();
+                    Player.addItemToInventory(empty.id, 1, empty.data);
+                }
+                return true;
+            }
+            liquid = this.interface.getLiquidStored();
+            var full = LiquidRegistry.getFullItem(id, data, liquid);
+            if (full && this.controller.liquidStorage.getAmount(liquid) >= 1000) {
+                this.interface.getLiquid(liquid, 1, true);
+                Player.decreaseCarriedItem();
+                Player.addItemToInventory(full.id, 1, full.data);
+                return true;
+            }
+        }
+        return false;
     };
     return SearedDrain;
 }(TileBase));
@@ -1061,7 +1166,7 @@ var CastingTable = /** @class */ (function (_super) {
         this.animOutput = createAnimItem(this.x + 9 / 16, this.y + 31 / 32, this.z + 9 / 16);
         this.setAnimItem();
         this.setLiquidLimit();
-        MoltenLiquid.initAnim(this, 0.5, 15 / 16, 0.5, 14 / 16, 1 / 16, 14 / 16);
+        MoltenLiquid.initAnim(this, 0.5, 15 / 16, 0.5, 14 / 16, 1 / 16, 14 / 16, true);
     };
     CastingTable.prototype.destroy = function () {
         this.anim && this.anim.destroy();
@@ -1150,7 +1255,7 @@ var CastingTableInterface = /** @class */ (function (_super) {
 TileEntity.registerPrototype(BlockID.tcon_itemcast, new CastingTable());
 StorageInterface.createInterface(BlockID.tcon_itemcast, new CastingTableInterface());
 createBlock("tcon_blockcast", [{ name: "Casting Basin", texture: [0, 1, 2] }]);
-Recipes2.addShaped(BlockID.tcon_blockcast, "aaa:a_a:a_a", { a: ItemID.tcon_brick });
+Recipes2.addShaped(BlockID.tcon_blockcast, "a_a:a_a:aaa", { a: ItemID.tcon_brick });
 BlockModel.register(BlockID.tcon_blockcast, function (model) {
     var addBox = function (x1, y1, z1, x2, y2, z2, rotation) {
         model.addBox(x1 / 16, y1 / 16, z1 / 16, x2 / 16, y2 / 16, z2 / 16, BlockID.tcon_blockcast, 0);
@@ -1177,7 +1282,7 @@ var CastingBasin = /** @class */ (function (_super) {
         this.animOutput = createAnimItem(this.x + 0.5, this.y + 10 / 16, this.z + 0.5);
         this.setAnimItem();
         this.setLiquidLimit();
-        MoltenLiquid.initAnim(this, 0.5, 5 / 16, 0.5, 12 / 16, 11 / 16, 12 / 16);
+        MoltenLiquid.initAnim(this, 0.5, 5 / 16, 0.5, 12 / 16, 11 / 16, 12 / 16, true);
     };
     CastingBasin.prototype.setAnimItem = function () {
         var input = this.container.getSlot("slotInput");
@@ -1260,9 +1365,9 @@ var SmelteryHandler = /** @class */ (function () {
         _a);
     SmelteryHandler.elements = {
         line: { type: "image", x: 93 * SCALE, y: 11 * SCALE, z: 1, bitmap: "tcon.smeltery_line", scale: SCALE },
-        slot0: { type: "slot", x: 24 * SCALE, y: 10 * SCALE, size: 18 * SCALE, isValid: function (id, count, data) { return MeltingRecipe.isExist(id, data); } },
-        slot1: { type: "slot", x: 24 * SCALE, y: 28 * SCALE, size: 18 * SCALE, isValid: function (id, count, data) { return MeltingRecipe.isExist(id, data); } },
-        slot2: { type: "slot", x: 24 * SCALE, y: 46 * SCALE, size: 18 * SCALE, isValid: function (id, count, data) { return MeltingRecipe.isExist(id, data); } },
+        slot0: { type: "slot", x: 24 * SCALE, y: 10 * SCALE, size: 18 * SCALE /*, isValid: (id, count, data) => MeltingRecipe.isExist(id, data)*/ },
+        slot1: { type: "slot", x: 24 * SCALE, y: 28 * SCALE, size: 18 * SCALE /*, isValid: (id, count, data) => MeltingRecipe.isExist(id, data)*/ },
+        slot2: { type: "slot", x: 24 * SCALE, y: 46 * SCALE, size: 18 * SCALE /*, isValid: (id, count, data) => MeltingRecipe.isExist(id, data)*/ },
         gauge0: { type: "scale", x: 21 * SCALE, y: 11 * SCALE, bitmap: "tcon.heat_gauge_0", scale: SCALE, direction: 1 },
         gauge1: { type: "scale", x: 21 * SCALE, y: 29 * SCALE, bitmap: "tcon.heat_gauge_0", scale: SCALE, direction: 1 },
         gauge2: { type: "scale", x: 21 * SCALE, y: 47 * SCALE, bitmap: "tcon.heat_gauge_0", scale: SCALE, direction: 1 },
@@ -1436,7 +1541,6 @@ var SmelteryControler = /** @class */ (function (_super) {
         this.area.to.y = y - 1;
         this.area.to.z = to.z;
         this.tanks = tanks;
-        this.liquidStorage.setLimit(null, Math.max(0, this.getLiquidCapacity()));
         return true;
     };
     SmelteryControler.prototype.getItemCapacity = function () {
@@ -1473,6 +1577,7 @@ var SmelteryControler = /** @class */ (function (_super) {
         var liquidCapacity = this.getLiquidCapacity();
         var isOpened = this.container.isOpened();
         SmelteryHandler.updateScale();
+        this.liquidStorage.setLimit(null, Math.max(0, liquidCapacity));
         if ((tick & 63) === 0) {
             this.setActive(this.checkStructure());
             this.setAnim();
@@ -1480,6 +1585,9 @@ var SmelteryControler = /** @class */ (function (_super) {
         }
         if (!this.data.isActive) {
             return;
+        }
+        if (Cfg.checkInsideSmeltery && tick % 20 === 0) {
+            this.interactWithEntitiesInside();
         }
         if ((tick & 3) === 0) {
             AlloyRecipe.alloyAlloys(liquids, this.liquidStorage);
@@ -1565,6 +1673,33 @@ var SmelteryControler = /** @class */ (function (_super) {
             this.data.fuel--;
         }
     };
+    SmelteryControler.prototype.interactWithEntitiesInside = function () {
+        var _this = this;
+        var allEnt = Entity.getAll();
+        var entities = [];
+        var pos;
+        for (var i = 0; i < allEnt.length; i++) {
+            pos = Entity.getPosition(allEnt[i]);
+            if (this.area.from.x <= pos.x && this.area.to.x >= pos.x && this.area.from.y <= pos.y && this.area.to.y >= pos.y && this.area.from.z <= pos.z && this.area.to.z >= pos.z) {
+                if (MeltingRecipe.getEntRecipe(allEnt[i])) {
+                    entities.push(allEnt[i]);
+                }
+            }
+        }
+        var liquidCapacity = this.getLiquidCapacity();
+        entities.forEach(function (ent) {
+            var result = MeltingRecipe.getEntRecipe(ent);
+            if (_this.totalLiquidAmount() + result.amount <= liquidCapacity) {
+                _this.liquidStorage.addLiquid(result.liquid, result.amount);
+            }
+            Entity.damageEntity(ent, 2);
+        });
+        /*
+        for(let i = 0; i < items.length; i++){
+
+        }
+        */
+    };
     SmelteryControler.prototype.setAnim = function () {
         var boxes = [];
         var sizeX = this.area.to.x - this.area.from.x - 1;
@@ -1597,31 +1732,16 @@ var SmelteryControler = /** @class */ (function (_super) {
         this.anim.refresh();
     };
     SmelteryControler.prototype.spawnParticle = function () {
+        //270, 90, 180, 0 degree
+        var cos = [0, 0, -1, 1][this.data.meta];
+        var sin = [-1, 1, 0, 0][this.data.meta];
+        var x = 0.52;
+        var z = Math.random() * 0.6 - 0.3;
         var coords = {
-            x: this.x + 0.5,
+            x: this.x + 0.5 + x * cos - z * sin,
             y: this.y + 0.5 + (Math.random() * 6) / 16,
-            z: this.z + 0.5
+            z: this.z + 0.5 + x * sin + z * cos
         };
-        var num1 = 0.52;
-        var num2 = Math.random() * 0.6 - 0.3;
-        switch (this.data.meta) {
-            case 0:
-                coords.x += num2;
-                coords.z -= num1;
-                break;
-            case 1:
-                coords.x += num2;
-                coords.z += num1;
-                break;
-            case 2:
-                coords.x += num1;
-                coords.z += num2;
-                break;
-            case 3:
-                coords.x -= num1;
-                coords.z += num2;
-                break;
-        }
         Particles.addParticle(Native.ParticleType.smoke, coords.x, coords.y, coords.z, 0, 0, 0);
         Particles.addParticle(Native.ParticleType.flame, coords.x, coords.y, coords.z, 0, 0, 0);
     };
@@ -1660,7 +1780,7 @@ var TinkersMaterial = /** @class */ (function () {
         return this.texIndex;
     };
     TinkersMaterial.prototype.getMoltenLiquid = function () {
-        return this.isMetal ? this.moltenLiquid : "";
+        return this.moltenLiquid || "";
     };
     TinkersMaterial.prototype.setItem = function (id) {
         this.item = id;
@@ -1773,7 +1893,7 @@ Material.sponge.setItem(VanillaBlockID.sponge);
 Material.sponge.setHeadStats(1050, 3.02, 0, TinkersMaterial.STONE);
 Material.sponge.setHandleStats(1.2, 250);
 Material.sponge.setExtraStats(250);
-Material.firewood.setItem(ItemID.tcon_firewood);
+Material.firewood.setItem(BlockID.tcon_firewood);
 Material.firewood.setHeadStats(550, 6, 5.5, TinkersMaterial.STONE);
 Material.firewood.setHandleStats(1, -200);
 Material.firewood.setExtraStats(150);
@@ -2044,8 +2164,59 @@ var ToolData = /** @class */ (function () {
             Modifier[key] && func(Modifier[key], this.modifiers[key]);
         }
     };
+    ToolData.prototype.uniqueKey = function () {
+        var hash = this.materials.reduce(function (a, v) { return 31 * a + Material[v].getTexIndex(); }, 0);
+        var mask = 0;
+        for (var key in this.modifiers) {
+            mask |= 1 << Modifier[key].getTexIndex();
+        }
+        return this.item.id + ":" + hash.toString(16) + ":" + mask.toString(16);
+    };
     return ToolData;
 }());
+/*
+(() => {
+
+    const time = Debug.sysTime();
+
+    const genHash = (o1: number, o2: number, o3: number, o4: number): number => {
+        let result = 0;
+        result = 31 * result + o1;
+        result = 31 * result + o2;
+        result = 31 * result + o3;
+        result = 31 * result + o4;
+        return result;
+    };
+
+    const cache = {};
+
+    let hash: number;
+    loop:
+    for(let i = 0; i < 27; i++){
+    for(let j = 0; j < 27; j++){
+    for(let k = 0; k < 27; k++){
+    for(let l = 0; l < 27; l++){
+        hash = genHash(i, j, k, l);
+        if(hash !== [i, j, k, l].reduce((current, v) => 31 * current + v, 0)){
+            alert("chigauyo!!");
+            break loop;
+        }
+        if(hash in cache){
+            alert("break: " + hash);
+            break loop;
+        }
+        else{
+            cache[hash] = true;
+        }
+    }
+    }
+    }
+    }
+
+    alert("finish: " + (Debug.sysTime() - time) + "ms");
+
+})();
+*/ 
 var PartRegistry = /** @class */ (function () {
     function PartRegistry() {
     }
@@ -2056,12 +2227,10 @@ var PartRegistry = /** @class */ (function () {
             var id = createItem("tconpart_" + type.key + "_" + key, name + " " + type.name);
             Item.addCreativeGroup("tconpart_" + type.key, type.name, [id]);
             _this.data[id] = { type: type.key, material: key };
-            if (material.isMetal) {
-                var liquid = material.getMoltenLiquid();
+            var liquid = material.getMoltenLiquid();
+            if (liquid) {
                 MeltingRecipe.addRecipe(id, liquid, MatValue.INGOT * type.cost);
                 CastingRecipe.addTableRecipeForBoth(type.key, liquid, id);
-            }
-            else {
             }
             CastingRecipe.addMakeCastRecipes(id, type.key);
         });
@@ -2220,6 +2389,39 @@ createBlock("tcon_seared_glass", [{ name: "Seared Glass" }]);
 Recipes2.addShaped(BlockID.tcon_seared_glass, "_a_:aba:_a_", { a: ItemID.tcon_brick, b: VanillaBlockID.glass });
 CastingRecipe.addBasinRecipe(VanillaBlockID.glass, "molten_stone", BlockID.tcon_seared_glass, MatValue.SEARED_BLOCK);
 ConnectedTexture.setModelForGlass(BlockID.tcon_seared_glass, -1, "tcon_seared_glass");
+var PatternRegistry = /** @class */ (function () {
+    function PatternRegistry() {
+    }
+    PatternRegistry.registerData = function (id, type, cost) {
+        this.data[id] = { type: type, cost: cost };
+    };
+    PatternRegistry.getData = function (id) {
+        return this.data[id];
+    };
+    PatternRegistry.isPattern = function (id) {
+        return id in this.data;
+    };
+    PatternRegistry.getAllRecipeForRV = function () {
+        var list = [];
+        var material;
+        var pattern;
+        for (var mat in Material) {
+            if (Material[mat].isMetal) {
+                continue;
+            }
+            material = Material[mat].getItem();
+            for (pattern in this.data) {
+                list.push({
+                    input: [{ id: parseInt(pattern), count: 1, data: 0 }, { id: material, count: this.data[pattern].cost, data: 0 }],
+                    output: [{ id: PartRegistry.getIDFromData(this.data[pattern].type, mat), count: 1, data: 0 }]
+                });
+            }
+        }
+        return list;
+    };
+    PatternRegistry.data = {};
+    return PatternRegistry;
+}());
 createItem("tcon_pattern_blank", "Blank Pattern");
 createItem("tcon_pattern_pickaxe", "Pickaxe Head Pattern");
 createItem("tcon_pattern_shovel", "Shovel Head Pattern");
@@ -2251,6 +2453,19 @@ Item.addCreativeGroup("tcon_pattern", "Pattern", [
     ItemID.tcon_pattern_largeplate
 ]);
 Recipes2.addShapedWith2x2({ item: "item:tcon_pattern_blank", count: 4 }, "ab:ba", { a: "planks", b: "stick" });
+PatternRegistry.registerData(ItemID.tcon_pattern_pickaxe, "pickaxe", 2);
+PatternRegistry.registerData(ItemID.tcon_pattern_shovel, "shovel", 2);
+PatternRegistry.registerData(ItemID.tcon_pattern_axe, "axe", 2);
+PatternRegistry.registerData(ItemID.tcon_pattern_broadaxe, "broadaxe", 8);
+PatternRegistry.registerData(ItemID.tcon_pattern_sword, "sword", 2);
+PatternRegistry.registerData(ItemID.tcon_pattern_hammer, "hammer", 8);
+PatternRegistry.registerData(ItemID.tcon_pattern_excavator, "excavator", 8);
+PatternRegistry.registerData(ItemID.tcon_pattern_rod, "rod", 1);
+PatternRegistry.registerData(ItemID.tcon_pattern_rod2, "rod2", 3);
+PatternRegistry.registerData(ItemID.tcon_pattern_binding, "binding", 1);
+PatternRegistry.registerData(ItemID.tcon_pattern_binding2, "binding2", 3);
+PatternRegistry.registerData(ItemID.tcon_pattern_guard, "guard", 1);
+PatternRegistry.registerData(ItemID.tcon_pattern_largeplate, "largeplate", 8);
 createItem("tcon_claycast_pickaxe", "Pickaxe Head Clay Cast");
 createItem("tcon_claycast_shovel", "Shovel Head Clay Cast");
 createItem("tcon_claycast_axe", "Axe Head Clay Cast");
@@ -2355,14 +2570,6 @@ CastingRecipe.addMakeCastRecipes(VanillaItemID.netherbrick, "ingot");
 CastingRecipe.addMakeCastRecipes(VanillaItemID.iron_nugget, "nugget");
 CastingRecipe.addMakeCastRecipes(VanillaItemID.gold_nugget, "nugget");
 CastingRecipe.addMakeCastRecipes(VanillaItemID.emerald, "gem");
-CastingRecipe.addBasinRecipe(0, "molten_iron", VanillaBlockID.iron_block);
-CastingRecipe.addBasinRecipe(0, "molten_gold", VanillaBlockID.gold_block);
-CastingRecipe.addTableRecipeForBoth("ingot", "molten_iron", VanillaItemID.iron_ingot);
-CastingRecipe.addTableRecipeForBoth("ingot", "molten_gold", VanillaItemID.gold_ingot);
-CastingRecipe.addTableRecipeForBoth("ingot", "molten_clay", VanillaItemID.brick);
-CastingRecipe.addTableRecipeForBoth("nugget", "molten_iron", VanillaItemID.iron_nugget);
-CastingRecipe.addTableRecipeForBoth("nugget", "molten_gold", VanillaItemID.gold_nugget);
-CastingRecipe.addTableRecipeForBoth("gem", "molten_emerald", VanillaItemID.emerald);
 var TinkersModifier = /** @class */ (function () {
     function TinkersModifier(key, name, texIndex, recipe, max, multi, hate) {
         var _this = this;
@@ -2927,12 +3134,12 @@ var TableBase = /** @class */ (function (_super) {
     return TableBase;
 }(TileBase));
 createBlock("tcon_stenciltable", [
-    { name: "Stencil Table" },
-    { name: "Stencil Table" },
-    { name: "Stencil Table" },
-    { name: "Stencil Table" },
-    { name: "Stencil Table" },
-    { name: "Stencil Table" }
+    { name: "Stencil Table", texture: [0, 0, ["planks", 0]] },
+    { name: "Stencil Table", texture: [0, 0, ["planks", 1]] },
+    { name: "Stencil Table", texture: [0, 0, ["planks", 2]] },
+    { name: "Stencil Table", texture: [0, 0, ["planks", 3]] },
+    { name: "Stencil Table", texture: [0, 0, ["planks", 4]] },
+    { name: "Stencil Table", texture: [0, 0, ["planks", 5]] }
 ], "wood");
 Item.addCreativeGroup("tcon_stenciltable", "Stencil Table", [BlockID.tcon_stenciltable]);
 BlockModel.register(BlockID.tcon_stenciltable, function (model, index) {
@@ -3052,12 +3259,12 @@ var StencilTable = /** @class */ (function (_super) {
 }(TableBase));
 TileEntity.registerPrototype(BlockID.tcon_stenciltable, new StencilTable());
 createBlock("tcon_partbuilder", [
-    { name: "Part Builder" },
-    { name: "Part Builder" },
-    { name: "Part Builder" },
-    { name: "Part Builder" },
-    { name: "Part Builder" },
-    { name: "Part Builder" }
+    { name: "Part Builder", texture: [0, 0, ["log_side", 0]] },
+    { name: "Part Builder", texture: [0, 0, ["log_side", 1]] },
+    { name: "Part Builder", texture: [0, 0, ["log_side", 2]] },
+    { name: "Part Builder", texture: [0, 0, ["log_side", 3]] },
+    { name: "Part Builder", texture: [0, 0, ["log2", 0]] },
+    { name: "Part Builder", texture: [0, 0, ["log2", 2]] }
 ], "wood");
 Item.addCreativeGroup("tcon_partbuilder", "Part Builder", [BlockID.tcon_partbuilder]);
 BlockModel.register(BlockID.tcon_partbuilder, function (model, index) {
@@ -3089,23 +3296,7 @@ var PartBuilder = /** @class */ (function (_super) {
         this.displayItem([{ x: -c, z: -c }, { x: c, z: -c }]);
     };
     PartBuilder.window = (function () {
-        var _a;
         var tutorial = addLineBreaks(18, "Here you can craft tool parts to fulfill your tinkering fantasies") + "\n\n" + addLineBreaks(18, "To craft a part simply put its pattern into the left slot. The two right slot hold the material you want to craft your part out of.");
-        var recipes = (_a = {},
-            _a[ItemID.tcon_pattern_pickaxe] = { type: "pickaxe", cost: 2 },
-            _a[ItemID.tcon_pattern_shovel] = { type: "shovel", cost: 2 },
-            _a[ItemID.tcon_pattern_axe] = { type: "axe", cost: 2 },
-            _a[ItemID.tcon_pattern_broadaxe] = { type: "broadaxe", cost: 8 },
-            _a[ItemID.tcon_pattern_sword] = { type: "sword", cost: 2 },
-            _a[ItemID.tcon_pattern_hammer] = { type: "hammer", cost: 8 },
-            _a[ItemID.tcon_pattern_excavator] = { type: "excavator", cost: 8 },
-            _a[ItemID.tcon_pattern_rod] = { type: "rod", cost: 1 },
-            _a[ItemID.tcon_pattern_rod2] = { type: "rod2", cost: 3 },
-            _a[ItemID.tcon_pattern_binding] = { type: "binding", cost: 1 },
-            _a[ItemID.tcon_pattern_binding2] = { type: "binding2", cost: 3 },
-            _a[ItemID.tcon_pattern_guard] = { type: "guard", cost: 1 },
-            _a[ItemID.tcon_pattern_largeplate] = { type: "largeplate", cost: 8 },
-            _a);
         var findPatternchest = function (coords) {
             var nears = StorageInterface.getNearestContainers(coords, -1);
             var tile;
@@ -3123,7 +3314,7 @@ var PartBuilder = /** @class */ (function (_super) {
                 var list = pc.getList();
                 if (list.length > 0) {
                     var slot = tile.container.getSlot("slot0");
-                    if (!recipes[slot.id]) {
+                    if (!PatternRegistry.isPattern(slot.id)) {
                         return;
                     }
                     var index_1 = PatternChest.getIndex(slot.id);
@@ -3151,7 +3342,7 @@ var PartBuilder = /** @class */ (function (_super) {
             }
         };
         var elements = {
-            slot0: { type: "slot", x: 200, y: 90, size: 100, isValid: function (id) { return id in recipes; }, bitmap: "tcon.slot.pattern" },
+            slot0: { type: "slot", x: 200, y: 90, size: 100, isValid: function (id) { return PatternRegistry.isPattern(id); }, bitmap: "tcon.slot.pattern" },
             slot1: { type: "slot", x: 300, y: 90, size: 100, isValid: function (id) {
                     for (var key in Material) {
                         if (Material[key].getItem() === id) {
@@ -3163,7 +3354,7 @@ var PartBuilder = /** @class */ (function (_super) {
             slotResult: { type: "slot", x: 600, y: 90, size: 100, isValid: function () { return false; }, clicker: {
                     onClick: function (container, tile) {
                         var slot = container.getSlot("slot1");
-                        var recipe = recipes[container.getSlot("slot0").id];
+                        var recipe = PatternRegistry.getData(container.getSlot("slot0").id);
                         var result;
                         for (var key in Material) {
                             result = 0;
@@ -3192,7 +3383,12 @@ var PartBuilder = /** @class */ (function (_super) {
                         turnPage(tile, 1);
                     }
                 } },
-            buttonExit: { type: "closeButton", x: 907, y: 18, bitmap: "classic_close_button", bitmap2: "classic_close_button_down", scale: 5 }
+            buttonExit: { type: "closeButton", x: 907, y: 18, bitmap: "classic_close_button", bitmap2: "classic_close_button_down", scale: 5 },
+            imageArrow: { type: "image", x: 434, y: 95, bitmap: "tcon.arrow", scale: 6, clicker: {
+                    onClick: function (container) {
+                        RV && RV.openRecipePage("tcon_partbuilder", container);
+                    }
+                } }
         };
         for (var i = 0; i < 36; i++) {
             elements["inv" + i] = {
@@ -3209,8 +3405,7 @@ var PartBuilder = /** @class */ (function (_super) {
                 { type: "background", color: Color.TRANSPARENT },
                 { type: "frame", x: 0, y: 0, width: 1000, height: 750, bitmap: "classic_frame_bg_light", scale: 6 },
                 { type: "text", x: 50, y: 60, text: "Part Builder", font: { size: 40 } },
-                { type: "text", x: 50, y: 290, text: "Inventory", font: { size: 40 } },
-                { type: "bitmap", x: 434, y: 95, bitmap: "tcon.arrow", scale: 6 }
+                { type: "text", x: 50, y: 290, text: "Inventory", font: { size: 40 } }
             ],
             elements: elements
         });
@@ -3245,7 +3440,7 @@ var PartBuilder = /** @class */ (function (_super) {
                         var textStats = void 0;
                         while (win.isOpened()) {
                             slot = container.getSlot("slot1");
-                            recipe = recipes[container.getSlot("slot0").id];
+                            recipe = PatternRegistry.getData(container.getSlot("slot0").id);
                             result = 0;
                             textCost = "";
                             textTitle = "";
@@ -3817,9 +4012,9 @@ var TinkersToolHandler = /** @class */ (function () {
             var path = texture.getPath();
             var materials = new String(item.extra.getString("materials")).split("_");
             var modifiers = TinkersModifierHandler.decodeToObj(item.extra.getString("modifiers"));
-            var code = __spreadArrays(materials, Object.keys(modifiers)).join("_");
-            if (this.models[code]) {
-                return this.models[code][suffix];
+            var uniqueKey = toolData.uniqueKey();
+            if (this.models[uniqueKey]) {
+                return this.models[uniqueKey][suffix];
             }
             var mesh = [new RenderMesh(), new RenderMesh(), new RenderMesh(), new RenderMesh()];
             var coordsNormal_1 = [];
@@ -3867,9 +4062,9 @@ var TinkersToolHandler = /** @class */ (function () {
             modelBroken.setModel(data.broken.hand, path);
             modelBroken.setUiModel(data.broken.ui, path);
             modelBroken.setSpriteUiRender(true);
-            this.models[code] = { normal: modelNormal, broken: modelBroken };
-            //Game.message("[TCon]: Tool Model has been generated");
-            return this.models[code][suffix];
+            this.models[uniqueKey] = { normal: modelNormal, broken: modelBroken };
+            //Game.message(uniqueKey);
+            return this.models[uniqueKey][suffix];
         }
         catch (e) {
             alert("iconError: " + e);
@@ -4634,19 +4829,19 @@ ModAPI.addAPICallback("ICore", function (api) {
     CastingRecipe.addBasinRecipe(0, "molten_lead", BlockID.blockLead);
     CastingRecipe.addBasinRecipe(0, "molten_silver", BlockID.blockSilver);
     CastingRecipe.addBasinRecipe(0, "molten_steel", BlockID.blockSteel);
-    CastingRecipe.addTableRecipeForBoth("ingot", "molten_copper", ItemID.ingotCopper);
-    CastingRecipe.addTableRecipeForBoth("ingot", "molten_tin", ItemID.ingotTin);
-    CastingRecipe.addTableRecipeForBoth("ingot", "molten_bronze", ItemID.ingotBronze);
-    CastingRecipe.addTableRecipeForBoth("ingot", "molten_lead", ItemID.ingotLead);
-    CastingRecipe.addTableRecipeForBoth("ingot", "molten_silver", ItemID.ingotSilver);
-    CastingRecipe.addTableRecipeForBoth("ingot", "molten_steel", ItemID.ingotSteel);
-    CastingRecipe.addTableRecipeForBoth("plate", "molten_iron", ItemID.plateIron);
-    CastingRecipe.addTableRecipeForBoth("plate", "molten_gold", ItemID.plateGold);
-    CastingRecipe.addTableRecipeForBoth("plate", "molten_copper", ItemID.plateCopper);
-    CastingRecipe.addTableRecipeForBoth("plate", "molten_tin", ItemID.plateTin);
-    CastingRecipe.addTableRecipeForBoth("plate", "molten_bronze", ItemID.plateBronze);
-    CastingRecipe.addTableRecipeForBoth("plate", "molten_lead", ItemID.plateLead);
-    CastingRecipe.addTableRecipeForBoth("plate", "molten_steel", ItemID.plateSteel);
+    CastingRecipe.addTableRecipe(ItemID.tcon_cast_ingot, "molten_copper", ItemID.ingotCopper, false);
+    CastingRecipe.addTableRecipe(ItemID.tcon_cast_ingot, "molten_tin", ItemID.ingotTin, false);
+    CastingRecipe.addTableRecipe(ItemID.tcon_cast_ingot, "molten_bronze", ItemID.ingotBronze, false);
+    CastingRecipe.addTableRecipe(ItemID.tcon_cast_ingot, "molten_lead", ItemID.ingotLead, false);
+    CastingRecipe.addTableRecipe(ItemID.tcon_cast_ingot, "molten_silver", ItemID.ingotSilver, false);
+    CastingRecipe.addTableRecipe(ItemID.tcon_cast_ingot, "molten_steel", ItemID.ingotSteel, false);
+    CastingRecipe.addTableRecipe(ItemID.tcon_cast_plate, "molten_iron", ItemID.plateIron, false);
+    CastingRecipe.addTableRecipe(ItemID.tcon_cast_plate, "molten_gold", ItemID.plateGold, false);
+    CastingRecipe.addTableRecipe(ItemID.tcon_cast_plate, "molten_copper", ItemID.plateCopper, false);
+    CastingRecipe.addTableRecipe(ItemID.tcon_cast_plate, "molten_tin", ItemID.plateTin, false);
+    CastingRecipe.addTableRecipe(ItemID.tcon_cast_plate, "molten_bronze", ItemID.plateBronze, false);
+    CastingRecipe.addTableRecipe(ItemID.tcon_cast_plate, "molten_lead", ItemID.plateLead, false);
+    CastingRecipe.addTableRecipe(ItemID.tcon_cast_plate, "molten_steel", ItemID.plateSteel, false);
     ToolForgeHandler.addVariation("block_copper", BlockID.blockCopper);
     ToolForgeHandler.addVariation("block_tin", BlockID.blockTin);
     ToolForgeHandler.addVariation("block_bronze", BlockID.blockBronze);
@@ -4657,8 +4852,168 @@ ModAPI.addAPICallback("ICore", function (api) {
     TinkersLumberaxe.logs[BlockID.rubberTreeLogLatex] = true;
     //TinkersLumberaxe.leaves[BlockID.rubberTreeLeaves] = true;
 });
+ModAPI.addAPICallback("RedCore", function (api) {
+    CastingRecipe.addMakeCastRecipes(ItemID.ingotCopper, "ingot");
+    CastingRecipe.addMakeCastRecipes(ItemID.ingotTin, "ingot");
+    CastingRecipe.addMakeCastRecipes(ItemID.ingotBronze, "ingot");
+    CastingRecipe.addMakeCastRecipes(ItemID.ingotSilver, "ingot");
+    MeltingRecipe.addRecipe(BlockID.oreCopper, "molten_copper", MatValue.ORE);
+    MeltingRecipe.addRecipe(BlockID.blockCopper, "molten_copper", MatValue.BLOCK);
+    MeltingRecipe.addRecipe(ItemID.ingotCopper, "molten_copper", MatValue.INGOT);
+    MeltingRecipe.addRecipe(BlockID.oreTin, "molten_tin", MatValue.ORE);
+    MeltingRecipe.addRecipe(BlockID.blockTin, "molten_tin", MatValue.BLOCK);
+    MeltingRecipe.addRecipe(ItemID.ingotTin, "molten_tin", MatValue.INGOT);
+    MeltingRecipe.addRecipe(BlockID.blockBronze, "molten_bronze", MatValue.BLOCK);
+    MeltingRecipe.addRecipe(ItemID.ingotBronze, "molten_bronze", MatValue.INGOT);
+    MeltingRecipe.addRecipe(BlockID.oreSilver, "molten_silver", MatValue.ORE);
+    MeltingRecipe.addRecipe(BlockID.blockSilver, "molten_silver", MatValue.BLOCK);
+    MeltingRecipe.addRecipe(ItemID.ingotSilver, "molten_silver", MatValue.INGOT);
+    CastingRecipe.addBasinRecipe(0, "molten_copper", BlockID.blockCopper);
+    CastingRecipe.addBasinRecipe(0, "molten_tin", BlockID.blockTin);
+    CastingRecipe.addBasinRecipe(0, "molten_bronze", BlockID.blockBronze);
+    CastingRecipe.addBasinRecipe(0, "molten_silver", BlockID.blockSilver);
+    CastingRecipe.addTableRecipe(ItemID.tcon_cast_ingot, "molten_copper", ItemID.ingotCopper, false);
+    CastingRecipe.addTableRecipe(ItemID.tcon_cast_ingot, "molten_tin", ItemID.ingotTin, false);
+    CastingRecipe.addTableRecipe(ItemID.tcon_cast_ingot, "molten_bronze", ItemID.ingotBronze, false);
+    CastingRecipe.addTableRecipe(ItemID.tcon_cast_ingot, "molten_silver", ItemID.ingotSilver, false);
+    ToolForgeHandler.addVariation("block_copper", BlockID.blockCopper);
+    ToolForgeHandler.addVariation("block_tin", BlockID.blockTin);
+    ToolForgeHandler.addVariation("block_bronze", BlockID.blockBronze);
+    ToolForgeHandler.addVariation("block_silver", BlockID.blockSilver);
+});
+ModAPI.addAPICallback("ForestryAPI", function (api) {
+    CastingRecipe.addMakeCastRecipes(ItemID.ingotCopper, "ingot");
+    CastingRecipe.addMakeCastRecipes(ItemID.ingotTin, "ingot");
+    CastingRecipe.addMakeCastRecipes(ItemID.ingotBronze, "ingot");
+    CastingRecipe.addMakeCastRecipes(ItemID.gearCopper, "gear");
+    CastingRecipe.addMakeCastRecipes(ItemID.gearTin, "gear");
+    CastingRecipe.addMakeCastRecipes(ItemID.gearBronze, "gear");
+    MeltingRecipe.addRecipe(BlockID.oreCopper, "molten_copper", MatValue.ORE);
+    MeltingRecipe.addRecipe(BlockID.blockCopper, "molten_copper", MatValue.BLOCK);
+    MeltingRecipe.addRecipe(ItemID.ingotCopper, "molten_copper", MatValue.INGOT);
+    MeltingRecipe.addRecipe(BlockID.oreTin, "molten_tin", MatValue.ORE);
+    MeltingRecipe.addRecipe(BlockID.blockTin, "molten_tin", MatValue.BLOCK);
+    MeltingRecipe.addRecipe(ItemID.ingotTin, "molten_tin", MatValue.INGOT);
+    MeltingRecipe.addRecipe(BlockID.blockBronze, "molten_bronze", MatValue.BLOCK);
+    MeltingRecipe.addRecipe(ItemID.ingotBronze, "molten_bronze", MatValue.INGOT);
+    CastingRecipe.addBasinRecipe(0, "molten_copper", BlockID.blockCopper);
+    CastingRecipe.addBasinRecipe(0, "molten_tin", BlockID.blockTin);
+    CastingRecipe.addBasinRecipe(0, "molten_bronze", BlockID.blockBronze);
+    CastingRecipe.addTableRecipe(ItemID.tcon_cast_ingot, "molten_copper", ItemID.ingotCopper, false);
+    CastingRecipe.addTableRecipe(ItemID.tcon_cast_ingot, "molten_tin", ItemID.ingotTin, false);
+    CastingRecipe.addTableRecipe(ItemID.tcon_cast_ingot, "molten_bronze", ItemID.ingotBronze, false);
+    CastingRecipe.addTableRecipe(ItemID.tcon_cast_gear, "molten_copper", ItemID.gearCopper, false);
+    CastingRecipe.addTableRecipe(ItemID.tcon_cast_gear, "molten_tin", ItemID.gearTin, false);
+    CastingRecipe.addTableRecipe(ItemID.tcon_cast_gear, "molten_bronze", ItemID.gearBronze, false);
+    ToolForgeHandler.addVariation("block_copper", BlockID.blockCopper);
+    ToolForgeHandler.addVariation("block_tin", BlockID.blockTin);
+    ToolForgeHandler.addVariation("block_bronze", BlockID.blockBronze);
+});
+var RV;
 ModAPI.addAPICallback("RecipeViewer", function (api) {
-    var RV = api.Core;
+    RV = api.Core;
+    var setLiquidScale = function (scale, text, liquid) {
+        scale.setBinding("texture", LiquidRegistry.getLiquidUITexture(liquid.liquid, 108, 234));
+        scale.setBinding("value", Math.min(1, liquid.amount / MatValue.BLOCK));
+        text.setBinding("text", LiquidRegistry.getLiquidName(liquid.liquid) + "\n" + liquid.amount + " mB");
+    };
+    Callback.addCallback("PostLoaded", function () {
+        RV.registerRecipeType("tcon_partbuilder", {
+            title: "Part Build",
+            contents: {
+                icon: BlockID.tcon_partbuilder,
+                drawing: [
+                    { type: "bitmap", x: 476, y: 104, bitmap: "tcon.arrow", scale: 8 }
+                ],
+                elements: {
+                    input0: { x: 180, y: 100, size: 128 },
+                    input1: { x: 308, y: 100, size: 128 },
+                    output0: { x: 692, y: 100, size: 128 },
+                },
+                moveItems: { x: 840, y: 180, slots: ["slot0", "slot1"] }
+            },
+            recipeList: PatternRegistry.getAllRecipeForRV()
+        });
+        RV.registerRecipeType("tcon_melting", {
+            title: "Melting",
+            contents: {
+                icon: BlockID.tcon_smeltery,
+                description: "melting",
+                drawing: [
+                    { type: "bitmap", x: 86, y: 50, bitmap: "tcon.rv.smeltery", scale: 6 },
+                    { type: "bitmap", x: 614, y: 50, bitmap: "tcon.rv.smeltery", scale: 6 },
+                    { type: "bitmap", x: 452, y: 176, bitmap: "tcon.rv.fire_tank", scale: 6 }
+                ],
+                elements: {
+                    input0: { x: 182, y: 176, bitmap: "_default_slot_empty", size: 108 },
+                    scaleLiquid: { type: "scale", x: 710, y: 50, width: 108, height: 234, direction: 1 },
+                    textTemp: { type: "text", x: 500, y: 50, font: { size: 50, alignment: 1 } },
+                    textLiquid: { type: "text", x: 614, y: 380, font: { color: Color.WHITE, size: 40, shadow: 0.5 }, multiline: true }
+                }
+            },
+            recipeList: MeltingRecipe.getAllRecipeForRV(),
+            onOpen: function (elements, recipe) {
+                setLiquidScale(elements.get("scaleLiquid"), elements.get("textLiquid"), recipe.outputLiq);
+                elements.get("textTemp").setBinding("text", recipe.temp + "°C");
+            }
+        });
+        RV.registerRecipeType("tcon_itemcast", {
+            title: "Item Casting",
+            contents: {
+                icon: BlockID.tcon_itemcast,
+                drawing: [
+                    { type: "bitmap", x: 86, y: 50, bitmap: "tcon.rv.smeltery", scale: 6 },
+                    { type: "bitmap", x: 386, y: 122, bitmap: "tcon.rv.faucet", scale: 6 },
+                    { type: "bitmap", x: 404, y: 284, bitmap: "tcon.rv.table", scale: 6 },
+                    { type: "bitmap", x: 530, y: 182, bitmap: "tcon.arrow", scale: 6 }
+                ],
+                elements: {
+                    input0: { x: 404, y: 188, bitmap: "_default_slot_empty", size: 96 },
+                    output0: { x: 704, y: 176, size: 108 },
+                    scaleLiquid: { type: "scale", x: 182, y: 50, width: 108, height: 234, direction: 1 },
+                    scaleFlow: { type: "scale", x: 434, y: 122, width: 36, height: 66, value: 1 },
+                    textLiquid: { type: "text", x: 86, y: 380, font: { color: Color.WHITE, size: 40, shadow: 0.5 }, multiline: true },
+                    textTime: { type: "text", x: 596, y: 100, font: { size: 50, alignment: 1 } },
+                    textConsume: { type: "text", x: 758, y: 300, font: { color: Color.RED, size: 40, alignment: 1 } }
+                }
+            },
+            recipeList: CastingRecipe.getAllRecipeForRV("table"),
+            onOpen: function (elements, recipe) {
+                setLiquidScale(elements.get("scaleLiquid"), elements.get("textLiquid"), recipe.inputLiq);
+                elements.get("scaleFlow").setBinding("texture", LiquidRegistry.getLiquidUITexture(recipe.inputLiq.liquid, 36, 66));
+                elements.get("textTime").setBinding("text", (CastingRecipe.calcCooldownTime(recipe.inputLiq.liquid, recipe.inputLiq.amount) / 20).toFixed(1) + " s");
+                elements.get("textConsume").setBinding("text", recipe.consume ? "Consumes cast!" : "");
+            }
+        });
+        RV.registerRecipeType("tcon_blockcast", {
+            title: "Block Casting",
+            contents: {
+                icon: BlockID.tcon_blockcast,
+                drawing: [
+                    { type: "bitmap", x: 86, y: 50, bitmap: "tcon.rv.smeltery", scale: 6 },
+                    { type: "bitmap", x: 386, y: 122, bitmap: "tcon.rv.faucet", scale: 6 },
+                    { type: "bitmap", x: 404, y: 284, bitmap: "tcon.rv.basin", scale: 6 },
+                    { type: "bitmap", x: 530, y: 182, bitmap: "tcon.arrow", scale: 6 }
+                ],
+                elements: {
+                    input0: { x: 404, y: 188, bitmap: "_default_slot_empty", size: 96 },
+                    output0: { x: 704, y: 176, size: 108 },
+                    scaleLiquid: { type: "scale", x: 182, y: 50, width: 108, height: 234, direction: 1 },
+                    scaleFlow: { type: "scale", x: 434, y: 122, width: 36, height: 66, value: 1 },
+                    textLiquid: { type: "text", x: 86, y: 380, font: { color: Color.WHITE, size: 40, shadow: 0.5 }, multiline: true },
+                    textTime: { type: "text", x: 596, y: 100, font: { size: 50, alignment: 1 } },
+                    textConsume: { type: "text", x: 758, y: 300, font: { color: Color.RED, size: 40, alignment: 1 } }
+                }
+            },
+            recipeList: CastingRecipe.getAllRecipeForRV("basin"),
+            onOpen: function (elements, recipe) {
+                setLiquidScale(elements.get("scaleLiquid"), elements.get("textLiquid"), recipe.inputLiq);
+                elements.get("scaleFlow").setBinding("texture", LiquidRegistry.getLiquidUITexture(recipe.inputLiq.liquid, 36, 66));
+                elements.get("textTime").setBinding("text", (CastingRecipe.calcCooldownTime(recipe.inputLiq.liquid, recipe.inputLiq.amount) / 20).toFixed(1) + " s");
+                elements.get("textConsume").setBinding("text", recipe.consume ? "Consumes cast!" : "");
+            }
+        });
+    });
 });
 ModAPI.registerAPI("TConAPI", {
     MoltenLiquid: MoltenLiquid,

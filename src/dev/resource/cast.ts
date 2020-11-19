@@ -1,3 +1,41 @@
+class PatternRegistry {
+
+    private static data: {[id: number]: {type: string, cost: number}} = {};
+
+    static registerData(id: number, type: string, cost: number): void {
+        this.data[id] = {type: type, cost: cost};
+    }
+
+    static getData(id: number): {type: string, cost: number} {
+        return this.data[id];
+    }
+
+    static isPattern(id: number): boolean {
+        return id in this.data;
+    }
+
+    static getAllRecipeForRV(): {input: ItemInstance[], output: ItemInstance[]}[] {
+        const list = [];
+        let material: number;
+        let pattern: string;
+        for(let mat in Material){
+            if(Material[mat].isMetal){
+                continue;
+            }
+            material = Material[mat].getItem();
+            for(pattern in this.data){
+                list.push({
+                    input: [{id: parseInt(pattern), count: 1, data: 0}, {id: material, count: this.data[pattern].cost, data: 0}],
+                    output: [{id: PartRegistry.getIDFromData(this.data[pattern].type, mat), count: 1, data: 0}]
+                });
+            }
+        }
+        return list;
+    }
+
+}
+
+
 createItem("tcon_pattern_blank", "Blank Pattern");
 createItem("tcon_pattern_pickaxe", "Pickaxe Head Pattern");
 createItem("tcon_pattern_shovel", "Shovel Head Pattern");
@@ -31,6 +69,19 @@ Item.addCreativeGroup("tcon_pattern", "Pattern", [
 ]);
 
 Recipes2.addShapedWith2x2({item: "item:tcon_pattern_blank", count: 4}, "ab:ba", {a: "planks", b: "stick"});
+PatternRegistry.registerData(ItemID.tcon_pattern_pickaxe, "pickaxe", 2);
+PatternRegistry.registerData(ItemID.tcon_pattern_shovel, "shovel", 2);
+PatternRegistry.registerData(ItemID.tcon_pattern_axe, "axe", 2);
+PatternRegistry.registerData(ItemID.tcon_pattern_broadaxe, "broadaxe", 8);
+PatternRegistry.registerData(ItemID.tcon_pattern_sword, "sword", 2);
+PatternRegistry.registerData(ItemID.tcon_pattern_hammer, "hammer", 8);
+PatternRegistry.registerData(ItemID.tcon_pattern_excavator, "excavator", 8);
+PatternRegistry.registerData(ItemID.tcon_pattern_rod, "rod", 1);
+PatternRegistry.registerData(ItemID.tcon_pattern_rod2, "rod2", 3);
+PatternRegistry.registerData(ItemID.tcon_pattern_binding, "binding", 1);
+PatternRegistry.registerData(ItemID.tcon_pattern_binding2, "binding2", 3);
+PatternRegistry.registerData(ItemID.tcon_pattern_guard, "guard", 1);
+PatternRegistry.registerData(ItemID.tcon_pattern_largeplate, "largeplate", 8);
 
 
 createItem("tcon_claycast_pickaxe", "Pickaxe Head Clay Cast");
@@ -144,16 +195,3 @@ CastingRecipe.addMakeCastRecipes(VanillaItemID.netherbrick, "ingot");
 CastingRecipe.addMakeCastRecipes(VanillaItemID.iron_nugget, "nugget");
 CastingRecipe.addMakeCastRecipes(VanillaItemID.gold_nugget, "nugget");
 CastingRecipe.addMakeCastRecipes(VanillaItemID.emerald, "gem");
-
-
-CastingRecipe.addBasinRecipe(0, "molten_iron", VanillaBlockID.iron_block);
-CastingRecipe.addBasinRecipe(0, "molten_gold", VanillaBlockID.gold_block);
-
-CastingRecipe.addTableRecipeForBoth("ingot", "molten_iron", VanillaItemID.iron_ingot);
-CastingRecipe.addTableRecipeForBoth("ingot", "molten_gold", VanillaItemID.gold_ingot);
-CastingRecipe.addTableRecipeForBoth("ingot", "molten_clay", VanillaItemID.brick);
-
-CastingRecipe.addTableRecipeForBoth("nugget", "molten_iron", VanillaItemID.iron_nugget);
-CastingRecipe.addTableRecipeForBoth("nugget", "molten_gold", VanillaItemID.gold_nugget);
-
-CastingRecipe.addTableRecipeForBoth("gem", "molten_emerald", VanillaItemID.emerald);

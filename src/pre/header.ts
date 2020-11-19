@@ -1,6 +1,7 @@
 const Color = android.graphics.Color;
 const Bitmap = android.graphics.Bitmap;
 const Canvas = android.graphics.Canvas;
+const Paint = android.graphics.Paint;
 
 
 class FileUtil {

@@ -31,7 +31,7 @@ class CastingTable extends TileBase {
         this.animOutput = createAnimItem(this.x + 9/16, this.y + 31/32, this.z + 9/16);
         this.setAnimItem();
         this.setLiquidLimit();
-        MoltenLiquid.initAnim(this, 0.5, 15/16, 0.5, 14/16, 1/16, 14/16);
+        MoltenLiquid.initAnim(this, 0.5, 15/16, 0.5, 14/16, 1/16, 14/16, true);
     }
 
     destroy(): void {

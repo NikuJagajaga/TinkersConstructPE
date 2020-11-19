@@ -77,20 +77,20 @@ ModAPI.addAPICallback("ICore", (api: any) => {
     CastingRecipe.addBasinRecipe(0, "molten_silver", BlockID.blockSilver);
     CastingRecipe.addBasinRecipe(0, "molten_steel", BlockID.blockSteel);
 
-    CastingRecipe.addTableRecipeForBoth("ingot", "molten_copper", ItemID.ingotCopper);
-    CastingRecipe.addTableRecipeForBoth("ingot", "molten_tin", ItemID.ingotTin);
-    CastingRecipe.addTableRecipeForBoth("ingot", "molten_bronze", ItemID.ingotBronze);
-    CastingRecipe.addTableRecipeForBoth("ingot", "molten_lead", ItemID.ingotLead);
-    CastingRecipe.addTableRecipeForBoth("ingot", "molten_silver", ItemID.ingotSilver);
-    CastingRecipe.addTableRecipeForBoth("ingot", "molten_steel", ItemID.ingotSteel);
+    CastingRecipe.addTableRecipe(ItemID.tcon_cast_ingot, "molten_copper", ItemID.ingotCopper, false);
+    CastingRecipe.addTableRecipe(ItemID.tcon_cast_ingot, "molten_tin", ItemID.ingotTin, false);
+    CastingRecipe.addTableRecipe(ItemID.tcon_cast_ingot, "molten_bronze", ItemID.ingotBronze, false);
+    CastingRecipe.addTableRecipe(ItemID.tcon_cast_ingot, "molten_lead", ItemID.ingotLead, false);
+    CastingRecipe.addTableRecipe(ItemID.tcon_cast_ingot, "molten_silver", ItemID.ingotSilver, false);
+    CastingRecipe.addTableRecipe(ItemID.tcon_cast_ingot, "molten_steel", ItemID.ingotSteel, false);
 
-    CastingRecipe.addTableRecipeForBoth("plate", "molten_iron", ItemID.plateIron);
-    CastingRecipe.addTableRecipeForBoth("plate", "molten_gold", ItemID.plateGold);
-    CastingRecipe.addTableRecipeForBoth("plate", "molten_copper", ItemID.plateCopper);
-    CastingRecipe.addTableRecipeForBoth("plate", "molten_tin", ItemID.plateTin);
-    CastingRecipe.addTableRecipeForBoth("plate", "molten_bronze", ItemID.plateBronze);
-    CastingRecipe.addTableRecipeForBoth("plate", "molten_lead", ItemID.plateLead);
-    CastingRecipe.addTableRecipeForBoth("plate", "molten_steel", ItemID.plateSteel);
+    CastingRecipe.addTableRecipe(ItemID.tcon_cast_plate, "molten_iron", ItemID.plateIron, false);
+    CastingRecipe.addTableRecipe(ItemID.tcon_cast_plate, "molten_gold", ItemID.plateGold, false);
+    CastingRecipe.addTableRecipe(ItemID.tcon_cast_plate, "molten_copper", ItemID.plateCopper, false);
+    CastingRecipe.addTableRecipe(ItemID.tcon_cast_plate, "molten_tin", ItemID.plateTin, false);
+    CastingRecipe.addTableRecipe(ItemID.tcon_cast_plate, "molten_bronze", ItemID.plateBronze, false);
+    CastingRecipe.addTableRecipe(ItemID.tcon_cast_plate, "molten_lead", ItemID.plateLead, false);
+    CastingRecipe.addTableRecipe(ItemID.tcon_cast_plate, "molten_steel", ItemID.plateSteel, false);
 
 
     ToolForgeHandler.addVariation("block_copper", BlockID.blockCopper);
