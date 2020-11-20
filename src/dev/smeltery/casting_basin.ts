@@ -51,7 +51,7 @@ class CastingBasin extends CastingTable {
 }
 
 
-class CastingBasinInterface extends FluidTileInterface {
+class CastingBasinInterface extends CastingTableInterface {
     canReceiveLiquid(liquid: string, side: number): boolean {
         const stored = this.liquidStorage.getLiquidStored();
         return (!stored || stored === liquid) && CastingRecipe.isValidLiquidForBasin(this.container.getSlot("slotInput").id, liquid);

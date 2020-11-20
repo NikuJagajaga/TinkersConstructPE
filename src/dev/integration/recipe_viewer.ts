@@ -10,6 +10,10 @@ ModAPI.addAPICallback("RecipeViewer", (api: any) => {
     }
 
 
+    UI.TextureSource.put("tcon.rv.table", FileTools.ReadImage(__dir__ + "res/terrain-atlas/smeltery/tcon_itemcast_2.png"));
+    UI.TextureSource.put("tcon.rv.basin", FileTools.ReadImage(__dir__ + "res/terrain-atlas/smeltery/tcon_blockcast_2.png"));
+
+
     const setLiquidScale = (scale: UI.Element, text: UI.Element, liquid: LiquidInstance): void => {
         scale.setBinding("texture", LiquidRegistry.getLiquidUITexture(liquid.liquid, 108, 234));
         scale.setBinding("value", Math.min(1, liquid.amount / MatValue.BLOCK));

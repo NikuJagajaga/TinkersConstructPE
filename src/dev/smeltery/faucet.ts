@@ -53,7 +53,8 @@ class SearedFaucet extends TileBase {
     anim: any;
 
     defaultValues = {
-        meta: 0
+        meta: 0,
+        signal: 0
     };
 
     init(): void {
@@ -69,29 +70,29 @@ class SearedFaucet extends TileBase {
         this.anim && this.anim.destroy();
     }
 
-    click(): boolean {
+    startThread(): void {
 
         const threadName = "tcon_faucet_" + this.x + ":" + this.y + ":" + this.z;
         const thread = Threading.getThread(threadName);
         if(thread && thread.isAlive()){
-            return true;
+            return;
         }
 
         const tileSend = StorageInterface.getNearestLiquidStorages(this, this.data.meta)[this.data.meta];
         const tileReceive = StorageInterface.getNearestLiquidStorages(this, 0)[0];
         if(!tileSend || !tileReceive){
-            return true;
+            return;
         }
 
         const iSend = tileSend.interface || tileSend.liquidStorage;
         const iReceive = tileReceive.interface || tileReceive.liquidStorage;
         if(!iSend || !iReceive){
-            return true;
+            return;
         }
 
         const liqSend = iSend.getLiquidStored();
         if(!liqSend){
-            return true;
+            return;
         }
 
         const dir = StorageInterface.directionsBySide[this.data.meta];
@@ -143,8 +144,18 @@ class SearedFaucet extends TileBase {
             }
         });
 
-        return true;
+    }
 
+    click(): boolean {
+        this.startThread();
+        return true;
+    }
+
+    redstone(signal: {power: number}): void {
+        if(this.data.signal < signal.power){
+            this.startThread();
+        }
+        this.data.signal = signal.power;
     }
 
 }

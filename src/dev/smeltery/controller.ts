@@ -107,10 +107,7 @@ class SmelteryControler extends TileBase {
     render: any;
     anim: any;
 
-    area = {
-        from: {x: 0, y: 0, z: 0},
-        to: {x: 0, y: 0, z: 0}
-    };
+    area: {from: Vector, to: Vector};
 
     tanks: TileEntity[] = [];
 
@@ -141,6 +138,10 @@ class SmelteryControler extends TileBase {
     }
 
     init(): void {
+        this.area = {
+            from: {x: 0, y: 0, z: 0},
+            to: {x: 0, y: 0, z: 0}
+        };
         this.data.isActive = this.checkStructure();
         this.render = new Render();
         this.anim = new Animation.Base(this.x, this.y, this.z);

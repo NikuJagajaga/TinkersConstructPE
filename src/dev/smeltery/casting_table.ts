@@ -75,7 +75,7 @@ class CastingTable extends TileBase {
             }
             return false;
         }
-        this.setAnimItem();
+        //this.setAnimItem();
         this.setLiquidLimit();
         return true;
     }
@@ -102,7 +102,6 @@ class CastingTable extends TileBase {
                     this.container.setSlot("slotOutput", result.id, 1, result.data);
                     result.consume && this.container.clearSlot("slotInput");
                     this.spawnParticle(Native.ParticleType.flame);
-                    this.setAnimItem();
                 }
                 this.data.progress = 0;
                 this.liquidStorage.setAmount(stored, 0);
@@ -111,16 +110,24 @@ class CastingTable extends TileBase {
                 }
             }
         }
+        this.setAnimItem();
+        StorageInterface.checkHoppers(this);
     }
 
 }
 
 
 class CastingTableInterface extends FluidTileInterface {
+
+    slots = {
+        slotOutput: {output: true}
+    };
+
     canReceiveLiquid(liquid: string, side: number): boolean {
         const stored = this.liquidStorage.getLiquidStored();
         return (!stored || stored === liquid) && CastingRecipe.isValidLiquidForTable(this.container.getSlot("slotInput").id, liquid);
     }
+
 }
 
 

@@ -475,7 +475,7 @@ var MeltingRecipe = /** @class */ (function () {
         for (var key in this.recipeItem) {
             split = key.split(":");
             list.push({
-                input: [{ id: parseInt(split[0]), count: 1, data: split[1] ? parseInt(split[1]) : -1 }],
+                input: [{ id: parseInt(split[0]), count: 1, data: split[1] ? parseInt(split[1]) : 0 }],
                 output: [],
                 outputLiq: { liquid: this.recipeItem[key].liquid, amount: this.recipeItem[key].amount },
                 temp: this.recipeItem[key].temp
@@ -1050,7 +1050,8 @@ var SearedFaucet = /** @class */ (function (_super) {
     function SearedFaucet() {
         var _this = _super !== null && _super.apply(this, arguments) || this;
         _this.defaultValues = {
-            meta: 0
+            meta: 0,
+            signal: 0
         };
         return _this;
     }
@@ -1065,26 +1066,26 @@ var SearedFaucet = /** @class */ (function (_super) {
     SearedFaucet.prototype.destroy = function () {
         this.anim && this.anim.destroy();
     };
-    SearedFaucet.prototype.click = function () {
+    SearedFaucet.prototype.startThread = function () {
         var _this = this;
         var threadName = "tcon_faucet_" + this.x + ":" + this.y + ":" + this.z;
         var thread = Threading.getThread(threadName);
         if (thread && thread.isAlive()) {
-            return true;
+            return;
         }
         var tileSend = StorageInterface.getNearestLiquidStorages(this, this.data.meta)[this.data.meta];
         var tileReceive = StorageInterface.getNearestLiquidStorages(this, 0)[0];
         if (!tileSend || !tileReceive) {
-            return true;
+            return;
         }
         var iSend = tileSend.interface || tileSend.liquidStorage;
         var iReceive = tileReceive.interface || tileReceive.liquidStorage;
         if (!iSend || !iReceive) {
-            return true;
+            return;
         }
         var liqSend = iSend.getLiquidStored();
         if (!liqSend) {
-            return true;
+            return;
         }
         var dir = StorageInterface.directionsBySide[this.data.meta];
         var liquidY = MoltenLiquid.getY(liqSend);
@@ -1133,7 +1134,16 @@ var SearedFaucet = /** @class */ (function (_super) {
                 alert("FaucetEror: " + e);
             }
         });
+    };
+    SearedFaucet.prototype.click = function () {
+        this.startThread();
         return true;
+    };
+    SearedFaucet.prototype.redstone = function (signal) {
+        if (this.data.signal < signal.power) {
+            this.startThread();
+        }
+        this.data.signal = signal.power;
     };
     return SearedFaucet;
 }(TileBase));
@@ -1205,7 +1215,7 @@ var CastingTable = /** @class */ (function (_super) {
             }
             return false;
         }
-        this.setAnimItem();
+        //this.setAnimItem();
         this.setLiquidLimit();
         return true;
     };
@@ -1229,7 +1239,6 @@ var CastingTable = /** @class */ (function (_super) {
                     this.container.setSlot("slotOutput", result.id, 1, result.data);
                     result.consume && this.container.clearSlot("slotInput");
                     this.spawnParticle(Native.ParticleType.flame);
-                    this.setAnimItem();
                 }
                 this.data.progress = 0;
                 this.liquidStorage.setAmount(stored, 0);
@@ -1238,13 +1247,19 @@ var CastingTable = /** @class */ (function (_super) {
                 }
             }
         }
+        this.setAnimItem();
+        StorageInterface.checkHoppers(this);
     };
     return CastingTable;
 }(TileBase));
 var CastingTableInterface = /** @class */ (function (_super) {
     __extends(CastingTableInterface, _super);
     function CastingTableInterface() {
-        return _super !== null && _super.apply(this, arguments) || this;
+        var _this = _super !== null && _super.apply(this, arguments) || this;
+        _this.slots = {
+            slotOutput: { output: true }
+        };
+        return _this;
     }
     CastingTableInterface.prototype.canReceiveLiquid = function (liquid, side) {
         var stored = this.liquidStorage.getLiquidStored();
@@ -1311,7 +1326,7 @@ var CastingBasinInterface = /** @class */ (function (_super) {
         return (!stored || stored === liquid) && CastingRecipe.isValidLiquidForBasin(this.container.getSlot("slotInput").id, liquid);
     };
     return CastingBasinInterface;
-}(FluidTileInterface));
+}(CastingTableInterface));
 TileEntity.registerPrototype(BlockID.tcon_blockcast, new CastingBasin());
 StorageInterface.createInterface(BlockID.tcon_blockcast, new CastingBasinInterface());
 var _a;
@@ -1411,10 +1426,6 @@ var SmelteryControler = /** @class */ (function (_super) {
     __extends(SmelteryControler, _super);
     function SmelteryControler() {
         var _this = _super !== null && _super.apply(this, arguments) || this;
-        _this.area = {
-            from: { x: 0, y: 0, z: 0 },
-            to: { x: 0, y: 0, z: 0 }
-        };
         _this.tanks = [];
         _this.defaultValues = {
             meta: 0,
@@ -1441,6 +1452,10 @@ var SmelteryControler = /** @class */ (function (_super) {
         }
     };
     SmelteryControler.prototype.init = function () {
+        this.area = {
+            from: { x: 0, y: 0, z: 0 },
+            to: { x: 0, y: 0, z: 0 }
+        };
         this.data.isActive = this.checkStructure();
         this.render = new Render();
         this.anim = new Animation.Base(this.x, this.y, this.z);
@@ -4912,6 +4927,8 @@ ModAPI.addAPICallback("ForestryAPI", function (api) {
 var RV;
 ModAPI.addAPICallback("RecipeViewer", function (api) {
     RV = api.Core;
+    UI.TextureSource.put("tcon.rv.table", FileTools.ReadImage(__dir__ + "res/terrain-atlas/smeltery/tcon_itemcast_2.png"));
+    UI.TextureSource.put("tcon.rv.basin", FileTools.ReadImage(__dir__ + "res/terrain-atlas/smeltery/tcon_blockcast_2.png"));
     var setLiquidScale = function (scale, text, liquid) {
         scale.setBinding("texture", LiquidRegistry.getLiquidUITexture(liquid.liquid, 108, 234));
         scale.setBinding("value", Math.min(1, liquid.amount / MatValue.BLOCK));

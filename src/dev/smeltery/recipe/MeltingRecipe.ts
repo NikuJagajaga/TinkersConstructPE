@@ -39,7 +39,7 @@ class MeltingRecipe {
         for(let key in this.recipeItem){
             split = key.split(":");
             list.push({
-                input: [{id: parseInt(split[0]), count: 1, data: split[1] ? parseInt(split[1]) : -1}],
+                input: [{id: parseInt(split[0]), count: 1, data: split[1] ? parseInt(split[1]) : 0}],
                 output: [],
                 outputLiq: {liquid: this.recipeItem[key].liquid, amount: this.recipeItem[key].amount},
                 temp: this.recipeItem[key].temp
