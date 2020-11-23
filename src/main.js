@@ -558,7 +558,7 @@ MeltingRecipe.addRecipe(VanillaBlockID.iron_door, "molten_iron", MatValue.INGOT 
 MeltingRecipe.addRecipe(VanillaBlockID.cauldron, "molten_iron", MatValue.INGOT * 7);
 MeltingRecipe.addRecipe(VanillaBlockID.anvil, "molten_iron", MatValue.BLOCK * 3 + MatValue.INGOT * 4);
 MeltingRecipe.addRecipe(VanillaBlockID.iron_ore, "molten_iron", MatValue.ORE);
-MeltingRecipe.addRecipe(VanillaBlockID.gold_ore, "molten_iron", MatValue.ORE);
+MeltingRecipe.addRecipe(VanillaBlockID.gold_ore, "molten_gold", MatValue.ORE);
 MeltingRecipe.addEntRecipe(1, "blood", 20); //Native.EntityType.PLAYER
 MeltingRecipe.addEntRecipe(Native.EntityType.ZOMBIE, "blood", 20);
 MeltingRecipe.addEntRecipe(Native.EntityType.ZOMBIE_VILLAGER, "blood", 20);
@@ -4013,7 +4013,10 @@ var TinkersToolHandler = /** @class */ (function () {
                 alert("nameError: " + e);
             }
         });
-        ItemModel.getFor(id, -1).setModelOverrideCallback(function (item) { return item.extra ? _this.getModel(item) : null; });
+        //ItemModel.getFor(id, -1).setModelOverrideCallback(item => item.extra ? this.getModel(item) : null);
+        for (var i = 0; i <= 14; i++) {
+            ItemModel.getFor(id, i).setModelOverrideCallback(function (item) { return item.extra ? _this.getModel(item) : null; });
+        }
         this.tools[id] = true;
     };
     TinkersToolHandler.isTool = function (id) {
@@ -4025,8 +4028,6 @@ var TinkersToolHandler = /** @class */ (function () {
             var suffix = toolData.isBroken() ? "broken" : "normal";
             var texture = toolData.toolData.getTexture();
             var path = texture.getPath();
-            var materials = new String(item.extra.getString("materials")).split("_");
-            var modifiers = TinkersModifierHandler.decodeToObj(item.extra.getString("modifiers"));
             var uniqueKey = toolData.uniqueKey();
             if (this.models[uniqueKey]) {
                 return this.models[uniqueKey][suffix];
@@ -4036,11 +4037,11 @@ var TinkersToolHandler = /** @class */ (function () {
             var coordsBroken_1 = [];
             var index = void 0;
             for (var i = 0; i < toolData.toolData.partsCount; i++) {
-                index = Material[materials[i]].getTexIndex();
+                index = Material[toolData.materials[i]].getTexIndex();
                 coordsNormal_1.push(texture.getCoords(i, index));
-                coordsBroken_1.push(texture.getCoords(toolData.toolData.partsCount, index));
+                coordsBroken_1.push(texture.getCoords(i === toolData.toolData.brokenIndex ? toolData.toolData.partsCount : i, index));
             }
-            for (var key in modifiers) {
+            for (var key in toolData.modifiers) {
                 index = Modifier[key].getTexIndex();
                 coordsNormal_1.push(texture.getModCoords(index));
                 coordsBroken_1.push(texture.getModCoords(index));
@@ -4411,6 +4412,7 @@ var TinkersShovel = /** @class */ (function (_super) {
             World.setBlock(coords.x, coords.y, coords.z, VanillaBlockID.grass_path);
             World.playSound(coords.x + 0.5, coords.y + 1, coords.z + 0.5, "step.grass", 1, 0.8);
             toolData.consumeDurability(1);
+            toolData.applyHand();
         }
     };
     return TinkersShovel;
@@ -4446,6 +4448,25 @@ var TinkersHatchet = /** @class */ (function (_super) {
     };
     TinkersHatchet.prototype.getTexture = function () {
         return textureHatchet;
+    };
+    TinkersHatchet.prototype.onDestroy = function (item, coords, block) {
+        if (!item.extra) {
+            return true;
+        }
+        var toolData = new ToolData(item);
+        var blockData = ToolAPI.getBlockData(block.id);
+        if (this.blockMaterials[blockData.material.name] && toolData.stats.level >= blockData.level && !toolData.isBroken()) {
+            toolData.forEachModifiers(function (mod, level) {
+                mod.onDestroy(item, coords, block, level);
+            });
+            if (blockData.material.name !== "plant") {
+                toolData.consumeDurability(this.isWeapon ? 2 : 1);
+                if (!this.isWeapon) {
+                    toolData.addXp(1);
+                }
+            }
+        }
+        return true;
     };
     return TinkersHatchet;
 }(TinkersTool));
@@ -4492,6 +4513,7 @@ var TinkersMattock = /** @class */ (function (_super) {
             World.setBlock(coords.x, coords.y, coords.z, VanillaBlockID.farmland);
             World.playSound(coords.x + 0.5, coords.y + 1, coords.z + 0.5, "step.gravel", 1, 0.8);
             toolData.consumeDurability(1);
+            toolData.applyHand();
         }
     };
     return TinkersMattock;
@@ -4702,7 +4724,7 @@ var TinkersLumberaxe = /** @class */ (function (_super) {
                     }
                     visited.push(pos);
                     blo = World.getBlock(pos.x, pos.y, pos.z);
-                    if (!TinkersLumberaxe.logs[blo.id]) {
+                    if (!TinkersLumberaxe.logs[blo.id] && (coords.x !== pos.x || coords.y !== pos.y || coords.z !== pos.z)) {
                         continue;
                     }
                     for (i = 2; i < 6; i++) {
@@ -5033,6 +5055,7 @@ ModAPI.addAPICallback("RecipeViewer", function (api) {
     });
 });
 ModAPI.registerAPI("TConAPI", {
+    MatValue: MatValue,
     MoltenLiquid: MoltenLiquid,
     SmelteryFuel: SmelteryFuel,
     MeltingRecipe: MeltingRecipe,

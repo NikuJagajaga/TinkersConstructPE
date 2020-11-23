@@ -38,7 +38,10 @@ class TinkersToolHandler {
                 alert("nameError: " + e);
             }
         });
-        ItemModel.getFor(id, -1).setModelOverrideCallback(item => item.extra ? this.getModel(item) : null);
+        //ItemModel.getFor(id, -1).setModelOverrideCallback(item => item.extra ? this.getModel(item) : null);
+        for(let i = 0; i <= 14; i++){
+            ItemModel.getFor(id, i).setModelOverrideCallback(item => item.extra ? this.getModel(item) : null);
+        }
         this.tools[id] = true;
     }
 
@@ -46,7 +49,7 @@ class TinkersToolHandler {
         return this.tools[id] || false;
     }
 
-    private static models = {};
+    private static models: {[key: string]: {normal: ItemModel, broken: ItemModel}} = {};
 
     private static getModel(item: ItemInstance): any {
         try{
@@ -54,8 +57,6 @@ class TinkersToolHandler {
             const suffix = toolData.isBroken() ? "broken" : "normal";
             const texture = toolData.toolData.getTexture();
             const path = texture.getPath();
-            const materials = new String(item.extra.getString("materials")).split("_");
-            const modifiers = TinkersModifierHandler.decodeToObj(item.extra.getString("modifiers"));
             const uniqueKey = toolData.uniqueKey();
             if(this.models[uniqueKey]){
                 return this.models[uniqueKey][suffix];
@@ -65,11 +66,11 @@ class TinkersToolHandler {
             const coordsBroken: {x: number, y: number}[] = [];
             let index: number;
             for(let i = 0; i < toolData.toolData.partsCount; i++){
-                index = Material[materials[i]].getTexIndex();
+                index = Material[toolData.materials[i]].getTexIndex();
                 coordsNormal.push(texture.getCoords(i, index));
-                coordsBroken.push(texture.getCoords(toolData.toolData.partsCount, index));
+                coordsBroken.push(texture.getCoords(i === toolData.toolData.brokenIndex ? toolData.toolData.partsCount : i, index));
             }
-            for(let key in modifiers){
+            for(let key in toolData.modifiers){
                 index = Modifier[key].getTexIndex();
                 coordsNormal.push(texture.getModCoords(index));
                 coordsBroken.push(texture.getModCoords(index));

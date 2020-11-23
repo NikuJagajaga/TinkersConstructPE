@@ -86,7 +86,7 @@ class TinkersLumberaxe extends TinkersTool {
                     visited.push(pos);
 
                     blo = World.getBlock(pos.x, pos.y, pos.z);
-                    if(!TinkersLumberaxe.logs[blo.id]){
+                    if(!TinkersLumberaxe.logs[blo.id] && (coords.x !== pos.x || coords.y !== pos.y || coords.z !== pos.z)){
                         continue;
                     }
 

@@ -24,6 +24,26 @@ class TinkersHatchet extends TinkersTool {
         return textureHatchet;
     }
 
+    onDestroy(item: ItemInstance, coords: Callback.ItemUseCoordinates, block: Tile): true {
+        if(!item.extra){
+            return true;
+        }
+        const toolData = new ToolData(item);
+        const blockData = ToolAPI.getBlockData(block.id);
+        if(this.blockMaterials[blockData.material.name] && toolData.stats.level >= blockData.level && !toolData.isBroken()){
+            toolData.forEachModifiers((mod, level) => {
+                mod.onDestroy(item, coords, block, level);
+            });
+            if(blockData.material.name !== "plant"){
+                toolData.consumeDurability(this.isWeapon ? 2 : 1);
+                if(!this.isWeapon){
+                    toolData.addXp(1);
+                }
+            }
+        }
+        return true;
+    }
+
 }
 
 

@@ -140,7 +140,7 @@ MeltingRecipe.addRecipe(VanillaBlockID.cauldron, "molten_iron", MatValue.INGOT *
 MeltingRecipe.addRecipe(VanillaBlockID.anvil, "molten_iron", MatValue.BLOCK * 3 + MatValue.INGOT * 4);
 
 MeltingRecipe.addRecipe(VanillaBlockID.iron_ore, "molten_iron", MatValue.ORE);
-MeltingRecipe.addRecipe(VanillaBlockID.gold_ore, "molten_iron", MatValue.ORE);
+MeltingRecipe.addRecipe(VanillaBlockID.gold_ore, "molten_gold", MatValue.ORE);
 
 
 MeltingRecipe.addEntRecipe(1, "blood", 20);//Native.EntityType.PLAYER

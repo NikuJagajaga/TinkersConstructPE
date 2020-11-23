@@ -37,6 +37,7 @@ class TinkersMattock extends TinkersTool {
             World.setBlock(coords.x, coords.y, coords.z, VanillaBlockID.farmland);
             World.playSound(coords.x + 0.5, coords.y + 1, coords.z + 0.5, "step.gravel", 1, 0.8);
             toolData.consumeDurability(1);
+            toolData.applyHand();
         }
     }
 
