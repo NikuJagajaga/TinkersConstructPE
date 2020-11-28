@@ -35,18 +35,18 @@ const Cfg = {
 };
 
 class MatValue {
-    static INGOT = 144;
-    static NUGGET = MatValue.INGOT / 9;
-    static FRAGMENT = MatValue.INGOT / 4;
-    static SHARD = MatValue.INGOT / 2;
-    static GEM = 666;
-    static BLOCK = MatValue.INGOT * 9;
-    static SEARED_BLOCK = MatValue.INGOT * 2;
-    static SEARED_MATERIAL = MatValue.INGOT / 2;
-    static GLASS = 1000;
-    static BRICK_BLOCK = MatValue.INGOT * 4;
-    static SLIME_BALL = 250;
-    static ORE = MatValue.INGOT * Cfg.oreToIngotRatio;
+    static readonly INGOT = 144;
+    static readonly NUGGET = MatValue.INGOT / 9;
+    static readonly FRAGMENT = MatValue.INGOT / 4;
+    static readonly SHARD = MatValue.INGOT / 2;
+    static readonly GEM = 666;
+    static readonly BLOCK = MatValue.INGOT * 9;
+    static readonly SEARED_BLOCK = MatValue.INGOT * 2;
+    static readonly SEARED_MATERIAL = MatValue.INGOT / 2;
+    static readonly GLASS = 1000;
+    static readonly BRICK_BLOCK = MatValue.INGOT * 4;
+    static readonly SLIME_BALL = 250;
+    static readonly ORE = MatValue.INGOT * Cfg.oreToIngotRatio;
 }
 
 interface LiquidInstance {

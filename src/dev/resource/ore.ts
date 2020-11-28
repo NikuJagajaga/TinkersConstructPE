@@ -14,26 +14,24 @@ MeltingRecipe.addRecipe(BlockID.oreCobalt, "molten_cobalt", MatValue.ORE);
 MeltingRecipe.addRecipe(BlockID.oreArdite, "molten_ardite", MatValue.ORE);
 
 
-const generateNetherOre = (id: number, rate: number, x: number, z: number, random: java.util.Random) => {
+const generateNetherOre = (id: number, rate: number, chunkX: number, chunkZ: number, random: java.util.Random) => {
     for(let i = 0; i < rate; i += 2){
         GenerationUtils.generateOre(
-            x + random.nextInt(16),
+            chunkX * 16 + random.nextInt(16),
             32 + random.nextInt(64),
-            z + random.nextInt(16),
+            chunkZ * 16 + random.nextInt(16),
             id, 0, 5, false, random.nextInt()
         );
         GenerationUtils.generateOre(
-            x + random.nextInt(16),
+            chunkX * 16 + random.nextInt(16),
             random.nextInt(128),
-            z + random.nextInt(16),
+            chunkZ * 16 + random.nextInt(16),
             id, 0, 5, false, random.nextInt()
         );
     }
 }
 
 Callback.addCallback("GenerateNetherChunk", (chunkX: number, chunkZ: number, random: java.util.Random) => {
-    const x = chunkX << 4;
-    const z = chunkZ << 4;
-    generateNetherOre(BlockID.oreCobalt, Cfg.oreGen.cobaltRate, x, z, random);
-    generateNetherOre(BlockID.oreArdite, Cfg.oreGen.arditeRate, x, z, random);
+    generateNetherOre(BlockID.oreCobalt, Cfg.oreGen.cobaltRate, chunkX, chunkZ, random);
+    generateNetherOre(BlockID.oreArdite, Cfg.oreGen.arditeRate, chunkX, chunkZ, random);
 });

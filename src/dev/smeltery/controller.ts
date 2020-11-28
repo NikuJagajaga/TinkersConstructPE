@@ -8,7 +8,7 @@ Recipes2.addShaped(BlockID.tcon_smeltery, "aaa:a_a:aaa", {a: ItemID.tcon_brick})
 
 class SmelteryHandler {
 
-    private static blocks = {
+    private static readonly blocks = {
         [BlockID.tcon_stone]: true,
         [BlockID.tcon_seared_glass]: true,
         [BlockID.tcon_drain]: true,
@@ -414,11 +414,6 @@ class SmelteryControler extends TileBase {
             }
             Entity.damageEntity(ent, 2);
         });
-        /*
-        for(let i = 0; i < items.length; i++){
-
-        }
-        */
     }
 
     setAnim(): void {

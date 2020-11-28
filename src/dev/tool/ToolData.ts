@@ -36,9 +36,9 @@ class ToolData {
         const stats = this.getBaseStats();
         stats.speed *= this.toolData.miningSpeedModifier();
         stats.attack *= this.toolData.damagePotential();
-        for(let mod in this.modifiers){
-            Modifier[mod].applyStats(stats, this.modifiers[mod]);
-        }
+        this.forEachModifiers((mod, level) => {
+            mod.applyStats(stats, level);
+        });
         return stats.getToolMaterial();
     }
 

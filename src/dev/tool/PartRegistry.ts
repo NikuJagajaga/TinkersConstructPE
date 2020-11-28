@@ -7,7 +7,7 @@ class PartRegistry {
 
     private static data: {[id: number]: TinkersPartData} = {};
 
-    private static types: {key: string, name: string, cost: number}[] = [
+    private static readonly types: {key: string, name: string, cost: number}[] = [
         {key: "pickaxe", name: "Pickaxe Head", cost: 2},
         {key: "shovel", name: "Shovel Head", cost: 2},
         {key: "axe", name: "Axe Head", cost: 2},

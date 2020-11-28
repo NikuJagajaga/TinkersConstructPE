@@ -29,6 +29,7 @@ class TinkersShovel extends TinkersTool {
             World.setBlock(coords.x, coords.y, coords.z, VanillaBlockID.grass_path);
             World.playSound(coords.x + 0.5, coords.y + 1, coords.z + 0.5, "step.grass", 1, 0.8);
             toolData.consumeDurability(1);
+            toolData.addXp(1);
             toolData.applyHand();
         }
     }

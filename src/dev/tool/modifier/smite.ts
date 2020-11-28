@@ -6,7 +6,7 @@ Recipes.addFurnace(BlockID.tcon_graveyard_soil, BlockID.tcon_consecrated_soil);
 
 class ModSmite extends TinkersModifier {
 
-    private static targets = {
+    private static readonly targets = {
         [Native.EntityType.SKELETON]: true,
         [Native.EntityType.STRAY]: true,
         [Native.EntityType.WHITHER_SKELETON]: true,

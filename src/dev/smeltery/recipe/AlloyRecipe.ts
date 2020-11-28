@@ -3,7 +3,6 @@ class AlloyRecipe {
     private static data: {inputs: LiquidInstance[], result: LiquidInstance}[] = [];
 
     static addRecipe(result: LiquidInstance, ...inputs: LiquidInstance[]): void {
-        result.amount;
         this.data.push({inputs: inputs.map(input => ({liquid: input.liquid, amount: input.amount})), result: result});
     }
 

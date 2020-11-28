@@ -589,7 +589,6 @@ var AlloyRecipe = /** @class */ (function () {
         for (var _i = 1; _i < arguments.length; _i++) {
             inputs[_i - 1] = arguments[_i];
         }
-        result.amount;
         this.data.push({ inputs: inputs.map(function (input) { return ({ liquid: input.liquid, amount: input.amount }); }), result: result });
     };
     AlloyRecipe.alloyAlloys = function (liquids, liquidStorage) {
@@ -1709,11 +1708,6 @@ var SmelteryControler = /** @class */ (function (_super) {
             }
             Entity.damageEntity(ent, 2);
         });
-        /*
-        for(let i = 0; i < items.length; i++){
-
-        }
-        */
     };
     SmelteryControler.prototype.setAnim = function () {
         var boxes = [];
@@ -2072,9 +2066,9 @@ var ToolData = /** @class */ (function () {
         var stats = this.getBaseStats();
         stats.speed *= this.toolData.miningSpeedModifier();
         stats.attack *= this.toolData.damagePotential();
-        for (var mod in this.modifiers) {
-            Modifier[mod].applyStats(stats, this.modifiers[mod]);
-        }
+        this.forEachModifiers(function (mod, level) {
+            mod.applyStats(stats, level);
+        });
         return stats.getToolMaterial();
     };
     ToolData.prototype.isBroken = function () {
@@ -2318,17 +2312,15 @@ Block.setDestroyLevel(BlockID.oreArdite, TinkersMaterial.COBALT);
 Item.addCreativeGroup("ores", Translation.translate("Ores"), [BlockID.oreCobalt, BlockID.oreArdite]);
 MeltingRecipe.addRecipe(BlockID.oreCobalt, "molten_cobalt", MatValue.ORE);
 MeltingRecipe.addRecipe(BlockID.oreArdite, "molten_ardite", MatValue.ORE);
-var generateNetherOre = function (id, rate, x, z, random) {
+var generateNetherOre = function (id, rate, chunkX, chunkZ, random) {
     for (var i = 0; i < rate; i += 2) {
-        GenerationUtils.generateOre(x + random.nextInt(16), 32 + random.nextInt(64), z + random.nextInt(16), id, 0, 5, false, random.nextInt());
-        GenerationUtils.generateOre(x + random.nextInt(16), random.nextInt(128), z + random.nextInt(16), id, 0, 5, false, random.nextInt());
+        GenerationUtils.generateOre(chunkX * 16 + random.nextInt(16), 32 + random.nextInt(64), chunkZ * 16 + random.nextInt(16), id, 0, 5, false, random.nextInt());
+        GenerationUtils.generateOre(chunkX * 16 + random.nextInt(16), random.nextInt(128), chunkZ * 16 + random.nextInt(16), id, 0, 5, false, random.nextInt());
     }
 };
 Callback.addCallback("GenerateNetherChunk", function (chunkX, chunkZ, random) {
-    var x = chunkX << 4;
-    var z = chunkZ << 4;
-    generateNetherOre(BlockID.oreCobalt, Cfg.oreGen.cobaltRate, x, z, random);
-    generateNetherOre(BlockID.oreArdite, Cfg.oreGen.arditeRate, x, z, random);
+    generateNetherOre(BlockID.oreCobalt, Cfg.oreGen.cobaltRate, chunkX, chunkZ, random);
+    generateNetherOre(BlockID.oreArdite, Cfg.oreGen.arditeRate, chunkX, chunkZ, random);
 });
 createBlock("blockKnightslime", [{ name: "Block of Knightslime", texture: "tcon_block_knightslime" }]);
 createBlock("blockCobalt", [{ name: "Block of Cobalt", texture: "tcon_block_cobalt" }]);
@@ -2671,17 +2663,16 @@ var TinkersModifierHandler = /** @class */ (function () {
 var ModHaste = /** @class */ (function (_super) {
     __extends(ModHaste, _super);
     function ModHaste() {
-        var _this = _super.call(this, "haste", "Haste", 0, [VanillaItemID.redstone], 50, true) || this;
-        _this.step1 = 15;
-        _this.step2 = 25;
-        return _this;
+        return _super.call(this, "haste", "Haste", 0, [VanillaItemID.redstone], 50, true) || this;
     }
     ModHaste.prototype.applyStats = function (stats, level) {
         for (var i = level; i--;) {
-            stats.speed += stats.speed <= this.step1 ? 0.15 - 0.05 * stats.speed / this.step1 : stats.speed <= this.step2 ? 0.1 - 0.05 * (stats.speed - this.step1) / (this.step2 - this.step1) : 0.05;
+            stats.speed += stats.speed <= ModHaste.step1 ? 0.15 - 0.05 * stats.speed / ModHaste.step1 : stats.speed <= ModHaste.step2 ? 0.1 - 0.05 * (stats.speed - ModHaste.step1) / (ModHaste.step2 - ModHaste.step1) : 0.05;
         }
         stats.speed += (level / this.max | 0) * 0.5;
     };
+    ModHaste.step1 = 15;
+    ModHaste.step2 = 25;
     return ModHaste;
 }(TinkersModifier));
 var ModLuck = /** @class */ (function (_super) {
@@ -2742,8 +2733,8 @@ var ModSilk = /** @class */ (function (_super) {
         return _super.call(this, "silk", "SilkTouch", 5, [ItemID.tcon_silky_jewel], 1, false, ["luck"]) || this;
     }
     ModSilk.prototype.applyStats = function (stats, level) {
-        stats.speed -= 3;
-        stats.attack -= 3;
+        stats.speed = Math.max(1, stats.speed - 3);
+        stats.attack = Math.max(1, stats.attack - 3);
     };
     ModSilk.prototype.applyEnchant = function (enchant, level) {
         enchant.silk = true;
@@ -2779,7 +2770,7 @@ var ModBeheading = /** @class */ (function (_super) {
         _a[Native.EntityType.SKELETON] = 0,
         _a[Native.EntityType.WHITHER_SKELETON] = 1,
         _a[Native.EntityType.ZOMBIE] = 2,
-        _a[Native.EntityType.PLAYER] = 3,
+        _a[1] = 3,
         _a[Native.EntityType.CREEPER] = 4,
         _a[Native.EntityType.ENDER_DRAGON] = 5,
         _a);
@@ -3099,7 +3090,7 @@ var TableBase = /** @class */ (function (_super) {
         return _this;
     }
     TableBase.prototype.created = function () {
-        this.data.meta = TileRenderer.getBlockRotation();
+        this.data.meta = TileRenderer.getBlockRotation(player);
     };
     TableBase.prototype.init = function () {
         if (Cfg.showItemOnTable) {
@@ -4004,7 +3995,7 @@ var TinkersToolHandler = /** @class */ (function () {
         Item.registerNameOverrideFunction(id, function (item, name) {
             try {
                 if (!item.extra) {
-                    return "Invalid Tool";
+                    return name;
                 }
                 var toolData_2 = new ToolData(item);
                 return toolData_2.getName(name);
@@ -4131,6 +4122,9 @@ var TinkersTool = /** @class */ (function () {
                 devider *= blockData.material.multiplier;
             }
             this.toolMaterial.level = toolData.stats.level;
+        }
+        else {
+            this.toolMaterial.level = 0;
         }
         return time.base / devider / time.modifier;
     };
@@ -4412,6 +4406,7 @@ var TinkersShovel = /** @class */ (function (_super) {
             World.setBlock(coords.x, coords.y, coords.z, VanillaBlockID.grass_path);
             World.playSound(coords.x + 0.5, coords.y + 1, coords.z + 0.5, "step.grass", 1, 0.8);
             toolData.consumeDurability(1);
+            toolData.addXp(1);
             toolData.applyHand();
         }
     };
@@ -4468,6 +4463,38 @@ var TinkersHatchet = /** @class */ (function (_super) {
         }
         return true;
     };
+    TinkersHatchet.prototype.useItem = function (coords, item, block) {
+        if (!item.extra) {
+            return;
+        }
+        var toolData = new ToolData(item);
+        var id;
+        if (block.id === VanillaBlockID.log) {
+            switch (block.data) {
+                case 0:
+                    id = VanillaBlockID.stripped_oak_log;
+                    break;
+                case 1:
+                    id = VanillaBlockID.stripped_spruce_log;
+                    break;
+                case 2:
+                    id = VanillaBlockID.stripped_birch_log;
+                    break;
+                case 3:
+                    id = VanillaBlockID.stripped_jungle_log;
+                    break;
+            }
+        }
+        else if (block.id === VanillaBlockID.log2) {
+            id = block.data === 0 ? VanillaBlockID.stripped_acacia_log : VanillaBlockID.stripped_dark_oak_log;
+        }
+        if (id !== undefined) {
+            World.setBlock(coords.x, coords.y, coords.z, id, 0);
+            toolData.consumeDurability(1);
+            toolData.addXp(1);
+            toolData.applyHand();
+        }
+    };
     return TinkersHatchet;
 }(TinkersTool));
 TinkersToolHandler.registerTool("hatchet", "Hatchet", new TinkersHatchet());
@@ -4513,6 +4540,7 @@ var TinkersMattock = /** @class */ (function (_super) {
             World.setBlock(coords.x, coords.y, coords.z, VanillaBlockID.farmland);
             World.playSound(coords.x + 0.5, coords.y + 1, coords.z + 0.5, "step.gravel", 1, 0.8);
             toolData.consumeDurability(1);
+            toolData.addXp(1);
             toolData.applyHand();
         }
     };

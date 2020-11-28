@@ -1,4 +1,4 @@
-class TinkersModifier {
+abstract class TinkersModifier {
 
     private recipe: {id: number, data: number}[];
     private hate: {[key: string]: true};

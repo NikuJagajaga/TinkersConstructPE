@@ -12,8 +12,8 @@ class ModSilk extends TinkersModifier {
     }
     
     applyStats(stats: ToolStats, level: number): void {
-        stats.speed -= 3;
-        stats.attack -= 3;
+        stats.speed = Math.max(1, stats.speed - 3);
+        stats.attack = Math.max(1, stats.attack - 3);
     }
 
     applyEnchant(enchant: ToolAPI.EnchantData, level: number): void {

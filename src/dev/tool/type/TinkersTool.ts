@@ -29,7 +29,7 @@ class TinkersToolHandler {
         Item.registerNameOverrideFunction(id, (item, name) => {
             try{
                 if(!item.extra){
-                    return "Invalid Tool";
+                    return name;
                 }
                 const toolData = new ToolData(item);
                 return toolData.getName(name);
@@ -174,6 +174,9 @@ abstract class TinkersTool implements TinkersToolParams {
                 devider *= blockData.material.multiplier;
             }
             this.toolMaterial.level = toolData.stats.level;
+        }
+        else{
+            this.toolMaterial.level = 0;
         }
         return time.base / devider / time.modifier;
     }

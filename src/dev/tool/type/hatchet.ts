@@ -44,6 +44,31 @@ class TinkersHatchet extends TinkersTool {
         return true;
     }
 
+    useItem(coords: Callback.ItemUseCoordinates, item: ItemInstance, block: Tile): void {
+        if(!item.extra){
+            return;
+        }
+        const toolData = new ToolData(item);
+        let id: number;
+        if(block.id === VanillaBlockID.log){
+            switch(block.data){
+                case 0: id = VanillaBlockID.stripped_oak_log; break;
+                case 1: id = VanillaBlockID.stripped_spruce_log; break;
+                case 2: id = VanillaBlockID.stripped_birch_log; break;
+                case 3: id = VanillaBlockID.stripped_jungle_log; break;
+            }
+        }
+        else if(block.id === VanillaBlockID.log2){
+            id = block.data === 0 ? VanillaBlockID.stripped_acacia_log : VanillaBlockID.stripped_dark_oak_log;
+        }
+        if(id !== undefined){
+            World.setBlock(coords.x, coords.y, coords.z, id, 0);
+            toolData.consumeDurability(1);
+            toolData.addXp(1);
+            toolData.applyHand();
+        }
+    }
+
 }
 
 

@@ -1,6 +1,6 @@
 LIBRARY({
     name: "EnhancedRecipes",
-    version: 4,
+    version: 5,
     shared: false,
     api: "CoreEngine"
 });
@@ -9,10 +9,6 @@ LIBRARY({
 var existVR = FileTools.isExists(__dir__ + "lib/VanillaRecipe.js");
 if(existVR){
     IMPORT("VanillaRecipe");
-}
-
-
-if(existVR){
     VanillaRecipe.setResourcePath(__dir__ + "res/");
     FileTools.mkdir(__dir__ + "res/definitions/recipe/");
 }
@@ -22,8 +18,6 @@ var Recipes2 = {
 
     addShaped: function(result, mask, source, func){
         const array = [];
-        let id = 0;
-        let data = 0;
         for(let key in source){
             array.push(key, source[key].id || source[key], source[key].data || (source[key].data === 0 ? 0 : -1));
         }

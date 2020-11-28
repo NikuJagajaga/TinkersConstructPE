@@ -5,13 +5,13 @@ interface ExtraStats {durability: number};
 
 class TinkersMaterial {
 
-    static STONE = 1;
-    static IRON = 2;
-    static DIAMOND = 3;
-    static OBSIDIAN = 4;
-    static COBALT = 5;
+    static readonly STONE = 1;
+    static readonly IRON = 2;
+    static readonly DIAMOND = 3;
+    static readonly OBSIDIAN = 4;
+    static readonly COBALT = 5;
 
-    static level = {
+    static readonly level = {
         1: "Stone",
         2: "Iron",
         3: "Diamond",
