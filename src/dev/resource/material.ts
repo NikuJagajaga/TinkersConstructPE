@@ -48,19 +48,19 @@ Recipes.addFurnace(BlockID.oreArdite, ItemID.ingotArdite);
 
 
 createItem("tcon_paperstack", "Paper Stack");
-Recipes2.addShapelessWith2x2("item:tcon_paperstack", [{item: "paper", count: 4}]);
+Recipes2.addShapeless(ItemID.tcon_paperstack, [{id: VanillaItemID.paper, count: 4}]);
 
 
 createBlock("tcon_lavawood", [{name: "Lavawood"}]);
 createBlock("tcon_firewood", [{name: "Firewood"}]);
 CastingRecipe.addBasinRecipe(VanillaBlockID.planks, "lava", BlockID.tcon_lavawood, 250);
-Recipes2.addShapelessWith2x2("block:tcon_firewood", ["block:tcon_lavawood", {item: "blaze_powder", count: 2}]);
+Recipes2.addShapeless(BlockID.tcon_firewood, [BlockID.tcon_lavawood, {id: VanillaItemID.blaze_powder, count: 2}]);
 
 
 createItem("tcon_slimeball_blue", "Blue Slime");
 createItem("tcon_slimeball_purple", "Purple Slime");
-Recipes2.addShapelessWith2x2("item:tcon_slimeball_blue", ["slime_ball", {item: "dye", count: 2, data: 4}]);
-Recipes2.addShapelessWith2x2("item:tcon_slimeball_purple", ["item:tcon_slimeball_blue", {item: "redstone", count: 2}]);
+Recipes2.addShapeless(ItemID.tcon_slimeball_blue, [VanillaItemID.slime_ball, {id: VanillaItemID.dye, count: 2, data: 4}]);
+Recipes2.addShapeless(ItemID.tcon_slimeball_purple, [ItemID.tcon_slimeball_blue, {id: VanillaItemID.redstone, count: 2}]);
 MeltingRecipe.addRecipe(ItemID.tcon_slimeball_purple, "purpleslime", MatValue.SLIME_BALL);
 
 createBlock("tcon_slimymud_green", [{name: "Slimy Mud"}]);

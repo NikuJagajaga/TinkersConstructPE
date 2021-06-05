@@ -11,7 +11,7 @@ abstract class TableBase extends TileBase {
     };
 
     created(): void {
-        this.data.meta = TileRenderer.getBlockRotation(player);
+        this.data.meta = TileRenderer.getBlockRotation();
     }
 
     init(): void {

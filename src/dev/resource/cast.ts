@@ -14,8 +14,8 @@ class PatternRegistry {
         return id in this.data;
     }
 
-    static getAllRecipeForRV(): {input: ItemInstance[], output: ItemInstance[]}[] {
-        const list = [];
+    static getAllRecipeForRV(): RecipePattern[] {
+        const list: RecipePattern[] = [];
         let material: number;
         let pattern: string;
         for(let mat in Material){
@@ -68,7 +68,7 @@ Item.addCreativeGroup("tcon_pattern", "Pattern", [
     ItemID.tcon_pattern_largeplate
 ]);
 
-Recipes2.addShapedWith2x2({item: "item:tcon_pattern_blank", count: 4}, "ab:ba", {a: "planks", b: "stick"});
+Recipes2.addShaped({id: ItemID.tcon_pattern_blank, count: 4}, "ab:ba", {a: VanillaBlockID.planks, b: VanillaItemID.stick});
 PatternRegistry.registerData(ItemID.tcon_pattern_pickaxe, "pickaxe", 2);
 PatternRegistry.registerData(ItemID.tcon_pattern_shovel, "shovel", 2);
 PatternRegistry.registerData(ItemID.tcon_pattern_axe, "axe", 2);

@@ -2,10 +2,12 @@ var __extends = (this && this.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
+        if (typeof b !== "function" && b !== null)
+            throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
         extendStatics(d, b);
         function __() { this.constructor = d; }
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
@@ -21,6 +23,11 @@ var __assign = (this && this.__assign) || function () {
         return t;
     };
     return __assign.apply(this, arguments);
+};
+var __spreadArray = (this && this.__spreadArray) || function (to, from) {
+    for (var i = 0, il = from.length, j = to.length; i < il; i++, j++)
+        to[j] = from[i];
+    return to;
 };
 var _a, _b, _c, _d, _e, _f, _g, _h;
 IMPORT("ToolLib");
@@ -454,6 +461,9 @@ var MeltingRecipe = /** @class */ (function () {
     };
     MeltingRecipe.addRecipe = function (item, liquid, amount, temp) {
         if (temp === void 0) { temp = this.calcTemp(liquid, amount); }
+        if (!item) {
+            return;
+        }
         this.recipeItem[typeof item === "number" ? item : item.id + ":" + item.data] = {
             liquid: liquid,
             amount: amount,
@@ -477,7 +487,7 @@ var MeltingRecipe = /** @class */ (function () {
             list.push({
                 input: [{ id: parseInt(split[0]), count: 1, data: split[1] ? parseInt(split[1]) : 0 }],
                 output: [],
-                outputLiq: { liquid: this.recipeItem[key].liquid, amount: this.recipeItem[key].amount },
+                outputLiq: [{ liquid: this.recipeItem[key].liquid, amount: this.recipeItem[key].amount }],
                 temp: this.recipeItem[key].temp
             });
         }
@@ -601,6 +611,12 @@ var AlloyRecipe = /** @class */ (function () {
             }
         });
     };
+    AlloyRecipe.getAllRecipeForRV = function () {
+        return this.data.map(function (recipe) { return ({
+            inputLiq: recipe.inputs,
+            outputLiq: [recipe.result]
+        }); });
+    };
     AlloyRecipe.data = [];
     return AlloyRecipe;
 }());
@@ -693,7 +709,7 @@ var CastingRecipe = /** @class */ (function () {
                 list.push({
                     input: [{ id: id, count: 1, data: 0 }],
                     output: [{ id: result.id, count: 1, data: result.data }],
-                    inputLiq: { liquid: liquid, amount: limits[liquid] || limits.__global },
+                    inputLiq: [{ liquid: liquid, amount: limits[liquid] || limits.__global }],
                     consume: result.consume
                 });
             }
@@ -756,7 +772,7 @@ Callback.addCallback("PreLoaded", function () {
     }
 });
 createBlock("tcon_grout", [{ name: "Grout" }]);
-Recipes2.addShapelessWith2x2({ item: "block:tcon_grout", count: 2 }, ["sand", "gravel", "clay_ball"]);
+Recipes2.addShapeless({ id: BlockID.tcon_grout, count: 2 }, [VanillaBlockID.sand, VanillaBlockID.gravel, VanillaItemID.clay_ball]);
 Recipes2.addShapeless({ id: BlockID.tcon_grout, count: 8 }, [{ id: VanillaBlockID.sand, count: 4 }, { id: VanillaBlockID.gravel, count: 4 }, VanillaBlockID.clay]);
 createItem("tcon_brick", "Seared Brick");
 Recipes.addFurnace(BlockID.tcon_grout, ItemID.tcon_brick);
@@ -781,11 +797,11 @@ MeltingRecipe.addRecipeForAmount(BlockID.tcon_grout, "molten_stone", MatValue.SE
 CastingRecipe.addTableRecipeForBoth("ingot", "molten_stone", ItemID.tcon_brick, MatValue.SEARED_MATERIAL);
 CastingRecipe.addBasinRecipe(0, "molten_stone", { id: BlockID.tcon_stone, data: 0 }, MatValue.SEARED_BLOCK);
 CastingRecipe.addBasinRecipe(VanillaBlockID.cobblestone, "molten_stone", { id: BlockID.tcon_stone, data: 1 }, MatValue.SEARED_MATERIAL * 3);
-Recipes2.addShapedWith2x2({ item: "block:tcon_stone", data: 3 }, "aa:aa", { a: "item:tcon_brick" });
+Recipes2.addShaped({ id: BlockID.tcon_stone, data: 3 }, "aa:aa", { a: ItemID.tcon_brick });
 Recipes.addFurnace(BlockID.tcon_stone, 3, BlockID.tcon_stone, 4);
 (function () {
     var addRecipe = function (input, output) {
-        Recipes2.addShapelessWith2x2({ item: "block:tcon_stone", data: output }, [{ item: "block:tcon_stone", data: input }], "tcon_stone_" + output);
+        Recipes2.addShapeless({ id: BlockID.tcon_stone, data: output }, [{ id: BlockID.tcon_stone, data: input }]);
     };
     addRecipe(0, 2);
     addRecipe(7, 2);
@@ -1404,10 +1420,10 @@ var SmelteryHandler = /** @class */ (function () {
         textLiquid: { type: "text", x: 150 * SCALE, y: 50 * SCALE, font: { size: 30, color: Color.WHITE, shadow: 0.5 }, multiline: true }
     };
     SmelteryHandler.window = new UI.StandardWindow({
-        standart: {
+        standard: {
             header: { text: { text: "Smeltery" } },
-            inventory: { standart: true },
-            background: { standart: true }
+            inventory: { standard: true },
+            background: { standard: true }
         },
         drawing: [
             { type: "frame", x: 20 * SCALE, y: 10 * SCALE, width: 18 * SCALE, height: 18 * SCALE, bitmap: "classic_slot", scale: SCALE },
@@ -2365,15 +2381,15 @@ Recipes.addFurnace(BlockID.oreArdite, ItemID.ingotArdite);
     addRecipes("molten_alubrass", BlockID.blockAlubrass, ItemID.ingotAlubrass /*, ItemID.nuggetAlubrass*/);
 })();
 createItem("tcon_paperstack", "Paper Stack");
-Recipes2.addShapelessWith2x2("item:tcon_paperstack", [{ item: "paper", count: 4 }]);
+Recipes2.addShapeless(ItemID.tcon_paperstack, [{ id: VanillaItemID.paper, count: 4 }]);
 createBlock("tcon_lavawood", [{ name: "Lavawood" }]);
 createBlock("tcon_firewood", [{ name: "Firewood" }]);
 CastingRecipe.addBasinRecipe(VanillaBlockID.planks, "lava", BlockID.tcon_lavawood, 250);
-Recipes2.addShapelessWith2x2("block:tcon_firewood", ["block:tcon_lavawood", { item: "blaze_powder", count: 2 }]);
+Recipes2.addShapeless(BlockID.tcon_firewood, [BlockID.tcon_lavawood, { id: VanillaItemID.blaze_powder, count: 2 }]);
 createItem("tcon_slimeball_blue", "Blue Slime");
 createItem("tcon_slimeball_purple", "Purple Slime");
-Recipes2.addShapelessWith2x2("item:tcon_slimeball_blue", ["slime_ball", { item: "dye", count: 2, data: 4 }]);
-Recipes2.addShapelessWith2x2("item:tcon_slimeball_purple", ["item:tcon_slimeball_blue", { item: "redstone", count: 2 }]);
+Recipes2.addShapeless(ItemID.tcon_slimeball_blue, [VanillaItemID.slime_ball, { id: VanillaItemID.dye, count: 2, data: 4 }]);
+Recipes2.addShapeless(ItemID.tcon_slimeball_purple, [ItemID.tcon_slimeball_blue, { id: VanillaItemID.redstone, count: 2 }]);
 MeltingRecipe.addRecipe(ItemID.tcon_slimeball_purple, "purpleslime", MatValue.SLIME_BALL);
 createBlock("tcon_slimymud_green", [{ name: "Slimy Mud" }]);
 createBlock("tcon_slimymud_blue", [{ name: "Blue Slimy Mud" }]);
@@ -2459,7 +2475,7 @@ Item.addCreativeGroup("tcon_pattern", "Pattern", [
     ItemID.tcon_pattern_guard,
     ItemID.tcon_pattern_largeplate
 ]);
-Recipes2.addShapedWith2x2({ item: "item:tcon_pattern_blank", count: 4 }, "ab:ba", { a: "planks", b: "stick" });
+Recipes2.addShaped({ id: ItemID.tcon_pattern_blank, count: 4 }, "ab:ba", { a: VanillaBlockID.planks, b: VanillaItemID.stick });
 PatternRegistry.registerData(ItemID.tcon_pattern_pickaxe, "pickaxe", 2);
 PatternRegistry.registerData(ItemID.tcon_pattern_shovel, "shovel", 2);
 PatternRegistry.registerData(ItemID.tcon_pattern_axe, "axe", 2);
@@ -2779,7 +2795,7 @@ var ModBeheading = /** @class */ (function (_super) {
 var _a;
 createBlock("tcon_graveyard_soil", [{ name: "Graveyard Soil" }], "dirt");
 createBlock("tcon_consecrated_soil", [{ name: "Consecrated Soil" }], "dirt");
-Recipes2.addShapelessWith2x2("block:tcon_graveyard_soil", ["dirt", "rotten_flesh", { item: "dye", data: 15 }]);
+Recipes2.addShapeless(BlockID.tcon_graveyard_soil, [VanillaBlockID.dirt, VanillaItemID.rotten_flesh, { id: VanillaItemID.dye, data: 15 }]);
 Recipes.addFurnace(BlockID.tcon_graveyard_soil, BlockID.tcon_consecrated_soil);
 var ModSmite = /** @class */ (function (_super) {
     __extends(ModSmite, _super);
@@ -3066,7 +3082,7 @@ var PatternChest = /** @class */ (function (_super) {
     return PatternChest;
 }(TileBase));
 createBlock("tcon_patternchest", [{ name: "Pattern Chest", texture: [["itemframe_background", 0]] }]);
-Recipes2.addShapedWith2x2("block:tcon_patternchest", "a:b", { a: "item:tcon_pattern_blank", b: "chest" });
+Recipes2.addShaped(BlockID.tcon_patternchest, "a:b", { a: ItemID.tcon_pattern_blank, b: VanillaBlockID.chest });
 Block.setShape(BlockID.tcon_patternchest, 0, 0, 0, 1, 14 / 16, 1);
 Block.registerDropFunction(BlockID.tcon_patternchest, function () { return []; });
 Block.registerPlaceFunction(BlockID.tcon_patternchest, function (coords, item, block) {
@@ -3090,7 +3106,7 @@ var TableBase = /** @class */ (function (_super) {
         return _this;
     }
     TableBase.prototype.created = function () {
-        this.data.meta = TileRenderer.getBlockRotation(player);
+        this.data.meta = TileRenderer.getBlockRotation();
     };
     TableBase.prototype.init = function () {
         if (Cfg.showItemOnTable) {
@@ -3156,12 +3172,12 @@ BlockModel.register(BlockID.tcon_stenciltable, function (model, index) {
     model.addBox(0 / 16, 0 / 16, 12 / 16, 4 / 16, 12 / 16, 16 / 16, "planks", index);
     return model;
 }, 6);
-Recipes2.addShapedWith2x2({ item: "block:tcon_stenciltable", data: 0 }, "a:b", { a: "item:tcon_pattern_blank", b: { item: "planks", data: 0 } }, "tcon_stenciltable_0");
-Recipes2.addShapedWith2x2({ item: "block:tcon_stenciltable", data: 1 }, "a:b", { a: "item:tcon_pattern_blank", b: { item: "planks", data: 1 } }, "tcon_stenciltable_1");
-Recipes2.addShapedWith2x2({ item: "block:tcon_stenciltable", data: 2 }, "a:b", { a: "item:tcon_pattern_blank", b: { item: "planks", data: 2 } }, "tcon_stenciltable_2");
-Recipes2.addShapedWith2x2({ item: "block:tcon_stenciltable", data: 3 }, "a:b", { a: "item:tcon_pattern_blank", b: { item: "planks", data: 3 } }, "tcon_stenciltable_3");
-Recipes2.addShapedWith2x2({ item: "block:tcon_stenciltable", data: 4 }, "a:b", { a: "item:tcon_pattern_blank", b: { item: "planks", data: 4 } }, "tcon_stenciltable_4");
-Recipes2.addShapedWith2x2({ item: "block:tcon_stenciltable", data: 5 }, "a:b", { a: "item:tcon_pattern_blank", b: { item: "planks", data: 5 } }, "tcon_stenciltable_5");
+Recipes2.addShaped({ id: BlockID.tcon_stenciltable, data: 0 }, "a:b", { a: ItemID.tcon_pattern_blank, b: { id: VanillaBlockID.planks, data: 0 } });
+Recipes2.addShaped({ id: BlockID.tcon_stenciltable, data: 1 }, "a:b", { a: ItemID.tcon_pattern_blank, b: { id: VanillaBlockID.planks, data: 1 } });
+Recipes2.addShaped({ id: BlockID.tcon_stenciltable, data: 2 }, "a:b", { a: ItemID.tcon_pattern_blank, b: { id: VanillaBlockID.planks, data: 2 } });
+Recipes2.addShaped({ id: BlockID.tcon_stenciltable, data: 3 }, "a:b", { a: ItemID.tcon_pattern_blank, b: { id: VanillaBlockID.planks, data: 3 } });
+Recipes2.addShaped({ id: BlockID.tcon_stenciltable, data: 4 }, "a:b", { a: ItemID.tcon_pattern_blank, b: { id: VanillaBlockID.planks, data: 4 } });
+Recipes2.addShaped({ id: BlockID.tcon_stenciltable, data: 5 }, "a:b", { a: ItemID.tcon_pattern_blank, b: { id: VanillaBlockID.planks, data: 5 } });
 var StencilTable = /** @class */ (function (_super) {
     __extends(StencilTable, _super);
     function StencilTable() {
@@ -3283,12 +3299,12 @@ BlockModel.register(BlockID.tcon_partbuilder, function (model, index) {
     model.addBox(0 / 16, 0 / 16, 12 / 16, 4 / 16, 12 / 16, 16 / 16, tex, meta);
     return model;
 }, 6);
-Recipes2.addShapedWith2x2({ item: "block:tcon_partbuilder", data: 0 }, "a:b", { a: "item:tcon_pattern_blank", b: { item: "log", data: 0 } }, "tcon_partbuilder_0");
-Recipes2.addShapedWith2x2({ item: "block:tcon_partbuilder", data: 1 }, "a:b", { a: "item:tcon_pattern_blank", b: { item: "log", data: 1 } }, "tcon_partbuilder_1");
-Recipes2.addShapedWith2x2({ item: "block:tcon_partbuilder", data: 2 }, "a:b", { a: "item:tcon_pattern_blank", b: { item: "log", data: 2 } }, "tcon_partbuilder_2");
-Recipes2.addShapedWith2x2({ item: "block:tcon_partbuilder", data: 3 }, "a:b", { a: "item:tcon_pattern_blank", b: { item: "log", data: 3 } }, "tcon_partbuilder_3");
-Recipes2.addShapedWith2x2({ item: "block:tcon_partbuilder", data: 4 }, "a:b", { a: "item:tcon_pattern_blank", b: { item: "log2", data: 0 } }, "tcon_partbuilder_4");
-Recipes2.addShapedWith2x2({ item: "block:tcon_partbuilder", data: 5 }, "a:b", { a: "item:tcon_pattern_blank", b: { item: "log2", data: 1 } }, "tcon_partbuilder_5");
+Recipes2.addShaped({ id: BlockID.tcon_partbuilder, data: 0 }, "a:b", { a: ItemID.tcon_pattern_blank, b: { id: VanillaBlockID.log, data: 0 } });
+Recipes2.addShaped({ id: BlockID.tcon_partbuilder, data: 1 }, "a:b", { a: ItemID.tcon_pattern_blank, b: { id: VanillaBlockID.log, data: 1 } });
+Recipes2.addShaped({ id: BlockID.tcon_partbuilder, data: 2 }, "a:b", { a: ItemID.tcon_pattern_blank, b: { id: VanillaBlockID.log, data: 2 } });
+Recipes2.addShaped({ id: BlockID.tcon_partbuilder, data: 3 }, "a:b", { a: ItemID.tcon_pattern_blank, b: { id: VanillaBlockID.log, data: 3 } });
+Recipes2.addShaped({ id: BlockID.tcon_partbuilder, data: 4 }, "a:b", { a: ItemID.tcon_pattern_blank, b: { id: VanillaBlockID.log2, data: 0 } });
+Recipes2.addShaped({ id: BlockID.tcon_partbuilder, data: 5 }, "a:b", { a: ItemID.tcon_pattern_blank, b: { id: VanillaBlockID.log2, data: 1 } });
 var PartBuilder = /** @class */ (function (_super) {
     __extends(PartBuilder, _super);
     function PartBuilder() {
@@ -3641,10 +3657,10 @@ var ToolForgeHandler = /** @class */ (function () {
     ToolForgeHandler.consume = [];
     ToolForgeHandler.window = (function () {
         var window = new UI.StandardWindow({
-            standart: {
+            standard: {
                 header: { text: { text: "Tool Forge" } },
-                inventory: { standart: true },
-                background: { standart: true }
+                inventory: { standard: true },
+                background: { standard: true }
             },
             drawing: [
                 { type: "frame", x: 580, y: 0, width: 400, height: 240, bitmap: "tcon.frame", scale: 4 },
@@ -3937,7 +3953,7 @@ Callback.addCallback("PreLoaded", function () {
     ToolForgeHandler.createForge();
 });
 createBlock("tcon_toolstation", [{ name: "Tool Station" }], "wood");
-Recipes2.addShapedWith2x2("block:tcon_toolstation", "a:b", { a: "item:tcon_pattern_blank", b: "crafting_table" });
+Recipes2.addShaped(BlockID.tcon_toolstation, "a:b", { a: ItemID.tcon_pattern_blank, b: VanillaBlockID.crafting_table });
 BlockModel.register(BlockID.tcon_toolstation, function (model, index) {
     model.addBox(0 / 16, 12 / 16, 0 / 16, 16 / 16, 16 / 16, 16 / 16, [["tcon_toolstation", 0], ["tcon_toolstation", 0], ["tcon_table_side", 0]]);
     model.addBox(0 / 16, 0 / 16, 0 / 16, 4 / 16, 12 / 16, 4 / 16, "tcon_table_side", 0);
@@ -4979,108 +4995,139 @@ ModAPI.addAPICallback("RecipeViewer", function (api) {
     RV = api.Core;
     UI.TextureSource.put("tcon.rv.table", FileTools.ReadImage(__dir__ + "res/terrain-atlas/smeltery/tcon_itemcast_2.png"));
     UI.TextureSource.put("tcon.rv.basin", FileTools.ReadImage(__dir__ + "res/terrain-atlas/smeltery/tcon_blockcast_2.png"));
-    var setLiquidScale = function (scale, text, liquid) {
-        scale.setBinding("texture", LiquidRegistry.getLiquidUITexture(liquid.liquid, 108, 234));
-        scale.setBinding("value", Math.min(1, liquid.amount / MatValue.BLOCK));
-        text.setBinding("text", LiquidRegistry.getLiquidName(liquid.liquid) + "\n" + liquid.amount + " mB");
-    };
-    Callback.addCallback("PostLoaded", function () {
-        RV.registerRecipeType("tcon_partbuilder", {
-            title: "Part Build",
-            contents: {
-                icon: BlockID.tcon_partbuilder,
+    var PartBuilderRV = /** @class */ (function (_super) {
+        __extends(PartBuilderRV, _super);
+        function PartBuilderRV() {
+            return _super.call(this, "Part Build", BlockID.tcon_partbuilder, {
                 drawing: [
                     { type: "bitmap", x: 476, y: 104, bitmap: "tcon.arrow", scale: 8 }
                 ],
                 elements: {
                     input0: { x: 180, y: 100, size: 128 },
                     input1: { x: 308, y: 100, size: 128 },
-                    output0: { x: 692, y: 100, size: 128 },
-                },
-                moveItems: { x: 840, y: 180, slots: ["slot0", "slot1"] }
-            },
-            recipeList: PatternRegistry.getAllRecipeForRV()
-        });
-        RV.registerRecipeType("tcon_melting", {
-            title: "Melting",
-            contents: {
-                icon: BlockID.tcon_smeltery,
-                description: "melting",
+                    output0: { x: 692, y: 100, size: 128 }
+                }
+            }) || this;
+        }
+        PartBuilderRV.prototype.getAllList = function () {
+            return PatternRegistry.getAllRecipeForRV();
+        };
+        return PartBuilderRV;
+    }(api.RecipeType));
+    api.RecipeTypeRegistry.register("tcon_partbuilder", new PartBuilderRV());
+    var MeltingRV = /** @class */ (function (_super) {
+        __extends(MeltingRV, _super);
+        function MeltingRV() {
+            var _this = _super.call(this, "Melting", BlockID.tcon_smeltery, {
                 drawing: [
                     { type: "bitmap", x: 86, y: 50, bitmap: "tcon.rv.smeltery", scale: 6 },
-                    { type: "bitmap", x: 614, y: 50, bitmap: "tcon.rv.smeltery", scale: 6 },
-                    { type: "bitmap", x: 452, y: 176, bitmap: "tcon.rv.fire_tank", scale: 6 }
+                    { type: "bitmap", x: 452, y: 176, bitmap: "tcon.rv.fire_tank", scale: 6 },
+                    { type: "bitmap", x: 614, y: 50, bitmap: "tcon.rv.smeltery", scale: 6 }
                 ],
                 elements: {
                     input0: { x: 182, y: 176, bitmap: "_default_slot_empty", size: 108 },
-                    scaleLiquid: { type: "scale", x: 710, y: 50, width: 108, height: 234, direction: 1 },
-                    textTemp: { type: "text", x: 500, y: 50, font: { size: 50, alignment: 1 } },
-                    textLiquid: { type: "text", x: 614, y: 380, font: { color: Color.WHITE, size: 40, shadow: 0.5 }, multiline: true }
+                    outputLiq0: { x: 710, y: 50, width: 108, height: 234 },
+                    textTemp: { type: "text", x: 500, y: 50, font: { size: 50, alignment: UI.Font.ALIGN_CENTER } }
                 }
-            },
-            recipeList: MeltingRecipe.getAllRecipeForRV(),
-            onOpen: function (elements, recipe) {
-                setLiquidScale(elements.get("scaleLiquid"), elements.get("textLiquid"), recipe.outputLiq);
-                elements.get("textTemp").setBinding("text", recipe.temp + "°C");
+            }) || this;
+            _this.setDescription("Melt");
+            _this.setTankLimit(MatValue.BLOCK);
+            return _this;
+        }
+        MeltingRV.prototype.getAllList = function () {
+            return MeltingRecipe.getAllRecipeForRV();
+        };
+        MeltingRV.prototype.onOpen = function (elements, recipe) {
+            elements.get("textTemp").setBinding("text", recipe.temp + "°C");
+        };
+        return MeltingRV;
+    }(api.RecipeType));
+    api.RecipeTypeRegistry.register("tcon_melting", new MeltingRV());
+    var AlloyingRV = /** @class */ (function (_super) {
+        __extends(AlloyingRV, _super);
+        function AlloyingRV() {
+            var _this = _super.call(this, "Alloying", BlockID.tcon_smeltery, {
+                drawing: [
+                    { type: "bitmap", x: 50, y: 50, bitmap: "tcon.rv.smeltery_wide", scale: 6 },
+                    { type: "bitmap", x: 488, y: 150, bitmap: "tcon.arrow", scale: 6 },
+                    { type: "bitmap", x: 650, y: 50, bitmap: "tcon.rv.smeltery", scale: 6 }
+                ],
+                elements: {
+                    inputLiq0: { x: 0, y: 1000, width: 108, height: 234 },
+                    inputLiq1: { x: 0, y: 1000, width: 108, height: 234 },
+                    inputLiq2: { x: 0, y: 1000, width: 108, height: 234 },
+                    inputLiq3: { x: 0, y: 1000, width: 108, height: 234 },
+                    inputLiq4: { x: 0, y: 1000, width: 108, height: 234 },
+                    inputLiq5: { x: 0, y: 1000, width: 108, height: 234 },
+                    inputLiq6: { x: 0, y: 1000, width: 108, height: 234 },
+                    inputLiq7: { x: 0, y: 1000, width: 108, height: 234 },
+                    outputLiq0: { x: 746, y: 50, width: 108, height: 234 }
+                }
+            }) || this;
+            _this.setDescription("Alloy");
+            return _this;
+        }
+        AlloyingRV.prototype.getAllList = function () {
+            return AlloyRecipe.getAllRecipeForRV();
+        };
+        AlloyingRV.prototype.onOpen = function (elements, recipe) {
+            if (recipe.inputLiq && recipe.outputLiq) {
+                var len = recipe.inputLiq.length;
+                var width = 216 / len;
+                var elem = void 0;
+                for (var i = 0; i < 8; i++) {
+                    elem = elements.get("inputLiq" + i);
+                    if (i < len) {
+                        elem.setPosition(146 + i * width, 50);
+                        elem.setSize(width, 234);
+                    }
+                    else {
+                        elem.setPosition(0, 1000);
+                    }
+                }
+                this.setTankLimit(Math.max.apply(Math, __spreadArray(__spreadArray([], recipe.inputLiq.map(function (rec) { return rec.amount; })), [recipe.outputLiq[0].amount])));
             }
-        });
-        RV.registerRecipeType("tcon_itemcast", {
-            title: "Item Casting",
-            contents: {
-                icon: BlockID.tcon_itemcast,
+        };
+        return AlloyingRV;
+    }(api.RecipeType));
+    api.RecipeTypeRegistry.register("tcon_alloying", new AlloyingRV());
+    var CastingRV = /** @class */ (function (_super) {
+        __extends(CastingRV, _super);
+        function CastingRV(name, icon, tileBitmap, castType) {
+            var _this = this;
+            var content = {
                 drawing: [
                     { type: "bitmap", x: 86, y: 50, bitmap: "tcon.rv.smeltery", scale: 6 },
                     { type: "bitmap", x: 386, y: 122, bitmap: "tcon.rv.faucet", scale: 6 },
-                    { type: "bitmap", x: 404, y: 284, bitmap: "tcon.rv.table", scale: 6 },
                     { type: "bitmap", x: 530, y: 182, bitmap: "tcon.arrow", scale: 6 }
                 ],
                 elements: {
                     input0: { x: 404, y: 188, bitmap: "_default_slot_empty", size: 96 },
                     output0: { x: 704, y: 176, size: 108 },
-                    scaleLiquid: { type: "scale", x: 182, y: 50, width: 108, height: 234, direction: 1 },
+                    inputLiq0: { x: 182, y: 50, width: 108, height: 234 },
                     scaleFlow: { type: "scale", x: 434, y: 122, width: 36, height: 66, value: 1 },
-                    textLiquid: { type: "text", x: 86, y: 380, font: { color: Color.WHITE, size: 40, shadow: 0.5 }, multiline: true },
-                    textTime: { type: "text", x: 596, y: 100, font: { size: 50, alignment: 1 } },
-                    textConsume: { type: "text", x: 758, y: 300, font: { color: Color.RED, size: 40, alignment: 1 } }
+                    textTime: { type: "text", x: 596, y: 100, font: { size: 50, alignment: UI.Font.ALIGN_CENTER } },
+                    textConsume: { type: "text", x: 758, y: 300, font: { color: Color.RED, size: 40, alignment: UI.Font.ALIGN_CENTER } }
                 }
-            },
-            recipeList: CastingRecipe.getAllRecipeForRV("table"),
-            onOpen: function (elements, recipe) {
-                setLiquidScale(elements.get("scaleLiquid"), elements.get("textLiquid"), recipe.inputLiq);
-                elements.get("scaleFlow").setBinding("texture", LiquidRegistry.getLiquidUITexture(recipe.inputLiq.liquid, 36, 66));
-                elements.get("textTime").setBinding("text", (CastingRecipe.calcCooldownTime(recipe.inputLiq.liquid, recipe.inputLiq.amount) / 20).toFixed(1) + " s");
-                elements.get("textConsume").setBinding("text", recipe.consume ? "Consumes cast!" : "");
-            }
-        });
-        RV.registerRecipeType("tcon_blockcast", {
-            title: "Block Casting",
-            contents: {
-                icon: BlockID.tcon_blockcast,
-                drawing: [
-                    { type: "bitmap", x: 86, y: 50, bitmap: "tcon.rv.smeltery", scale: 6 },
-                    { type: "bitmap", x: 386, y: 122, bitmap: "tcon.rv.faucet", scale: 6 },
-                    { type: "bitmap", x: 404, y: 284, bitmap: "tcon.rv.basin", scale: 6 },
-                    { type: "bitmap", x: 530, y: 182, bitmap: "tcon.arrow", scale: 6 }
-                ],
-                elements: {
-                    input0: { x: 404, y: 188, bitmap: "_default_slot_empty", size: 96 },
-                    output0: { x: 704, y: 176, size: 108 },
-                    scaleLiquid: { type: "scale", x: 182, y: 50, width: 108, height: 234, direction: 1 },
-                    scaleFlow: { type: "scale", x: 434, y: 122, width: 36, height: 66, value: 1 },
-                    textLiquid: { type: "text", x: 86, y: 380, font: { color: Color.WHITE, size: 40, shadow: 0.5 }, multiline: true },
-                    textTime: { type: "text", x: 596, y: 100, font: { size: 50, alignment: 1 } },
-                    textConsume: { type: "text", x: 758, y: 300, font: { color: Color.RED, size: 40, alignment: 1 } }
-                }
-            },
-            recipeList: CastingRecipe.getAllRecipeForRV("basin"),
-            onOpen: function (elements, recipe) {
-                setLiquidScale(elements.get("scaleLiquid"), elements.get("textLiquid"), recipe.inputLiq);
-                elements.get("scaleFlow").setBinding("texture", LiquidRegistry.getLiquidUITexture(recipe.inputLiq.liquid, 36, 66));
-                elements.get("textTime").setBinding("text", (CastingRecipe.calcCooldownTime(recipe.inputLiq.liquid, recipe.inputLiq.amount) / 20).toFixed(1) + " s");
-                elements.get("textConsume").setBinding("text", recipe.consume ? "Consumes cast!" : "");
-            }
-        });
-    });
+            };
+            content.drawing.push({ type: "bitmap", x: 404, y: 284, bitmap: tileBitmap, scale: 6 });
+            _this = _super.call(this, name, icon, content) || this;
+            _this.castType = castType;
+            _this.setTankLimit(MatValue.BLOCK);
+            return _this;
+        }
+        CastingRV.prototype.getAllList = function () {
+            return CastingRecipe.getAllRecipeForRV(this.castType);
+        };
+        CastingRV.prototype.onOpen = function (elements, recipe) {
+            elements.get("scaleFlow").setBinding("texture", LiquidRegistry.getLiquidUITexture(recipe.inputLiq[0].liquid, 36, 66));
+            elements.get("textTime").setBinding("text", (CastingRecipe.calcCooldownTime(recipe.inputLiq[0].liquid, recipe.inputLiq[0].amount) / 20).toFixed(1) + " s");
+            elements.get("textConsume").setBinding("text", recipe.consume ? "Consumes cast!" : "");
+        };
+        return CastingRV;
+    }(api.RecipeType));
+    api.RecipeTypeRegistry.register("tcon_itemcast", new CastingRV("Item Casting", BlockID.tcon_itemcast, "tcon.rv.table", "table"));
+    api.RecipeTypeRegistry.register("tcon_blockcast", new CastingRV("Block Casting", BlockID.tcon_blockcast, "tcon.rv.basin", "basin"));
 });
 ModAPI.registerAPI("TConAPI", {
     MatValue: MatValue,

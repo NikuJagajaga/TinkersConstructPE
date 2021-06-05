@@ -22,28 +22,28 @@
         {
             "label": "Push All",
             "type": "shell",
-            "command": "adb push 'D:/icmod/Tinkers Construct/src/.' '/storage/emulated/0/games/horizon/packs/Inner_Core_Test/innercore/mods/Tinkers Construct/.'",
+            "command": "adb push '${workspaceFolder}/src/.' '/storage/emulated/0/games/horizon/packs/Inner_Core/innercore/mods/${workspaceFolderBasename}/.'",
             "group": "build",
             "problemMatcher": []
         },
         {
             "label": "Push Libs",
             "type": "shell",
-            "command": "adb push 'D:/icmod/Tinkers Construct/src/lib/.' '/storage/emulated/0/games/horizon/packs/Inner_Core_Test/innercore/mods/Tinkers Construct/lib/.'",
+            "command": "adb push '${workspaceFolder}/src/lib/.' '/storage/emulated/0/games/horizon/packs/Inner_Core_Test/innercore/mods/${workspaceFolderBasename}/lib/.'",
             "group": "build",
             "problemMatcher": []
         },
         {
             "label": "Push Pre Code",
             "type": "shell",
-            "command": "adb push 'D:/icmod/Tinkers Construct/src/preloader.js' '/storage/emulated/0/games/horizon/packs/Inner_Core_Test/innercore/mods/Tinkers Construct/preloader.js'",
+            "command": "adb push '${workspaceFolder}/src/preloader.js' '/storage/emulated/0/games/horizon/packs/Inner_Core_Test/innercore/mods/${workspaceFolderBasename}/preloader.js'",
             "group": "build",
             "problemMatcher": []
         },
         {
             "label": "Push Code",
             "type": "shell",
-            "command": "adb push 'D:/icmod/Tinkers Construct/src/main.js' '/storage/emulated/0/games/horizon/packs/Inner_Core_Test/innercore/mods/Tinkers Construct/main.js'",
+            "command": "adb push '${workspaceFolder}/src/main.js' '/storage/emulated/0/games/horizon/packs/Inner_Core/innercore/mods/${workspaceFolderBasename}/main.js'",
             "group": "build",
             "problemMatcher": []
         },

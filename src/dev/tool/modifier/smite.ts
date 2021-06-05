@@ -1,6 +1,6 @@
 createBlock("tcon_graveyard_soil", [{name: "Graveyard Soil"}], "dirt");
 createBlock("tcon_consecrated_soil", [{name: "Consecrated Soil"}], "dirt");
-Recipes2.addShapelessWith2x2("block:tcon_graveyard_soil", ["dirt", "rotten_flesh", {item: "dye", data: 15}]);
+Recipes2.addShapeless(BlockID.tcon_graveyard_soil, [VanillaBlockID.dirt, VanillaItemID.rotten_flesh, {id: VanillaItemID.dye, data: 15}]);
 Recipes.addFurnace(BlockID.tcon_graveyard_soil, BlockID.tcon_consecrated_soil);
 
 
@@ -29,5 +29,5 @@ class ModSmite extends TinkersModifier {
     onAttack(item: ItemInstance, victim: number, level: number): number {
         return ModSmite.targets[Entity.getType(victim)] ? 7 / this.max * level : 0;
     }
-    
+
 }

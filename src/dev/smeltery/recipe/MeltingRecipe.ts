@@ -14,6 +14,9 @@ class MeltingRecipe {
     }
 
     static addRecipe(item: number | Tile, liquid: string, amount: number, temp: number = this.calcTemp(liquid, amount)): void {
+        if(!item){
+            return;
+        }
         this.recipeItem[typeof item === "number" ? item : item.id + ":" + item.data] = {
             liquid: liquid,
             amount: amount,
@@ -33,15 +36,15 @@ class MeltingRecipe {
         return (id + ":" + data) in this.recipeItem || id in this.recipeItem || false;
     }
 
-    static getAllRecipeForRV(): {input: ItemInstance[], output: ItemInstance[], outputLiq: LiquidInstance, temp: number}[] {
-        const list = [];
+    static getAllRecipeForRV(): RecipePattern[] {
+        const list: RecipePattern[] = [];
         let split: string[];
         for(let key in this.recipeItem){
             split = key.split(":");
             list.push({
                 input: [{id: parseInt(split[0]), count: 1, data: split[1] ? parseInt(split[1]) : 0}],
                 output: [],
-                outputLiq: {liquid: this.recipeItem[key].liquid, amount: this.recipeItem[key].amount},
+                outputLiq: [{liquid: this.recipeItem[key].liquid, amount: this.recipeItem[key].amount}],
                 temp: this.recipeItem[key].temp
             });
         }

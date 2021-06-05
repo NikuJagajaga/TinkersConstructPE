@@ -17,6 +17,13 @@ class AlloyRecipe {
         });
     }
 
+    static getAllRecipeForRV(): RecipePattern[] {
+        return this.data.map(recipe => ({
+            inputLiq: recipe.inputs,
+            outputLiq: [recipe.result]
+        }));
+    }
+
 }
 
 

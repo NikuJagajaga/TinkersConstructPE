@@ -20,12 +20,12 @@ BlockModel.register(BlockID.tcon_partbuilder, (model, index) => {
     return model;
 }, 6);
 
-Recipes2.addShapedWith2x2({item: "block:tcon_partbuilder", data: 0}, "a:b", {a: "item:tcon_pattern_blank", b: {item: "log", data: 0}}, "tcon_partbuilder_0");
-Recipes2.addShapedWith2x2({item: "block:tcon_partbuilder", data: 1}, "a:b", {a: "item:tcon_pattern_blank", b: {item: "log", data: 1}}, "tcon_partbuilder_1");
-Recipes2.addShapedWith2x2({item: "block:tcon_partbuilder", data: 2}, "a:b", {a: "item:tcon_pattern_blank", b: {item: "log", data: 2}}, "tcon_partbuilder_2");
-Recipes2.addShapedWith2x2({item: "block:tcon_partbuilder", data: 3}, "a:b", {a: "item:tcon_pattern_blank", b: {item: "log", data: 3}}, "tcon_partbuilder_3");
-Recipes2.addShapedWith2x2({item: "block:tcon_partbuilder", data: 4}, "a:b", {a: "item:tcon_pattern_blank", b: {item: "log2", data: 0}}, "tcon_partbuilder_4");
-Recipes2.addShapedWith2x2({item: "block:tcon_partbuilder", data: 5}, "a:b", {a: "item:tcon_pattern_blank", b: {item: "log2", data: 1}}, "tcon_partbuilder_5");
+Recipes2.addShaped({id: BlockID.tcon_partbuilder, data: 0}, "a:b", {a: ItemID.tcon_pattern_blank, b: {id: VanillaBlockID.log, data: 0}});
+Recipes2.addShaped({id: BlockID.tcon_partbuilder, data: 1}, "a:b", {a: ItemID.tcon_pattern_blank, b: {id: VanillaBlockID.log, data: 1}});
+Recipes2.addShaped({id: BlockID.tcon_partbuilder, data: 2}, "a:b", {a: ItemID.tcon_pattern_blank, b: {id: VanillaBlockID.log, data: 2}});
+Recipes2.addShaped({id: BlockID.tcon_partbuilder, data: 3}, "a:b", {a: ItemID.tcon_pattern_blank, b: {id: VanillaBlockID.log, data: 3}});
+Recipes2.addShaped({id: BlockID.tcon_partbuilder, data: 4}, "a:b", {a: ItemID.tcon_pattern_blank, b: {id: VanillaBlockID.log2, data: 0}});
+Recipes2.addShaped({id: BlockID.tcon_partbuilder, data: 5}, "a:b", {a: ItemID.tcon_pattern_blank, b: {id: VanillaBlockID.log2, data: 1}});
 
 
 class PartBuilder extends TableBase {
@@ -79,7 +79,7 @@ class PartBuilder extends TableBase {
                 }
             }
         };
-    
+
         const elements: UI.UIElementSet = {
             slot0: {type: "slot", x: 200, y: 90, size: 100, isValid: id => PatternRegistry.isPattern(id), bitmap: "tcon.slot.pattern"},
             slot1: {type: "slot", x: 300, y: 90, size: 100, isValid: id => {
@@ -129,7 +129,7 @@ class PartBuilder extends TableBase {
                 }
             }}
         };
-    
+
         for(let i = 0; i < 36; i++){
             elements["inv" + i] = {
                 type: "invSlot",
@@ -139,7 +139,7 @@ class PartBuilder extends TableBase {
                 index: i
             }
         }
-    
+
         const window = new UI.Window({
             location: {x: 50, y: 20, width: 600, height: 450},
             drawing: [
@@ -150,7 +150,7 @@ class PartBuilder extends TableBase {
             ],
             elements: elements
         });
-    
+
         const window2 = new UI.Window({
             location: {x: 650, y: 20, width: 300, height: 450},
             drawing: [
@@ -162,13 +162,13 @@ class PartBuilder extends TableBase {
                 textStats: {type: "text", x: 60, y: 200, font: {size: 70, color: Color.WHITE}, multiline: true}
             }
         });
-    
+
         const elements2 = window2.getElements();
-    
+
         window.addAdjacentWindow(window2);
         window.setInventoryNeeded(true);
         window.setBlockingBackground(true);
-    
+
         window.setEventListener({
             onOpen: win => {
                 Threading.initThread("tcon_crafting", () => {
@@ -240,9 +240,9 @@ class PartBuilder extends TableBase {
                 tile.setAnimItem();
             }
         });
-    
+
         return window;
-    
+
     })();
 
     constructor(){

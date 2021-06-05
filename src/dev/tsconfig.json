@@ -55,7 +55,7 @@
         "tool/modifier/mending.ts",
         "tool/modifier/shulking.ts",
         "tool/modifier/web.ts",
-        
+
         "table/PatternChest.ts",
         "table/TableBase.ts",
         "teble/CraftingStation.ts",
@@ -80,7 +80,7 @@
         "integration/guide_api.ts",
 
         "footer.ts"
-        
+
       ],
     "files": [
         "../../../_MODULE_/android-declarations.d.ts",
@@ -90,7 +90,7 @@
         "../../../_MODULE_/LiquidLib.d.ts",
         "../../../_MODULE_/TileRender.d.ts",
         "../../../_MODULE_/StorageInterface.d.ts",
-        "../../../_MODULE_/VanillaRecipe.d.ts",
+        "../../../_MODULE_/RecipeViewer.d.ts",
         "../../../_MODULE_/additional.d.ts"
     ]
 }

@@ -18,18 +18,18 @@ BlockModel.register(BlockID.tcon_stenciltable, (model, index) => {
     return model;
 }, 6);
 
-Recipes2.addShapedWith2x2({item: "block:tcon_stenciltable", data: 0}, "a:b", {a: "item:tcon_pattern_blank", b: {item: "planks", data: 0}}, "tcon_stenciltable_0");
-Recipes2.addShapedWith2x2({item: "block:tcon_stenciltable", data: 1}, "a:b", {a: "item:tcon_pattern_blank", b: {item: "planks", data: 1}}, "tcon_stenciltable_1");
-Recipes2.addShapedWith2x2({item: "block:tcon_stenciltable", data: 2}, "a:b", {a: "item:tcon_pattern_blank", b: {item: "planks", data: 2}}, "tcon_stenciltable_2");
-Recipes2.addShapedWith2x2({item: "block:tcon_stenciltable", data: 3}, "a:b", {a: "item:tcon_pattern_blank", b: {item: "planks", data: 3}}, "tcon_stenciltable_3");
-Recipes2.addShapedWith2x2({item: "block:tcon_stenciltable", data: 4}, "a:b", {a: "item:tcon_pattern_blank", b: {item: "planks", data: 4}}, "tcon_stenciltable_4");
-Recipes2.addShapedWith2x2({item: "block:tcon_stenciltable", data: 5}, "a:b", {a: "item:tcon_pattern_blank", b: {item: "planks", data: 5}}, "tcon_stenciltable_5");
+Recipes2.addShaped({id: BlockID.tcon_stenciltable, data: 0}, "a:b", {a: ItemID.tcon_pattern_blank, b: {id: VanillaBlockID.planks, data: 0}});
+Recipes2.addShaped({id: BlockID.tcon_stenciltable, data: 1}, "a:b", {a: ItemID.tcon_pattern_blank, b: {id: VanillaBlockID.planks, data: 1}});
+Recipes2.addShaped({id: BlockID.tcon_stenciltable, data: 2}, "a:b", {a: ItemID.tcon_pattern_blank, b: {id: VanillaBlockID.planks, data: 2}});
+Recipes2.addShaped({id: BlockID.tcon_stenciltable, data: 3}, "a:b", {a: ItemID.tcon_pattern_blank, b: {id: VanillaBlockID.planks, data: 3}});
+Recipes2.addShaped({id: BlockID.tcon_stenciltable, data: 4}, "a:b", {a: ItemID.tcon_pattern_blank, b: {id: VanillaBlockID.planks, data: 4}});
+Recipes2.addShaped({id: BlockID.tcon_stenciltable, data: 5}, "a:b", {a: ItemID.tcon_pattern_blank, b: {id: VanillaBlockID.planks, data: 5}});
 
 
 class StencilTable extends TableBase {
 
     private static readonly window = (() => {
-    
+
         const elements: UI.UIElementSet = {
             slot0: {type: "slot", x: 300, y: 90, size: 100, isValid: id => id === ItemID.tcon_pattern_blank},
             slotResult: {type: "slot", x: 600, y: 90, size: 100, isValid: () => false, clicker: {
@@ -58,7 +58,7 @@ class StencilTable extends TableBase {
             }},
             buttonExit: {type: "closeButton", x: 907, y: 18, bitmap: "classic_close_button", bitmap2: "classic_close_button_down", scale: 5}
         };
-    
+
         for(let i = 0; i < 36; i++){
             elements["inv" + i] = {
                 type: "invSlot",
@@ -68,7 +68,7 @@ class StencilTable extends TableBase {
                 index: i
             }
         }
-    
+
         const window = new UI.Window({
             location: {x: 200, y: 20, width: 600, height: 450},
             drawing: [
@@ -80,10 +80,10 @@ class StencilTable extends TableBase {
             ],
             elements: elements
         });
-    
+
         window.setInventoryNeeded(true);
         window.setBlockingBackground(true);
-    
+
         window.setEventListener({
             onOpen: win => {
                 Threading.initThread("tcon_crafting", () => {
@@ -114,9 +114,9 @@ class StencilTable extends TableBase {
                 tile.setAnimItem();
             }
         });
-    
+
         return window;
-    
+
     })();
 
     constructor(){

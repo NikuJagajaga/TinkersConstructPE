@@ -119,10 +119,10 @@ class ToolForgeHandler {
     private static window = (() => {
 
         const window = new UI.StandardWindow({
-            standart: {
+            standard: {
                 header: {text: {text: "Tool Forge"}},
-                inventory: {standart: true},
-                background: {standart: true}
+                inventory: {standard: true},
+                background: {standard: true}
             },
             drawing: [
                 {type: "frame", x: 580, y: 0, width: 400, height: 240, bitmap: "tcon.frame", scale: 4},
@@ -219,13 +219,13 @@ class ToolForgeHandler {
                 Threading.initThread("tcon_crafting", () => {
 
                     try{
-                        
+
                         while(win.isOpened()){
-            
+
                             let consume: number[] = [];
-            
+
                             const slotTool = container.getSlot("slot0");
-                            
+
                             if(TinkersToolHandler.isTool(slotTool.id) && slotTool.extra){
 
                                 const slots: ItemInstance[] = [];
@@ -279,7 +279,7 @@ class ToolForgeHandler {
                                 let value = 0;
                                 find = null;
                                 count = 0;
-                                
+
                                 for(let i = 0; i < mat.length; i++){
                                     find = items.find(item => item.id === mat[i]);
                                     if(find){
@@ -313,7 +313,7 @@ class ToolForgeHandler {
                                         return min;
                                     });
                                     consume[0] = 1;
-        
+
                                     const extra = slotTool.extra.copy();
                                     extra.putInt("durability", newDur);
                                     extra.putString("modifiers", TinkersModifierHandler.encodeToString(modifiers));
@@ -322,10 +322,10 @@ class ToolForgeHandler {
                                 else{
                                     container.clearSlot("slotResult");
                                 }
-                                
+
                             }
                             else{
-            
+
                                 const result = ToolForgeHandler.recipe.find(recipe => {
                                     let slot: UI.Slot;
                                     let partData: TinkersPartData;
@@ -343,7 +343,7 @@ class ToolForgeHandler {
                                     }
                                     return true;
                                 });
-                                
+
                                 if(result){
                                     const materials = [];
                                     let slot: UI.Slot;
@@ -365,7 +365,7 @@ class ToolForgeHandler {
                                 else{
                                     container.clearSlot("slotResult");
                                 }
-            
+
                             }
 
                             const slotResult = container.getSlot("slotResult");
@@ -383,7 +383,7 @@ class ToolForgeHandler {
 
                             ToolForgeHandler.consume = consume;
                             Thread.sleep(100);
-            
+
                         }
 
                     }
@@ -480,7 +480,7 @@ Callback.addCallback("PreLoaded", () => {
 
 
 createBlock("tcon_toolstation", [{name: "Tool Station"}], "wood");
-Recipes2.addShapedWith2x2("block:tcon_toolstation", "a:b", {a: "item:tcon_pattern_blank", b: "crafting_table"});
+Recipes2.addShaped(BlockID.tcon_toolstation, "a:b", {a: ItemID.tcon_pattern_blank, b: VanillaBlockID.crafting_table});
 BlockModel.register(BlockID.tcon_toolstation, (model, index) => {
     model.addBox( 0/16, 12/16,  0/16,  16/16, 16/16, 16/16, [["tcon_toolstation", 0], ["tcon_toolstation", 0], ["tcon_table_side", 0]]);
     model.addBox( 0/16,  0/16,  0/16,   4/16, 12/16,  4/16, "tcon_table_side", 0);

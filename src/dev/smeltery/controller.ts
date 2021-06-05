@@ -44,10 +44,10 @@ class SmelteryHandler {
         };
 
     private static window = new UI.StandardWindow({
-        standart: {
+        standard: {
             header: {text: {text: "Smeltery"}},
-            inventory: {standart: true},
-            background: {standart: true}
+            inventory: {standard: true},
+            background: {standard: true}
         },
         drawing: [
             {type: "frame", x: 20 * SCALE, y: 10 * SCALE, width: 18 * SCALE, height: 18 * SCALE, bitmap: "classic_slot", scale: SCALE},

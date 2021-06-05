@@ -77,8 +77,8 @@ class CastingRecipe {
         return this.basin[id] ? this.basin[id][liquid] : undefined;
     }
 
-    static getAllRecipeForRV(type: "table" | "basin"): {input: ItemInstance[], output: ItemInstance[], inputLiq: LiquidInstance, consume: boolean}[] {
-        const list = [];
+    static getAllRecipeForRV(type: "table" | "basin"): RecipePattern[] {
+        const list: RecipePattern[] = [];
         let key: string;
         let liquid: string;
         let id: number;
@@ -92,7 +92,7 @@ class CastingRecipe {
                 list.push({
                     input: [{id: id, count: 1, data: 0}],
                     output: [{id: result.id, count: 1, data: result.data}],
-                    inputLiq: {liquid: liquid, amount: limits[liquid] || limits.__global},
+                    inputLiq: [{liquid: liquid, amount: limits[liquid] || limits.__global}],
                     consume: result.consume
                 });
             }
