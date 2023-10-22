@@ -83,14 +83,14 @@
 
       ],
     "files": [
-        "../../../_MODULE_/android-declarations.d.ts",
-        "../../../_MODULE_/android.d.ts",
-        "../../../_MODULE_/core-engine.d.ts",
-        "../../../_MODULE_/ToolLib.d.ts",
-        "../../../_MODULE_/LiquidLib.d.ts",
-        "../../../_MODULE_/TileRender.d.ts",
-        "../../../_MODULE_/StorageInterface.d.ts",
-        "../../../_MODULE_/RecipeViewer.d.ts",
-        "../../../_MODULE_/additional.d.ts"
+        "../../declarations/android-declarations.d.ts",
+        "../../declarations/android.d.ts",
+        "../../declarations/core-engine.d.ts",
+        "../../declarations/ToolLib.d.ts",
+        "../../declarations/LiquidLib.d.ts",
+        "../../declarations/TileRender.d.ts",
+        "../../declarations/StorageInterface.d.ts",
+        "../../declarations/RecipeViewer.d.ts",
+        "../../declarations/additional.d.ts"
     ]
 }

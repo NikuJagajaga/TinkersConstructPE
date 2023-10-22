@@ -24,10 +24,14 @@ var __assign = (this && this.__assign) || function () {
     };
     return __assign.apply(this, arguments);
 };
-var __spreadArray = (this && this.__spreadArray) || function (to, from) {
-    for (var i = 0, il = from.length, j = to.length; i < il; i++, j++)
-        to[j] = from[i];
-    return to;
+var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
+    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
+        if (ar || !(i in from)) {
+            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+            ar[i] = from[i];
+        }
+    }
+    return to.concat(ar || Array.prototype.slice.call(from));
 };
 var _a, _b, _c, _d, _e, _f, _g, _h;
 IMPORT("ToolLib");
@@ -179,7 +183,7 @@ var BlockModel = /** @class */ (function () {
                     render.addEntry(this.data[i].func(BlockRenderer.createModel(), j));
                     BlockRenderer.setStaticICRender(this.data[i].id, j, render);
                     ItemModel.getFor(this.data[i].id, j).setModel(render);
-                    setLoadingTip("[TCon]: register render (" + count++ + " / " + this.amount + ")");
+                    setLoadingTip("[TCon]: register render (".concat(count++, " / ").concat(this.amount, ")"));
                 }
             }
         }
@@ -2154,23 +2158,23 @@ var ToolData = /** @class */ (function () {
     ToolData.prototype.getLevelupMessage = function (lv) {
         var name = Item.getName(this.item.id);
         switch (lv) {
-            case 1: return "You begin to feel comfortable handling the " + name;
-            case 2: return "You are now accustomed to the weight of the " + name;
-            case 3: return "You have become adept at handling the " + name;
-            case 4: return "You are now an expert at using the " + name + " !";
-            case 5: return "You have mastered the " + name + "!";
-            case 6: return "You have grandmastered the " + name + "!";
-            case 7: return "You feel like you could fulfill mighty deeds with your " + name + "!";
-            case 8: return "You and your " + name + " are living legends!";
-            case 9: return "No god could stand in the way of you and your " + name + "!";
-            case 10: return "Your " + name + " is pure awesome.";
-            default: return "Your " + name + " has reached level " + lv;
+            case 1: return "You begin to feel comfortable handling the ".concat(name);
+            case 2: return "You are now accustomed to the weight of the ".concat(name);
+            case 3: return "You have become adept at handling the ".concat(name);
+            case 4: return "You are now an expert at using the ".concat(name, " !");
+            case 5: return "You have mastered the ".concat(name, "!");
+            case 6: return "You have grandmastered the ".concat(name, "!");
+            case 7: return "You feel like you could fulfill mighty deeds with your ".concat(name, "!");
+            case 8: return "You and your ".concat(name, " are living legends!");
+            case 9: return "No god could stand in the way of you and your ".concat(name, "!");
+            case 10: return "Your ".concat(name, " is pure awesome.");
+            default: return "Your ".concat(name, " has reached level ").concat(lv);
         }
     };
     ToolData.prototype.getName = function (name) {
         var head = Material[this.materials[1]].getName();
         if (this.isBroken()) {
-            return "Broken " + head + " " + name;
+            return "Broken ".concat(head, " ").concat(name);
         }
         var xp = this.item.extra.getInt("xp");
         var total = 0;
@@ -2182,7 +2186,7 @@ var ToolData = /** @class */ (function () {
             total += next;
             next *= Cfg.toolLeveling.multiplier;
         }
-        return head + " " + name + "\n\u00A77" + (this.stats.durability - this.item.extra.getInt("durability")) + " / " + this.stats.durability + "\nLevel: " + this.getLevelName() + "\nXP: " + (xp - total) + " / " + next;
+        return "".concat(head, " ").concat(name, "\n\u00A77").concat(this.stats.durability - this.item.extra.getInt("durability"), " / ").concat(this.stats.durability, "\nLevel: ").concat(this.getLevelName(), "\nXP: ").concat(xp - total, " / ").concat(next);
     };
     ToolData.prototype.forEachModifiers = function (func) {
         for (var key in this.modifiers) {
@@ -2249,7 +2253,7 @@ var PartRegistry = /** @class */ (function () {
         var _this = this;
         var name = material.getName();
         this.types.forEach(function (type) {
-            var id = createItem("tconpart_" + type.key + "_" + key, name + " " + type.name);
+            var id = createItem("tconpart_".concat(type.key, "_").concat(key), "".concat(name, " ").concat(type.name));
             Item.addCreativeGroup("tconpart_" + type.key, type.name, [id]);
             _this.data[id] = { type: type.key, material: key };
             var liquid = material.getMoltenLiquid();
@@ -3488,7 +3492,7 @@ var PartBuilder = /** @class */ (function (_super) {
                                             "Extra" + "\n" +
                                             "Durability: " + statsExtra.durability;
                                         if (!Material[key].isMetal) {
-                                            textCost = "Material Value:  " + slot.count + " / " + recipe.cost;
+                                            textCost = "Material Value:  ".concat(slot.count, " / ").concat(recipe.cost);
                                             if (slot.count >= recipe.cost) {
                                                 result = PartRegistry.getIDFromData(recipe.type, key);
                                             }
@@ -3645,7 +3649,7 @@ var ToolForgeHandler = /** @class */ (function () {
             "Attack: " + ((toolData.stats.damage * 100 | 0) / 100) + "\n" +
             "Modifiers: " + (Cfg.modifierSlots + toolData.getLevel() - modifiers.length));
         container.setText("textModifiers", modifiers.map(function (mod) {
-            return Modifier[mod.type].getName() + " (" + mod.level + "/" + Modifier[mod.type].max + ")";
+            return "".concat(Modifier[mod.type].getName(), " (").concat(mod.level, "/").concat(Modifier[mod.type].max, ")");
         }).join("\n"));
     };
     ToolForgeHandler.getWindow = function () {
@@ -5085,7 +5089,7 @@ ModAPI.addAPICallback("RecipeViewer", function (api) {
                         elem.setPosition(0, 1000);
                     }
                 }
-                this.setTankLimit(Math.max.apply(Math, __spreadArray(__spreadArray([], recipe.inputLiq.map(function (rec) { return rec.amount; })), [recipe.outputLiq[0].amount])));
+                this.setTankLimit(Math.max.apply(Math, __spreadArray(__spreadArray([], recipe.inputLiq.map(function (rec) { return rec.amount; }), false), [recipe.outputLiq[0].amount], false)));
             }
         };
         return AlloyingRV;
