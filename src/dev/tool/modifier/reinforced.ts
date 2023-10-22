@@ -1,5 +1,5 @@
 createItem("tcon_reinforcement", "Reinforcement");
-Recipes2.addShaped(ItemID.tcon_reinforcement, "aaa:aba:aaa", {a: VanillaBlockID.obsidian, b: ItemID.tcon_cast_largeplate});
+Recipes2.addShaped(ItemID.tcon_reinforcement, "aaa:aba:aaa", {a: "obsidian", b: ItemID.tcon_cast_largeplate});
 
 
 class ModReinforced extends TinkersModifier {

@@ -34,9 +34,11 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
     return to.concat(ar || Array.prototype.slice.call(from));
 };
 var _a, _b, _c, _d, _e, _f, _g, _h;
+IMPORT("BlockEngine");
 IMPORT("ToolLib");
 IMPORT("TileRender");
 IMPORT("StorageInterface");
+IMPORT("SoundLib");
 IMPORT("EnhancedRecipes");
 IMPORT("ConnectedTexture");
 var Color = android.graphics.Color;
@@ -112,6 +114,14 @@ var isBlockID = function (id) {
 var isItemID = function (id) {
     var info = IDRegistry.getIdInfo(id);
     return info && info.startsWith("item");
+};
+var getIDData = function (item, defaultData) {
+    if (defaultData === void 0) { defaultData = -1; }
+    switch (typeof item) {
+        case "string": return IDConverter.getIDData(item);
+        case "number": return { id: item, data: defaultData };
+        default: return typeof item.id === "string" ? { id: IDConverter.getID(item.id), data: item.data } : item;
+    }
 };
 var createBlock = function (namedID, defineData, material) {
     if (material === void 0) { material = "stone"; }
@@ -201,29 +211,10 @@ Callback.addCallback("PostLoaded", function () {
         BlockModel.run();
     });
 });
-var Sound = /** @class */ (function () {
-    function Sound(name) {
-        this.media = new android.media.MediaPlayer();
-        this.media.setDataSource(__dir__ + "res/sounds/tcon/" + name);
-        this.media.prepare();
-    }
-    Sound.prototype.play = function () {
-        this.media.start();
-    };
-    Sound.prototype.pause = function () {
-        this.media.pause();
-    };
-    Sound.prototype.reset = function () {
-        this.media.reset();
-    };
-    Sound.prototype.stop = function () {
-        this.media.stop();
-        this.media.prepare();
-    };
-    return Sound;
-}());
-var soundSaw = new Sound("saw.ogg");
-var soundLevelup = new Sound("levelup.ogg");
+SoundManager.init(16);
+SoundManager.setResourcePath(__dir__ + "res/sounds/");
+SoundManager.registerSound("saw.ogg", "tcon/saw.ogg");
+SoundManager.registerSound("levelup.ogg", "tcon/levelup.ogg");
 var MoltenLiquid = /** @class */ (function () {
     function MoltenLiquid() {
     }
@@ -463,12 +454,13 @@ var MeltingRecipe = /** @class */ (function () {
     MeltingRecipe.calcTemp = function (liquid, amount) {
         return Math.pow((amount / MatValue.BLOCK), this.LOG9_2) * MoltenLiquid.getTemp(liquid) | 0;
     };
-    MeltingRecipe.addRecipe = function (item, liquid, amount, temp) {
+    MeltingRecipe.addRecipe = function (source, liquid, amount, temp) {
         if (temp === void 0) { temp = this.calcTemp(liquid, amount); }
-        if (!item) {
+        if (!source) {
             return;
         }
-        this.recipeItem[typeof item === "number" ? item : item.id + ":" + item.data] = {
+        var item = getIDData(source);
+        this.recipeItem[item.id + ":" + item.data] = {
             liquid: liquid,
             amount: amount,
             temp: temp
@@ -478,10 +470,10 @@ var MeltingRecipe = /** @class */ (function () {
         this.addRecipe(item, liquid, amount, this.calcTemp(liquid, timeAmount));
     };
     MeltingRecipe.getRecipe = function (id, data) {
-        return this.recipeItem[id + ":" + data] || this.recipeItem[id];
+        return this.recipeItem[id + ":" + data] || this.recipeItem[id + ":-1"];
     };
     MeltingRecipe.isExist = function (id, data) {
-        return (id + ":" + data) in this.recipeItem || id in this.recipeItem || false;
+        return (id + ":" + data) in this.recipeItem || (id + ":-1") in this.recipeItem || false;
     };
     MeltingRecipe.getAllRecipeForRV = function () {
         var list = [];
@@ -489,7 +481,7 @@ var MeltingRecipe = /** @class */ (function () {
         for (var key in this.recipeItem) {
             split = key.split(":");
             list.push({
-                input: [{ id: parseInt(split[0]), count: 1, data: split[1] ? parseInt(split[1]) : 0 }],
+                input: [{ id: parseInt(split[0]), count: 1, data: parseInt(split[1]) }],
                 output: [],
                 outputLiq: [{ liquid: this.recipeItem[key].liquid, amount: this.recipeItem[key].amount }],
                 temp: this.recipeItem[key].temp
@@ -509,70 +501,70 @@ var MeltingRecipe = /** @class */ (function () {
     MeltingRecipe.recipeEnt = {};
     return MeltingRecipe;
 }());
-MeltingRecipe.addRecipe(VanillaBlockID.ice, "water", 1000, 305 - 300);
-MeltingRecipe.addRecipe(VanillaBlockID.packed_ice, "water", 2000, 310 - 300);
-MeltingRecipe.addRecipe(VanillaBlockID.snow, "water", 1000, 305 - 300);
-MeltingRecipe.addRecipe(VanillaItemID.snowball, "water", 125, 301 - 300);
-MeltingRecipe.addRecipe(VanillaItemID.rotten_flesh, "blood", 40);
-MeltingRecipe.addRecipeForAmount(VanillaBlockID.stone, "molten_stone", MatValue.SEARED_MATERIAL, MatValue.ORE);
-MeltingRecipe.addRecipeForAmount(VanillaBlockID.cobblestone, "molten_stone", MatValue.SEARED_MATERIAL, MatValue.ORE);
-MeltingRecipe.addRecipe(VanillaBlockID.obsidian, "molten_obsidian", MatValue.ORE);
-MeltingRecipe.addRecipe(VanillaItemID.horsearmoriron, "molten_iron", MatValue.INGOT * 2);
-MeltingRecipe.addRecipe(VanillaItemID.horsearmorgold, "molten_gold", MatValue.INGOT * 2);
-MeltingRecipe.addRecipe(VanillaBlockID.rail, "molten_iron", MatValue.INGOT * 6 / 16);
-MeltingRecipe.addRecipe(VanillaBlockID.activator_rail, "molten_iron", MatValue.INGOT);
-MeltingRecipe.addRecipe(VanillaBlockID.detector_rail, "molten_iron", MatValue.INGOT);
-MeltingRecipe.addRecipe(VanillaBlockID.golden_rail, "molten_gold", MatValue.INGOT);
-MeltingRecipe.addRecipeForAmount(VanillaBlockID.dirt, "molten_dirt", MatValue.INGOT, MatValue.BRICK_BLOCK);
-MeltingRecipe.addRecipe(VanillaItemID.clay_ball, "molten_clay", MatValue.INGOT);
-MeltingRecipe.addRecipe(VanillaBlockID.clay, "molten_clay", MatValue.BRICK_BLOCK);
-MeltingRecipe.addRecipe(VanillaBlockID.emerald_ore, "molten_emerald", MatValue.GEM * Cfg.oreToIngotRatio);
-MeltingRecipe.addRecipe(VanillaItemID.emerald, "molten_emerald", MatValue.GEM);
-MeltingRecipe.addRecipe(VanillaBlockID.emerald_block, "molten_emerald", MatValue.GEM * 9);
-MeltingRecipe.addRecipe(VanillaBlockID.sand, "molten_glass", MatValue.GLASS);
-MeltingRecipe.addRecipe(VanillaBlockID.glass, "molten_glass", MatValue.GLASS);
-MeltingRecipe.addRecipe(VanillaBlockID.glass_pane, "molten_glass", MatValue.GLASS * 6 / 16);
-MeltingRecipe.addRecipe(VanillaItemID.glass_bottle, "molten_glass", MatValue.GLASS);
-MeltingRecipe.addRecipe(VanillaItemID.iron_nugget, "molten_iron", MatValue.NUGGET);
-MeltingRecipe.addRecipe(VanillaItemID.iron_ingot, "molten_iron", MatValue.INGOT);
-MeltingRecipe.addRecipe(VanillaBlockID.iron_block, "molten_iron", MatValue.BLOCK);
-MeltingRecipe.addRecipe(VanillaItemID.gold_nugget, "molten_gold", MatValue.NUGGET);
-MeltingRecipe.addRecipe(VanillaItemID.gold_ingot, "molten_gold", MatValue.INGOT);
-MeltingRecipe.addRecipe(VanillaBlockID.gold_block, "molten_gold", MatValue.BLOCK);
-MeltingRecipe.addRecipe(VanillaBlockID.heavy_weighted_pressure_plate, "molten_iron", MatValue.INGOT * 2);
-MeltingRecipe.addRecipe(VanillaBlockID.light_weighted_pressure_plate, "molten_gold", MatValue.INGOT * 2);
-MeltingRecipe.addRecipe(VanillaItemID.compass, "molten_iron", MatValue.INGOT * 4);
-MeltingRecipe.addRecipe(VanillaItemID.clock, "molten_gold", MatValue.INGOT * 4);
-MeltingRecipe.addRecipe(VanillaItemID.golden_helmet, "molten_gold", MatValue.INGOT * 5);
-MeltingRecipe.addRecipe(VanillaItemID.golden_chestplate, "molten_gold", MatValue.INGOT * 8);
-MeltingRecipe.addRecipe(VanillaItemID.golden_leggings, "molten_gold", MatValue.INGOT * 7);
-MeltingRecipe.addRecipe(VanillaItemID.golden_boots, "molten_gold", MatValue.INGOT * 4);
-MeltingRecipe.addRecipe(VanillaItemID.golden_pickaxe, "molten_gold", MatValue.INGOT * 3);
-MeltingRecipe.addRecipe(VanillaItemID.golden_axe, "molten_gold", MatValue.INGOT * 3);
-MeltingRecipe.addRecipe(VanillaItemID.golden_sword, "molten_gold", MatValue.INGOT * 2);
-MeltingRecipe.addRecipe(VanillaItemID.golden_shovel, "molten_gold", MatValue.INGOT);
-MeltingRecipe.addRecipe(VanillaItemID.golden_hoe, "molten_gold", MatValue.INGOT * 2);
-MeltingRecipe.addRecipe(VanillaItemID.iron_helmet, "molten_iron", MatValue.INGOT * 5);
-MeltingRecipe.addRecipe(VanillaItemID.iron_chestplate, "molten_iron", MatValue.INGOT * 8);
-MeltingRecipe.addRecipe(VanillaItemID.iron_leggings, "molten_iron", MatValue.INGOT * 7);
-MeltingRecipe.addRecipe(VanillaItemID.iron_boots, "molten_iron", MatValue.INGOT * 4);
-MeltingRecipe.addRecipe(VanillaItemID.iron_pickaxe, "molten_iron", MatValue.INGOT * 3);
-MeltingRecipe.addRecipe(VanillaItemID.iron_axe, "molten_iron", MatValue.INGOT * 3);
-MeltingRecipe.addRecipe(VanillaItemID.iron_sword, "molten_iron", MatValue.INGOT * 2);
-MeltingRecipe.addRecipe(VanillaItemID.iron_shovel, "molten_iron", MatValue.INGOT);
-MeltingRecipe.addRecipe(VanillaItemID.iron_hoe, "molten_iron", MatValue.INGOT * 2);
-MeltingRecipe.addRecipe(VanillaItemID.bucket, "molten_iron", MatValue.INGOT * 3);
-MeltingRecipe.addRecipe(VanillaBlockID.hopper, "molten_iron", MatValue.INGOT * 5);
-MeltingRecipe.addRecipe(VanillaBlockID.iron_bars, "molten_iron", MatValue.INGOT * 6 / 16);
-MeltingRecipe.addRecipe(VanillaItemID.minecart, "molten_iron", MatValue.INGOT * 5);
-MeltingRecipe.addRecipe(VanillaItemID.shears, "molten_iron", MatValue.INGOT * 2);
-MeltingRecipe.addRecipe(VanillaItemID.shield, "molten_iron", MatValue.INGOT);
-MeltingRecipe.addRecipe(VanillaBlockID.tripwire_hook, "molten_iron", MatValue.INGOT / 2);
-MeltingRecipe.addRecipe(VanillaBlockID.iron_door, "molten_iron", MatValue.INGOT * 2);
-MeltingRecipe.addRecipe(VanillaBlockID.cauldron, "molten_iron", MatValue.INGOT * 7);
-MeltingRecipe.addRecipe(VanillaBlockID.anvil, "molten_iron", MatValue.BLOCK * 3 + MatValue.INGOT * 4);
-MeltingRecipe.addRecipe(VanillaBlockID.iron_ore, "molten_iron", MatValue.ORE);
-MeltingRecipe.addRecipe(VanillaBlockID.gold_ore, "molten_gold", MatValue.ORE);
+MeltingRecipe.addRecipe("ice", "water", 1000, 305 - 300);
+MeltingRecipe.addRecipe("packed_ice", "water", 2000, 310 - 300);
+MeltingRecipe.addRecipe("snow", "water", 1000, 305 - 300);
+MeltingRecipe.addRecipe("snowball", "water", 125, 301 - 300);
+MeltingRecipe.addRecipe("rotten_flesh", "blood", 40);
+MeltingRecipe.addRecipeForAmount("stone", "molten_stone", MatValue.SEARED_MATERIAL, MatValue.ORE);
+MeltingRecipe.addRecipeForAmount("cobblestone", "molten_stone", MatValue.SEARED_MATERIAL, MatValue.ORE);
+MeltingRecipe.addRecipe("obsidian", "molten_obsidian", MatValue.ORE);
+MeltingRecipe.addRecipe("horsearmoriron", "molten_iron", MatValue.INGOT * 2);
+MeltingRecipe.addRecipe("horsearmorgold", "molten_gold", MatValue.INGOT * 2);
+MeltingRecipe.addRecipe("rail", "molten_iron", MatValue.INGOT * 6 / 16);
+MeltingRecipe.addRecipe("activator_rail", "molten_iron", MatValue.INGOT);
+MeltingRecipe.addRecipe("detector_rail", "molten_iron", MatValue.INGOT);
+MeltingRecipe.addRecipe("golden_rail", "molten_gold", MatValue.INGOT);
+MeltingRecipe.addRecipeForAmount("dirt", "molten_dirt", MatValue.INGOT, MatValue.BRICK_BLOCK);
+MeltingRecipe.addRecipe("clay_ball", "molten_clay", MatValue.INGOT);
+MeltingRecipe.addRecipe("clay", "molten_clay", MatValue.BRICK_BLOCK);
+MeltingRecipe.addRecipe("emerald_ore", "molten_emerald", MatValue.GEM * Cfg.oreToIngotRatio);
+MeltingRecipe.addRecipe("emerald", "molten_emerald", MatValue.GEM);
+MeltingRecipe.addRecipe("emerald_block", "molten_emerald", MatValue.GEM * 9);
+MeltingRecipe.addRecipe("sand", "molten_glass", MatValue.GLASS);
+MeltingRecipe.addRecipe("glass", "molten_glass", MatValue.GLASS);
+MeltingRecipe.addRecipe("glass_pane", "molten_glass", MatValue.GLASS * 6 / 16);
+MeltingRecipe.addRecipe("glass_bottle", "molten_glass", MatValue.GLASS);
+MeltingRecipe.addRecipe("iron_nugget", "molten_iron", MatValue.NUGGET);
+MeltingRecipe.addRecipe("iron_ingot", "molten_iron", MatValue.INGOT);
+MeltingRecipe.addRecipe("iron_block", "molten_iron", MatValue.BLOCK);
+MeltingRecipe.addRecipe("gold_nugget", "molten_gold", MatValue.NUGGET);
+MeltingRecipe.addRecipe("gold_ingot", "molten_gold", MatValue.INGOT);
+MeltingRecipe.addRecipe("gold_block", "molten_gold", MatValue.BLOCK);
+MeltingRecipe.addRecipe("heavy_weighted_pressure_plate", "molten_iron", MatValue.INGOT * 2);
+MeltingRecipe.addRecipe("light_weighted_pressure_plate", "molten_gold", MatValue.INGOT * 2);
+MeltingRecipe.addRecipe("compass", "molten_iron", MatValue.INGOT * 4);
+MeltingRecipe.addRecipe("clock", "molten_gold", MatValue.INGOT * 4);
+MeltingRecipe.addRecipe("golden_helmet", "molten_gold", MatValue.INGOT * 5);
+MeltingRecipe.addRecipe("golden_chestplate", "molten_gold", MatValue.INGOT * 8);
+MeltingRecipe.addRecipe("golden_leggings", "molten_gold", MatValue.INGOT * 7);
+MeltingRecipe.addRecipe("golden_boots", "molten_gold", MatValue.INGOT * 4);
+MeltingRecipe.addRecipe("golden_pickaxe", "molten_gold", MatValue.INGOT * 3);
+MeltingRecipe.addRecipe("golden_axe", "molten_gold", MatValue.INGOT * 3);
+MeltingRecipe.addRecipe("golden_sword", "molten_gold", MatValue.INGOT * 2);
+MeltingRecipe.addRecipe("golden_shovel", "molten_gold", MatValue.INGOT);
+MeltingRecipe.addRecipe("golden_hoe", "molten_gold", MatValue.INGOT * 2);
+MeltingRecipe.addRecipe("iron_helmet", "molten_iron", MatValue.INGOT * 5);
+MeltingRecipe.addRecipe("iron_chestplate", "molten_iron", MatValue.INGOT * 8);
+MeltingRecipe.addRecipe("iron_leggings", "molten_iron", MatValue.INGOT * 7);
+MeltingRecipe.addRecipe("iron_boots", "molten_iron", MatValue.INGOT * 4);
+MeltingRecipe.addRecipe("iron_pickaxe", "molten_iron", MatValue.INGOT * 3);
+MeltingRecipe.addRecipe("iron_axe", "molten_iron", MatValue.INGOT * 3);
+MeltingRecipe.addRecipe("iron_sword", "molten_iron", MatValue.INGOT * 2);
+MeltingRecipe.addRecipe("iron_shovel", "molten_iron", MatValue.INGOT);
+MeltingRecipe.addRecipe("iron_hoe", "molten_iron", MatValue.INGOT * 2);
+MeltingRecipe.addRecipe("bucket", "molten_iron", MatValue.INGOT * 3);
+MeltingRecipe.addRecipe("hopper", "molten_iron", MatValue.INGOT * 5);
+MeltingRecipe.addRecipe("iron_bars", "molten_iron", MatValue.INGOT * 6 / 16);
+MeltingRecipe.addRecipe("minecart", "molten_iron", MatValue.INGOT * 5);
+MeltingRecipe.addRecipe("shears", "molten_iron", MatValue.INGOT * 2);
+MeltingRecipe.addRecipe("shield", "molten_iron", MatValue.INGOT);
+MeltingRecipe.addRecipe("tripwire_hook", "molten_iron", MatValue.INGOT / 2);
+MeltingRecipe.addRecipe("iron_door", "molten_iron", MatValue.INGOT * 2);
+MeltingRecipe.addRecipe("cauldron", "molten_iron", MatValue.INGOT * 7);
+MeltingRecipe.addRecipe("anvil", "molten_iron", MatValue.BLOCK * 3 + MatValue.INGOT * 4);
+MeltingRecipe.addRecipe("iron_ore", "molten_iron", MatValue.ORE);
+MeltingRecipe.addRecipe("gold_ore", "molten_gold", MatValue.ORE);
 MeltingRecipe.addEntRecipe(1, "blood", 20); //Native.EntityType.PLAYER
 MeltingRecipe.addEntRecipe(Native.EntityType.ZOMBIE, "blood", 20);
 MeltingRecipe.addEntRecipe(Native.EntityType.ZOMBIE_VILLAGER, "blood", 20);
@@ -637,18 +629,11 @@ var CastingRecipe = /** @class */ (function () {
     function CastingRecipe() {
     }
     CastingRecipe.addRecipe = function (type, id, liquid, result, consume, amount) {
-        var resultID;
-        var resultData;
-        if (typeof result === "number") {
-            resultID = result;
-            resultData = 0;
-        }
-        else {
-            resultID = result.id;
-            resultData = result.data;
-        }
-        this[type][id] = this[type][id] || {};
-        this[type][id][liquid] = { id: resultID, data: resultData, consume: consume, amount: amount };
+        var _a;
+        var _b;
+        var item = getIDData(result, 0);
+        (_a = (_b = this[type])[id]) !== null && _a !== void 0 ? _a : (_b[id] = {});
+        this[type][id][liquid] = { id: item.id, data: item.data, consume: consume, amount: amount };
     };
     CastingRecipe.getLimits = function (type, id) {
         var limits = {};
@@ -749,20 +734,20 @@ var CastingRecipe = /** @class */ (function () {
     CastingRecipe.capacity = {};
     return CastingRecipe;
 }());
-CastingRecipe.addTableRecipe(0, "molten_glass", VanillaBlockID.glass_pane, false, MatValue.GLASS * 6 / 16);
-CastingRecipe.addBasinRecipe(0, "molten_iron", VanillaBlockID.iron_block);
-CastingRecipe.addBasinRecipe(0, "molten_gold", VanillaBlockID.gold_block);
-CastingRecipe.addBasinRecipe(0, "molten_obsidian", VanillaBlockID.obsidian, 288);
-CastingRecipe.addTableRecipeForBoth("ingot", "molten_iron", VanillaItemID.iron_ingot);
-CastingRecipe.addTableRecipeForBoth("ingot", "molten_gold", VanillaItemID.gold_ingot);
-CastingRecipe.addTableRecipeForBoth("ingot", "molten_clay", VanillaItemID.brick);
-CastingRecipe.addTableRecipeForBoth("nugget", "molten_iron", VanillaItemID.iron_nugget);
-CastingRecipe.addTableRecipeForBoth("nugget", "molten_gold", VanillaItemID.gold_nugget);
-CastingRecipe.addTableRecipeForBoth("gem", "molten_emerald", VanillaItemID.emerald);
-CastingRecipe.addBasinRecipe(0, "molten_emerald", VanillaBlockID.emerald_block, MatValue.GEM * 9);
-CastingRecipe.addBasinRecipe(0, "molten_clay", VanillaBlockID.hardened_clay, MatValue.INGOT * 4);
-CastingRecipe.addBasinRecipe(VanillaBlockID.stained_hardened_clay, "water", VanillaBlockID.hardened_clay, 250);
-CastingRecipe.addBasinRecipe(VanillaBlockID.sand, "blood", { id: VanillaBlockID.sand, data: 1 }, 10);
+CastingRecipe.addTableRecipe(0, "molten_glass", "glass_pane", false, MatValue.GLASS * 6 / 16);
+CastingRecipe.addBasinRecipe(0, "molten_iron", "iron_block");
+CastingRecipe.addBasinRecipe(0, "molten_gold", "gold_block");
+CastingRecipe.addBasinRecipe(0, "molten_obsidian", "obsidian", 288);
+CastingRecipe.addTableRecipeForBoth("ingot", "molten_iron", "iron_ingot");
+CastingRecipe.addTableRecipeForBoth("ingot", "molten_gold", "gold_ingot");
+CastingRecipe.addTableRecipeForBoth("ingot", "molten_clay", "brick");
+CastingRecipe.addTableRecipeForBoth("nugget", "molten_iron", "iron_nugget");
+CastingRecipe.addTableRecipeForBoth("nugget", "molten_gold", "gold_nugget");
+CastingRecipe.addTableRecipeForBoth("gem", "molten_emerald", "emerald");
+CastingRecipe.addBasinRecipe(0, "molten_emerald", "emerald_block", MatValue.GEM * 9);
+CastingRecipe.addBasinRecipe(0, "molten_clay", "hardened_clay", MatValue.INGOT * 4);
+CastingRecipe.addBasinRecipe(VanillaBlockID.stained_hardened_clay, "water", "hardened_clay", 250);
+CastingRecipe.addBasinRecipe(VanillaBlockID.sand, "blood", { id: "sand", data: 1 }, 10);
 CastingRecipe.setDefaultCapacity(VanillaItemID.bucket, 1000);
 Callback.addCallback("PreLoaded", function () {
     var empty;
@@ -776,8 +761,8 @@ Callback.addCallback("PreLoaded", function () {
     }
 });
 createBlock("tcon_grout", [{ name: "Grout" }]);
-Recipes2.addShapeless({ id: BlockID.tcon_grout, count: 2 }, [VanillaBlockID.sand, VanillaBlockID.gravel, VanillaItemID.clay_ball]);
-Recipes2.addShapeless({ id: BlockID.tcon_grout, count: 8 }, [{ id: VanillaBlockID.sand, count: 4 }, { id: VanillaBlockID.gravel, count: 4 }, VanillaBlockID.clay]);
+Recipes2.addShapeless({ id: BlockID.tcon_grout, count: 2 }, ["sand", "gravel", "clay_ball"]);
+Recipes2.addShapeless({ id: BlockID.tcon_grout, count: 8 }, [{ id: "sand", count: 4 }, { id: "gravel", count: 4 }, "clay"]);
 createItem("tcon_brick", "Seared Brick");
 Recipes.addFurnace(BlockID.tcon_grout, ItemID.tcon_brick);
 createBlock("tcon_stone", [
@@ -824,9 +809,9 @@ createBlock("tcon_tank", [
     { name: "Seared Window", texture: [["tcon_seared_glass", 0], ["tcon_seared_glass", 0], 2] }
 ]);
 Item.addCreativeGroup("tcon_tank", "Seared Tanks", [BlockID.tcon_tank]);
-Recipes2.addShaped({ id: BlockID.tcon_tank, data: 0 }, "aaa:aba:aaa", { a: ItemID.tcon_brick, b: VanillaBlockID.glass });
-Recipes2.addShaped({ id: BlockID.tcon_tank, data: 1 }, "aba:aba:aba", { a: ItemID.tcon_brick, b: VanillaBlockID.glass });
-Recipes2.addShaped({ id: BlockID.tcon_tank, data: 2 }, "aba:bbb:aba", { a: ItemID.tcon_brick, b: VanillaBlockID.glass });
+Recipes2.addShaped({ id: BlockID.tcon_tank, data: 0 }, "aaa:aba:aaa", { a: ItemID.tcon_brick, b: "glass" });
+Recipes2.addShaped({ id: BlockID.tcon_tank, data: 1 }, "aba:aba:aba", { a: ItemID.tcon_brick, b: "glass" });
+Recipes2.addShaped({ id: BlockID.tcon_tank, data: 2 }, "aba:bbb:aba", { a: ItemID.tcon_brick, b: "glass" });
 BlockModel.register(BlockID.tcon_tank, function (model, index) {
     model.addBox(0 / 16, 0 / 16, 0 / 16, 16 / 16, 16 / 16, 16 / 16, BlockID.tcon_tank, index);
     index === 0 && model.addBox(2 / 16, 16 / 16, 2 / 16, 14 / 16, 18 / 16, 14 / 16, BlockID.tcon_tank, 0);
@@ -2113,7 +2098,7 @@ var ToolData = /** @class */ (function () {
         var newLv = this.getLevel();
         if (oldLv < newLv) {
             Game.message("§3" + this.getLevelupMessage(newLv));
-            soundLevelup.play();
+            SoundManager.startPlaySound(SourceType.ENTITY, player, "saw.ogg", 0.5);
         }
     };
     ToolData.prototype.getLevel = function () {
@@ -2385,22 +2370,22 @@ Recipes.addFurnace(BlockID.oreArdite, ItemID.ingotArdite);
     addRecipes("molten_alubrass", BlockID.blockAlubrass, ItemID.ingotAlubrass /*, ItemID.nuggetAlubrass*/);
 })();
 createItem("tcon_paperstack", "Paper Stack");
-Recipes2.addShapeless(ItemID.tcon_paperstack, [{ id: VanillaItemID.paper, count: 4 }]);
+Recipes2.addShapeless(ItemID.tcon_paperstack, [{ id: "paper", count: 4 }]);
 createBlock("tcon_lavawood", [{ name: "Lavawood" }]);
 createBlock("tcon_firewood", [{ name: "Firewood" }]);
 CastingRecipe.addBasinRecipe(VanillaBlockID.planks, "lava", BlockID.tcon_lavawood, 250);
-Recipes2.addShapeless(BlockID.tcon_firewood, [BlockID.tcon_lavawood, { id: VanillaItemID.blaze_powder, count: 2 }]);
+Recipes2.addShapeless(BlockID.tcon_firewood, [BlockID.tcon_lavawood, { id: "blaze_powder", count: 2 }]);
 createItem("tcon_slimeball_blue", "Blue Slime");
 createItem("tcon_slimeball_purple", "Purple Slime");
-Recipes2.addShapeless(ItemID.tcon_slimeball_blue, [VanillaItemID.slime_ball, { id: VanillaItemID.dye, count: 2, data: 4 }]);
-Recipes2.addShapeless(ItemID.tcon_slimeball_purple, [ItemID.tcon_slimeball_blue, { id: VanillaItemID.redstone, count: 2 }]);
+Recipes2.addShapeless(ItemID.tcon_slimeball_blue, ["slime_ball", { id: "blue_dye", count: 2 }]);
+Recipes2.addShapeless(ItemID.tcon_slimeball_purple, [ItemID.tcon_slimeball_blue, { id: "redstone", count: 2 }]);
 MeltingRecipe.addRecipe(ItemID.tcon_slimeball_purple, "purpleslime", MatValue.SLIME_BALL);
 createBlock("tcon_slimymud_green", [{ name: "Slimy Mud" }]);
 createBlock("tcon_slimymud_blue", [{ name: "Blue Slimy Mud" }]);
 createBlock("tcon_slimymud_magma", [{ name: "Magma Slimy Mud" }]);
-Recipes2.addShapeless(BlockID.tcon_slimymud_green, [{ id: VanillaItemID.slime_ball, count: 4 }, VanillaBlockID.sand, VanillaBlockID.dirt]);
-Recipes2.addShapeless(BlockID.tcon_slimymud_green, [{ id: ItemID.tcon_slimeball_blue, count: 4 }, VanillaBlockID.sand, VanillaBlockID.dirt]);
-Recipes2.addShapeless(BlockID.tcon_slimymud_green, [{ id: VanillaItemID.magma_cream, count: 4 }, VanillaBlockID.soul_sand, VanillaBlockID.netherrack]);
+Recipes2.addShapeless(BlockID.tcon_slimymud_green, [{ id: "slime_ball", count: 4 }, "sand", "dirt"]);
+Recipes2.addShapeless(BlockID.tcon_slimymud_green, [{ id: ItemID.tcon_slimeball_blue, count: 4 }, "sand", "dirt"]);
+Recipes2.addShapeless(BlockID.tcon_slimymud_green, [{ id: "magma_cream", count: 4 }, "soul_sand", "netherrack"]);
 Item.addCreativeGroup("tcon_slimymud", "Slimy Mud", [BlockID.tcon_slimymud_green, BlockID.tcon_slimymud_blue, BlockID.tcon_slimymud_magma]);
 createItem("tcon_slimecrystal_green", "Slime Crystal");
 createItem("tcon_slimecrystal_blue", "Blue Slime Crystal");
@@ -2413,7 +2398,7 @@ createBlock("tcon_clear_glass", [{ name: "Clear Glass" }]);
 CastingRecipe.addBasinRecipe(0, "molten_glass", BlockID.tcon_clear_glass, 1000);
 ConnectedTexture.setModelForGlass(BlockID.tcon_clear_glass, -1, "tcon_clear_glass");
 createBlock("tcon_seared_glass", [{ name: "Seared Glass" }]);
-Recipes2.addShaped(BlockID.tcon_seared_glass, "_a_:aba:_a_", { a: ItemID.tcon_brick, b: VanillaBlockID.glass });
+Recipes2.addShaped(BlockID.tcon_seared_glass, "_a_:aba:_a_", { a: ItemID.tcon_brick, b: "glass" });
 CastingRecipe.addBasinRecipe(VanillaBlockID.glass, "molten_stone", BlockID.tcon_seared_glass, MatValue.SEARED_BLOCK);
 ConnectedTexture.setModelForGlass(BlockID.tcon_seared_glass, -1, "tcon_seared_glass");
 var PatternRegistry = /** @class */ (function () {
@@ -2479,7 +2464,7 @@ Item.addCreativeGroup("tcon_pattern", "Pattern", [
     ItemID.tcon_pattern_guard,
     ItemID.tcon_pattern_largeplate
 ]);
-Recipes2.addShaped({ id: ItemID.tcon_pattern_blank, count: 4 }, "ab:ba", { a: VanillaBlockID.planks, b: VanillaItemID.stick });
+Recipes2.addShaped({ id: ItemID.tcon_pattern_blank, count: 4 }, "ab:ba", { a: "planks", b: "stick" });
 PatternRegistry.registerData(ItemID.tcon_pattern_pickaxe, "pickaxe", 2);
 PatternRegistry.registerData(ItemID.tcon_pattern_shovel, "shovel", 2);
 PatternRegistry.registerData(ItemID.tcon_pattern_axe, "axe", 2);
@@ -2604,7 +2589,7 @@ var TinkersModifier = /** @class */ (function () {
         this.name = name;
         this.texIndex = texIndex;
         this.max = max;
-        this.recipe = recipe.map(function (item) { return (typeof item === "number" ? { id: item, data: -1 } : item); });
+        this.recipe = recipe.map(function (item) { return getIDData(item); });
         this.hate = {};
         if (!multi) {
             this.hate[key] = true;
@@ -2683,7 +2668,7 @@ var TinkersModifierHandler = /** @class */ (function () {
 var ModHaste = /** @class */ (function (_super) {
     __extends(ModHaste, _super);
     function ModHaste() {
-        return _super.call(this, "haste", "Haste", 0, [VanillaItemID.redstone], 50, true) || this;
+        return _super.call(this, "haste", "Haste", 0, ["redstone"], 50, true) || this;
     }
     ModHaste.prototype.applyStats = function (stats, level) {
         for (var i = level; i--;) {
@@ -2698,7 +2683,7 @@ var ModHaste = /** @class */ (function (_super) {
 var ModLuck = /** @class */ (function (_super) {
     __extends(ModLuck, _super);
     function ModLuck() {
-        return _super.call(this, "luck", "Luck", 1, [{ id: VanillaItemID.dye, data: 4 }], 360, false, ["silk"]) || this;
+        return _super.call(this, "luck", "Luck", 1, ["lapis_lazuli"], 360, false, ["silk"]) || this;
     }
     ModLuck.prototype.applyEnchant = function (enchant, level) {
         enchant.fortune = level < 60 ? 0 : level < 180 ? 1 : level < 360 ? 2 : 3;
@@ -2708,7 +2693,7 @@ var ModLuck = /** @class */ (function (_super) {
 var ModSharp = /** @class */ (function (_super) {
     __extends(ModSharp, _super);
     function ModSharp() {
-        return _super.call(this, "sharp", "Sharper", 2, [VanillaItemID.quartz], 72, true) || this;
+        return _super.call(this, "sharp", "Sharper", 2, ["quartz"], 72, true) || this;
     }
     ModSharp.prototype.applyStats = function (stats, level) {
         for (var i = level; i--;) {
@@ -2721,7 +2706,7 @@ var ModSharp = /** @class */ (function (_super) {
 var ModDiamond = /** @class */ (function (_super) {
     __extends(ModDiamond, _super);
     function ModDiamond() {
-        return _super.call(this, "diamond", "Diamond", 3, [VanillaItemID.diamond], 1, false) || this;
+        return _super.call(this, "diamond", "Diamond", 3, ["diamond"], 1, false) || this;
     }
     ModDiamond.prototype.applyStats = function (stats, level) {
         stats.durability += 500;
@@ -2734,7 +2719,7 @@ var ModDiamond = /** @class */ (function (_super) {
 var ModEmerald = /** @class */ (function (_super) {
     __extends(ModEmerald, _super);
     function ModEmerald() {
-        return _super.call(this, "emerald", "Emerald", 4, [VanillaItemID.emerald], 1, false) || this;
+        return _super.call(this, "emerald", "Emerald", 4, ["emerald"], 1, false) || this;
     }
     ModEmerald.prototype.applyStats = function (stats, level) {
         stats.durability += stats.durability >> 1;
@@ -2744,8 +2729,8 @@ var ModEmerald = /** @class */ (function (_super) {
 }(TinkersModifier));
 createItem("tcon_silky_cloth", "Silky Cloth");
 createItem("tcon_silky_jewel", "Silky Jewel");
-Recipes2.addShaped(ItemID.tcon_silky_cloth, "aaa:aba:aaa", { a: VanillaItemID.string, b: VanillaItemID.gold_ingot });
-Recipes2.addShaped(ItemID.tcon_silky_jewel, "_a_:aba:_a_", { a: ItemID.tcon_silky_cloth, b: VanillaItemID.emerald });
+Recipes2.addShaped(ItemID.tcon_silky_cloth, "aaa:aba:aaa", { a: "string", b: "gold_ingot" });
+Recipes2.addShaped(ItemID.tcon_silky_jewel, "_a_:aba:_a_", { a: ItemID.tcon_silky_cloth, b: "emerald" });
 MeltingRecipe.addRecipe(ItemID.tcon_silky_cloth, "molten_gold", MatValue.INGOT);
 var ModSilk = /** @class */ (function (_super) {
     __extends(ModSilk, _super);
@@ -2762,7 +2747,7 @@ var ModSilk = /** @class */ (function (_super) {
     return ModSilk;
 }(TinkersModifier));
 createItem("tcon_reinforcement", "Reinforcement");
-Recipes2.addShaped(ItemID.tcon_reinforcement, "aaa:aba:aaa", { a: VanillaBlockID.obsidian, b: ItemID.tcon_cast_largeplate });
+Recipes2.addShaped(ItemID.tcon_reinforcement, "aaa:aba:aaa", { a: "obsidian", b: ItemID.tcon_cast_largeplate });
 var ModReinforced = /** @class */ (function (_super) {
     __extends(ModReinforced, _super);
     function ModReinforced() {
@@ -2777,7 +2762,7 @@ var _a;
 var ModBeheading = /** @class */ (function (_super) {
     __extends(ModBeheading, _super);
     function ModBeheading() {
-        return _super.call(this, "beheading", "Beheading", 7, [VanillaItemID.ender_pearl, VanillaBlockID.obsidian], 1, true) || this;
+        return _super.call(this, "beheading", "Beheading", 7, ["ender_pearl", "obsidian"], 1, true) || this;
     }
     ModBeheading.prototype.onKillEntity = function (entity, damageType, level) {
         var headMeta = ModBeheading.headMeta[Entity.getType(entity)];
@@ -2799,7 +2784,7 @@ var ModBeheading = /** @class */ (function (_super) {
 var _a;
 createBlock("tcon_graveyard_soil", [{ name: "Graveyard Soil" }], "dirt");
 createBlock("tcon_consecrated_soil", [{ name: "Consecrated Soil" }], "dirt");
-Recipes2.addShapeless(BlockID.tcon_graveyard_soil, [VanillaBlockID.dirt, VanillaItemID.rotten_flesh, { id: VanillaItemID.dye, data: 15 }]);
+Recipes2.addShapeless(BlockID.tcon_graveyard_soil, ["dirt", "rotten_flesh", "bone_meal"]);
 Recipes.addFurnace(BlockID.tcon_graveyard_soil, BlockID.tcon_consecrated_soil);
 var ModSmite = /** @class */ (function (_super) {
     __extends(ModSmite, _super);
@@ -2830,7 +2815,7 @@ var _a;
 var ModSpider = /** @class */ (function (_super) {
     __extends(ModSpider, _super);
     function ModSpider() {
-        return _super.call(this, "spider", "Bane of Arthropods", 9, [VanillaItemID.fermented_spider_eye], 24, true) || this;
+        return _super.call(this, "spider", "Bane of Arthropods", 9, ["fermented_spider_eye"], 24, true) || this;
     }
     ModSpider.prototype.onAttack = function (item, victim, level) {
         return ModSpider.targets[Entity.getType(victim)] ? 7 / this.max * level : 0;
@@ -2846,7 +2831,7 @@ var ModSpider = /** @class */ (function (_super) {
 var ModFiery = /** @class */ (function (_super) {
     __extends(ModFiery, _super);
     function ModFiery() {
-        return _super.call(this, "fiery", "Fiery", 10, [VanillaItemID.blaze_powder], 25, true) || this;
+        return _super.call(this, "fiery", "Fiery", 10, ["blaze_powder"], 25, true) || this;
     }
     ModFiery.prototype.onAttack = function (item, victim, level) {
         Entity.setFire(victim, 1 + (level >> 3), true);
@@ -2869,7 +2854,7 @@ var ModNecrotic = /** @class */ (function (_super) {
 var ModKnockback = /** @class */ (function (_super) {
     __extends(ModKnockback, _super);
     function ModKnockback() {
-        return _super.call(this, "knockback", "Knockback", 12, [VanillaBlockID.piston], 10, true) || this;
+        return _super.call(this, "knockback", "Knockback", 12, ["piston"], 10, true) || this;
     }
     ModKnockback.prototype.onAttack = function (item, victim, level) {
         var vec = Entity.getLookVector(player);
@@ -2881,7 +2866,7 @@ var ModKnockback = /** @class */ (function (_super) {
 }(TinkersModifier));
 createItem("tcon_moss", "Ball of Moss");
 createItem("tcon_mending_moss", "Mending Moss");
-Recipes2.addShapeless(ItemID.tcon_moss, [{ id: VanillaBlockID.mossy_cobblestone, count: 9 }]);
+Recipes2.addShapeless(ItemID.tcon_moss, [{ id: "mossy_cobblestone", count: 9 }]);
 Item.registerUseFunction(ItemID.tcon_moss, function (coords, item, block) {
     if (block.id === VanillaBlockID.bookshelf) {
         if (Player.getLevel() < 10) {
@@ -2907,7 +2892,7 @@ var ModMending = /** @class */ (function (_super) {
 var ModShulking = /** @class */ (function (_super) {
     __extends(ModShulking, _super);
     function ModShulking() {
-        return _super.call(this, "shulking", "Shulking", 14, [VanillaItemID.chorus_fruit_popped], 50, false) || this;
+        return _super.call(this, "shulking", "Shulking", 14, ["chorus_fruit_popped"], 50, false) || this;
     }
     ModShulking.prototype.onAttack = function (item, victim, level) {
         Entity.addEffect(victim, Native.PotionEffect.levitation, 0, (level >> 1) + 10);
@@ -2918,7 +2903,7 @@ var ModShulking = /** @class */ (function (_super) {
 var ModWeb = /** @class */ (function (_super) {
     __extends(ModWeb, _super);
     function ModWeb() {
-        return _super.call(this, "web", "Web", 15, [VanillaBlockID.web], 1, true) || this;
+        return _super.call(this, "web", "Web", 15, ["web"], 1, true) || this;
     }
     ModWeb.prototype.onAttack = function (item, victim, level) {
         Entity.addEffect(victim, Native.PotionEffect.movementSlowdown, 1, level * 20);
@@ -3086,7 +3071,7 @@ var PatternChest = /** @class */ (function (_super) {
     return PatternChest;
 }(TileBase));
 createBlock("tcon_patternchest", [{ name: "Pattern Chest", texture: [["itemframe_background", 0]] }]);
-Recipes2.addShaped(BlockID.tcon_patternchest, "a:b", { a: ItemID.tcon_pattern_blank, b: VanillaBlockID.chest });
+Recipes2.addShaped(BlockID.tcon_patternchest, "a:b", { a: ItemID.tcon_pattern_blank, b: "chest" });
 Block.setShape(BlockID.tcon_patternchest, 0, 0, 0, 1, 14 / 16, 1);
 Block.registerDropFunction(BlockID.tcon_patternchest, function () { return []; });
 Block.registerPlaceFunction(BlockID.tcon_patternchest, function (coords, item, block) {
@@ -3176,12 +3161,12 @@ BlockModel.register(BlockID.tcon_stenciltable, function (model, index) {
     model.addBox(0 / 16, 0 / 16, 12 / 16, 4 / 16, 12 / 16, 16 / 16, "planks", index);
     return model;
 }, 6);
-Recipes2.addShaped({ id: BlockID.tcon_stenciltable, data: 0 }, "a:b", { a: ItemID.tcon_pattern_blank, b: { id: VanillaBlockID.planks, data: 0 } });
-Recipes2.addShaped({ id: BlockID.tcon_stenciltable, data: 1 }, "a:b", { a: ItemID.tcon_pattern_blank, b: { id: VanillaBlockID.planks, data: 1 } });
-Recipes2.addShaped({ id: BlockID.tcon_stenciltable, data: 2 }, "a:b", { a: ItemID.tcon_pattern_blank, b: { id: VanillaBlockID.planks, data: 2 } });
-Recipes2.addShaped({ id: BlockID.tcon_stenciltable, data: 3 }, "a:b", { a: ItemID.tcon_pattern_blank, b: { id: VanillaBlockID.planks, data: 3 } });
-Recipes2.addShaped({ id: BlockID.tcon_stenciltable, data: 4 }, "a:b", { a: ItemID.tcon_pattern_blank, b: { id: VanillaBlockID.planks, data: 4 } });
-Recipes2.addShaped({ id: BlockID.tcon_stenciltable, data: 5 }, "a:b", { a: ItemID.tcon_pattern_blank, b: { id: VanillaBlockID.planks, data: 5 } });
+Recipes2.addShaped({ id: BlockID.tcon_stenciltable, data: 0 }, "a:b", { a: ItemID.tcon_pattern_blank, b: { id: "planks", data: 0 } });
+Recipes2.addShaped({ id: BlockID.tcon_stenciltable, data: 1 }, "a:b", { a: ItemID.tcon_pattern_blank, b: { id: "planks", data: 1 } });
+Recipes2.addShaped({ id: BlockID.tcon_stenciltable, data: 2 }, "a:b", { a: ItemID.tcon_pattern_blank, b: { id: "planks", data: 2 } });
+Recipes2.addShaped({ id: BlockID.tcon_stenciltable, data: 3 }, "a:b", { a: ItemID.tcon_pattern_blank, b: { id: "planks", data: 3 } });
+Recipes2.addShaped({ id: BlockID.tcon_stenciltable, data: 4 }, "a:b", { a: ItemID.tcon_pattern_blank, b: { id: "planks", data: 4 } });
+Recipes2.addShaped({ id: BlockID.tcon_stenciltable, data: 5 }, "a:b", { a: ItemID.tcon_pattern_blank, b: { id: "planks", data: 5 } });
 var StencilTable = /** @class */ (function (_super) {
     __extends(StencilTable, _super);
     function StencilTable() {
@@ -3303,12 +3288,12 @@ BlockModel.register(BlockID.tcon_partbuilder, function (model, index) {
     model.addBox(0 / 16, 0 / 16, 12 / 16, 4 / 16, 12 / 16, 16 / 16, tex, meta);
     return model;
 }, 6);
-Recipes2.addShaped({ id: BlockID.tcon_partbuilder, data: 0 }, "a:b", { a: ItemID.tcon_pattern_blank, b: { id: VanillaBlockID.log, data: 0 } });
-Recipes2.addShaped({ id: BlockID.tcon_partbuilder, data: 1 }, "a:b", { a: ItemID.tcon_pattern_blank, b: { id: VanillaBlockID.log, data: 1 } });
-Recipes2.addShaped({ id: BlockID.tcon_partbuilder, data: 2 }, "a:b", { a: ItemID.tcon_pattern_blank, b: { id: VanillaBlockID.log, data: 2 } });
-Recipes2.addShaped({ id: BlockID.tcon_partbuilder, data: 3 }, "a:b", { a: ItemID.tcon_pattern_blank, b: { id: VanillaBlockID.log, data: 3 } });
-Recipes2.addShaped({ id: BlockID.tcon_partbuilder, data: 4 }, "a:b", { a: ItemID.tcon_pattern_blank, b: { id: VanillaBlockID.log2, data: 0 } });
-Recipes2.addShaped({ id: BlockID.tcon_partbuilder, data: 5 }, "a:b", { a: ItemID.tcon_pattern_blank, b: { id: VanillaBlockID.log2, data: 1 } });
+Recipes2.addShaped({ id: BlockID.tcon_partbuilder, data: 0 }, "a:b", { a: ItemID.tcon_pattern_blank, b: { id: "log", data: 1 } });
+Recipes2.addShaped({ id: BlockID.tcon_partbuilder, data: 1 }, "a:b", { a: ItemID.tcon_pattern_blank, b: { id: "log", data: 1 } });
+Recipes2.addShaped({ id: BlockID.tcon_partbuilder, data: 2 }, "a:b", { a: ItemID.tcon_pattern_blank, b: { id: "log", data: 2 } });
+Recipes2.addShaped({ id: BlockID.tcon_partbuilder, data: 3 }, "a:b", { a: ItemID.tcon_pattern_blank, b: { id: "log", data: 3 } });
+Recipes2.addShaped({ id: BlockID.tcon_partbuilder, data: 4 }, "a:b", { a: ItemID.tcon_pattern_blank, b: { id: "log2", data: 0 } });
+Recipes2.addShaped({ id: BlockID.tcon_partbuilder, data: 5 }, "a:b", { a: ItemID.tcon_pattern_blank, b: { id: "log2", data: 1 } });
 var PartBuilder = /** @class */ (function (_super) {
     __extends(PartBuilder, _super);
     function PartBuilder() {
@@ -3701,7 +3686,9 @@ var ToolForgeHandler = /** @class */ (function () {
                                     }
                                     slot = container.getSlot("slotResult");
                                     Player.setInventorySlot(index, slot.id, 1, slot.data, slot.extra);
-                                    tile.blockID === BlockID.tcon_toolstation ? soundSaw.play() : World.playSoundAtEntity(player, "random.anvil_use", 0.9, 0.95 + 0.2 * Math.random());
+                                    tile.blockID === BlockID.tcon_toolstation ?
+                                        SoundManager.playSound("saw.ogg", 0.5) :
+                                        World.playSoundAtEntity(player, "random.anvil_use", 0.9, 0.95 + 0.2 * Math.random());
                                 }
                                 catch (e) {
                                     alert("craftError: " + e);
@@ -3957,7 +3944,7 @@ Callback.addCallback("PreLoaded", function () {
     ToolForgeHandler.createForge();
 });
 createBlock("tcon_toolstation", [{ name: "Tool Station" }], "wood");
-Recipes2.addShaped(BlockID.tcon_toolstation, "a:b", { a: ItemID.tcon_pattern_blank, b: VanillaBlockID.crafting_table });
+Recipes2.addShaped(BlockID.tcon_toolstation, "a:b", { a: ItemID.tcon_pattern_blank, b: "crafting_table" });
 BlockModel.register(BlockID.tcon_toolstation, function (model, index) {
     model.addBox(0 / 16, 12 / 16, 0 / 16, 16 / 16, 16 / 16, 16 / 16, [["tcon_toolstation", 0], ["tcon_toolstation", 0], ["tcon_table_side", 0]]);
     model.addBox(0 / 16, 0 / 16, 0 / 16, 4 / 16, 12 / 16, 4 / 16, "tcon_table_side", 0);
@@ -5140,6 +5127,5 @@ ModAPI.registerAPI("TConAPI", {
     MeltingRecipe: MeltingRecipe,
     AlloyRecipe: AlloyRecipe,
     CastingRecipe: CastingRecipe,
-    BlockModel: BlockModel,
-    Sound: Sound
+    BlockModel: BlockModel
 });

@@ -1,7 +1,7 @@
 class ModShulking extends TinkersModifier {
 
     constructor(){
-        super("shulking", "Shulking", 14, [VanillaItemID.chorus_fruit_popped], 50, false);
+        super("shulking", "Shulking", 14, ["chorus_fruit_popped"], 50, false);
     }
 
     onAttack(item: ItemInstance, victim: number, level: number): number {

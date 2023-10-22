@@ -6,19 +6,10 @@ class CastingRecipe {
     private static basin: {[id: number]: {[liquid: string]: ICastingRecipe}} = {};
     private static capacity: {[id: string]: number} = {};
 
-    private static addRecipe(type: "table" | "basin", id: number, liquid: string, result: Tile | number, consume: boolean, amount: number): void {
-        let resultID: number;
-        let resultData: number;
-        if(typeof result === "number"){
-            resultID = result;
-            resultData = 0;
-        }
-        else {
-            resultID = result.id;
-            resultData = result.data;
-        }
-        this[type][id] = this[type][id] || {};
-        this[type][id][liquid] = {id: resultID, data: resultData, consume: consume, amount: amount};
+    private static addRecipe(type: "table" | "basin", id: number, liquid: string, result: AnyID, consume: boolean, amount: number): void {
+        const item = getIDData(result, 0);
+        this[type][id] ??= {};
+        this[type][id][liquid] = {id: item.id, data: item.data, consume: consume, amount: amount};
     }
 
     private static getLimits(type: "table" | "basin", id: number): {[liquid: string]: number} {
@@ -44,11 +35,11 @@ class CastingRecipe {
         return ItemID["tcon_cast_" + type];
     }
 
-    static addTableRecipe(id: number, liquid: string, result: Tile | number, consume: boolean, amount?: number): void {
+    static addTableRecipe(id: number, liquid: string, result: AnyID, consume: boolean, amount?: number): void {
         this.addRecipe("table", id, liquid, result, consume, amount);
     }
 
-    static addTableRecipeForBoth(type: string, liquid: string, result: Tile | number, amount?: number): void {
+    static addTableRecipeForBoth(type: string, liquid: string, result: AnyID, amount?: number): void {
         this.addTableRecipe(this.getClayCastID(type), liquid, result, true, amount);
         this.addTableRecipe(this.getCastID(type), liquid, result, false, amount);
     }
@@ -65,7 +56,7 @@ class CastingRecipe {
         }
     }
 
-    static addBasinRecipe(id: number, liquid: string, result: Tile | number, amount: number = MatValue.BLOCK): void {
+    static addBasinRecipe(id: number, liquid: string, result: AnyID, amount: number = MatValue.BLOCK): void {
         this.addRecipe("basin", id, liquid, result, id !== 0, amount);
     }
 
@@ -133,20 +124,20 @@ class CastingRecipe {
 }
 
 
-CastingRecipe.addTableRecipe(0, "molten_glass", VanillaBlockID.glass_pane, false, MatValue.GLASS * 6 / 16);
-CastingRecipe.addBasinRecipe(0, "molten_iron", VanillaBlockID.iron_block);
-CastingRecipe.addBasinRecipe(0, "molten_gold", VanillaBlockID.gold_block);
-CastingRecipe.addBasinRecipe(0, "molten_obsidian", VanillaBlockID.obsidian, 288);
-CastingRecipe.addTableRecipeForBoth("ingot", "molten_iron", VanillaItemID.iron_ingot);
-CastingRecipe.addTableRecipeForBoth("ingot", "molten_gold", VanillaItemID.gold_ingot);
-CastingRecipe.addTableRecipeForBoth("ingot", "molten_clay", VanillaItemID.brick);
-CastingRecipe.addTableRecipeForBoth("nugget", "molten_iron", VanillaItemID.iron_nugget);
-CastingRecipe.addTableRecipeForBoth("nugget", "molten_gold", VanillaItemID.gold_nugget);
-CastingRecipe.addTableRecipeForBoth("gem", "molten_emerald", VanillaItemID.emerald);
-CastingRecipe.addBasinRecipe(0, "molten_emerald", VanillaBlockID.emerald_block, MatValue.GEM * 9);
-CastingRecipe.addBasinRecipe(0, "molten_clay", VanillaBlockID.hardened_clay, MatValue.INGOT * 4);
-CastingRecipe.addBasinRecipe(VanillaBlockID.stained_hardened_clay, "water", VanillaBlockID.hardened_clay, 250);
-CastingRecipe.addBasinRecipe(VanillaBlockID.sand, "blood", {id: VanillaBlockID.sand, data: 1}, 10);
+CastingRecipe.addTableRecipe(0, "molten_glass", "glass_pane", false, MatValue.GLASS * 6 / 16);
+CastingRecipe.addBasinRecipe(0, "molten_iron", "iron_block");
+CastingRecipe.addBasinRecipe(0, "molten_gold", "gold_block");
+CastingRecipe.addBasinRecipe(0, "molten_obsidian", "obsidian", 288);
+CastingRecipe.addTableRecipeForBoth("ingot", "molten_iron", "iron_ingot");
+CastingRecipe.addTableRecipeForBoth("ingot", "molten_gold", "gold_ingot");
+CastingRecipe.addTableRecipeForBoth("ingot", "molten_clay", "brick");
+CastingRecipe.addTableRecipeForBoth("nugget", "molten_iron", "iron_nugget");
+CastingRecipe.addTableRecipeForBoth("nugget", "molten_gold", "gold_nugget");
+CastingRecipe.addTableRecipeForBoth("gem", "molten_emerald", "emerald");
+CastingRecipe.addBasinRecipe(0, "molten_emerald", "emerald_block", MatValue.GEM * 9);
+CastingRecipe.addBasinRecipe(0, "molten_clay", "hardened_clay", MatValue.INGOT * 4);
+CastingRecipe.addBasinRecipe(VanillaBlockID.stained_hardened_clay, "water", "hardened_clay", 250);
+CastingRecipe.addBasinRecipe(VanillaBlockID.sand, "blood", {id: "sand", data: 1}, 10);
 
 
 CastingRecipe.setDefaultCapacity(VanillaItemID.bucket, 1000);

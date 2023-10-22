@@ -3,8 +3,8 @@ abstract class TinkersModifier {
     private recipe: {id: number, data: number}[];
     private hate: {[key: string]: true};
 
-    constructor(private key: string, private name: string, private texIndex: number, recipe: ({id: number, data: number} | number)[], public max: number, multi: boolean, hate?: string[]){
-        this.recipe = recipe.map(item => (typeof item === "number" ? {id: item, data: -1} : item));
+    constructor(private key: string, private name: string, private texIndex: number, recipe: (Tile | number | Recipes2.VanillaID)[], public max: number, multi: boolean, hate?: string[]){
+        this.recipe = recipe.map(item => getIDData(item));
         this.hate = {};
         if(!multi){
             this.hate[key] = true;

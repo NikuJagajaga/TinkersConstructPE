@@ -4,7 +4,7 @@ class ModHaste extends TinkersModifier {
     private static readonly step2 = 25;
 
     constructor(){
-        super("haste", "Haste", 0, [VanillaItemID.redstone], 50, true);
+        super("haste", "Haste", 0, ["redstone"], 50, true);
     }
 
     applyStats(stats: ToolStats, level: number): void {

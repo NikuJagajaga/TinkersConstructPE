@@ -67,7 +67,7 @@ class ToolData {
         const newLv = this.getLevel();
         if(oldLv < newLv){
             Game.message("§3" + this.getLevelupMessage(newLv));
-            soundLevelup.play();
+            SoundManager.startPlaySound(SourceType.ENTITY, player, "saw.ogg", 0.5);
         }
     }
 

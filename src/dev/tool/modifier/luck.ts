@@ -1,7 +1,7 @@
 class ModLuck extends TinkersModifier {
 
     constructor(){
-        super("luck", "Luck", 1, [{id: VanillaItemID.dye, data: 4}], 360, false, ["silk"]);
+        super("luck", "Luck", 1, ["lapis_lazuli"], 360, false, ["silk"]);
     }
 
     applyEnchant(enchant: ToolAPI.EnchantData, level: number): void {

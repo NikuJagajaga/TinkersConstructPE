@@ -1,6 +1,8 @@
+IMPORT("BlockEngine");
 IMPORT("ToolLib");
 IMPORT("TileRender");
 IMPORT("StorageInterface");
+IMPORT("SoundLib");
 IMPORT("EnhancedRecipes");
 IMPORT("ConnectedTexture");
 
@@ -89,6 +91,17 @@ const isBlockID = (id: number): boolean => {
 const isItemID = (id: number): boolean => {
     const info = IDRegistry.getIdInfo(id);
     return info && info.startsWith("item");
+}
+
+
+type AnyID = number | Recipes2.VanillaID | Tile | {id: Recipes2.VanillaID, data: number};
+
+const getIDData = (item: AnyID, defaultData: number = -1): Tile => {
+    switch(typeof item){
+        case "string": return IDConverter.getIDData(item);
+        case "number": return {id: item, data: defaultData};
+        default: return typeof item.id === "string" ? {id: IDConverter.getID(item.id), data: item.data} : item;
+    }
 }
 
 

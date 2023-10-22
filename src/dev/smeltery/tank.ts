@@ -5,9 +5,9 @@ createBlock("tcon_tank", [
 ]);
 
 Item.addCreativeGroup("tcon_tank", "Seared Tanks", [BlockID.tcon_tank]);
-Recipes2.addShaped({id: BlockID.tcon_tank, data: 0}, "aaa:aba:aaa", {a: ItemID.tcon_brick, b: VanillaBlockID.glass});
-Recipes2.addShaped({id: BlockID.tcon_tank, data: 1}, "aba:aba:aba", {a: ItemID.tcon_brick, b: VanillaBlockID.glass});
-Recipes2.addShaped({id: BlockID.tcon_tank, data: 2}, "aba:bbb:aba", {a: ItemID.tcon_brick, b: VanillaBlockID.glass});
+Recipes2.addShaped({id: BlockID.tcon_tank, data: 0}, "aaa:aba:aaa", {a: ItemID.tcon_brick, b: "glass"});
+Recipes2.addShaped({id: BlockID.tcon_tank, data: 1}, "aba:aba:aba", {a: ItemID.tcon_brick, b: "glass"});
+Recipes2.addShaped({id: BlockID.tcon_tank, data: 2}, "aba:bbb:aba", {a: ItemID.tcon_brick, b: "glass"});
 
 BlockModel.register(BlockID.tcon_tank, (model, index) => {
     model.addBox( 0/16,  0/16,  0/16, 16/16, 16/16, 16/16, BlockID.tcon_tank, index);

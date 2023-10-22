@@ -10,7 +10,7 @@ class ModBeheading extends TinkersModifier {
     };
 
     constructor(){
-        super("beheading", "Beheading", 7, [VanillaItemID.ender_pearl, VanillaBlockID.obsidian], 1, true);
+        super("beheading", "Beheading", 7, ["ender_pearl", "obsidian"], 1, true);
     }
 
     onKillEntity(entity: number, damageType: number, level: number): void {

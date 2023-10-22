@@ -1,6 +1,6 @@
 createBlock("tcon_graveyard_soil", [{name: "Graveyard Soil"}], "dirt");
 createBlock("tcon_consecrated_soil", [{name: "Consecrated Soil"}], "dirt");
-Recipes2.addShapeless(BlockID.tcon_graveyard_soil, [VanillaBlockID.dirt, VanillaItemID.rotten_flesh, {id: VanillaItemID.dye, data: 15}]);
+Recipes2.addShapeless(BlockID.tcon_graveyard_soil, ["dirt", "rotten_flesh", "bone_meal"]);
 Recipes.addFurnace(BlockID.tcon_graveyard_soil, BlockID.tcon_consecrated_soil);
 
 

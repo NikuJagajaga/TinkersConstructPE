@@ -1,6 +1,6 @@
 createItem("tcon_moss", "Ball of Moss");
 createItem("tcon_mending_moss", "Mending Moss");
-Recipes2.addShapeless(ItemID.tcon_moss, [{id: VanillaBlockID.mossy_cobblestone, count: 9}]);
+Recipes2.addShapeless(ItemID.tcon_moss, [{id: "mossy_cobblestone", count: 9}]);
 Item.registerUseFunction(ItemID.tcon_moss, (coords, item, block) => {
     if(block.id === VanillaBlockID.bookshelf){
         if(Player.getLevel() < 10){

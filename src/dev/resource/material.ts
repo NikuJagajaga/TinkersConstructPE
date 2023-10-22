@@ -48,27 +48,27 @@ Recipes.addFurnace(BlockID.oreArdite, ItemID.ingotArdite);
 
 
 createItem("tcon_paperstack", "Paper Stack");
-Recipes2.addShapeless(ItemID.tcon_paperstack, [{id: VanillaItemID.paper, count: 4}]);
+Recipes2.addShapeless(ItemID.tcon_paperstack, [{id: "paper", count: 4}]);
 
 
 createBlock("tcon_lavawood", [{name: "Lavawood"}]);
 createBlock("tcon_firewood", [{name: "Firewood"}]);
 CastingRecipe.addBasinRecipe(VanillaBlockID.planks, "lava", BlockID.tcon_lavawood, 250);
-Recipes2.addShapeless(BlockID.tcon_firewood, [BlockID.tcon_lavawood, {id: VanillaItemID.blaze_powder, count: 2}]);
+Recipes2.addShapeless(BlockID.tcon_firewood, [BlockID.tcon_lavawood, {id: "blaze_powder", count: 2}]);
 
 
 createItem("tcon_slimeball_blue", "Blue Slime");
 createItem("tcon_slimeball_purple", "Purple Slime");
-Recipes2.addShapeless(ItemID.tcon_slimeball_blue, [VanillaItemID.slime_ball, {id: VanillaItemID.dye, count: 2, data: 4}]);
-Recipes2.addShapeless(ItemID.tcon_slimeball_purple, [ItemID.tcon_slimeball_blue, {id: VanillaItemID.redstone, count: 2}]);
+Recipes2.addShapeless(ItemID.tcon_slimeball_blue, ["slime_ball", {id: "blue_dye", count: 2}]);
+Recipes2.addShapeless(ItemID.tcon_slimeball_purple, [ItemID.tcon_slimeball_blue, {id: "redstone", count: 2}]);
 MeltingRecipe.addRecipe(ItemID.tcon_slimeball_purple, "purpleslime", MatValue.SLIME_BALL);
 
 createBlock("tcon_slimymud_green", [{name: "Slimy Mud"}]);
 createBlock("tcon_slimymud_blue", [{name: "Blue Slimy Mud"}]);
 createBlock("tcon_slimymud_magma", [{name: "Magma Slimy Mud"}]);
-Recipes2.addShapeless(BlockID.tcon_slimymud_green, [{id: VanillaItemID.slime_ball, count: 4}, VanillaBlockID.sand, VanillaBlockID.dirt]);
-Recipes2.addShapeless(BlockID.tcon_slimymud_green, [{id: ItemID.tcon_slimeball_blue, count: 4}, VanillaBlockID.sand, VanillaBlockID.dirt]);
-Recipes2.addShapeless(BlockID.tcon_slimymud_green, [{id: VanillaItemID.magma_cream, count: 4}, VanillaBlockID.soul_sand, VanillaBlockID.netherrack]);
+Recipes2.addShapeless(BlockID.tcon_slimymud_green, [{id: "slime_ball", count: 4}, "sand", "dirt"]);
+Recipes2.addShapeless(BlockID.tcon_slimymud_green, [{id: ItemID.tcon_slimeball_blue, count: 4}, "sand", "dirt"]);
+Recipes2.addShapeless(BlockID.tcon_slimymud_green, [{id: "magma_cream", count: 4}, "soul_sand", "netherrack"]);
 Item.addCreativeGroup("tcon_slimymud", "Slimy Mud", [BlockID.tcon_slimymud_green, BlockID.tcon_slimymud_blue, BlockID.tcon_slimymud_magma]);
 
 createItem("tcon_slimecrystal_green", "Slime Crystal");
@@ -85,6 +85,6 @@ CastingRecipe.addBasinRecipe(0, "molten_glass", BlockID.tcon_clear_glass, 1000);
 ConnectedTexture.setModelForGlass(BlockID.tcon_clear_glass, -1, "tcon_clear_glass");
 
 createBlock("tcon_seared_glass", [{name: "Seared Glass"}]);
-Recipes2.addShaped(BlockID.tcon_seared_glass, "_a_:aba:_a_", {a: ItemID.tcon_brick, b: VanillaBlockID.glass});
+Recipes2.addShaped(BlockID.tcon_seared_glass, "_a_:aba:_a_", {a: ItemID.tcon_brick, b: "glass"});
 CastingRecipe.addBasinRecipe(VanillaBlockID.glass, "molten_stone", BlockID.tcon_seared_glass, MatValue.SEARED_BLOCK);
 ConnectedTexture.setModelForGlass(BlockID.tcon_seared_glass, -1, "tcon_seared_glass");

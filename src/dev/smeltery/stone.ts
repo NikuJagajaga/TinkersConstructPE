@@ -1,6 +1,6 @@
 createBlock("tcon_grout", [{name: "Grout"}]);
-Recipes2.addShapeless({id: BlockID.tcon_grout, count: 2}, [VanillaBlockID.sand, VanillaBlockID.gravel, VanillaItemID.clay_ball]);
-Recipes2.addShapeless({id: BlockID.tcon_grout, count: 8}, [{id: VanillaBlockID.sand, count: 4}, {id: VanillaBlockID.gravel, count: 4}, VanillaBlockID.clay]);
+Recipes2.addShapeless({id: BlockID.tcon_grout, count: 2}, ["sand", "gravel", "clay_ball"]);
+Recipes2.addShapeless({id: BlockID.tcon_grout, count: 8}, [{id: "sand", count: 4}, {id: "gravel", count: 4}, "clay"]);
 
 createItem("tcon_brick", "Seared Brick");
 Recipes.addFurnace(BlockID.tcon_grout, ItemID.tcon_brick);

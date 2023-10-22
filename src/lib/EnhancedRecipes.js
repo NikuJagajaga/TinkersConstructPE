@@ -1,124 +1,141 @@
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        if (typeof b !== "function" && b !== null)
+            throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 LIBRARY({
     name: "EnhancedRecipes",
-    version: 5,
+    version: 6,
     shared: false,
     api: "CoreEngine"
 });
-
-
-var existVR = FileTools.isExists(__dir__ + "lib/VanillaRecipe.js");
-if(existVR){
-    IMPORT("VanillaRecipe");
-    VanillaRecipe.setResourcePath(__dir__ + "res/");
-    FileTools.mkdir(__dir__ + "res/definitions/recipe/");
+try {
+    IMPORT("BlockEngine", "IDConverter");
 }
-
-
-var Recipes2 = {
-
-    addShaped: function(result, mask, source, func){
-        const array = [];
-        for(let key in source){
-            array.push(key, source[key].id || source[key], source[key].data || (source[key].data === 0 ? 0 : -1));
+catch (e) {
+}
+var Recipes2;
+(function (Recipes2) {
+    var getIDData = function (stringId) {
+        if (IDConverter) {
+            return IDConverter.getIDData(stringId);
         }
-        Recipes.addShaped(typeof result === "number" ? {id: result} : result, mask.split(":"), array, func);
-    },
-
-    addShapeless: function(result, source, func){
-        const array = [];
-        for(let i = 0; i < source.length; i++){
-            if(typeof source[i] === "number"){
-                array.push({id: source[i], data: -1});
-                continue;
-            }
-            if(!("data" in source[i])){
-                source[i].data = 0;
-            }
-            if(!source[i].count){
-                array.push({id: source[i].id, data: source[i].data});
-                continue;
-            }
-            for(; source[i].count--;){
-                array.push({id: source[i].id, data: source[i].data});
-            }
-        }
-        Recipes.addShapeless(typeof result === "number" ? {id: result} : result, array, func);
-    },
-
-    addShapedWith2x2: function(result, mask, source, name){
-        if(!existVR){
-            return;
-        }
-        if(!name){
-            name = result.item || result;
-        }
-        let result2;
-        if(typeof result === "string"){
-            result2 = VanillaRecipe.getNumericID(result);
-            result = {item: result};
-        }
-        else{
-            result2 = {id: VanillaRecipe.getNumericID(result.item), count: result.count, data: result.data};
-        }
-        const source2 = {};
-        for(let key in source){
-            if(typeof source[key] === "string"){
-                source2[key] = VanillaRecipe.getNumericID(source[key]);
-                source[key] = {item: source[key]};
-            }
-            else{
-                source2[key] = {id: VanillaRecipe.getNumericID(source[key].item), data: source[key].data};
+        return { id: VanillaItemID[stringId] || VanillaBlockID[stringId], data: 0 };
+    };
+    var ItemInstanceClass = /** @class */ (function () {
+        function ItemInstanceClass(arg, defData) {
+            var _a, _b, _c;
+            var pair;
+            switch (typeof arg) {
+                case "number":
+                    this.id = arg;
+                    this.count = 1;
+                    this.data = defData;
+                    break;
+                case "string":
+                    pair = getIDData(arg);
+                    this.id = pair.id;
+                    this.count = 1;
+                    this.data = pair.data;
+                    break;
+                default:
+                    if (typeof arg.id === "string") {
+                        pair = getIDData(arg.id);
+                        this.id = pair.id;
+                        this.data = (_a = arg.data) !== null && _a !== void 0 ? _a : pair.data;
+                    }
+                    else {
+                        this.id = arg.id;
+                        this.data = (_b = arg.data) !== null && _b !== void 0 ? _b : defData;
+                    }
+                    this.count = (_c = arg.count) !== null && _c !== void 0 ? _c : 1;
             }
         }
-        this.addShaped(result2, mask, source2);
-        VanillaRecipe.addCraftingRecipe(name, {
-            type: "shaped",
-            pattern: mask.split(":"),
-            key: source,
-            result: result
-        });
-    },
-
-    addShapelessWith2x2: function(result, source, name){
-        if(!existVR){
-            return;
+        return ItemInstanceClass;
+    }());
+    var SourceItem = /** @class */ (function (_super) {
+        __extends(SourceItem, _super);
+        function SourceItem(arg) {
+            return _super.call(this, arg, -1) || this;
         }
-        if(!name){
-            name = result.item || result;
+        return SourceItem;
+    }(ItemInstanceClass));
+    Recipes2.SourceItem = SourceItem;
+    var ResultItem = /** @class */ (function (_super) {
+        __extends(ResultItem, _super);
+        function ResultItem(arg) {
+            return _super.call(this, arg, 0) || this;
         }
-        let result2;
-        if(typeof result === "string"){
-            result2 = VanillaRecipe.getNumericID(result);
-            result = {item: result};
+        return ResultItem;
+    }(ItemInstanceClass));
+    Recipes2.ResultItem = ResultItem;
+    function addShaped(result, mask, sources, onCrafting) {
+        var array = [];
+        var source;
+        for (var char in sources) {
+            source = new SourceItem(sources[char]);
+            array.push(char, source.id, source.data);
         }
-        else{
-            result2 = {id: VanillaRecipe.getNumericID(result.item), count: result.count, data: result.data};
-        }
-        this.addShapeless(result2, source.map(function(item){
-            return typeof item === "string" ? VanillaRecipe.getNumericID(item) : {id: VanillaRecipe.getNumericID(item.item), count: item.count, data: item.data};
-        }));
-        VanillaRecipe.addCraftingRecipe(name, {
-            type: "shapeless",
-            ingredients: source.map(function(item){
-                return typeof item === "string" ? {item: item} : item;
-            }),
-            result: result
-        });
-    },
-
-    bucketFunc: function(api){
-        let slot;
-        for(let i = 9; i--;){
-            slot = api.getFieldSlot(i);
-            if(slot.id == VanillaItemID.bucket){
-                slot.data = 0;
-                continue;
-            }
-            api.decreaseFieldSlot(i);
-        }
+        Recipes.addShaped(new ResultItem(result), typeof mask === "string" ? mask.split(":") : mask, array, onCrafting);
     }
-
-};
-
-
+    Recipes2.addShaped = addShaped;
+    function addShapeless(result, sources, onCrafting) {
+        var array = [];
+        var source;
+        var n = 0;
+        for (var i = 0; i < sources.length; i++) {
+            source = new SourceItem(sources[i]);
+            for (n = 0; n < source.count; n++) {
+                array.push({ id: source.id, data: source.data });
+            }
+        }
+        Recipes.addShapeless(new ResultItem(result), array, onCrafting);
+    }
+    Recipes2.addShapeless = addShapeless;
+    function deleteRecipe(result) {
+        Recipes.deleteRecipe(new ResultItem(result));
+    }
+    Recipes2.deleteRecipe = deleteRecipe;
+    function addFurnace(source, result, prefix) {
+        var sourceItem = new SourceItem(source);
+        var resultItem = new ResultItem(result);
+        Recipes.addFurnace(sourceItem.id, sourceItem.data, resultItem.id, resultItem.data, prefix);
+    }
+    Recipes2.addFurnace = addFurnace;
+    function removeFurnaceRecipe(source) {
+        var sourceItem = new SourceItem(source);
+        Recipes.removeFurnaceRecipe(sourceItem.id, sourceItem.data);
+    }
+    Recipes2.removeFurnaceRecipe = removeFurnaceRecipe;
+    function addFurnaceFuel(fuel, time) {
+        var sourceItem = new SourceItem(fuel);
+        Recipes.addFurnaceFuel(sourceItem.id, sourceItem.data, time);
+    }
+    Recipes2.addFurnaceFuel = addFurnaceFuel;
+    function removeFurnaceFuel(fuel) {
+        var sourceItem = new SourceItem(fuel);
+        Recipes.removeFurnaceFuel(sourceItem.id, sourceItem.data);
+    }
+    Recipes2.removeFurnaceFuel = removeFurnaceFuel;
+    function getFurnaceRecipeResult(source, prefix) {
+        var sourceItem = new SourceItem(source);
+        return Recipes.getFurnaceRecipeResult(sourceItem.id, sourceItem.data, prefix);
+    }
+    Recipes2.getFurnaceRecipeResult = getFurnaceRecipeResult;
+    function getFuelBurnDuration(fuel) {
+        var sourceItem = new SourceItem(fuel);
+        return Recipes.getFuelBurnDuration(sourceItem.id, sourceItem.data);
+    }
+    Recipes2.getFuelBurnDuration = getFuelBurnDuration;
+})(Recipes2 || (Recipes2 = {}));
 EXPORT("Recipes2", Recipes2);

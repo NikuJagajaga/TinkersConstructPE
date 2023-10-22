@@ -18,12 +18,12 @@ BlockModel.register(BlockID.tcon_stenciltable, (model, index) => {
     return model;
 }, 6);
 
-Recipes2.addShaped({id: BlockID.tcon_stenciltable, data: 0}, "a:b", {a: ItemID.tcon_pattern_blank, b: {id: VanillaBlockID.planks, data: 0}});
-Recipes2.addShaped({id: BlockID.tcon_stenciltable, data: 1}, "a:b", {a: ItemID.tcon_pattern_blank, b: {id: VanillaBlockID.planks, data: 1}});
-Recipes2.addShaped({id: BlockID.tcon_stenciltable, data: 2}, "a:b", {a: ItemID.tcon_pattern_blank, b: {id: VanillaBlockID.planks, data: 2}});
-Recipes2.addShaped({id: BlockID.tcon_stenciltable, data: 3}, "a:b", {a: ItemID.tcon_pattern_blank, b: {id: VanillaBlockID.planks, data: 3}});
-Recipes2.addShaped({id: BlockID.tcon_stenciltable, data: 4}, "a:b", {a: ItemID.tcon_pattern_blank, b: {id: VanillaBlockID.planks, data: 4}});
-Recipes2.addShaped({id: BlockID.tcon_stenciltable, data: 5}, "a:b", {a: ItemID.tcon_pattern_blank, b: {id: VanillaBlockID.planks, data: 5}});
+Recipes2.addShaped({id: BlockID.tcon_stenciltable, data: 0}, "a:b", {a: ItemID.tcon_pattern_blank, b: {id: "planks", data: 0}});
+Recipes2.addShaped({id: BlockID.tcon_stenciltable, data: 1}, "a:b", {a: ItemID.tcon_pattern_blank, b: {id: "planks", data: 1}});
+Recipes2.addShaped({id: BlockID.tcon_stenciltable, data: 2}, "a:b", {a: ItemID.tcon_pattern_blank, b: {id: "planks", data: 2}});
+Recipes2.addShaped({id: BlockID.tcon_stenciltable, data: 3}, "a:b", {a: ItemID.tcon_pattern_blank, b: {id: "planks", data: 3}});
+Recipes2.addShaped({id: BlockID.tcon_stenciltable, data: 4}, "a:b", {a: ItemID.tcon_pattern_blank, b: {id: "planks", data: 4}});
+Recipes2.addShaped({id: BlockID.tcon_stenciltable, data: 5}, "a:b", {a: ItemID.tcon_pattern_blank, b: {id: "planks", data: 5}});
 
 
 class StencilTable extends TableBase {

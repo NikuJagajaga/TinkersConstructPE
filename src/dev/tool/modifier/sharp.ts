@@ -1,7 +1,7 @@
 class ModSharp extends TinkersModifier {
 
     constructor(){
-        super("sharp", "Sharper", 2, [VanillaItemID.quartz], 72, true);
+        super("sharp", "Sharper", 2, ["quartz"], 72, true);
     }
 
     applyStats(stats: ToolStats, level: number): void {

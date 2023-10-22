@@ -86,11 +86,14 @@
         "../../declarations/android-declarations.d.ts",
         "../../declarations/android.d.ts",
         "../../declarations/core-engine.d.ts",
+        "../../declarations/BlockEngine.d.ts",
         "../../declarations/ToolLib.d.ts",
         "../../declarations/LiquidLib.d.ts",
         "../../declarations/TileRender.d.ts",
         "../../declarations/StorageInterface.d.ts",
+        "../../declarations/SoundLib.d.ts",
         "../../declarations/RecipeViewer.d.ts",
-        "../../declarations/additional.d.ts"
+        "../../declarations/ConnectedTexture.d.ts",
+        "../../declarations/EnhancedRecipes.d.ts"
     ]
 }

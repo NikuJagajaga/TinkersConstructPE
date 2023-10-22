@@ -159,7 +159,9 @@ class ToolForgeHandler {
                                 }
                                 slot = container.getSlot("slotResult");
                                 Player.setInventorySlot(index, slot.id, 1, slot.data, slot.extra);
-                                tile.blockID === BlockID.tcon_toolstation ? soundSaw.play() : World.playSoundAtEntity(player, "random.anvil_use", 0.9, 0.95 + 0.2 * Math.random());
+                                tile.blockID === BlockID.tcon_toolstation ?
+                                    SoundManager.playSound("saw.ogg", 0.5) :
+                                    World.playSoundAtEntity(player, "random.anvil_use", 0.9, 0.95 + 0.2 * Math.random());
                             }
                             catch(e){
                                 alert("craftError: " + e);
@@ -480,7 +482,7 @@ Callback.addCallback("PreLoaded", () => {
 
 
 createBlock("tcon_toolstation", [{name: "Tool Station"}], "wood");
-Recipes2.addShaped(BlockID.tcon_toolstation, "a:b", {a: ItemID.tcon_pattern_blank, b: VanillaBlockID.crafting_table});
+Recipes2.addShaped(BlockID.tcon_toolstation, "a:b", {a: ItemID.tcon_pattern_blank, b: "crafting_table"});
 BlockModel.register(BlockID.tcon_toolstation, (model, index) => {
     model.addBox( 0/16, 12/16,  0/16,  16/16, 16/16, 16/16, [["tcon_toolstation", 0], ["tcon_toolstation", 0], ["tcon_table_side", 0]]);
     model.addBox( 0/16,  0/16,  0/16,   4/16, 12/16,  4/16, "tcon_table_side", 0);

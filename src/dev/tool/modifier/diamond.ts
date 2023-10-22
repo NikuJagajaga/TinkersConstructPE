@@ -1,7 +1,7 @@
 class ModDiamond extends TinkersModifier {
 
     constructor(){
-        super("diamond", "Diamond", 3, [VanillaItemID.diamond], 1, false);
+        super("diamond", "Diamond", 3, ["diamond"], 1, false);
     }
 
     applyStats(stats: ToolStats, level: number): void {

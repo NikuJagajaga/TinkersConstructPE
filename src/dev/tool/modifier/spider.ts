@@ -8,7 +8,7 @@ class ModSpider extends TinkersModifier {
     };
 
     constructor(){
-        super("spider", "Bane of Arthropods", 9, [VanillaItemID.fermented_spider_eye], 24, true);
+        super("spider", "Bane of Arthropods", 9, ["fermented_spider_eye"], 24, true);
     }
 
     onAttack(item: ItemInstance, victim: number, level: number): number {

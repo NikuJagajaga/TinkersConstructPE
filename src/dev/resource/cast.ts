@@ -68,7 +68,7 @@ Item.addCreativeGroup("tcon_pattern", "Pattern", [
     ItemID.tcon_pattern_largeplate
 ]);
 
-Recipes2.addShaped({id: ItemID.tcon_pattern_blank, count: 4}, "ab:ba", {a: VanillaBlockID.planks, b: VanillaItemID.stick});
+Recipes2.addShaped({id: ItemID.tcon_pattern_blank, count: 4}, "ab:ba", {a: "planks", b: "stick"});
 PatternRegistry.registerData(ItemID.tcon_pattern_pickaxe, "pickaxe", 2);
 PatternRegistry.registerData(ItemID.tcon_pattern_shovel, "shovel", 2);
 PatternRegistry.registerData(ItemID.tcon_pattern_axe, "axe", 2);
