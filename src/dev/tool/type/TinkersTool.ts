@@ -22,10 +22,42 @@ class TinkersToolHandler {
 
     private static tools: {[key: number]: true} = {};
 
+    private static ToolLib_setTool(id: number, toolMaterial: ToolAPI.ToolMaterial, toolType: TinkersTool): void {
+        Item.setToolRender(id, true);
+        const toolData: {[key: string]: any} = {brokenId: 0, ...toolType};
+        if(!toolMaterial.durability){
+            toolMaterial.durability = Item.getMaxDamage(id);
+        }
+        if(!toolData.blockTypes){
+            toolData.isNative = true;
+            Item.setMaxDamage(id, toolMaterial.durability);
+        }
+        ToolAPI.registerTool(id, toolMaterial, toolData.blockTypes, toolData);
+        if(toolData.useItem){
+            Item.registerUseFunctionForID(id, toolData.useItem);
+        }
+        if(toolData.destroyBlock){
+            Callback.addCallback("DestroyBlock", (coords, block, player) => {
+                const item = Player.getCarriedItem();
+                if(item.id === id){
+                    toolData.destroyBlock(coords, coords.side, item, block);
+                }
+            });
+        }
+        if(toolData.continueDestroyBlock){
+            Callback.addCallback("DestroyBlockContinue", (coords, block, progress) => {
+                const item = Player.getCarriedItem();
+                if(item.id === id){
+                    toolData.continueDestroyBlock(item, coords, block, progress);
+                }
+            });
+        }
+    }
+
     static registerTool(key: string, name: string, toolData: TinkersTool): void {
         const id = createItem("tcontool_" + key, name, {name: "tcontool_" + key}, {stack: 1, isTech: true});
         Item.setMaxDamage(id, 14);
-        ToolLib.setTool(id, {durability: 0, level: 0, efficiency: 0, damage: 0}, toolData);
+        this.ToolLib_setTool(id, {durability: 0, level: 0, efficiency: 0, damage: 0}, toolData);
         Item.registerNameOverrideFunction(id, (item, name) => {
             try{
                 if(!item.extra){
@@ -112,7 +144,8 @@ class TinkersToolHandler {
             return this.models[uniqueKey][suffix];
         }
         catch(e){
-            alert("iconError: " + e);
+            //alert("iconError: " + e);
+            return null;
         }
     }
 

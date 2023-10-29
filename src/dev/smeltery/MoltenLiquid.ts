@@ -14,7 +14,7 @@ class MoltenLiquid {
         return {width: 64, height: this.liquidCount * 32};
     }
 
-    static create(key: string, name: string, color: string, type: "metal" | "stone" | "other" = "metal"): void {
+    private static create(key: string, name: string, color: string, type: "metal" | "stone" | "other" = "metal"): void {
 
         const bitmap = new Bitmap.createBitmap(16, 16, Bitmap.Config.ARGB_8888);
         const canvas = new Canvas(bitmap);
@@ -48,7 +48,8 @@ class MoltenLiquid {
     }
 
     static createAndRegister(key: string, name: string, temp: number, color: string, type: "metal" | "stone" | "other" = "metal"): void {
-        this.create(key, name, color, type);
+        //this.create(key, name, color, type);
+        LiquidRegistry.registerLiquid(key, name, ["liquid." + key]);
         this.register(key, temp);
     }
 

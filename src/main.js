@@ -35,7 +35,6 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
 };
 var _a, _b, _c, _d, _e, _f, _g, _h;
 IMPORT("BlockEngine");
-IMPORT("ToolLib");
 IMPORT("TileRender");
 IMPORT("StorageInterface");
 IMPORT("SoundLib");
@@ -252,7 +251,8 @@ var MoltenLiquid = /** @class */ (function () {
     };
     MoltenLiquid.createAndRegister = function (key, name, temp, color, type) {
         if (type === void 0) { type = "metal"; }
-        this.create(key, name, color, type);
+        //this.create(key, name, color, type);
+        LiquidRegistry.registerLiquid(key, name, ["liquid." + key]);
         this.register(key, temp);
     };
     MoltenLiquid.isExist = function (key) {
@@ -3994,11 +3994,42 @@ var Modifier = {
 var TinkersToolHandler = /** @class */ (function () {
     function TinkersToolHandler() {
     }
+    TinkersToolHandler.ToolLib_setTool = function (id, toolMaterial, toolType) {
+        Item.setToolRender(id, true);
+        var toolData = __assign({ brokenId: 0 }, toolType);
+        if (!toolMaterial.durability) {
+            toolMaterial.durability = Item.getMaxDamage(id);
+        }
+        if (!toolData.blockTypes) {
+            toolData.isNative = true;
+            Item.setMaxDamage(id, toolMaterial.durability);
+        }
+        ToolAPI.registerTool(id, toolMaterial, toolData.blockTypes, toolData);
+        if (toolData.useItem) {
+            Item.registerUseFunctionForID(id, toolData.useItem);
+        }
+        if (toolData.destroyBlock) {
+            Callback.addCallback("DestroyBlock", function (coords, block, player) {
+                var item = Player.getCarriedItem();
+                if (item.id === id) {
+                    toolData.destroyBlock(coords, coords.side, item, block);
+                }
+            });
+        }
+        if (toolData.continueDestroyBlock) {
+            Callback.addCallback("DestroyBlockContinue", function (coords, block, progress) {
+                var item = Player.getCarriedItem();
+                if (item.id === id) {
+                    toolData.continueDestroyBlock(item, coords, block, progress);
+                }
+            });
+        }
+    };
     TinkersToolHandler.registerTool = function (key, name, toolData) {
         var _this = this;
         var id = createItem("tcontool_" + key, name, { name: "tcontool_" + key }, { stack: 1, isTech: true });
         Item.setMaxDamage(id, 14);
-        ToolLib.setTool(id, { durability: 0, level: 0, efficiency: 0, damage: 0 }, toolData);
+        this.ToolLib_setTool(id, { durability: 0, level: 0, efficiency: 0, damage: 0 }, toolData);
         Item.registerNameOverrideFunction(id, function (item, name) {
             try {
                 if (!item.extra) {
@@ -4081,7 +4112,8 @@ var TinkersToolHandler = /** @class */ (function () {
             return this.models[uniqueKey][suffix];
         }
         catch (e) {
-            alert("iconError: " + e);
+            //alert("iconError: " + e);
+            return null;
         }
     };
     TinkersToolHandler.tools = {};

@@ -87,8 +87,6 @@
         "../../declarations/android.d.ts",
         "../../declarations/core-engine.d.ts",
         "../../declarations/BlockEngine.d.ts",
-        "../../declarations/ToolLib.d.ts",
-        "../../declarations/LiquidLib.d.ts",
         "../../declarations/TileRender.d.ts",
         "../../declarations/StorageInterface.d.ts",
         "../../declarations/SoundLib.d.ts",
