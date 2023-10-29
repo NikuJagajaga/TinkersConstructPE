@@ -1,23 +1,22 @@
 createBlock("tcon_drain", [{name: "Seared Drain", texture: [0, 0, 1, 0, 0, 0]}]);
-registerRotationModel("tcon_drain", [0, 0, 1, 0, 0, 0]);
+TileRenderer.setStandardModelWithRotation(BlockID.tcon_drain, 2, [0, 0, 1, 0, 0, 0].map(meta => ["tcon_drain", meta]));
+TileRenderer.setRotationFunction(BlockID.tcon_drain);
 Recipes2.addShaped(BlockID.tcon_drain, "a_a:a_a:a_a", {a: ItemID.tcon_brick});
 
 
-class SearedDrain extends TileBase {
+class SearedDrain extends TconTileEntity {
 
-    controller: TileEntity;
+    controller: SmelteryControler;
 
-    setController(tile: TileEntity): void {
-        this.controller = tile;
+    override onItemUse(coords: Callback.ItemUseCoordinates, item: ItemStack, player: number): boolean {
+
+
+
+        return false;
+
     }
 
-    init(): void {
-        TileRenderer.mapAtCoords(this.x, this.y, this.z, this.blockID, this.data.meta);
-    }
-
-    destroy(): void {
-        BlockRenderer.unmapAtCoords(this.x, this.y, this.z);
-    }
+    /*
 
     click(id: number, count: number, data: number): boolean {
         if(this.controller && this.controller.isLoaded){
@@ -45,9 +44,13 @@ class SearedDrain extends TileBase {
         return false;
     }
 
+    */
+
 }
 
 
+
+/*
 class DrainInterface extends TileBase {
     getSmelteryInterface(): any {
         const tile = this.tileEntity.controller;
@@ -66,10 +69,18 @@ class DrainInterface extends TileBase {
         return inteface ? inteface.getLiquidStored(storage, side) : null;
     }
 }
-
+*/
 
 
 
 TileEntity.registerPrototype(BlockID.tcon_drain, new SearedDrain());
-TileRenderer.setRotationPlaceFunction(BlockID.tcon_drain);
-StorageInterface.createInterface(BlockID.tcon_drain, new DrainInterface());
+
+StorageInterface.createInterface(BlockID.tcon_drain, {
+    liquidUnitRatio: 0.001,
+    getInputTank(side): ILiquidStorage {
+        return null;
+    },
+    getOutputTank(side): ILiquidStorage {
+        return null;
+    }
+});

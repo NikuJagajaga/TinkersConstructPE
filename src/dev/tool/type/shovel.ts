@@ -26,7 +26,7 @@ class TinkersShovel extends TinkersTool {
     useItem(coords: Callback.ItemUseCoordinates, item: ItemInstance, block: Tile): void {
         if(item.extra && block.id == VanillaBlockID.grass && coords.side == 1){ 
             const toolData = new ToolData(item);
-            World.setBlock(coords.x, coords.y, coords.z, VanillaBlockID.grass_path);
+            World.setBlock(coords.x, coords.y, coords.z, VanillaBlockID.grass_path, 0);
             World.playSound(coords.x + 0.5, coords.y + 1, coords.z + 0.5, "step.grass", 1, 0.8);
             toolData.consumeDurability(1);
             toolData.addXp(1);

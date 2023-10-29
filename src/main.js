@@ -13,6 +13,12 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
 var __assign = (this && this.__assign) || function () {
     __assign = Object.assign || function(t) {
         for (var s, i = 1, n = arguments.length; i < n; i++) {
@@ -33,7 +39,6 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
     }
     return to.concat(ar || Array.prototype.slice.call(from));
 };
-var _a, _b, _c, _d, _e, _f, _g, _h;
 IMPORT("BlockEngine");
 IMPORT("TileRender");
 IMPORT("StorageInterface");
@@ -41,30 +46,39 @@ IMPORT("SoundLib");
 IMPORT("EnhancedRecipes");
 IMPORT("ConnectedTexture");
 var Color = android.graphics.Color;
-var Bitmap = android.graphics.Bitmap;
-var Canvas = android.graphics.Canvas;
-var Paint = android.graphics.Paint;
-var ColorFilter = android.graphics.PorterDuffColorFilter;
-var PorterDuff = android.graphics.PorterDuff;
 var Thread = java.lang.Thread;
+var ClientSide = BlockEngine.Decorators.ClientSide;
+var NetworkEvent = BlockEngine.Decorators.NetworkEvent;
+var ContainerEvent = BlockEngine.Decorators.ContainerEvent;
 var ScreenHeight = UI.getScreenHeight();
-var setLoadingTip = ModAPI.requireGlobal("MCSystem.setLoadingTip");
-//const getAllEntity = ModAPI.requireGlobal("EntityDataRegistry.getAllData");
-//const getEntityForType = ModAPI.requireGlobal("EntityDataRegistry.getDataForType");
 var SCALE = 5; //GUI Scale
-var Cfg = {
+__config__.checkAndRestore({
     toolLeveling: {
-        baseXp: (_a = __config__.getNumber("toolLeveling.baseXp") - 0) !== null && _a !== void 0 ? _a : 500,
-        multiplier: (_b = __config__.getNumber("toolLeveling.multiplier") - 0) !== null && _b !== void 0 ? _b : 2
+        baseXp: 500,
+        multiplier: 2
     },
     oreGen: {
-        cobaltRate: (_c = __config__.getNumber("oreGen.cobaltRate") - 0) !== null && _c !== void 0 ? _c : 20,
-        arditeRate: (_d = __config__.getNumber("oreGen.arditeRate") - 0) !== null && _d !== void 0 ? _d : 20
+        cobaltRate: 20,
+        arditeRate: 20
     },
-    oreToIngotRatio: (_e = __config__.getNumber("oreToIngotRatio") - 0) !== null && _e !== void 0 ? _e : 2,
-    modifierSlots: (_f = __config__.getNumber("modifierSlots") - 0) !== null && _f !== void 0 ? _f : 3,
-    showItemOnTable: (_g = __config__.getBool("showItemOnTable")) !== null && _g !== void 0 ? _g : true,
-    checkInsideSmeltery: (_h = __config__.getBool("checkInsideSmeltery")) !== null && _h !== void 0 ? _h : true
+    oreToIngotRatio: 2,
+    modifierSlots: 3,
+    showItemOnTable: true,
+    checkInsideSmeltery: true
+});
+var Cfg = {
+    toolLeveling: {
+        baseXp: __config__.getNumber("toolLeveling.baseXp").intValue(),
+        multiplier: __config__.getNumber("toolLeveling.multiplier").intValue()
+    },
+    oreGen: {
+        cobaltRate: __config__.getNumber("oreGen.cobaltRate").intValue(),
+        arditeRate: __config__.getNumber("oreGen.arditeRate").intValue()
+    },
+    oreToIngotRatio: __config__.getNumber("oreToIngotRatio").intValue(),
+    modifierSlots: __config__.getNumber("modifierSlots").intValue(),
+    showItemOnTable: __config__.getBool("showItemOnTable"),
+    checkInsideSmeltery: __config__.getBool("checkInsideSmeltery")
 };
 var MatValue = /** @class */ (function () {
     function MatValue() {
@@ -83,11 +97,6 @@ var MatValue = /** @class */ (function () {
     MatValue.ORE = MatValue.INGOT * Cfg.oreToIngotRatio;
     return MatValue;
 }());
-;
-var player;
-Callback.addCallback("LevelLoaded", function () {
-    player = Player.get();
-});
 var addLineBreaks = function (length, text) {
     var array = [];
     var words = text.split(" ");
@@ -140,76 +149,122 @@ var createItem = function (namedID, name, texture, params) {
     Item.createItem(namedID, name, texture, params);
     return id;
 };
-var createAnimItem = function (x, y, z) {
-    var anim = new Animation.Item(x, y, z);
-    anim.load();
-    anim.setSkylightMode();
-    return anim;
-};
-var registerRotationModel = function (namedID) {
-    var texture = [];
-    for (var _i = 1; _i < arguments.length; _i++) {
-        texture[_i - 1] = arguments[_i];
+var TconTileEntity = /** @class */ (function (_super) {
+    __extends(TconTileEntity, _super);
+    function TconTileEntity() {
+        return _super !== null && _super.apply(this, arguments) || this;
     }
-    var id = BlockID[namedID];
-    var texture2 = texture.map(function (tex) { return tex.map(function (t) { return typeof t === "number" ? [namedID, t] : t; }); });
-    TileRenderer.setStandartModel(id, texture2[0]);
-    for (var i = 0; i < texture2.length; i++) {
-        TileRenderer.registerRotationModel(id, i * 4, texture2[i]);
+    TconTileEntity.prototype.onInit = function () {
+        this.networkData.putInt("blockId", this.blockID);
+        this.networkData.putInt("blockData", this.blockSource.getBlockData(this.x, this.y, this.z));
+        this.putDefaultNetworkData();
+        this.networkData.sendChanges();
+        this.setupContainer();
+    };
+    TconTileEntity.prototype.putDefaultNetworkData = function () { };
+    TconTileEntity.prototype.setupContainer = function () { };
+    TconTileEntity.prototype.setUiScale = function (name, numerator, denominator) {
+        this.container.setScale(name, denominator ? numerator / denominator : 0);
+    };
+    TconTileEntity.prototype.getScreenByName = function (screenName, container) {
+        return null;
+    };
+    return TconTileEntity;
+}(TileEntityBase));
+var TileWithLiquidModel = /** @class */ (function (_super) {
+    __extends(TileWithLiquidModel, _super);
+    function TileWithLiquidModel() {
+        return _super !== null && _super.apply(this, arguments) || this;
     }
-};
-var TileBase = /** @class */ (function () {
-    function TileBase() {
-    }
-    return TileBase;
-}());
-/*
-class TileWithoutContainer extends TileBase {
-    init(): void {
-        delete this.container;
-        delete this.liquidStorage;
-    }
-    destroy(): void {
-        this.container = {dropAt: () => {}};
-    }
-}
-*/ 
+    TileWithLiquidModel.prototype.putDefaultNetworkData = function () {
+        this.networkData.putString("liquidStored", "");
+        this.networkData.putFloat("liquidRelativeAmount", 0);
+    };
+    TileWithLiquidModel.prototype.clientLoad = function () {
+        this.render = new Render();
+        this.anim = new Animation.Base(this.x + this.animPos.x, this.y + this.animPos.y - 1.5, this.z + this.animPos.z);
+        this.anim.describe({ render: this.render.getId(), skin: "model/tcon_liquids.png" });
+        this.anim.load();
+        this.anim.setSkylightMode();
+        var amount = this.networkData.getFloat("liquidRelativeAmount");
+        this.animHeight = 0;
+        if (amount > 0) {
+            this.animHeight = amount;
+            this.render.setPart("head", [{
+                    uv: { x: 0, y: MoltenLiquid.getY(this.networkData.getString("liquidStored")) },
+                    coords: { x: 0, y: -this.animHeight * 16 * this.animScale.y / 2, z: 0 },
+                    size: { x: 16 * this.animScale.x, y: 16 * this.animScale.y * this.animHeight, z: 16 * this.animScale.z }
+                }], MoltenLiquid.getTexScale());
+            this.anim.refresh();
+        }
+    };
+    TileWithLiquidModel.prototype.clientUnload = function () {
+        var _a;
+        (_a = this.anim) === null || _a === void 0 ? void 0 : _a.destroy();
+    };
+    TileWithLiquidModel.prototype.clientTick = function () {
+        var amount = this.networkData.getFloat("liquidRelativeAmount");
+        var diff = amount - this.animHeight;
+        var parts = [];
+        var needRefresh = false;
+        if (amount > 0) {
+            this.animHeight += diff * 0.2;
+            this.animHeight = Math.round(this.animHeight * 100) / 100;
+            if (Math.abs(diff) > 0.01) {
+                parts.push({
+                    uv: { x: 0, y: MoltenLiquid.getY(this.networkData.getString("liquidStored")) },
+                    coords: { x: 0, y: -this.animHeight * 16 * this.animScale.y / 2, z: 0 },
+                    size: { x: 16 * this.animScale.x, y: 16 * this.animScale.y * this.animHeight, z: 16 * this.animScale.z }
+                });
+                needRefresh = true;
+            }
+        }
+        else if (this.animHeight !== 0) {
+            this.animHeight = 0;
+            needRefresh = true;
+        }
+        if (needRefresh) {
+            this.render.setPart("head", parts, MoltenLiquid.getTexScale());
+            this.anim.refresh();
+        }
+    };
+    TileWithLiquidModel.prototype.onTick = function () {
+        var _a;
+        var stored = (_a = this.liquidStorage.getLiquidStored()) !== null && _a !== void 0 ? _a : "";
+        var amount = this.liquidStorage.getRelativeAmount(stored);
+        if (stored != this.networkData.getString("liquidStored") || amount !== this.networkData.getFloat("liquidRelativeAmount")) {
+            this.networkData.putString("liquidStored", stored);
+            this.networkData.putFloat("liquidRelativeAmount", amount);
+            this.networkData.sendChanges();
+        }
+    };
+    __decorate([
+        ClientSide
+    ], TileWithLiquidModel.prototype, "animPos", void 0);
+    __decorate([
+        ClientSide
+    ], TileWithLiquidModel.prototype, "animScale", void 0);
+    __decorate([
+        ClientSide
+    ], TileWithLiquidModel.prototype, "animHeight", void 0);
+    return TileWithLiquidModel;
+}(TconTileEntity));
 var BlockModel = /** @class */ (function () {
     function BlockModel() {
     }
     BlockModel.register = function (id, func, meta) {
         if (meta === void 0) { meta = 1; }
-        this.data.push({ id: id, func: func, meta: meta });
-        this.amount += meta;
-    };
-    BlockModel.run = function () {
-        try {
-            var render = void 0;
-            var i = 0, j = 0, count = 0;
-            for (i = 0; i < this.data.length; i++) {
-                for (j = 0; j < this.data[i].meta; j++) {
-                    render = new ICRender.Model();
-                    render.addEntry(this.data[i].func(BlockRenderer.createModel(), j));
-                    BlockRenderer.setStaticICRender(this.data[i].id, j, render);
-                    ItemModel.getFor(this.data[i].id, j).setModel(render);
-                    setLoadingTip("[TCon]: register render (".concat(count++, " / ").concat(this.amount, ")"));
-                }
-            }
-        }
-        catch (e) {
-            alert(e);
+        var render;
+        for (var i = 0; i < meta; i++) {
+            render = new ICRender.Model();
+            render.addEntry(func(BlockRenderer.createModel(), i));
+            BlockRenderer.setStaticICRender(id, i, render);
+            ItemModel.getFor(id, i).setModel(render);
         }
     };
-    BlockModel.amount = 0;
-    BlockModel.data = [];
     return BlockModel;
 }());
 ;
-Callback.addCallback("PostLoaded", function () {
-    Threading.initThread("tcon_define_render", function () {
-        BlockModel.run();
-    });
-});
 SoundManager.init(16);
 SoundManager.setResourcePath(__dir__ + "res/sounds/");
 SoundManager.registerSound("saw.ogg", "tcon/saw.ogg");
@@ -220,28 +275,32 @@ var MoltenLiquid = /** @class */ (function () {
     MoltenLiquid.getTexScale = function () {
         return { width: 64, height: this.liquidCount * 32 };
     };
-    MoltenLiquid.create = function (key, name, color, type) {
-        if (type === void 0) { type = "metal"; }
-        var bitmap = new Bitmap.createBitmap(16, 16, Bitmap.Config.ARGB_8888);
-        var canvas = new Canvas(bitmap);
-        var paint = new Paint();
-        paint.setColorFilter(new ColorFilter(Color.parseColor(color), PorterDuff.Mode.MULTIPLY));
-        canvas.drawBitmap(this.baseTex[type], 0, 0, paint);
-        UI.TextureSource.put("liquid." + key, bitmap);
-        LiquidRegistry.registerLiquid(key, name, ["liquid." + key]);
-        var bucket = this.baseTex.bucket.copy(Bitmap.Config.ARGB_8888, true);
-        var w;
-        var h;
-        for (w = 0; w < 16; w++) {
-            for (h = 0; h < 16; h++) {
+    /*
+        private static create(key: string, name: string, color: string, type: "metal" | "stone" | "other" = "metal"): void {
+    
+            const bitmap = new Bitmap.createBitmap(16, 16, Bitmap.Config.ARGB_8888);
+            const canvas = new Canvas(bitmap);
+            const paint = new Paint();
+            paint.setColorFilter(new ColorFilter(Color.parseColor(color), PorterDuff.Mode.MULTIPLY));
+            canvas.drawBitmap(this.baseTex[type], 0, 0, paint);
+            UI.TextureSource.put("liquid." + key, bitmap);
+            LiquidRegistry.registerLiquid(key, name, ["liquid." + key]);
+    
+            const bucket = this.baseTex.bucket.copy(Bitmap.Config.ARGB_8888, true);
+            let w: number;
+            let h: number;
+            for(w = 0; w < 16; w++){
+            for(h = 0; h < 16; h++){
                 bucket.getPixel(w, h) === Color.GREEN && bucket.setPixel(w, h, bitmap.getPixel(w, h));
             }
+            }
+            const path = __dir__ + "res/items-opaque/bucket/tcon_bucket_" + key + ".png";
+            const file = new java.io.File(path);
+            file.getParentFile().mkdirs();
+            FileTools.WriteImage(path, bucket);
+    
         }
-        var path = __dir__ + "res/items-opaque/bucket/tcon_bucket_" + key + ".png";
-        var file = new java.io.File(path);
-        file.getParentFile().mkdirs();
-        FileTools.WriteImage(path, bucket);
-    };
+    */
     MoltenLiquid.register = function (key, temp) {
         if (temp < 300) {
             return;
@@ -253,6 +312,9 @@ var MoltenLiquid = /** @class */ (function () {
         if (type === void 0) { type = "metal"; }
         //this.create(key, name, color, type);
         LiquidRegistry.registerLiquid(key, name, ["liquid." + key]);
+        var id = createItem("tcon_bucket_" + key, name + " Bucket");
+        Item.addCreativeGroup("tcon_bucket", "TCon Buckets", [id]);
+        LiquidRegistry.registerItem(key, { id: VanillaItemID.bucket, data: 0 }, { id: id, data: 0 });
         this.register(key, temp);
     };
     MoltenLiquid.isExist = function (key) {
@@ -264,137 +326,14 @@ var MoltenLiquid = /** @class */ (function () {
     MoltenLiquid.getTemp = function (key) {
         return this.isExist(key) ? this.data[key].temp : -1;
     };
-    MoltenLiquid.setup = function () {
-        var path = __dir__ + "res/model/tcon_liquids.png";
-        var scale = this.getTexScale();
-        var bitmap = new Bitmap.createBitmap(scale.width, scale.height, Bitmap.Config.ARGB_8888);
-        var canvas = new Canvas(bitmap);
-        var i = 0;
-        for (var key in this.data) {
-            for (i = 0; i < 8; i++) {
-                canvas.drawBitmap(this.data[key].bmp, (i & 3) << 4, (i >> 2 << 4) + this.data[key].y, null);
-            }
-        }
-        var file = new java.io.File(path);
-        file.getParentFile().mkdirs();
-        file.createNewFile();
-        FileTools.WriteImage(path, bitmap);
-        var liquids = Object.keys(this.data).filter(function (liq) { return liq !== "water" && liq !== "lava" && liq !== "milk"; });
-        var id = createItem("tcon_bucket", "Tinkers Bucket", { name: "bucket" }, { isTech: true });
-        Item.registerNameOverrideFunction(id, function (item) { return LiquidRegistry.getLiquidName(liquids[item.data]) + " Bucket"; });
-        Item.registerIconOverrideFunction(id, function (item) { return ({ name: "tcon_bucket_" + liquids[item.data] }); });
-        liquids.forEach(function (liq, i) {
-            LiquidRegistry.registerItem(liq, { id: VanillaItemID.bucket, data: 0 }, { id: id, data: i });
-        });
-    };
-    MoltenLiquid.initAnim = function (tile, posX, posY, posZ, scaleX, scaleY, scaleZ, useThread) {
-        var _this = this;
-        if (useThread) {
-            tile.liquidStorage.setAmount = function (liquid, amount) {
-                tile.liquidStorage.liquidAmounts[liquid] = amount;
-                _this.updateAnimInThread(tile);
-            };
-        }
-        tile.render = new Render();
-        tile.anim = new Animation.Base(tile.x + posX, tile.y + posY - 1.5, tile.z + posZ);
-        tile.anim.height = 0;
-        tile.anim.scaleX = scaleX;
-        tile.anim.scaleY = scaleY;
-        tile.anim.scaleZ = scaleZ;
-        tile.anim.describe({ render: tile.render.getID(), skin: "model/tcon_liquids.png" });
-        tile.anim.load();
-        tile.anim.setSkylightMode();
-        var stored = tile.liquidStorage.getLiquidStored();
-        if (stored) {
-            tile.anim.height = tile.liquidStorage.getRelativeAmount(stored);
-            tile.render.setPart("head", [{
-                    type: "box",
-                    uv: { x: 0, y: this.getY(stored) },
-                    coords: { x: 0, y: -tile.anim.height * 16 * scaleY / 2, z: 0 },
-                    size: { x: 16 * scaleX, y: 16 * scaleY * tile.anim.height, z: 16 * scaleZ }
-                }], this.getTexScale());
-            tile.anim.refresh();
-        }
-    };
-    MoltenLiquid.updateAnim = function (tile) {
-        var stored = tile.liquidStorage.getLiquidStored();
-        var add = (tile.liquidStorage.getRelativeAmount(stored) - tile.anim.height) * 0.2;
-        var box = [];
-        var needRefresh = false;
-        if (stored) {
-            if (Math.abs(add) > 0.01) {
-                tile.anim.height += add;
-                tile.anim.height = Math.round(tile.anim.height * 100) / 100;
-                box.push({
-                    type: "box",
-                    uv: { x: 0, y: this.getY(stored) },
-                    coords: { x: 0, y: -tile.anim.height * 16 * tile.anim.scaleY / 2, z: 0 },
-                    size: { x: 16 * tile.anim.scaleX, y: 16 * tile.anim.scaleY * tile.anim.height, z: 16 * tile.anim.scaleZ }
-                });
-                needRefresh = true;
-            }
-        }
-        else if (tile.anim.height !== 0) {
-            tile.anim.height = 0;
-            needRefresh = true;
-        }
-        if (needRefresh) {
-            tile.render.setPart("head", box, this.getTexScale());
-            tile.anim.refresh();
-        }
-        return needRefresh;
-    };
-    MoltenLiquid.updateAnimInThread = function (tile) {
-        var _this = this;
-        var threadName = "tcon_liqanim_" + tile.x + ":" + tile.y + ":" + tile.z;
-        var thread = Threading.getThread(threadName);
-        if (thread && thread.isAlive()) {
-            return;
-        }
-        Threading.initThread(threadName, function () {
-            var stored;
-            var diff;
-            var box;
-            var needRefresh;
-            while (tile.isLoaded) {
-                stored = tile.liquidStorage.getLiquidStored();
-                diff = tile.liquidStorage.getRelativeAmount(stored) - tile.anim.height;
-                box = [];
-                needRefresh = false;
-                if (stored) {
-                    tile.anim.height += diff * 0.1;
-                    tile.anim.height = Math.round(tile.anim.height * 1000) / 1000;
-                    if (Math.abs(diff) > 0.01) {
-                        box = [{
-                                type: "box",
-                                uv: { x: 0, y: _this.getY(stored) },
-                                coords: { x: 0, y: -tile.anim.height * 16 * tile.anim.scaleY / 2, z: 0 },
-                                size: { x: 16 * tile.anim.scaleX, y: 16 * tile.anim.scaleY * tile.anim.height, z: 16 * tile.anim.scaleZ }
-                            }];
-                        needRefresh = true;
-                    }
-                }
-                else if (tile.anim.height !== 0) {
-                    tile.anim.height = 0;
-                    needRefresh = true;
-                }
-                if (needRefresh) {
-                    tile.render.setPart("head", box, _this.getTexScale());
-                    tile.anim.refresh();
-                }
-                else {
-                    break;
-                }
-                Thread.sleep(20);
-            }
-        });
-    };
-    MoltenLiquid.baseTex = {
+    /*
+    private static readonly baseTex = {
         metal: FileTools.ReadImage(__dir__ + "texture-source/liquid/molten_metal.png"),
         stone: FileTools.ReadImage(__dir__ + "texture-source/liquid/molten_stone.png"),
         other: FileTools.ReadImage(__dir__ + "texture-source/liquid/molten_other.png"),
         bucket: FileTools.ReadImage(__dir__ + "texture-source/liquid/bucket.png")
     };
+    */
     MoltenLiquid.liquidCount = 0;
     MoltenLiquid.data = {};
     return MoltenLiquid;
@@ -429,9 +368,6 @@ MoltenLiquid.createAndRegister("molten_emerald", "Molten Emerald", 999, "#58e78e
 MoltenLiquid.createAndRegister("molten_glass", "Molten Glass", 625, "#c0f5fe");
 MoltenLiquid.createAndRegister("blood", "Blood", 336, "#540000", "other");
 MoltenLiquid.createAndRegister("purpleslime", "Liquid Purple Slime", 520, "#a81212", "other");
-Callback.addCallback("PostLoaded", function () {
-    MoltenLiquid.setup();
-});
 var SmelteryFuel = /** @class */ (function () {
     function SmelteryFuel() {
     }
@@ -565,28 +501,28 @@ MeltingRecipe.addRecipe("cauldron", "molten_iron", MatValue.INGOT * 7);
 MeltingRecipe.addRecipe("anvil", "molten_iron", MatValue.BLOCK * 3 + MatValue.INGOT * 4);
 MeltingRecipe.addRecipe("iron_ore", "molten_iron", MatValue.ORE);
 MeltingRecipe.addRecipe("gold_ore", "molten_gold", MatValue.ORE);
-MeltingRecipe.addEntRecipe(1, "blood", 20); //Native.EntityType.PLAYER
-MeltingRecipe.addEntRecipe(Native.EntityType.ZOMBIE, "blood", 20);
-MeltingRecipe.addEntRecipe(Native.EntityType.ZOMBIE_VILLAGER, "blood", 20);
-MeltingRecipe.addEntRecipe(Native.EntityType.ZOMBIE_VILLAGE_V2, "blood", 20);
-MeltingRecipe.addEntRecipe(Native.EntityType.PIG_ZOMBIE, "blood", 20);
-MeltingRecipe.addEntRecipe(Native.EntityType.ZOMBIE_HORSE, "blood", 20);
-MeltingRecipe.addEntRecipe(Native.EntityType.COW, "blood", 20);
-MeltingRecipe.addEntRecipe(Native.EntityType.PIG, "blood", 20);
-MeltingRecipe.addEntRecipe(Native.EntityType.SHEEP, "blood", 20);
-MeltingRecipe.addEntRecipe(Native.EntityType.CHICKEN, "blood", 20);
-MeltingRecipe.addEntRecipe(Native.EntityType.WOLF, "blood", 20);
-MeltingRecipe.addEntRecipe(Native.EntityType.CAT, "blood", 20);
-MeltingRecipe.addEntRecipe(Native.EntityType.RABBIT, "blood", 20);
-MeltingRecipe.addEntRecipe(Native.EntityType.HORSE, "blood", 20);
-MeltingRecipe.addEntRecipe(Native.EntityType.LLAMA, "blood", 20);
-MeltingRecipe.addEntRecipe(Native.EntityType.IRON_GOLEM, "molten_iron", 18);
-MeltingRecipe.addEntRecipe(Native.EntityType.SNOW_GOLEM, "water", 100);
-MeltingRecipe.addEntRecipe(Native.EntityType.VILLAGER, "molten_emerald", 6);
-MeltingRecipe.addEntRecipe(Native.EntityType.VILLAGER_V2, "molten_emerald", 6);
-MeltingRecipe.addEntRecipe(Native.EntityType.VINDICATOR, "molten_emerald", 6);
-MeltingRecipe.addEntRecipe(Native.EntityType.EVOCATION_ILLAGER, "molten_emerald", 6);
-//MeltingRecipe.addEntRecipe(Native.EntityType.ILLUSIONER, "molten_emerald", 6);
+MeltingRecipe.addEntRecipe(1, "blood", 20); //EEntityType.PLAYER
+MeltingRecipe.addEntRecipe(EEntityType.ZOMBIE, "blood", 20);
+MeltingRecipe.addEntRecipe(EEntityType.ZOMBIE_VILLAGER, "blood", 20);
+MeltingRecipe.addEntRecipe(EEntityType.ZOMBIE_VILLAGE_V2, "blood", 20);
+MeltingRecipe.addEntRecipe(EEntityType.PIG_ZOMBIE, "blood", 20);
+MeltingRecipe.addEntRecipe(EEntityType.ZOMBIE_HORSE, "blood", 20);
+MeltingRecipe.addEntRecipe(EEntityType.COW, "blood", 20);
+MeltingRecipe.addEntRecipe(EEntityType.PIG, "blood", 20);
+MeltingRecipe.addEntRecipe(EEntityType.SHEEP, "blood", 20);
+MeltingRecipe.addEntRecipe(EEntityType.CHICKEN, "blood", 20);
+MeltingRecipe.addEntRecipe(EEntityType.WOLF, "blood", 20);
+MeltingRecipe.addEntRecipe(EEntityType.CAT, "blood", 20);
+MeltingRecipe.addEntRecipe(EEntityType.RABBIT, "blood", 20);
+MeltingRecipe.addEntRecipe(EEntityType.HORSE, "blood", 20);
+MeltingRecipe.addEntRecipe(EEntityType.LLAMA, "blood", 20);
+MeltingRecipe.addEntRecipe(EEntityType.IRON_GOLEM, "molten_iron", 18);
+MeltingRecipe.addEntRecipe(EEntityType.SNOW_GOLEM, "water", 100);
+MeltingRecipe.addEntRecipe(EEntityType.VILLAGER, "molten_emerald", 6);
+MeltingRecipe.addEntRecipe(EEntityType.VILLAGER_V2, "molten_emerald", 6);
+MeltingRecipe.addEntRecipe(EEntityType.VINDICATOR, "molten_emerald", 6);
+MeltingRecipe.addEntRecipe(EEntityType.EVOCATION_ILLAGER, "molten_emerald", 6);
+//MeltingRecipe.addEntRecipe(EEntityType.ILLUSIONER, "molten_emerald", 6);
 var AlloyRecipe = /** @class */ (function () {
     function AlloyRecipe() {
     }
@@ -818,186 +754,119 @@ BlockModel.register(BlockID.tcon_tank, function (model, index) {
     return model;
 }, 3);
 Block.registerDropFunction("tcon_tank", function () { return []; });
-Item.registerNameOverrideFunction(BlockID.tcon_tank, function (item, name) { return item.extra ? name + "\n§7" + LiquidRegistry.getLiquidName(item.extra.getString("stored")) + ": " + (item.extra.getInt("amount")) + " mB" : name; });
-Block.registerPlaceFunction(BlockID.tcon_tank, function (coords, item, block) {
-    var c = World.canTileBeReplaced(block.id, block.data) ? coords : coords.relative;
-    World.setBlock(c.x, c.y, c.z, item.id, item.data);
-    var tile = World.addTileEntity(c.x, c.y, c.z);
-    item.extra && tile.liquidStorage.addLiquid(item.extra.getString("stored"), item.extra.getInt("amount"));
+Item.registerNameOverrideFunction(BlockID.tcon_tank, function (item, name) {
+    if (item.extra) {
+        var liquid = LiquidRegistry.getLiquidName(item.extra.getString("stored"));
+        var amount = item.extra.getInt("amount");
+        return name + "\n§7" + liquid + ": " + amount + " mB";
+    }
+    return name;
+});
+Block.registerPlaceFunction(BlockID.tcon_tank, function (coords, item, block, player, blockSource) {
+    var region = new WorldRegion(blockSource);
+    var place = BlockRegistry.getPlacePosition(coords, block, blockSource);
+    region.setBlock(place, item.id, item.data);
+    var tile = region.addTileEntity(place);
+    if (item.extra) {
+        tile.liquidStorage.setAmount(item.extra.getString("stored"), item.extra.getInt("amount"));
+    }
 });
 var SearedTank = /** @class */ (function (_super) {
     __extends(SearedTank, _super);
     function SearedTank() {
         return _super !== null && _super.apply(this, arguments) || this;
     }
-    SearedTank.prototype.init = function () {
+    SearedTank.prototype.clientLoad = function () {
+        this.animPos = { x: 0.5, y: 0, z: 0.5 };
+        this.animScale = { x: 31 / 32, y: 31 / 32, z: 31 / 32 };
+        _super.prototype.clientLoad.call(this);
+    };
+    SearedTank.prototype.setupContainer = function () {
         this.liquidStorage.setLimit(null, 4000);
-        MoltenLiquid.initAnim(this, 0.5, 0, 0.5, 31 / 32, 31 / 32, 31 / 32, true);
     };
-    SearedTank.prototype.destroy = function () {
-        this.anim && this.anim.destroy();
-    };
-    SearedTank.prototype.click = function (id, count, data) {
-        var stored = this.liquidStorage.getLiquidStored();
-        var amount = this.liquidStorage.getAmount(stored);
-        var liquid = LiquidRegistry.getItemLiquid(id, data);
-        if (MoltenLiquid.isExist(liquid)) {
-            if (!stored || stored === liquid && amount + 1000 <= this.liquidStorage.getLimit(stored)) {
-                var empty = LiquidRegistry.getEmptyItem(id, data);
-                this.liquidStorage.addLiquid(liquid, 1000);
-                Player.decreaseCarriedItem();
-                Player.addItemToInventory(empty.id, 1, empty.data);
-            }
+    SearedTank.prototype.onItemUse = function (coords, item, playerUid) {
+        if (Entity.getSneaking(playerUid))
             return true;
-        }
-        var full = LiquidRegistry.getFullItem(id, data, stored);
-        if (full && amount >= 1000) {
-            this.liquidStorage.getLiquid(stored, 1000);
-            Player.decreaseCarriedItem();
-            Player.addItemToInventory(full.id, 1, full.data);
-            return true;
-        }
-        return false;
-    };
-    SearedTank.prototype.consumeFuel = function () {
-        var liquid = this.liquidStorage.getLiquidStored();
-        var amount = this.liquidStorage.getAmount(liquid);
-        var fuelData = SmelteryFuel.getFuel(liquid);
-        if (fuelData && amount >= fuelData.amount) {
-            this.liquidStorage.getLiquid(liquid, fuelData.amount);
-            return { duration: fuelData.duration, temp: fuelData.temp };
-        }
-        return null;
-    };
-    SearedTank.prototype.destroyBlock = function () {
-        var liquid = this.liquidStorage.getLiquidStored();
-        var extra;
-        if (liquid) {
-            extra = new ItemExtraData();
-            extra.putString("stored", liquid);
-            extra.putInt("amount", this.liquidStorage.getAmount(liquid));
-        }
-        World.drop(this.x + 0.5, this.y, this.z + 0.5, this.blockID, 1, World.getBlock(this.x, this.y, this.z).data, extra);
-    };
-    return SearedTank;
-}(TileBase));
-var FluidTileInterface = /** @class */ (function (_super) {
-    __extends(FluidTileInterface, _super);
-    function FluidTileInterface() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    FluidTileInterface.prototype.addLiquid = function (liquid, amount, onlyFullAmount) {
-        var limit = this.liquidStorage.getLimit(liquid);
-        var stored = this.liquidStorage.getAmount(liquid);
-        var result = Math.round(stored + amount * 1000);
-        var left = result - Math.min(limit, result);
-        if (!onlyFullAmount || left <= 0) {
-            this.liquidStorage.setAmount(liquid, result - left);
-            return Math.max(left / 1000, 0);
-        }
-        return amount;
-    };
-    FluidTileInterface.prototype.getLiquid = function (liquid, amount, onlyFullAmount) {
-        var amountMilli = Math.round(amount * 1000);
-        var stored = this.liquidStorage.getAmount(liquid);
-        if (!this.liquidStorage.getLiquid_flag && this.tileEntity && stored < amountMilli) {
-            this.liquidStorage.getLiquid_flag = true;
-            this.tileEntity.requireMoreLiquid(liquid, amountMilli - stored);
-            this.liquidStorage.getLiquid_flag = false;
-            stored = this.liquidStorage.getAmount(liquid);
-        }
-        var got = Math.min(stored, amountMilli);
-        if (!onlyFullAmount || got >= amountMilli) {
-            this.liquidStorage.setAmount(liquid, stored - got);
-            return got / 1000;
-        }
-        return 0;
-    };
-    return FluidTileInterface;
-}(TileBase));
-var TankInterface = /** @class */ (function (_super) {
-    __extends(TankInterface, _super);
-    function TankInterface() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    TankInterface.prototype.canReceiveLiquid = function (liquid, side) {
+        var player = new PlayerEntity(playerUid);
         var stored = this.liquidStorage.getLiquidStored();
-        return !stored || stored === liquid;
-    };
-    return TankInterface;
-}(FluidTileInterface));
-TileEntity.registerPrototype(BlockID.tcon_tank, new SearedTank());
-StorageInterface.createInterface(BlockID.tcon_tank, new TankInterface());
-createBlock("tcon_drain", [{ name: "Seared Drain", texture: [0, 0, 1, 0, 0, 0] }]);
-registerRotationModel("tcon_drain", [0, 0, 1, 0, 0, 0]);
-Recipes2.addShaped(BlockID.tcon_drain, "a_a:a_a:a_a", { a: ItemID.tcon_brick });
-var SearedDrain = /** @class */ (function (_super) {
-    __extends(SearedDrain, _super);
-    function SearedDrain() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    SearedDrain.prototype.setController = function (tile) {
-        this.controller = tile;
-    };
-    SearedDrain.prototype.init = function () {
-        TileRenderer.mapAtCoords(this.x, this.y, this.z, this.blockID, this.data.meta);
-    };
-    SearedDrain.prototype.destroy = function () {
-        BlockRenderer.unmapAtCoords(this.x, this.y, this.z);
-    };
-    SearedDrain.prototype.click = function (id, count, data) {
-        if (this.controller && this.controller.isLoaded) {
-            var liquid = LiquidRegistry.getItemLiquid(id, data);
-            if (MoltenLiquid.isExist(liquid)) {
-                var total = this.controller.totalLiquidAmount();
-                var capacity = this.controller.getLiquidCapacity();
-                if (total + 1000 <= capacity) {
-                    var empty = LiquidRegistry.getEmptyItem(id, data);
-                    this.interface.addLiquid(liquid, 1, true);
-                    Player.decreaseCarriedItem();
-                    Player.addItemToInventory(empty.id, 1, empty.data);
+        var empty = LiquidItemRegistry.getEmptyItem(item.id, item.data);
+        if (empty) {
+            if (!this.liquidStorage.isFull() && (stored === empty.liquid || !stored)) {
+                if (this.liquidStorage.getLimit(stored) - this.liquidStorage.getAmount(stored) >= empty.amount) {
+                    this.liquidStorage.addLiquid(empty.liquid, empty.amount);
+                    item.count--;
+                    player.setCarriedItem(item);
+                    player.addItemToInventory(empty.id, 1, empty.data);
+                    this.preventClick();
+                    return true;
                 }
-                return true;
+                if (item.count === 1 && empty.storage) {
+                    item.data += this.liquidStorage.addLiquid(empty.liquid, empty.amount);
+                    player.setCarriedItem(item);
+                    this.preventClick();
+                    return true;
+                }
             }
-            liquid = this.interface.getLiquidStored();
-            var full = LiquidRegistry.getFullItem(id, data, liquid);
-            if (full && this.controller.liquidStorage.getAmount(liquid) >= 1000) {
-                this.interface.getLiquid(liquid, 1, true);
-                Player.decreaseCarriedItem();
-                Player.addItemToInventory(full.id, 1, full.data);
-                return true;
+        }
+        if (stored) {
+            var full = LiquidItemRegistry.getFullItem(item.id, item.data, stored);
+            if (full) {
+                var amount = this.liquidStorage.getAmount(stored);
+                if (full.amount <= amount) {
+                    this.liquidStorage.getLiquid(stored, full.amount);
+                    if (item.count === 1) {
+                        player.setCarriedItem(full.id, 1, full.data);
+                    }
+                    else {
+                        item.count--;
+                        player.setCarriedItem(item);
+                        player.addItemToInventory(full.id, 1, full.data);
+                    }
+                    this.preventClick();
+                    return true;
+                }
+                if (item.count === 1 && full.storage) {
+                    player.setCarriedItem(full.id, 1, full.amount - this.liquidStorage.getLiquid(stored, full.amount));
+                    this.preventClick();
+                    return true;
+                }
             }
         }
         return false;
     };
-    return SearedDrain;
-}(TileBase));
-var DrainInterface = /** @class */ (function (_super) {
-    __extends(DrainInterface, _super);
-    function DrainInterface() {
-        return _super !== null && _super.apply(this, arguments) || this;
+    SearedTank.prototype.destroyBlock = function (coords, player) {
+        var region = WorldRegion.getForActor(player);
+        var stored = this.liquidStorage.getLiquidStored();
+        var extra;
+        if (stored) {
+            extra = new ItemExtraData();
+            extra.putString("stored", stored);
+            extra.putInt("amount", this.liquidStorage.getAmount(stored));
+        }
+        region.dropItem(this.x + 0.5, this.y, this.z + 0.5, this.blockID, 1, this.networkData.getInt("blockData"), extra);
+    };
+    __decorate([
+        ClientSide
+    ], SearedTank.prototype, "animPos", void 0);
+    __decorate([
+        ClientSide
+    ], SearedTank.prototype, "animScale", void 0);
+    return SearedTank;
+}(TileWithLiquidModel));
+TileEntity.registerPrototype(BlockID.tcon_tank, new SearedTank());
+StorageInterface.createInterface(BlockID.tcon_tank, {
+    liquidUnitRatio: 0.001,
+    canReceiveLiquid: function (liquid, side) {
+        var stored = this.tileEntity.liquidStorage.getLiquidStored();
+        return !stored || stored === liquid;
+    },
+    getInputTank: function () {
+        return this.tileEntity.liquidStorage;
+    },
+    getOutputTank: function () {
+        return this.tileEntity.liquidStorage;
     }
-    DrainInterface.prototype.getSmelteryInterface = function () {
-        var tile = this.tileEntity.controller;
-        return tile && tile.isLoaded ? tile.interface : null;
-    };
-    DrainInterface.prototype.addLiquid = function (liquid, amount, onlyFullAmount) {
-        var inteface = this.getSmelteryInterface();
-        return inteface ? inteface.addLiquid(liquid, amount, onlyFullAmount) : amount;
-    };
-    DrainInterface.prototype.getLiquid = function (liquid, amount, onlyFullAmount) {
-        var inteface = this.getSmelteryInterface();
-        return inteface ? inteface.getLiquid(liquid, amount, onlyFullAmount) : 0;
-    };
-    DrainInterface.prototype.getLiquidStored = function (storage, side) {
-        var inteface = this.getSmelteryInterface();
-        return inteface ? inteface.getLiquidStored(storage, side) : null;
-    };
-    return DrainInterface;
-}(TileBase));
-TileEntity.registerPrototype(BlockID.tcon_drain, new SearedDrain());
-TileRenderer.setRotationPlaceFunction(BlockID.tcon_drain);
-StorageInterface.createInterface(BlockID.tcon_drain, new DrainInterface());
+});
 createBlock("tcon_faucet", [
     { name: "Seared Faucet" },
     { name: "faucet", isTech: true },
@@ -1005,12 +874,14 @@ createBlock("tcon_faucet", [
     { name: "faucet", isTech: true }
 ]);
 Recipes2.addShaped(BlockID.tcon_faucet, "a_a:_a_", { a: ItemID.tcon_brick });
-Block.registerPlaceFunction("tcon_faucet", function (coords, item, block) {
+Block.registerPlaceFunction("tcon_faucet", function (coords, item, block, player, blockSource) {
     if (coords.side < 2) {
         return;
     }
-    var c = World.canTileBeReplaced(block.id, block.data) ? coords : coords.relative;
-    World.setBlock(c.x, c.y, c.z, item.id, coords.side - 2 ^ 1);
+    var region = new WorldRegion(blockSource);
+    var place = BlockRegistry.getPlacePosition(coords, block, blockSource);
+    region.setBlock(place, item.id, (coords.side - 2) ^ 1);
+    region.addTileEntity(place);
 });
 BlockModel.register(BlockID.tcon_faucet, function (model, index) {
     var addBox = function (x1, y1, z1, x2, y2, z2) {
@@ -1028,17 +899,6 @@ BlockModel.register(BlockID.tcon_faucet, function (model, index) {
                 model.addBox((16 - z2) / 16, y1 / 16, x1 / 16, (16 - z1) / 16, y2 / 16, x2 / 16, "tcon_faucet", 0);
                 break;
         }
-        /*
-        if(index & 1){
-            z1 = 16 - z2;
-            z2 = 16 - z1;
-        }
-        if(index >> 1){
-            [x1, z1] = [z1, x1];
-            [x2, z2] = [z2, x2];
-        }
-        model.addBox(x1 / 16, y1 / 16, z1 / 16, x2 / 16, y2 / 16, z2 / 16, "tcon_faucet", 0);
-        */
     };
     addBox(4, 4, 0, 12, 6, 6);
     addBox(4, 6, 0, 6, 10, 6);
@@ -1049,108 +909,121 @@ Block.setShape(BlockID.tcon_faucet, 4 / 16, 4 / 16, 0 / 16, 12 / 16, 10 / 16, 6 
 Block.setShape(BlockID.tcon_faucet, 4 / 16, 4 / 16, 10 / 16, 12 / 16, 10 / 16, 16 / 16, 1);
 Block.setShape(BlockID.tcon_faucet, 0 / 16, 4 / 16, 4 / 16, 6 / 16, 10 / 16, 12 / 16, 2);
 Block.setShape(BlockID.tcon_faucet, 10 / 16, 4 / 16, 4 / 16, 16 / 16, 10 / 16, 12 / 16, 3);
+var FaucetLiquidRenders = (function () {
+    var renders = [
+        new Render(),
+        new Render(),
+        new Render(),
+        new Render(),
+    ];
+    return renders;
+})();
 var SearedFaucet = /** @class */ (function (_super) {
     __extends(SearedFaucet, _super);
     function SearedFaucet() {
         var _this = _super !== null && _super.apply(this, arguments) || this;
         _this.defaultValues = {
-            meta: 0,
+            isActive: true,
+            timer: 0,
             signal: 0
         };
         return _this;
     }
-    SearedFaucet.prototype.init = function () {
-        this.data.meta = World.getBlock(this.x, this.y, this.z).data + 2;
+    SearedFaucet.prototype.putDefaultNetworkData = function () {
+        this.networkData.putString("liquid", "");
+    };
+    SearedFaucet.prototype.clientLoad = function () {
+        var _this = this;
         this.render = new Render();
         this.anim = new Animation.Base(this.x + 0.5, this.y - 1, this.z + 0.5);
-        this.anim.describe({ render: this.render.getID(), skin: "model/tcon_liquids.png" });
+        this.anim.describe({ render: this.render.getId(), skin: "model/tcon_liquids.png" });
         this.anim.load();
-        delete this.liquidStorage;
+        this.anim.setSkylightMode();
+        this.renderLiquidModel();
+        this.networkData.addOnDataChangedListener(function (data, isExternal) {
+            _this.renderLiquidModel();
+        });
     };
-    SearedFaucet.prototype.destroy = function () {
-        this.anim && this.anim.destroy();
+    SearedFaucet.prototype.clientUnload = function () {
+        var _a;
+        (_a = this.anim) === null || _a === void 0 ? void 0 : _a.destroy();
     };
-    SearedFaucet.prototype.startThread = function () {
-        var _this = this;
-        var threadName = "tcon_faucet_" + this.x + ":" + this.y + ":" + this.z;
-        var thread = Threading.getThread(threadName);
-        if (thread && thread.isAlive()) {
-            return;
+    SearedFaucet.prototype.onItemUse = function (coords, item, player) {
+        if (Entity.getSneaking(player))
+            return true;
+        this.data.isActive = this.turnOn();
+        return false;
+    };
+    SearedFaucet.prototype.onRedstoneUpdate = function (signal) {
+        if (this.data.signal < signal) {
+            this.data.isActive = this.turnOn();
         }
-        var tileSend = StorageInterface.getNearestLiquidStorages(this, this.data.meta)[this.data.meta];
-        var tileReceive = StorageInterface.getNearestLiquidStorages(this, 0)[0];
-        if (!tileSend || !tileReceive) {
-            return;
-        }
-        var iSend = tileSend.interface || tileSend.liquidStorage;
-        var iReceive = tileReceive.interface || tileReceive.liquidStorage;
-        if (!iSend || !iReceive) {
-            return;
-        }
-        var liqSend = iSend.getLiquidStored();
-        if (!liqSend) {
-            return;
-        }
-        var dir = StorageInterface.directionsBySide[this.data.meta];
-        var liquidY = MoltenLiquid.getY(liqSend);
-        this.render.setPart("head", [
-            {
-                type: "box",
+        this.data.signal = signal;
+    };
+    SearedFaucet.prototype.renderLiquidModel = function () {
+        var parts = [];
+        var liquid = this.networkData.getString("liquid") + "";
+        if (liquid !== "") {
+            var dir = StorageInterface.directionsBySide[this.networkData.getInt("blockData") + 2];
+            var liquidY = MoltenLiquid.getY(liquid);
+            parts.push({
                 uv: { x: 0, y: liquidY },
                 coords: { x: dir.x * 5, y: 0, z: -dir.z * 5 },
                 size: { x: dir.x ? 6 : 4, y: 4, z: dir.z ? 6 : 4 }
-            },
-            {
-                type: "box",
+            }, {
                 uv: { x: 0, y: liquidY },
                 coords: { x: dir.x, y: 3, z: -dir.z },
                 size: { x: dir.x ? 2 : 4, y: 10, z: dir.z ? 2 : 4 }
-            }
-        ], MoltenLiquid.getTexScale());
-        this.anim.refresh();
-        Threading.initThread(threadName, function () {
-            try {
-                var add = void 0;
-                var surplus = void 0;
-                while (_this.isLoaded) {
-                    if (!tileSend || !tileSend.isLoaded || !tileReceive || !tileReceive.isLoaded) {
-                        break;
-                    }
-                    if (!tileReceive.interface || tileReceive.interface.canReceiveLiquid(liqSend)) {
-                        add = iSend.getLiquid(liqSend, MatValue.INGOT / 1000);
-                        surplus = iReceive.addLiquid(liqSend, add);
-                        if (surplus > 0) {
-                            iSend.addLiquid(liqSend, surplus);
-                        }
-                        if (add === 0 || add === surplus) {
-                            break;
-                        }
-                    }
-                    else {
-                        break;
-                    }
-                    Thread.sleep(1000);
-                }
-                _this.render.setPart("head", [], MoltenLiquid.getTexScale());
-                _this.anim.refresh();
-            }
-            catch (e) {
-                alert("FaucetEror: " + e);
-            }
-        });
-    };
-    SearedFaucet.prototype.click = function () {
-        this.startThread();
-        return true;
-    };
-    SearedFaucet.prototype.redstone = function (signal) {
-        if (this.data.signal < signal.power) {
-            this.startThread();
+            });
         }
-        this.data.signal = signal.power;
+        this.render.setPart("head", parts, MoltenLiquid.getTexScale());
+        this.anim.refresh();
     };
+    SearedFaucet.prototype.turnOn = function () {
+        var blockData = this.networkData.getInt("blockData");
+        var iSend = StorageInterface.getNeighbourLiquidStorage(this.blockSource, this, blockData + 2);
+        var iReceive = StorageInterface.getNeighbourLiquidStorage(this.blockSource, this, 0);
+        var sideSend = (blockData + 2) ^ 1;
+        var sideReceive = 1;
+        var tankSend = iSend === null || iSend === void 0 ? void 0 : iSend.getOutputTank(sideSend);
+        var tankReceive = iReceive === null || iReceive === void 0 ? void 0 : iReceive.getInputTank(sideReceive);
+        if (!tankSend || !tankReceive) {
+            this.networkData.putString("liquid", "");
+            this.networkData.sendChanges();
+            return false;
+        }
+        var liquid = tankSend.getLiquidStored();
+        var amount = 0;
+        if (liquid && iSend.canTransportLiquid(liquid, sideSend) && iReceive.canReceiveLiquid(liquid, sideReceive) && !tankReceive.isFull(liquid)) {
+            amount = Math.min(tankSend.getAmount(liquid) * iSend.liquidUnitRatio, MatValue.INGOT / 1000);
+            amount = iReceive.receiveLiquid(tankReceive, liquid, amount);
+            iSend.extractLiquid(tankSend, liquid, amount);
+        }
+        if (amount > 0) {
+            this.networkData.putString("liquid", liquid);
+            this.networkData.sendChanges();
+            return true;
+        }
+        this.networkData.putString("liquid", "");
+        this.networkData.sendChanges();
+        return false;
+    };
+    SearedFaucet.prototype.onTick = function () {
+        if (this.data.isActive) {
+            if (++this.data.timer >= 20) {
+                this.data.isActive = this.turnOn();
+                this.data.timer = 0;
+            }
+        }
+        else {
+            this.data.timer = 0;
+        }
+    };
+    __decorate([
+        ClientSide
+    ], SearedFaucet.prototype, "renderLiquidModel", null);
     return SearedFaucet;
-}(TileBase));
+}(TconTileEntity));
 TileEntity.registerPrototype(BlockID.tcon_faucet, new SearedFaucet());
 createBlock("tcon_itemcast", [{ name: "Casting Table", texture: [0, 1, 2] }]);
 Recipes2.addShaped(BlockID.tcon_itemcast, "aaa:a_a:a_a", { a: ItemID.tcon_brick });
@@ -1175,74 +1048,104 @@ var CastingTable = /** @class */ (function (_super) {
         };
         return _this;
     }
-    CastingTable.prototype.init = function () {
-        this.animInput = createAnimItem(this.x + 9 / 16, this.y + 31 / 32, this.z + 9 / 16);
-        this.animOutput = createAnimItem(this.x + 9 / 16, this.y + 31 / 32, this.z + 9 / 16);
-        this.setAnimItem();
-        this.setLiquidLimit();
-        MoltenLiquid.initAnim(this, 0.5, 15 / 16, 0.5, 14 / 16, 1 / 16, 14 / 16, true);
+    CastingTable.prototype.putDefaultNetworkData = function () {
+        this.networkData.putInt("inputId", 0);
+        this.networkData.putInt("inputData", 0);
+        this.networkData.putInt("outputId", 0);
+        this.networkData.putInt("outputData", 0);
     };
-    CastingTable.prototype.destroy = function () {
-        this.anim && this.anim.destroy();
-        this.animInput && this.animInput.destroy();
-        this.animOutput && this.animOutput.destroy();
+    CastingTable.prototype.clientLoad = function () {
+        this.setupAnimPosScale();
+        _super.prototype.clientLoad.call(this);
+        this.setupAnimItem();
     };
-    CastingTable.prototype.setAnimItem = function () {
-        var input = this.container.getSlot("slotInput");
-        var output = this.container.getSlot("slotOutput");
-        this.animInput.describeItem(input.id === 0 ? { id: 0, count: 0, data: 0 } : { id: input.id, count: 1, data: input.data, size: 14 / 16, rotation: [Math.PI / 2, 0, 0] });
-        this.animOutput.describeItem(output.id === 0 ? { id: 0, count: 0, data: 0 } : { id: output.id, count: 1, data: output.data, size: 14 / 16, rotation: [Math.PI / 2, 0, 0] });
+    CastingTable.prototype.setupAnimPosScale = function () {
+        this.animPos = { x: 0.5, y: 15 / 16, z: 0.5 };
+        this.animScale = { x: 14 / 16, y: 1 / 16, z: 14 / 16 };
     };
-    CastingTable.prototype.setLiquidLimit = function () {
+    CastingTable.prototype.setupAnimItem = function () {
+        var _this = this;
+        this.animInput = new Animation.Item(this.x + 9 / 16, this.y + 31 / 32, this.z + 9 / 16);
+        this.animInput.load();
+        this.animInput.setSkylightMode();
+        this.animOutput = new Animation.Item(this.x + 9 / 16, this.y + 31 / 32, this.z + 9 / 16);
+        this.animOutput.load();
+        this.animOutput.setSkylightMode();
+        this.updateAnimItem();
+        this.networkData.addOnDataChangedListener(function (data, isExternal) {
+            _this.updateAnimItem();
+        });
+    };
+    CastingTable.prototype.clientUnload = function () {
+        var _a, _b;
+        _super.prototype.clientUnload.call(this);
+        (_a = this.animInput) === null || _a === void 0 ? void 0 : _a.destroy();
+        (_b = this.animOutput) === null || _b === void 0 ? void 0 : _b.destroy();
+    };
+    CastingTable.prototype.setupContainer = function () {
+        this.updateLiquidLimits();
+    };
+    CastingTable.prototype.updateAnimItem = function () {
+        var _a, _b;
+        var inputId = this.networkData.getInt("inputId");
+        var inputData = this.networkData.getInt("inputData");
+        var outputId = this.networkData.getInt("outputId");
+        var outputData = this.networkData.getInt("outputData");
+        //const input = this.container.getSlot("slotInput");
+        //const output = this.container.getSlot("slotOutput");
+        var empty = { id: 0, count: 0, data: 0 };
+        (_a = this.animInput) === null || _a === void 0 ? void 0 : _a.describeItem(inputId === 0 ? empty : { id: Network.serverToLocalId(inputId), count: 1, data: inputData, size: 14 / 16, rotation: [Math.PI / 2, 0, 0] });
+        (_b = this.animOutput) === null || _b === void 0 ? void 0 : _b.describeItem(outputId === 0 ? empty : { id: Network.serverToLocalId(outputId), count: 1, data: outputData, size: 14 / 16, rotation: [Math.PI / 2, 0, 0] });
+    };
+    CastingTable.prototype.updateLiquidLimits = function () {
         this.liquidStorage.liquidLimits = CastingRecipe.getTableLimits(this.container.getSlot("slotInput").id);
     };
     CastingTable.prototype.isValidCast = function (id) {
         return isItemID(id);
     };
-    CastingTable.prototype.click = function (id, count, data) {
+    CastingTable.prototype.getRecipe = function (stored) {
+        return CastingRecipe.getTableRecipe(this.container.getSlot("slotInput").id, stored);
+    };
+    CastingTable.prototype.onItemUse = function (coords, item, playerUid) {
         if (this.liquidStorage.getLiquidStored()) {
             return false;
         }
         label: {
             if (this.container.getSlot("slotOutput").id !== 0) {
-                this.container.dropSlot("slotOutput", this.x + 0.5, this.y + 1, this.z + 0.5);
+                this.container.dropSlot(this.blockSource, "slotOutput", this.x + 0.5, this.y + 1, this.z + 0.5);
                 break label;
             }
             if (this.container.getSlot("slotInput").id !== 0) {
-                this.container.dropSlot("slotInput", this.x + 0.5, this.y + 1, this.z + 0.5);
+                this.container.dropSlot(this.blockSource, "slotInput", this.x + 0.5, this.y + 1, this.z + 0.5);
                 break label;
             }
-            if (this.isValidCast(id) && !Player.getCarriedItem().extra) {
-                this.container.setSlot("slotInput", id, 1, data);
-                Player.decreaseCarriedItem();
+            if (this.isValidCast(item.id) && !item.extra) {
+                this.container.setSlot("slotInput", item.id, 1, item.data);
+                var player = new PlayerEntity(playerUid);
+                player.decreaseCarriedItem();
                 break label;
             }
             return false;
         }
         //this.setAnimItem();
-        this.setLiquidLimit();
+        this.updateLiquidLimits();
         return true;
     };
-    CastingTable.prototype.spawnParticle = function (id) {
-        for (var i = 0; i < 4; i++) {
-            Particles.addParticle(id, this.x + Math.random(), this.y + 1, this.z + Math.random(), 0, 0, 0);
-        }
-    };
-    CastingTable.prototype.getRecipe = function (stored) {
-        return CastingRecipe.getTableRecipe(this.container.getSlot("slotInput").id, stored);
-    };
-    CastingTable.prototype.tick = function () {
+    CastingTable.prototype.onTick = function () {
+        _super.prototype.onTick.call(this);
         var stored = this.liquidStorage.getLiquidStored();
         if (stored && this.liquidStorage.isFull(stored)) {
             if (++this.data.progress < CastingRecipe.calcCooldownTime(stored, this.liquidStorage.getAmount(stored))) {
-                (World.getThreadTime() & 15) === 0 && this.spawnParticle(Native.ParticleType.smoke);
+                if ((World.getThreadTime() & 15) === 0) {
+                    this.sendPacket("spawnParticle", {});
+                }
             }
             else {
                 var result = this.getRecipe(stored);
                 if (result) {
                     this.container.setSlot("slotOutput", result.id, 1, result.data);
                     result.consume && this.container.clearSlot("slotInput");
-                    this.spawnParticle(Native.ParticleType.flame);
+                    this.sendPacket("spawnParticle", {});
                 }
                 this.data.progress = 0;
                 this.liquidStorage.setAmount(stored, 0);
@@ -1251,28 +1154,47 @@ var CastingTable = /** @class */ (function (_super) {
                 }
             }
         }
-        this.setAnimItem();
         StorageInterface.checkHoppers(this);
+        this.updateAnimItem();
+        this.container.sendChanges();
+        var slotInput = this.container.getSlot("slotInput");
+        var slotOutput = this.container.getSlot("slotOutput");
+        this.networkData.putInt("inputId", slotInput.id);
+        this.networkData.putInt("inputData", slotInput.data);
+        this.networkData.putInt("outputId", slotOutput.id);
+        this.networkData.putInt("outputData", slotOutput.data);
+        this.networkData.sendChanges();
     };
+    CastingTable.prototype.spawnParticle = function (data) {
+        for (var i = 0; i < 4; i++) {
+            Particles.addParticle(EParticleType.SMOKE, this.x + Math.random(), this.y + 1, this.z + Math.random(), 0, 0, 0);
+        }
+    };
+    __decorate([
+        ClientSide
+    ], CastingTable.prototype, "setupAnimPosScale", null);
+    __decorate([
+        ClientSide
+    ], CastingTable.prototype, "setupAnimItem", null);
+    __decorate([
+        ClientSide
+    ], CastingTable.prototype, "updateAnimItem", null);
+    __decorate([
+        NetworkEvent(Side.Client)
+    ], CastingTable.prototype, "spawnParticle", null);
     return CastingTable;
-}(TileBase));
-var CastingTableInterface = /** @class */ (function (_super) {
-    __extends(CastingTableInterface, _super);
-    function CastingTableInterface() {
-        var _this = _super !== null && _super.apply(this, arguments) || this;
-        _this.slots = {
-            slotOutput: { output: true }
-        };
-        return _this;
-    }
-    CastingTableInterface.prototype.canReceiveLiquid = function (liquid, side) {
-        var stored = this.liquidStorage.getLiquidStored();
-        return (!stored || stored === liquid) && CastingRecipe.isValidLiquidForTable(this.container.getSlot("slotInput").id, liquid);
-    };
-    return CastingTableInterface;
-}(FluidTileInterface));
+}(TileWithLiquidModel));
 TileEntity.registerPrototype(BlockID.tcon_itemcast, new CastingTable());
-StorageInterface.createInterface(BlockID.tcon_itemcast, new CastingTableInterface());
+StorageInterface.createInterface(BlockID.tcon_itemcast, {
+    liquidUnitRatio: 0.001,
+    slots: {
+        slotOutput: { output: true }
+    },
+    canReceiveLiquid: function (liquid, side) {
+        var stored = this.tileEntity.liquidStorage.getLiquidStored();
+        return (!stored || stored === liquid) && CastingRecipe.isValidLiquidForTable(this.tileEntity.container.getSlot("slotInput").id, liquid);
+    }
+});
 createBlock("tcon_blockcast", [{ name: "Casting Basin", texture: [0, 1, 2] }]);
 Recipes2.addShaped(BlockID.tcon_blockcast, "a_a:a_a:aaa", { a: ItemID.tcon_brick });
 BlockModel.register(BlockID.tcon_blockcast, function (model) {
@@ -1296,20 +1218,34 @@ var CastingBasin = /** @class */ (function (_super) {
     function CastingBasin() {
         return _super !== null && _super.apply(this, arguments) || this;
     }
-    CastingBasin.prototype.init = function () {
-        this.animInput = createAnimItem(this.x + 0.5, this.y + 10 / 16, this.z + 0.5);
-        this.animOutput = createAnimItem(this.x + 0.5, this.y + 10 / 16, this.z + 0.5);
-        this.setAnimItem();
-        this.setLiquidLimit();
-        MoltenLiquid.initAnim(this, 0.5, 5 / 16, 0.5, 12 / 16, 11 / 16, 12 / 16, true);
+    CastingBasin.prototype.setupAnimPosScale = function () {
+        this.animPos = { x: 0.5, y: 5 / 16, z: 0.5 };
+        this.animScale = { x: 12 / 16, y: 11 / 16, z: 12 / 16 };
     };
-    CastingBasin.prototype.setAnimItem = function () {
-        var input = this.container.getSlot("slotInput");
-        var output = this.container.getSlot("slotOutput");
-        this.animInput.describeItem(input.id === 0 ? { id: 0, count: 0, data: 0 } : { id: input.id, count: 1, data: input.data, size: 12 / 16 - 0.01 });
-        this.animOutput.describeItem(output.id === 0 ? { id: 0, count: 0, data: 0 } : { id: output.id, count: 1, data: output.data, size: 12 / 16 - 0.01 });
+    CastingBasin.prototype.setupAnimItem = function () {
+        var _this = this;
+        this.animInput = new Animation.Item(this.x + 0.5, this.y + 10 / 16, this.z + 0.5);
+        this.animInput.load();
+        this.animInput.setSkylightMode();
+        this.animOutput = new Animation.Item(this.x + 0.5, this.y + 10 / 16, this.z + 0.5);
+        this.animOutput.load();
+        this.animOutput.setSkylightMode();
+        this.updateAnimItem();
+        this.networkData.addOnDataChangedListener(function (data, isExternal) {
+            _this.updateAnimItem();
+        });
     };
-    CastingBasin.prototype.setLiquidLimit = function () {
+    CastingBasin.prototype.updateAnimItem = function () {
+        var _a, _b;
+        var inputId = this.networkData.getInt("inputId");
+        var inputData = this.networkData.getInt("inputData");
+        var outputId = this.networkData.getInt("outputId");
+        var outputData = this.networkData.getInt("outputData");
+        var empty = { id: 0, count: 0, data: 0 };
+        (_a = this.animInput) === null || _a === void 0 ? void 0 : _a.describeItem(inputId === 0 ? empty : { id: Network.serverToLocalId(inputId), count: 1, data: inputData, size: 12 / 16 - 0.01 });
+        (_b = this.animOutput) === null || _b === void 0 ? void 0 : _b.describeItem(outputId === 0 ? empty : { id: Network.serverToLocalId(outputId), count: 1, data: outputData, size: 12 / 16 - 0.01 });
+    };
+    CastingBasin.prototype.updateLiquidLimits = function () {
         this.liquidStorage.liquidLimits = CastingRecipe.getBasinLimits(this.container.getSlot("slotInput").id);
     };
     CastingBasin.prototype.isValidCast = function (id) {
@@ -1318,24 +1254,33 @@ var CastingBasin = /** @class */ (function (_super) {
     CastingBasin.prototype.getRecipe = function (stored) {
         return CastingRecipe.getBasinRecipe(this.container.getSlot("slotInput").id, stored);
     };
+    __decorate([
+        ClientSide
+    ], CastingBasin.prototype, "setupAnimPosScale", null);
+    __decorate([
+        ClientSide
+    ], CastingBasin.prototype, "setupAnimItem", null);
+    __decorate([
+        ClientSide
+    ], CastingBasin.prototype, "updateAnimItem", null);
     return CastingBasin;
 }(CastingTable));
-var CastingBasinInterface = /** @class */ (function (_super) {
-    __extends(CastingBasinInterface, _super);
-    function CastingBasinInterface() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    CastingBasinInterface.prototype.canReceiveLiquid = function (liquid, side) {
-        var stored = this.liquidStorage.getLiquidStored();
-        return (!stored || stored === liquid) && CastingRecipe.isValidLiquidForBasin(this.container.getSlot("slotInput").id, liquid);
-    };
-    return CastingBasinInterface;
-}(CastingTableInterface));
 TileEntity.registerPrototype(BlockID.tcon_blockcast, new CastingBasin());
-StorageInterface.createInterface(BlockID.tcon_blockcast, new CastingBasinInterface());
+StorageInterface.createInterface(BlockID.tcon_blockcast, {
+    liquidUnitRatio: 0.001,
+    slots: {
+        slotOutput: { output: true }
+    },
+    canReceiveLiquid: function (liquid, side) {
+        var stored = this.tileEntity.liquidStorage.getLiquidStored();
+        return (!stored || stored === liquid) && CastingRecipe.isValidLiquidForBasin(this.tileEntity.container.getSlot("slotInput").id, liquid);
+    }
+});
 var _a;
 createBlock("tcon_smeltery", [{ name: "Smeltery Controller", texture: [["tcon_stone", 3], ["tcon_stone", 3], ["tcon_stone", 3], ["tcon_smeltery", 0], ["tcon_stone", 3], ["tcon_stone", 3]] }]);
-registerRotationModel("tcon_smeltery", [["tcon_stone", 3], ["tcon_stone", 3], ["tcon_stone", 3], 0, ["tcon_stone", 3], ["tcon_stone", 3]], [["tcon_stone", 3], ["tcon_stone", 3], ["tcon_stone", 3], 1, ["tcon_stone", 3], ["tcon_stone", 3]]);
+TileRenderer.setStandardModelWithRotation(BlockID.tcon_smeltery, 2, [["tcon_stone", 3], ["tcon_stone", 3], ["tcon_stone", 3], ["tcon_smeltery", 0], ["tcon_stone", 3], ["tcon_stone", 3]]);
+TileRenderer.registerModelWithRotation(BlockID.tcon_smeltery, 2, [["tcon_stone", 3], ["tcon_stone", 3], ["tcon_stone", 3], ["tcon_smeltery", 1], ["tcon_stone", 3], ["tcon_stone", 3]]);
+TileRenderer.setRotationFunction(BlockID.tcon_smeltery);
 Recipes2.addShaped(BlockID.tcon_smeltery, "aaa:a_a:aaa", { a: ItemID.tcon_brick });
 var SmelteryHandler = /** @class */ (function () {
     function SmelteryHandler() {
@@ -1347,7 +1292,7 @@ var SmelteryHandler = /** @class */ (function () {
         return 8;
     };
     SmelteryHandler.isValidBlock = function (id) {
-        return this.blocks[id];
+        return this.blocks[id] || false;
     };
     SmelteryHandler.updateScale = function () {
         if (this.window.isOpened()) {
@@ -1392,16 +1337,18 @@ var SmelteryHandler = /** @class */ (function () {
         gauge2: { type: "scale", x: 21 * SCALE, y: 47 * SCALE, bitmap: "tcon.heat_gauge_0", scale: SCALE, direction: 1 },
         //scaleLava: {type: "scale", x: 161 * SCALE, y: 11 * SCALE, width: 12 * SCALE, height: 52 * SCALE, bitmap: "_liquid_lava_texture_0", direction: 1},
         buttonSelect: { type: "button", x: 130 * SCALE, y: 70 * SCALE, bitmap: "classic_button_up", bitmap2: "classic_button_down", scale: SCALE, clicker: {
-                onClick: function (container, tile) {
-                    tile.data.select++;
-                    tile.data.select %= Object.keys(tile.liquidStorage.liquidAmounts).length;
+                onClick: function (_, container) {
+                    container.sendEvent("", {});
+                    //tile.data.select++;
+                    //tile.data.select %= Object.keys(tile.liquidStorage.liquidAmounts).length;
                 }
             } },
         buttonDump: { type: "button", x: 92 * SCALE, y: 70 * SCALE, bitmap: "_craft_button_up", bitmap2: "_craft_button_down", scale: SCALE / 2, clicker: {
-                onClick: function (container, tile) {
-                    var liquids = tile.liquidStorage.liquidAmounts;
-                    delete liquids[Object.keys(liquids)[tile.data.select]];
-                    tile.data.select %= Object.keys(liquids).length;
+                onClick: function (_, container) {
+                    container.sendEvent("", {});
+                    //const liquids = tile.liquidStorage.liquidAmounts;
+                    //delete liquids[Object.keys(liquids)[tile.data.select]];
+                    //tile.data.select %= Object.keys(liquids).length;
                 }
             } },
         iconSelect: { type: "image", x: 131.6 * SCALE, y: 71.6 * SCALE, z: 1, bitmap: "mod_browser_update_icon", scale: SCALE * 0.8 },
@@ -1432,7 +1379,6 @@ var SmelteryControler = /** @class */ (function (_super) {
         var _this = _super !== null && _super.apply(this, arguments) || this;
         _this.tanks = [];
         _this.defaultValues = {
-            meta: 0,
             select: 0,
             temp: 0,
             fuel: 0,
@@ -1443,74 +1389,95 @@ var SmelteryControler = /** @class */ (function (_super) {
         };
         return _this;
     }
-    SmelteryControler.prototype.getGuiScreen = function () {
+    SmelteryControler.prototype.getScreenByName = function (screenName, container) {
         return SmelteryHandler.getWindow();
     };
-    SmelteryControler.prototype.setModel = function () {
-        TileRenderer.mapAtCoords(this.x, this.y, this.z, this.blockID, this.data.meta + (this.data.isActive ? 4 : 0));
+    SmelteryControler.prototype.putDefaultNetworkData = function () {
+        this.networkData.putBoolean("active", false);
     };
-    SmelteryControler.prototype.setActive = function (active) {
-        if (this.data.isActive !== active) {
-            this.data.isActive = active;
-            this.setModel();
+    SmelteryControler.prototype.setActive = function () {
+        if (this.networkData.getBoolean("active") !== this.data.isActive) {
+            this.networkData.putBoolean("active", this.data.isActive);
+            this.networkData.sendChanges();
         }
     };
-    SmelteryControler.prototype.init = function () {
+    SmelteryControler.prototype.renderModel = function () {
+        if (this.networkData.getBoolean("active")) {
+            TileRenderer.mapAtCoords(this.x, this.y, this.z, Network.serverToLocalId(this.networkData.getInt("blockId")), this.networkData.getInt("blockData"));
+        }
+        else {
+            BlockRenderer.unmapAtCoords(this.x, this.y, this.z);
+        }
+    };
+    SmelteryControler.prototype.clientLoad = function () {
+        var _this = this;
+        this.render = new Render();
+        this.anim = new Animation.Base(this.x, this.y, this.z);
+        this.anim.describe({ render: this.render.getId(), skin: "model/tcon_liquids.png" });
+        this.anim.load();
+        this.anim.setSkylightMode();
+        this.renderModel();
+        this.networkData.addOnDataChangedListener(function (data, isExternal) {
+            _this.renderModel();
+        });
+    };
+    SmelteryControler.prototype.clientUnload = function () {
+        var _a;
+        (_a = this.anim) === null || _a === void 0 ? void 0 : _a.destroy();
+        BlockRenderer.unmapAtCoords(this.x, this.y, this.z);
+    };
+    SmelteryControler.prototype.onInit = function () {
+        _super.prototype.onInit.call(this);
         this.area = {
             from: { x: 0, y: 0, z: 0 },
             to: { x: 0, y: 0, z: 0 }
         };
         this.data.isActive = this.checkStructure();
-        this.render = new Render();
-        this.anim = new Animation.Base(this.x, this.y, this.z);
-        this.anim.describe({ render: this.render.getID(), skin: "model/tcon_liquids.png" });
-        this.anim.load();
-        this.anim.setSkylightMode();
-        this.setModel();
-        this.setAnim();
-    };
-    SmelteryControler.prototype.destroy = function () {
-        BlockRenderer.unmapAtCoords(this.x, this.y, this.z);
-        this.anim && this.anim.destroy();
     };
     SmelteryControler.prototype.searchWall = function (coords, axis, dir) {
-        var pos = { x: coords.x, y: coords.y, z: coords.z };
+        var pos = __assign({}, coords);
         var i;
         var block;
         for (i = 0; i < 16; i++) {
             pos[axis] += dir;
-            block = World.getBlockID(pos.x, pos.y, pos.z);
-            if (block === 0) {
+            block = this.region.getBlockId(pos);
+            if (block === 0)
                 continue;
-            }
             return SmelteryHandler.isValidBlock(block) ? (i + 1) * dir : 0;
         }
         return 0;
     };
     SmelteryControler.prototype.checkStructure = function () {
-        var pos = { x: this.x, y: this.y, z: this.z };
-        pos[this.data.meta >> 1 ? "x" : "z"] += this.data.meta & 1 ? -1 : 1;
-        if (World.getBlockID(pos.x, pos.y, pos.z) !== 0) {
+        var facing = this.networkData.getInt("blockData") - 2;
+        Game.message("facing: " + facing);
+        Game.message("blockData: " + this.blockSource.getBlockData(this.x, this.y, this.z));
+        var backPos = { x: this.x, y: this.y, z: this.z };
+        backPos[facing >> 1 ? "x" : "z"] += facing & 1 ? -1 : 1;
+        if (this.region.getBlockId(backPos) !== 0) {
             return false;
         }
-        var x1 = this.searchWall(pos, "x", -1);
-        var x2 = this.searchWall(pos, "x", 1);
-        var z1 = this.searchWall(pos, "z", -1);
-        var z2 = this.searchWall(pos, "z", 1);
+        var x1 = this.searchWall(backPos, "x", -1);
+        var x2 = this.searchWall(backPos, "x", 1);
+        var z1 = this.searchWall(backPos, "z", -1);
+        var z2 = this.searchWall(backPos, "z", 1);
         if (x1 === 0 || x2 === 0 || z1 === 0 || z2 === 0) {
+            Game.message("xz: " + [x1, x2, z1, z2].join(","));
             return false;
         }
-        var from = { x: pos.x + x1, z: pos.z + z1 };
-        var to = { x: pos.x + x2, z: pos.z + z2 };
+        var from = { x: backPos.x + x1, z: backPos.z + z1 };
+        var to = { x: backPos.x + x2, z: backPos.z + z2 };
+        //Floor Check
         var x;
         var z;
         for (x = from.x + 1; x <= to.x - 1; x++) {
             for (z = from.z + 1; z <= to.z - 1; z++) {
-                if (World.getBlockID(x, this.y - 1, z) !== BlockID.tcon_stone) {
+                if (this.region.getBlockId(x, this.y - 1, z) !== BlockID.tcon_stone) {
+                    Game.message("Floor Invalid");
                     return false;
                 }
             }
         }
+        //Wall Check
         var tanks = [];
         var y;
         var block;
@@ -1521,7 +1488,7 @@ var SmelteryControler = /** @class */ (function (_super) {
                     if (x === from.x && z === from.z || x === to.x && z === from.z || x === from.x && z === to.z || x === to.x && z === to.z) {
                         continue;
                     }
-                    block = World.getBlockID(x, y, z);
+                    block = this.region.getBlockId(x, y, z);
                     if (from.x < x && x < to.x && from.z < z && z < to.z) {
                         if (block !== 0) {
                             break loop;
@@ -1531,7 +1498,7 @@ var SmelteryControler = /** @class */ (function (_super) {
                     if (!SmelteryHandler.isValidBlock(block)) {
                         break loop;
                     }
-                    tile = World.getTileEntity(x, y, z);
+                    tile = this.region.getTileEntity(x, y, z);
                     if (tile) {
                         switch (tile.blockID) {
                             case BlockID.tcon_tank:
@@ -1542,6 +1509,7 @@ var SmelteryControler = /** @class */ (function (_super) {
                                 break;
                             case BlockID.tcon_smeltery:
                                 if (tile.x !== this.x || tile.y !== this.y || tile.z !== this.z) {
+                                    Game.message("Double Controller");
                                     return false;
                                 }
                                 break;
@@ -1551,6 +1519,7 @@ var SmelteryControler = /** @class */ (function (_super) {
             }
         }
         if (y === this.y || tanks.length === 0) {
+            Game.message("Height or Tank");
             return false;
         }
         this.area.from.x = from.x;
@@ -1562,193 +1531,24 @@ var SmelteryControler = /** @class */ (function (_super) {
         this.tanks = tanks;
         return true;
     };
-    SmelteryControler.prototype.getItemCapacity = function () {
-        return (this.area.to.x - this.area.from.x - 1) * (this.area.to.y - this.area.from.y) * (this.area.to.z - this.area.from.z - 1);
-    };
-    SmelteryControler.prototype.getLiquidCapacity = function () {
-        return this.getItemCapacity() * MatValue.INGOT * 8;
-    };
-    SmelteryControler.prototype.totalLiquidAmount = function () {
-        var liquids = this.liquidStorage.liquidAmounts;
-        var amount = 0;
-        for (var key in liquids) {
-            if (liquids[key] <= 0) {
-                delete liquids[key];
-                continue;
-            }
-            amount += liquids[key];
-        }
-        return amount;
-    };
-    SmelteryControler.prototype.getLiquidArray = function () {
-        var liquids = this.liquidStorage.liquidAmounts;
-        var array = Object.keys(liquids).filter(function (liq) { return liquids[liq] > 0; });
-        for (var i = 0; i < this.data.select; i++) {
-            array.push(array.shift());
-        }
-        return array;
-    };
-    SmelteryControler.prototype.tick = function () {
-        var tick = World.getThreadTime();
-        var liquids = this.liquidStorage.liquidAmounts;
-        var total = this.totalLiquidAmount();
-        var capacity = this.getItemCapacity();
-        var liquidCapacity = this.getLiquidCapacity();
-        var isOpened = this.container.isOpened();
-        SmelteryHandler.updateScale();
-        this.liquidStorage.setLimit(null, Math.max(0, liquidCapacity));
-        if ((tick & 63) === 0) {
-            this.setActive(this.checkStructure());
-            this.setAnim();
-            this.data.isActive && this.spawnParticle();
-        }
-        if (!this.data.isActive) {
-            return;
-        }
-        if (Cfg.checkInsideSmeltery && tick % 20 === 0) {
-            this.interactWithEntitiesInside();
-        }
-        if ((tick & 3) === 0) {
-            AlloyRecipe.alloyAlloys(liquids, this.liquidStorage);
-        }
-        if (this.data.fuel <= 0) {
-            var fuelData = void 0;
-            for (var i = 0; i < this.tanks.length; i++) {
-                if (this.tanks[i] && this.tanks[i].isLoaded && this.tanks[i].consumeFuel) {
-                    fuelData = this.tanks[i].consumeFuel();
-                    if (fuelData) {
-                        this.data.fuel = fuelData.duration;
-                        this.data.temp = fuelData.temp;
-                        break;
-                    }
-                }
-            }
-            if (this.data.fuel <= 0) {
-                return;
-            }
-        }
-        var slots = [
-            this.container.getSlot("slot0"),
-            this.container.getSlot("slot1"),
-            this.container.getSlot("slot2")
-        ];
-        var smeltCount = slots.reduce(function (sum, slot) { return sum + slot.count; }, 0);
-        var recipe;
-        var time;
-        var count;
-        var value;
-        var mode;
-        var consume = false;
-        if (smeltCount > capacity) {
-            if (isOpened) {
-                for (var i = 0; i < 3; i++) {
-                    this.container.setBinding("gauge" + i, "texture", "tcon.heat_gauge_2");
-                    this.container.setScale("gauge" + i, 1);
-                }
-            }
-            return;
-        }
-        for (var i = 0; i < 3; i++) {
-            recipe = MeltingRecipe.getRecipe(slots[i].id, slots[i].data);
-            value = 0;
-            mode = 0;
-            if (recipe && i < capacity) {
-                time = Math.max(5, recipe.temp) * SmelteryHandler.getHeatFactor();
-                this.data["heat" + i] += this.data.temp / 100;
-                consume = true;
-                if (this.data["heat" + i] >= time) {
-                    count = slots[i].count;
-                    while (total + recipe.amount * count > liquidCapacity) {
-                        count--;
-                    }
-                    if (count > 0) {
-                        slots[i].count -= count;
-                        this.container.validateSlot("slot" + i);
-                        this.liquidStorage.addLiquid(recipe.liquid, recipe.amount * count);
-                        this.data["heat" + i] = 0;
-                    }
-                    else {
-                        mode = 2;
-                        value = 1;
-                    }
-                }
-                else {
-                    value = this.data["heat" + i] / time;
-                }
-            }
-            else {
-                this.data["heat" + i] = 0;
-                if (slots[i].id !== 0) {
-                    mode = 3;
-                    value = 1;
-                }
-            }
-            if (isOpened) {
-                this.container.setBinding("gauge" + i, "texture", "tcon.heat_gauge_" + mode);
-                this.container.setScale("gauge" + i, value);
-            }
-        }
-        if (consume) {
-            this.data.fuel--;
-        }
-    };
-    SmelteryControler.prototype.interactWithEntitiesInside = function () {
-        var _this = this;
-        var allEnt = Entity.getAll();
-        var entities = [];
-        var pos;
-        for (var i = 0; i < allEnt.length; i++) {
-            pos = Entity.getPosition(allEnt[i]);
-            if (this.area.from.x <= pos.x && this.area.to.x >= pos.x && this.area.from.y <= pos.y && this.area.to.y >= pos.y && this.area.from.z <= pos.z && this.area.to.z >= pos.z) {
-                if (MeltingRecipe.getEntRecipe(allEnt[i])) {
-                    entities.push(allEnt[i]);
-                }
-            }
-        }
-        var liquidCapacity = this.getLiquidCapacity();
-        entities.forEach(function (ent) {
-            var result = MeltingRecipe.getEntRecipe(ent);
-            if (_this.totalLiquidAmount() + result.amount <= liquidCapacity) {
-                _this.liquidStorage.addLiquid(result.liquid, result.amount);
-            }
-            Entity.damageEntity(ent, 2);
-        });
-    };
-    SmelteryControler.prototype.setAnim = function () {
-        var boxes = [];
-        var sizeX = this.area.to.x - this.area.from.x - 1;
-        var sizeY = this.area.to.y - this.area.from.y;
-        var sizeZ = this.area.to.z - this.area.from.z - 1;
-        var texScale = MoltenLiquid.getTexScale();
+    SmelteryControler.prototype.onItemUse = function (coords, item, player) {
+        this.data.isActive = this.checkStructure();
         if (this.data.isActive) {
-            var liquids = this.liquidStorage.liquidAmounts;
-            var liqArray = this.getLiquidArray();
-            var capacity = this.getLiquidCapacity();
-            var height = void 0;
-            var max = void 0;
-            var y = 0;
-            for (var i = 0; i < liqArray.length; i++) {
-                height = liquids[liqArray[i]] / capacity * sizeY;
-                max = Math.max(sizeX, sizeZ, height);
-                boxes.push({
-                    type: "box",
-                    uv: { x: 0, y: MoltenLiquid.getY(liqArray[i]) * max },
-                    coords: { x: 0, y: y - height * 16 / 2, z: 0 },
-                    size: { x: sizeX * 16, y: height * 16, z: sizeZ * 16 }
-                });
-                y -= height * 16;
-            }
-            texScale.width *= max;
-            texScale.height *= max;
+            this.region.setBlock(this.area.from, VanillaBlockID.wool, 0);
+            this.region.setBlock(this.area.to, VanillaBlockID.wool, 1);
         }
-        this.render.setPart("head", boxes, texScale);
-        this.anim.setPos((this.area.from.x + this.area.to.x) / 2 + 0.5, (this.area.from.y + this.area.to.y) / 2 - (sizeY + 1) * 0.5, (this.area.from.z + this.area.to.z) / 2 + 0.5);
-        this.anim.refresh();
+        else {
+            Game.message("invalid");
+        }
+        return false;
     };
-    SmelteryControler.prototype.spawnParticle = function () {
+    SmelteryControler.prototype.onTick = function () {
+    };
+    SmelteryControler.prototype.spawnParticle = function (data) {
         //270, 90, 180, 0 degree
-        var cos = [0, 0, -1, 1][this.data.meta];
-        var sin = [-1, 1, 0, 0][this.data.meta];
+        var blockData = this.networkData.getInt("blockData");
+        var cos = [0, 0, -1, 1][blockData];
+        var sin = [-1, 1, 0, 0][blockData];
         var x = 0.52;
         var z = Math.random() * 0.6 - 0.3;
         var coords = {
@@ -1756,27 +1556,30 @@ var SmelteryControler = /** @class */ (function (_super) {
             y: this.y + 0.5 + (Math.random() * 6) / 16,
             z: this.z + 0.5 + x * sin + z * cos
         };
-        Particles.addParticle(Native.ParticleType.smoke, coords.x, coords.y, coords.z, 0, 0, 0);
-        Particles.addParticle(Native.ParticleType.flame, coords.x, coords.y, coords.z, 0, 0, 0);
+        Particles.addParticle(EParticleType.SMOKE, coords.x, coords.y, coords.z, 0, 0, 0);
+        Particles.addParticle(EParticleType.FLAME, coords.x, coords.y, coords.z, 0, 0, 0);
     };
+    __decorate([
+        ClientSide
+    ], SmelteryControler.prototype, "renderModel", null);
+    __decorate([
+        NetworkEvent(Side.Client)
+    ], SmelteryControler.prototype, "spawnParticle", null);
     return SmelteryControler;
-}(TileBase));
-var SmelteryInterface = /** @class */ (function (_super) {
-    __extends(SmelteryInterface, _super);
-    function SmelteryInterface() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    SmelteryInterface.prototype.getLiquidStored = function (storage, side) {
-        return this.tileEntity.getLiquidArray()[0];
-    };
-    SmelteryInterface.prototype.canReceiveLiquid = function (liquid, side) {
-        return true;
-    };
-    return SmelteryInterface;
-}(FluidTileInterface));
+}(TconTileEntity));
 TileEntity.registerPrototype(BlockID.tcon_smeltery, new SmelteryControler());
-TileRenderer.setRotationPlaceFunction(BlockID.tcon_smeltery);
-StorageInterface.createInterface(BlockID.tcon_smeltery, new SmelteryInterface());
+StorageInterface.createInterface(BlockID.tcon_smeltery, {
+    liquidUnitRatio: 0.001,
+    canReceiveLiquid: function (liquid, side) {
+        return true;
+    },
+    getInputTank: function () {
+        return this.tileEntity.liquidStorage;
+    },
+    getOutputTank: function () {
+        return this.tileEntity.liquidStorage;
+    }
+});
 ;
 ;
 ;
@@ -2048,7 +1851,7 @@ var ToolData = /** @class */ (function () {
         this.init();
     }
     ToolData.prototype.init = function () {
-        this.toolData = ToolAPI.getToolData(this.item.id);
+        //this.toolData = ToolAPI.getToolData(this.item.id);
         this.materials = new String(this.item.extra.getString("materials")).split("_");
         this.modifiers = TinkersModifierHandler.decodeToObj(this.item.extra.getString("modifiers"));
         this.stats = this.getStats();
@@ -2098,7 +1901,7 @@ var ToolData = /** @class */ (function () {
         var newLv = this.getLevel();
         if (oldLv < newLv) {
             Game.message("§3" + this.getLevelupMessage(newLv));
-            SoundManager.startPlaySound(SourceType.ENTITY, player, "saw.ogg", 0.5);
+            //SoundManager.startPlaySound(SourceType.ENTITY, player, "saw.ogg", 0.5);
         }
     };
     ToolData.prototype.getLevel = function () {
@@ -2141,7 +1944,7 @@ var ToolData = /** @class */ (function () {
         return "Hacker";
     };
     ToolData.prototype.getLevelupMessage = function (lv) {
-        var name = Item.getName(this.item.id);
+        var name = Item.getName(this.item.id, this.item.data);
         switch (lv) {
             case 1: return "You begin to feel comfortable handling the ".concat(name);
             case 2: return "You are now accustomed to the weight of the ".concat(name);
@@ -2292,9 +2095,11 @@ var ToolTexture = /** @class */ (function () {
     ToolTexture.prototype.getPath = function () {
         return this.path;
     };
-    ToolTexture.prototype.getBitmap = function (partNum, index) {
-        return Bitmap.createBitmap(this.bitmap, (index & 15) << 4, (index >> 4) + (partNum << 1) << 4, 16, 16); //null, true
-    };
+    /*
+        getBitmap(partNum: number, index: number): android.graphics.Bitmap {
+            return Bitmap.createBitmap(this.bitmap, (index & 15) << 4, (index >> 4) + (partNum << 1) << 4, 16, 16);//null, true
+        }
+    */
     ToolTexture.prototype.getCoords = function (partNum, index) {
         return {
             x: ((index & 15) << 4) / 256,
@@ -2772,12 +2577,12 @@ var ModBeheading = /** @class */ (function (_super) {
         }
     };
     ModBeheading.headMeta = (_a = {},
-        _a[Native.EntityType.SKELETON] = 0,
-        _a[Native.EntityType.WHITHER_SKELETON] = 1,
-        _a[Native.EntityType.ZOMBIE] = 2,
-        _a[1] = 3,
-        _a[Native.EntityType.CREEPER] = 4,
-        _a[Native.EntityType.ENDER_DRAGON] = 5,
+        _a[EEntityType.SKELETON] = 0,
+        _a[EEntityType.WHITHER_SKELETON] = 1,
+        _a[EEntityType.ZOMBIE] = 2,
+        _a[EEntityType.PLAYER] = 3,
+        _a[EEntityType.CREEPER] = 4,
+        _a[EEntityType.ENDER_DRAGON] = 5,
         _a);
     return ModBeheading;
 }(TinkersModifier));
@@ -2795,19 +2600,19 @@ var ModSmite = /** @class */ (function (_super) {
         return ModSmite.targets[Entity.getType(victim)] ? 7 / this.max * level : 0;
     };
     ModSmite.targets = (_a = {},
-        _a[Native.EntityType.SKELETON] = true,
-        _a[Native.EntityType.STRAY] = true,
-        _a[Native.EntityType.WHITHER_SKELETON] = true,
-        _a[Native.EntityType.ZOMBIE] = true,
-        _a[Native.EntityType.DROWNED] = true,
-        _a[Native.EntityType.HUSK] = true,
-        _a[Native.EntityType.PIG_ZOMBIE] = true,
-        _a[Native.EntityType.ZOMBIE_VILLAGER] = true,
-        _a[Native.EntityType.ZOMBIE_VILLAGE_V2] = true,
-        _a[Native.EntityType.PHANTOM] = true,
-        _a[Native.EntityType.WHITHER] = true,
-        _a[Native.EntityType.SKELETON_HORSE] = true,
-        _a[Native.EntityType.ZOMBIE_HORSE] = true,
+        _a[EEntityType.SKELETON] = true,
+        _a[EEntityType.STRAY] = true,
+        _a[EEntityType.WHITHER_SKELETON] = true,
+        _a[EEntityType.ZOMBIE] = true,
+        _a[EEntityType.DROWNED] = true,
+        _a[EEntityType.HUSK] = true,
+        _a[EEntityType.PIG_ZOMBIE] = true,
+        _a[EEntityType.ZOMBIE_VILLAGER] = true,
+        _a[EEntityType.ZOMBIE_VILLAGE_V2] = true,
+        _a[EEntityType.PHANTOM] = true,
+        _a[EEntityType.WHITHER] = true,
+        _a[EEntityType.SKELETON_HORSE] = true,
+        _a[EEntityType.ZOMBIE_HORSE] = true,
         _a);
     return ModSmite;
 }(TinkersModifier));
@@ -2821,10 +2626,10 @@ var ModSpider = /** @class */ (function (_super) {
         return ModSpider.targets[Entity.getType(victim)] ? 7 / this.max * level : 0;
     };
     ModSpider.targets = (_a = {},
-        _a[Native.EntityType.SPIDER] = true,
-        _a[Native.EntityType.CAVE_SPIDER] = true,
-        _a[Native.EntityType.SILVERFISH] = true,
-        _a[Native.EntityType.ENDERMITE] = true,
+        _a[EEntityType.SPIDER] = true,
+        _a[EEntityType.CAVE_SPIDER] = true,
+        _a[EEntityType.SILVERFISH] = true,
+        _a[EEntityType.ENDERMITE] = true,
         _a);
     return ModSpider;
 }(TinkersModifier));
@@ -2847,7 +2652,7 @@ var ModNecrotic = /** @class */ (function (_super) {
     }
     ModNecrotic.prototype.onDealDamage = function (victim, damageValue, damageType, level) {
         var add = damageValue * 0.1 * level | 0;
-        add && Entity.setHealth(player, Math.min(Entity.getHealth(player) + add, Entity.getMaxHealth(player)));
+        //add && Entity.setHealth(player, Math.min(Entity.getHealth(player) + add, Entity.getMaxHealth(player)));
     };
     return ModNecrotic;
 }(TinkersModifier));
@@ -2857,9 +2662,11 @@ var ModKnockback = /** @class */ (function (_super) {
         return _super.call(this, "knockback", "Knockback", 12, ["piston"], 10, true) || this;
     }
     ModKnockback.prototype.onAttack = function (item, victim, level) {
-        var vec = Entity.getLookVector(player);
-        var speed = 1 + level * 0.1;
+        /*
+        const vec = Entity.getLookVector(player);
+        const speed = 1 + level * 0.1;
         Entity.setVelocity(victim, vec.x * speed, vec.y, vec.z * speed);
+        */
         return 0;
     };
     return ModKnockback;
@@ -2876,7 +2683,7 @@ Item.registerUseFunction(ItemID.tcon_moss, function (coords, item, block) {
         Player.addLevel(-10);
         Player.decreaseCarriedItem();
         Player.addItemToInventory(ItemID.tcon_mending_moss, 1, 0);
-        World.playSoundAtEntity(player, "random.orb", 1);
+        //World.playSoundAtEntity(player, "random.orb", 1);
     }
 });
 var ModMending = /** @class */ (function (_super) {
@@ -2895,7 +2702,7 @@ var ModShulking = /** @class */ (function (_super) {
         return _super.call(this, "shulking", "Shulking", 14, ["chorus_fruit_popped"], 50, false) || this;
     }
     ModShulking.prototype.onAttack = function (item, victim, level) {
-        Entity.addEffect(victim, Native.PotionEffect.levitation, 0, (level >> 1) + 10);
+        Entity.addEffect(victim, EPotionEffect.LEVITATION, 0, (level >> 1) + 10);
         return 0;
     };
     return ModShulking;
@@ -2906,611 +2713,11 @@ var ModWeb = /** @class */ (function (_super) {
         return _super.call(this, "web", "Web", 15, ["web"], 1, true) || this;
     }
     ModWeb.prototype.onAttack = function (item, victim, level) {
-        Entity.addEffect(victim, Native.PotionEffect.movementSlowdown, 1, level * 20);
+        Entity.addEffect(victim, EPotionEffect.MOVEMENT_SLOWDOWN, 1, level * 20);
         return 0;
     };
     return ModWeb;
 }(TinkersModifier));
-/*
-0: top
-1: side
-2: front
-3: d-side
-4: d-front
-*/
-var PatternChest = /** @class */ (function (_super) {
-    __extends(PatternChest, _super);
-    function PatternChest() {
-        var _this = _super !== null && _super.apply(this, arguments) || this;
-        _this.defaultValues = {
-            mask: 0
-        };
-        return _this;
-    }
-    PatternChest.getIndex = function (id) {
-        if (id in PatternChest.mask) {
-            var i = 0;
-            while (PatternChest.mask[id] >> i & ~1) {
-                i++;
-            }
-            return i;
-        }
-        return -1;
-    };
-    PatternChest.prototype.init = function () {
-        delete this.liquidStorage;
-    };
-    PatternChest.prototype.isExist = function (id) {
-        return !!(this.data.mask & PatternChest.mask[id]);
-    };
-    PatternChest.prototype.getList = function () {
-        var array = [];
-        for (var i = 0; i < PatternChest.patterns.length; i++) {
-            this.data.mask >> i & 1 && array.push(i);
-        }
-        array.sort(function (a, b) { return a - b; });
-        return array;
-    };
-    PatternChest.prototype.upFlag = function (id) {
-        if (this.isExist(id)) {
-            return false;
-        }
-        this.data.mask |= PatternChest.mask[id];
-        return true;
-    };
-    PatternChest.prototype.downFlag = function (id) {
-        if (this.isExist(id)) {
-            this.data.mask &= ~PatternChest.mask[id];
-            return true;
-        }
-        return false;
-    };
-    PatternChest.prototype.click = function (id, count, data) {
-        if (id in PatternChest.mask) {
-            if (Entity.getSneaking(player)) {
-                var inv = void 0;
-                for (var i = 0; i < 36; i++) {
-                    inv = Player.getInventorySlot(i);
-                    if (inv.id in PatternChest.mask && this.upFlag(inv.id)) {
-                        if (--inv.count <= 0) {
-                            inv.id = inv.data = 0;
-                        }
-                        Player.setInventorySlot(i, inv.id, inv.count, inv.data);
-                    }
-                }
-                return true;
-            }
-            this.upFlag(id) ? Player.decreaseCarriedItem() : Game.tipMessage("already has this pattern inside");
-            return true;
-        }
-        return false;
-    };
-    PatternChest.prototype.getGuiScreen = function () {
-        return PatternChest.window;
-    };
-    PatternChest.prototype.destroyBlock = function () {
-        var extra;
-        if (this.data.mask) {
-            extra = new ItemExtraData();
-            extra.putInt("mask", this.data.mask);
-        }
-        World.drop(this.x + 0.5, this.y, this.z + 0.5, this.blockID, 1, World.getBlock(this.x, this.y, this.z).data, extra);
-    };
-    PatternChest.patterns = [
-        ItemID.tcon_pattern_pickaxe,
-        ItemID.tcon_pattern_shovel,
-        ItemID.tcon_pattern_axe,
-        ItemID.tcon_pattern_broadaxe,
-        ItemID.tcon_pattern_sword,
-        ItemID.tcon_pattern_hammer,
-        ItemID.tcon_pattern_excavator,
-        ItemID.tcon_pattern_rod,
-        ItemID.tcon_pattern_rod2,
-        ItemID.tcon_pattern_binding,
-        ItemID.tcon_pattern_binding2,
-        ItemID.tcon_pattern_guard,
-        ItemID.tcon_pattern_largeplate
-    ];
-    PatternChest.mask = (function () {
-        var obj = {};
-        PatternChest.patterns.forEach(function (pattern, i) {
-            obj[pattern] = 1 << i;
-        });
-        return obj;
-    })();
-    PatternChest.window = (function () {
-        var elementSet = {
-            buttonExit: { type: "closeButton", x: 907, y: 18, bitmap: "classic_close_button", bitmap2: "classic_close_button_down", scale: 5 }
-        };
-        var window = new UI.Window({
-            location: { x: 200, y: 20, width: 600, height: 300 },
-            drawing: [
-                { type: "background", color: Color.TRANSPARENT },
-                { type: "frame", x: 0, y: 0, width: 1000, height: 500, bitmap: "classic_frame_bg_light", scale: 6 },
-                { type: "text", x: 50, y: 60, text: "Pattern Chest", font: { size: 40 } },
-            ],
-            elements: elementSet
-        });
-        var i = 0;
-        var _loop_1 = function (id) {
-            elementSet["slot" + id] = {
-                type: "slot",
-                x: 50 + (i % 9) * 100,
-                y: 100 + (i / 9 | 0) * 100,
-                size: 100,
-                visual: true,
-                isDarkenAtZero: false,
-                source: { id: 0, count: 0, data: 0 },
-                clicker: {
-                    onClick: function (container, tile) {
-                        if (tile.downFlag(id)) {
-                            window.getElements().get("slot" + id).onBindingUpdated("source", { id: 0, count: 0, data: 0 });
-                            Player.addItemToInventory(parseInt(id), 1, 0);
-                        }
-                    }
-                }
-            };
-            i++;
-        };
-        for (var id in PatternChest.mask) {
-            _loop_1(id);
-        }
-        window.setBlockingBackground(true);
-        window.setEventListener({
-            onOpen: function (win) {
-                var elements = win.getElements();
-                var container = win.getContainer();
-                var tile = container.getParent();
-                for (var id in PatternChest.mask) {
-                    elements.get("slot" + id).onBindingUpdated("source", { id: tile.isExist(id) ? parseInt(id) : 0, count: 0, data: 0 });
-                }
-            }
-        });
-        return window;
-    })();
-    return PatternChest;
-}(TileBase));
-createBlock("tcon_patternchest", [{ name: "Pattern Chest", texture: [["itemframe_background", 0]] }]);
-Recipes2.addShaped(BlockID.tcon_patternchest, "a:b", { a: ItemID.tcon_pattern_blank, b: "chest" });
-Block.setShape(BlockID.tcon_patternchest, 0, 0, 0, 1, 14 / 16, 1);
-Block.registerDropFunction(BlockID.tcon_patternchest, function () { return []; });
-Block.registerPlaceFunction(BlockID.tcon_patternchest, function (coords, item, block) {
-    var c = World.canTileBeReplaced(block.id, block.data) ? coords : coords.relative;
-    World.setBlock(c.x, c.y, c.z, item.id, item.data);
-    var tile = World.addTileEntity(c.x, c.y, c.z);
-    if (item.extra) {
-        tile.data.mask = item.extra.getInt("mask");
-    }
-});
-TileEntity.registerPrototype(BlockID.tcon_patternchest, new PatternChest());
-var TableBase = /** @class */ (function (_super) {
-    __extends(TableBase, _super);
-    function TableBase(animCount, animSize) {
-        var _this = _super.call(this) || this;
-        _this.animCount = animCount;
-        _this.animSize = animSize;
-        _this.defaultValues = {
-            meta: 0
-        };
-        return _this;
-    }
-    TableBase.prototype.created = function () {
-        this.data.meta = TileRenderer.getBlockRotation();
-    };
-    TableBase.prototype.init = function () {
-        if (Cfg.showItemOnTable) {
-            this.anims = new Array(this.animCount);
-            for (var i = 0; i < this.animCount; i++) {
-                this.anims[i] = createAnimItem(this.x + 0.5, this.y + 33 / 32, this.z + 0.5);
-            }
-            this.setAnimItem();
-        }
-        delete this.liquidStorage;
-    };
-    TableBase.prototype.destroy = function () {
-        this.anims && this.anims.forEach(function (anim) {
-            anim && anim.destroy();
-        });
-    };
-    TableBase.prototype.displayItem = function (coords) {
-        var _this = this;
-        if (!Cfg.showItemOnTable) {
-            return;
-        }
-        //180, 0, 90, 270 degree
-        var cos = [-1, 1, 0, 0][this.data.meta];
-        var sin = [0, 0, 1, -1][this.data.meta];
-        var rot = [Math.PI, 0, Math.PI / 2, -Math.PI / 2][this.data.meta];
-        this.anims.forEach(function (anim, i) {
-            if (Math.abs(coords[i].x) > 1 || Math.abs(coords[i].z) > 1) {
-                return;
-            }
-            var slot = _this.container.getSlot("slot" + i);
-            var size = _this.animSize;
-            if (isBlockID(slot.id)) {
-                size /= 2;
-            }
-            var x = coords[i].x + size / 16;
-            var z = coords[i].z - size / 16;
-            var xx = x * cos - z * sin;
-            var zz = x * sin + z * cos;
-            anim.setPos(_this.x + 0.5 + xx, _this.y + 33 / 32, _this.z + 0.5 + zz);
-            anim.describeItem(slot.id === 0 ? { id: 0, count: 0, data: 0 } : {
-                id: slot.id, count: 1, data: slot.data,
-                size: size,
-                rotation: [-Math.PI / 2, rot, 0]
-            });
-        });
-    };
-    return TableBase;
-}(TileBase));
-createBlock("tcon_stenciltable", [
-    { name: "Stencil Table", texture: [0, 0, ["planks", 0]] },
-    { name: "Stencil Table", texture: [0, 0, ["planks", 1]] },
-    { name: "Stencil Table", texture: [0, 0, ["planks", 2]] },
-    { name: "Stencil Table", texture: [0, 0, ["planks", 3]] },
-    { name: "Stencil Table", texture: [0, 0, ["planks", 4]] },
-    { name: "Stencil Table", texture: [0, 0, ["planks", 5]] }
-], "wood");
-Item.addCreativeGroup("tcon_stenciltable", "Stencil Table", [BlockID.tcon_stenciltable]);
-BlockModel.register(BlockID.tcon_stenciltable, function (model, index) {
-    model.addBox(0 / 16, 12 / 16, 0 / 16, 16 / 16, 16 / 16, 16 / 16, [["planks", index], ["tcon_stenciltable", 0], ["tcon_table_side", 0]]);
-    model.addBox(0 / 16, 0 / 16, 0 / 16, 4 / 16, 12 / 16, 4 / 16, "planks", index);
-    model.addBox(12 / 16, 0 / 16, 0 / 16, 16 / 16, 12 / 16, 4 / 16, "planks", index);
-    model.addBox(12 / 16, 0 / 16, 12 / 16, 16 / 16, 12 / 16, 16 / 16, "planks", index);
-    model.addBox(0 / 16, 0 / 16, 12 / 16, 4 / 16, 12 / 16, 16 / 16, "planks", index);
-    return model;
-}, 6);
-Recipes2.addShaped({ id: BlockID.tcon_stenciltable, data: 0 }, "a:b", { a: ItemID.tcon_pattern_blank, b: { id: "planks", data: 0 } });
-Recipes2.addShaped({ id: BlockID.tcon_stenciltable, data: 1 }, "a:b", { a: ItemID.tcon_pattern_blank, b: { id: "planks", data: 1 } });
-Recipes2.addShaped({ id: BlockID.tcon_stenciltable, data: 2 }, "a:b", { a: ItemID.tcon_pattern_blank, b: { id: "planks", data: 2 } });
-Recipes2.addShaped({ id: BlockID.tcon_stenciltable, data: 3 }, "a:b", { a: ItemID.tcon_pattern_blank, b: { id: "planks", data: 3 } });
-Recipes2.addShaped({ id: BlockID.tcon_stenciltable, data: 4 }, "a:b", { a: ItemID.tcon_pattern_blank, b: { id: "planks", data: 4 } });
-Recipes2.addShaped({ id: BlockID.tcon_stenciltable, data: 5 }, "a:b", { a: ItemID.tcon_pattern_blank, b: { id: "planks", data: 5 } });
-var StencilTable = /** @class */ (function (_super) {
-    __extends(StencilTable, _super);
-    function StencilTable() {
-        var _this = _super.call(this, 1, 14 / 16) || this;
-        _this.defaultValues = {
-            meta: 0,
-            page: 0
-        };
-        return _this;
-    }
-    StencilTable.prototype.getGuiScreen = function () {
-        return StencilTable.window;
-    };
-    StencilTable.prototype.setAnimItem = function () {
-        this.displayItem([{ x: 0, z: 0 }]);
-    };
-    StencilTable.window = (function () {
-        var elements = {
-            slot0: { type: "slot", x: 300, y: 90, size: 100, isValid: function (id) { return id === ItemID.tcon_pattern_blank; } },
-            slotResult: { type: "slot", x: 600, y: 90, size: 100, isValid: function () { return false; }, clicker: {
-                    onClick: function (container, tile) {
-                        var source = container.getSlot("slot0");
-                        if (source.id === ItemID.tcon_pattern_blank) {
-                            source.count--;
-                            container.validateSlot("slot0");
-                            Player.addItemToInventory(PatternChest.patterns[tile.data.page], 1, 0);
-                        }
-                    }
-                } },
-            buttonPrev: { type: "button", x: 544, y: 200, bitmap: "_button_prev_48x24", bitmap2: "_button_prev_48x24p", scale: 2, clicker: {
-                    onClick: function (container, tile) {
-                        if (--tile.data.page < 0) {
-                            tile.data.page = PatternChest.patterns.length - 1;
-                        }
-                    }
-                } },
-            buttonNext: { type: "button", x: 660, y: 200, bitmap: "_button_next_48x24", bitmap2: "_button_next_48x24p", scale: 2, clicker: {
-                    onClick: function (container, tile) {
-                        if (++tile.data.page >= PatternChest.patterns.length) {
-                            tile.data.page = 0;
-                        }
-                    }
-                } },
-            buttonExit: { type: "closeButton", x: 907, y: 18, bitmap: "classic_close_button", bitmap2: "classic_close_button_down", scale: 5 }
-        };
-        for (var i = 0; i < 36; i++) {
-            elements["inv" + i] = {
-                type: "invSlot",
-                x: 50 + (i % 9) * 100,
-                y: i < 9 ? 620 : 200 + (i / 9 | 0) * 100,
-                size: 100,
-                index: i
-            };
-        }
-        var window = new UI.Window({
-            location: { x: 200, y: 20, width: 600, height: 450 },
-            drawing: [
-                { type: "background", color: Color.TRANSPARENT },
-                { type: "frame", x: 0, y: 0, width: 1000, height: 750, bitmap: "classic_frame_bg_light", scale: 6 },
-                { type: "text", x: 50, y: 60, text: "Stencil Table", font: { size: 40 } },
-                { type: "text", x: 50, y: 290, text: "Inventory", font: { size: 40 } },
-                { type: "bitmap", x: 434, y: 95, bitmap: "tcon.arrow", scale: 6 }
-            ],
-            elements: elements
-        });
-        window.setInventoryNeeded(true);
-        window.setBlockingBackground(true);
-        window.setEventListener({
-            onOpen: function (win) {
-                Threading.initThread("tcon_crafting", function () {
-                    try {
-                        var container = win.getContainer();
-                        var tile = container.getParent();
-                        while (win.isOpened()) {
-                            if (container.getSlot("slot0").id === ItemID.tcon_pattern_blank) {
-                                container.setSlot("slotResult", PatternChest.patterns[tile.data.page], 1, 0);
-                            }
-                            else {
-                                container.clearSlot("slotResult");
-                                tile.data.page = 0;
-                            }
-                            Thread.sleep(100);
-                        }
-                        container.clearSlot("slotResult");
-                    }
-                    catch (e) {
-                        alert("StencilTableError: " + e);
-                    }
-                });
-            },
-            onClose: function (win) {
-                var container = win.getContainer();
-                var tile = container.getParent();
-                container.clearSlot("slotResult");
-                tile.setAnimItem();
-            }
-        });
-        return window;
-    })();
-    return StencilTable;
-}(TableBase));
-TileEntity.registerPrototype(BlockID.tcon_stenciltable, new StencilTable());
-createBlock("tcon_partbuilder", [
-    { name: "Part Builder", texture: [0, 0, ["log_side", 0]] },
-    { name: "Part Builder", texture: [0, 0, ["log_side", 1]] },
-    { name: "Part Builder", texture: [0, 0, ["log_side", 2]] },
-    { name: "Part Builder", texture: [0, 0, ["log_side", 3]] },
-    { name: "Part Builder", texture: [0, 0, ["log2", 0]] },
-    { name: "Part Builder", texture: [0, 0, ["log2", 2]] }
-], "wood");
-Item.addCreativeGroup("tcon_partbuilder", "Part Builder", [BlockID.tcon_partbuilder]);
-BlockModel.register(BlockID.tcon_partbuilder, function (model, index) {
-    var tex = index <= 3 ? "log_side" : "log2";
-    var meta = index <= 3 ? index : (index - 4) * 2;
-    model.addBox(0 / 16, 12 / 16, 0 / 16, 16 / 16, 16 / 16, 16 / 16, [[tex, meta], ["tcon_partbuilder", 0], ["tcon_table_side", 0]]);
-    model.addBox(0 / 16, 0 / 16, 0 / 16, 4 / 16, 12 / 16, 4 / 16, tex, meta);
-    model.addBox(12 / 16, 0 / 16, 0 / 16, 16 / 16, 12 / 16, 4 / 16, tex, meta);
-    model.addBox(12 / 16, 0 / 16, 12 / 16, 16 / 16, 12 / 16, 16 / 16, tex, meta);
-    model.addBox(0 / 16, 0 / 16, 12 / 16, 4 / 16, 12 / 16, 16 / 16, tex, meta);
-    return model;
-}, 6);
-Recipes2.addShaped({ id: BlockID.tcon_partbuilder, data: 0 }, "a:b", { a: ItemID.tcon_pattern_blank, b: { id: "log", data: 1 } });
-Recipes2.addShaped({ id: BlockID.tcon_partbuilder, data: 1 }, "a:b", { a: ItemID.tcon_pattern_blank, b: { id: "log", data: 1 } });
-Recipes2.addShaped({ id: BlockID.tcon_partbuilder, data: 2 }, "a:b", { a: ItemID.tcon_pattern_blank, b: { id: "log", data: 2 } });
-Recipes2.addShaped({ id: BlockID.tcon_partbuilder, data: 3 }, "a:b", { a: ItemID.tcon_pattern_blank, b: { id: "log", data: 3 } });
-Recipes2.addShaped({ id: BlockID.tcon_partbuilder, data: 4 }, "a:b", { a: ItemID.tcon_pattern_blank, b: { id: "log2", data: 0 } });
-Recipes2.addShaped({ id: BlockID.tcon_partbuilder, data: 5 }, "a:b", { a: ItemID.tcon_pattern_blank, b: { id: "log2", data: 1 } });
-var PartBuilder = /** @class */ (function (_super) {
-    __extends(PartBuilder, _super);
-    function PartBuilder() {
-        return _super.call(this, 2, 0.46875) || this;
-    }
-    PartBuilder.prototype.getGuiScreen = function () {
-        return PartBuilder.window;
-    };
-    PartBuilder.prototype.setAnimItem = function () {
-        var c = 0.2125;
-        this.displayItem([{ x: -c, z: -c }, { x: c, z: -c }]);
-    };
-    PartBuilder.window = (function () {
-        var tutorial = addLineBreaks(18, "Here you can craft tool parts to fulfill your tinkering fantasies") + "\n\n" + addLineBreaks(18, "To craft a part simply put its pattern into the left slot. The two right slot hold the material you want to craft your part out of.");
-        var findPatternchest = function (coords) {
-            var nears = StorageInterface.getNearestContainers(coords, -1);
-            var tile;
-            for (var side in nears) {
-                tile = nears[side].getParent();
-                if (parseInt(side) >= 2 && tile.blockID === BlockID.tcon_patternchest) {
-                    return tile;
-                }
-            }
-            return null;
-        };
-        var turnPage = function (tile, num) {
-            var pc = findPatternchest(tile);
-            if (pc) {
-                var list = pc.getList();
-                if (list.length > 0) {
-                    var slot = tile.container.getSlot("slot0");
-                    if (!PatternRegistry.isPattern(slot.id)) {
-                        return;
-                    }
-                    var index_1 = PatternChest.getIndex(slot.id);
-                    if (slot.id !== 0) {
-                        if (pc.upFlag(slot.id)) {
-                            tile.container.clearSlot("slot0");
-                            list = pc.getList();
-                        }
-                        else {
-                            var pos = Entity.getPosition(player);
-                            tile.container.dropSlot("slot0", pos.x, pos.y, pos.z);
-                        }
-                    }
-                    var page = list.findIndex(function (i) { return i === index_1; }) + num;
-                    if (page < 0) {
-                        page = list.length - 1;
-                    }
-                    if (page >= list.length) {
-                        page = 0;
-                    }
-                    var id = PatternChest.patterns[list[page]];
-                    tile.container.setSlot("slot0", id, 1, 0);
-                    pc.downFlag(id);
-                }
-            }
-        };
-        var elements = {
-            slot0: { type: "slot", x: 200, y: 90, size: 100, isValid: function (id) { return PatternRegistry.isPattern(id); }, bitmap: "tcon.slot.pattern" },
-            slot1: { type: "slot", x: 300, y: 90, size: 100, isValid: function (id) {
-                    for (var key in Material) {
-                        if (Material[key].getItem() === id) {
-                            return true;
-                        }
-                    }
-                    return false;
-                } },
-            slotResult: { type: "slot", x: 600, y: 90, size: 100, isValid: function () { return false; }, clicker: {
-                    onClick: function (container, tile) {
-                        var slot = container.getSlot("slot1");
-                        var recipe = PatternRegistry.getData(container.getSlot("slot0").id);
-                        var result;
-                        for (var key in Material) {
-                            result = 0;
-                            if (Material[key].getItem() === slot.id) {
-                                result = PartRegistry.getIDFromData(recipe.type, key);
-                                if (!Material[key].isMetal && result) {
-                                    if (slot.count >= recipe.cost) {
-                                        slot.count -= recipe.cost;
-                                        container.validateSlot("slot1");
-                                        Player.addItemToInventory(result, 1, 0);
-                                        return;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                } },
-            textCost: { type: "text", x: 650, y: 200, font: { color: Color.GRAY, size: 30, alignment: 1 } },
-            buttonPrev: { type: "button", x: 144, y: 200, bitmap: "_button_prev_48x24", bitmap2: "_button_prev_48x24p", scale: 2, clicker: {
-                    onClick: function (container, tile) {
-                        turnPage(tile, -1);
-                    }
-                } },
-            buttonNext: { type: "button", x: 260, y: 200, bitmap: "_button_next_48x24", bitmap2: "_button_next_48x24p", scale: 2, clicker: {
-                    onClick: function (container, tile) {
-                        turnPage(tile, 1);
-                    }
-                } },
-            buttonExit: { type: "closeButton", x: 907, y: 18, bitmap: "classic_close_button", bitmap2: "classic_close_button_down", scale: 5 },
-            imageArrow: { type: "image", x: 434, y: 95, bitmap: "tcon.arrow", scale: 6, clicker: {
-                    onClick: function (container) {
-                        RV && RV.openRecipePage("tcon_partbuilder", container);
-                    }
-                } }
-        };
-        for (var i = 0; i < 36; i++) {
-            elements["inv" + i] = {
-                type: "invSlot",
-                x: 50 + (i % 9) * 100,
-                y: i < 9 ? 620 : 200 + (i / 9 | 0) * 100,
-                size: 100,
-                index: i
-            };
-        }
-        var window = new UI.Window({
-            location: { x: 50, y: 20, width: 600, height: 450 },
-            drawing: [
-                { type: "background", color: Color.TRANSPARENT },
-                { type: "frame", x: 0, y: 0, width: 1000, height: 750, bitmap: "classic_frame_bg_light", scale: 6 },
-                { type: "text", x: 50, y: 60, text: "Part Builder", font: { size: 40 } },
-                { type: "text", x: 50, y: 290, text: "Inventory", font: { size: 40 } }
-            ],
-            elements: elements
-        });
-        var window2 = new UI.Window({
-            location: { x: 650, y: 20, width: 300, height: 450 },
-            drawing: [
-                { type: "background", color: Color.TRANSPARENT },
-                { type: "frame", x: 0, y: 0, width: 1000, height: 1500, bitmap: "tcon.frame", scale: 12 },
-            ],
-            elements: {
-                textTitle: { type: "text", x: 500, y: 40, font: { size: 80, color: Color.YELLOW, bold: true, alignment: 1 } },
-                textStats: { type: "text", x: 60, y: 200, font: { size: 70, color: Color.WHITE }, multiline: true }
-            }
-        });
-        var elements2 = window2.getElements();
-        window.addAdjacentWindow(window2);
-        window.setInventoryNeeded(true);
-        window.setBlockingBackground(true);
-        window.setEventListener({
-            onOpen: function (win) {
-                Threading.initThread("tcon_crafting", function () {
-                    try {
-                        var container = win.getContainer();
-                        var slot = void 0;
-                        var recipe = void 0;
-                        var result = void 0;
-                        var statsHead = void 0;
-                        var statsHandle = void 0;
-                        var statsExtra = void 0;
-                        var textCost = void 0;
-                        var textTitle = void 0;
-                        var textStats = void 0;
-                        while (win.isOpened()) {
-                            slot = container.getSlot("slot1");
-                            recipe = PatternRegistry.getData(container.getSlot("slot0").id);
-                            result = 0;
-                            textCost = "";
-                            textTitle = "";
-                            textStats = "";
-                            if (recipe) {
-                                for (var key in Material) {
-                                    result = 0;
-                                    if (Material[key].getItem() === slot.id) {
-                                        statsHead = Material[key].getHeadStats();
-                                        statsHandle = Material[key].getHandleStats();
-                                        statsExtra = Material[key].getExtraStats();
-                                        textTitle = Material[key].getName();
-                                        textStats = "Head" + "\n" +
-                                            "Durability: " + statsHead.durability + "\n" +
-                                            "Mining Level: " + TinkersMaterial.level[statsHead.level] + "\n" +
-                                            "Mining Speed: " + statsHead.speed + "\n" +
-                                            "Attack" + statsHead.attack + "\n" +
-                                            "\n" +
-                                            "Handle" + "\n" +
-                                            "Modifier: " + statsHandle.modifier + "\n" +
-                                            "Durability: " + statsHandle.durability + "\n" +
-                                            "\n" +
-                                            "Extra" + "\n" +
-                                            "Durability: " + statsExtra.durability;
-                                        if (!Material[key].isMetal) {
-                                            textCost = "Material Value:  ".concat(slot.count, " / ").concat(recipe.cost);
-                                            if (slot.count >= recipe.cost) {
-                                                result = PartRegistry.getIDFromData(recipe.type, key);
-                                            }
-                                        }
-                                        break;
-                                    }
-                                }
-                            }
-                            container.setText("textCost", textCost);
-                            result ? container.setSlot("slotResult", result, 1, 0) : container.clearSlot("slotResult");
-                            elements2.get("textTitle").onBindingUpdated("text", textTitle || "Part Builder");
-                            elements2.get("textStats").onBindingUpdated("text", textStats || tutorial);
-                            Thread.sleep(100);
-                        }
-                        container.clearSlot("slotResult");
-                    }
-                    catch (e) {
-                        alert("PartBuilderError: " + e);
-                    }
-                });
-            },
-            onClose: function (win) {
-                var container = win.getContainer();
-                var tile = container.getParent();
-                container.clearSlot("slotResult");
-                tile.setAnimItem();
-            }
-        });
-        return window;
-    })();
-    return PartBuilder;
-}(TableBase));
-TileEntity.registerPrototype(BlockID.tcon_partbuilder, new PartBuilder());
 var RepairHandler = /** @class */ (function () {
     function RepairHandler() {
     }
@@ -3578,7 +2785,7 @@ var ToolForgeHandler = /** @class */ (function () {
         this.variation.forEach(function (v, i) {
             Recipes2.addShaped({ id: id, data: i }, "aaa:bcb:b_b", { a: BlockID.tcon_stone, b: v.block, c: BlockID.tcon_toolstation });
         });
-        TileEntity.registerPrototype(id, new ToolForge());
+        //TileEntity.registerPrototype(id, new ToolForge());
     };
     ToolForgeHandler.addContents = function (info) {
         var centerX = 160;
@@ -3618,11 +2825,11 @@ var ToolForgeHandler = /** @class */ (function () {
             slot = this.content.elements["slot" + i];
             slot.x = info.slots[i].x;
             slot.y = info.slots[i].y;
-            slot.bitmap = info.slots[i].bitmap;
+            //slot.bitmap = info.slots[i].bitmap;
         }
         tile.container.setText("textTitle", info.title);
         tile.container.setText("textStats", info.intro);
-        this.content.elements.background.bitmap = info.background;
+        //this.content.elements.background.bitmap = info.background;
     };
     ToolForgeHandler.showInfo = function (item) {
         var container = this.window.getContainer();
@@ -3665,21 +2872,22 @@ var ToolForgeHandler = /** @class */ (function () {
                 slot5: { type: "slot", x: 0, y: 0, z: 1, size: 80 },
                 slotResult: { type: "slot", x: 420, y: 190, size: 120, visual: true, clicker: {
                         onClick: function (container, tile) {
-                            if (container.getSlot("slotResult").id !== 0) {
-                                try {
-                                    var index = -1;
-                                    for (var i = 0; i < 36; i++) {
-                                        if (Player.getInventorySlot(i).id === 0) {
+                            /*
+                            if(container.getSlot("slotResult").id !== 0){
+                                try{
+                                    let index = -1;
+                                    for(let i = 0; i < 36; i++){
+                                        if(Player.getInventorySlot(i).id === 0){
                                             index = i;
                                             break;
                                         }
                                     }
-                                    if (index === -1) {
+                                    if(index === -1){
                                         alert("no space");
                                         return;
                                     }
-                                    var slot = void 0;
-                                    for (var i = 0; i < 6; i++) {
+                                    let slot: UI.Slot;
+                                    for(let i = 0; i < 6; i++){
                                         slot = container.getSlot("slot" + i);
                                         slot.count -= ToolForgeHandler.consume[i] || 0;
                                         container.validateSlot("slot" + i);
@@ -3690,10 +2898,11 @@ var ToolForgeHandler = /** @class */ (function () {
                                         SoundManager.playSound("saw.ogg", 0.5) :
                                         World.playSoundAtEntity(player, "random.anvil_use", 0.9, 0.95 + 0.2 * Math.random());
                                 }
-                                catch (e) {
+                                catch(e){
                                     alert("craftError: " + e);
                                 }
                             }
+                            */
                         }
                     } },
                 buttonPrev: { type: "button", x: 50, y: 452, bitmap: "_button_prev_48x24", bitmap2: "_button_prev_48x24p", scale: 2, clicker: {
@@ -3742,7 +2951,7 @@ var ToolForgeHandler = /** @class */ (function () {
                 ToolForgeHandler.turnPage(0);
                 Threading.initThread("tcon_crafting", function () {
                     try {
-                        var _loop_2 = function () {
+                        var _loop_1 = function () {
                             var consume = [];
                             var slotTool = container.getSlot("slot0");
                             if (TinkersToolHandler.isTool(slotTool.id) && slotTool.extra) {
@@ -3773,7 +2982,7 @@ var ToolForgeHandler = /** @class */ (function () {
                                 var toolData_1 = new ToolData(slotTool);
                                 var modifiers = TinkersModifierHandler.decodeToArray(slotTool.extra.getString("modifiers"));
                                 var find3 = void 0;
-                                var _loop_3 = function (key) {
+                                var _loop_2 = function (key) {
                                     find3 = modifiers.find(function (mod) { return mod.type === key; });
                                     if (find3 && find3.level < Modifier[key].max) {
                                         addMod_1[key] = Math.min(addMod_1[key], Modifier[key].max - find3.level);
@@ -3789,7 +2998,7 @@ var ToolForgeHandler = /** @class */ (function () {
                                     }
                                 };
                                 for (var key in addMod_1) {
-                                    _loop_3(key);
+                                    _loop_2(key);
                                 }
                                 var mat_1 = toolData_1.toolData.getRepairParts().map(function (index) { return Material[toolData_1.materials[index]].getItem(); });
                                 var space = slotTool.extra.getInt("durability");
@@ -3797,7 +3006,7 @@ var ToolForgeHandler = /** @class */ (function () {
                                 var value = 0;
                                 find = null;
                                 count = 0;
-                                var _loop_4 = function (i) {
+                                var _loop_3 = function (i) {
                                     find = items_1.find(function (item) { return item.id === mat_1[i]; });
                                     if (find) {
                                         value = RepairHandler.calcRepairAmount(find.id);
@@ -3812,16 +3021,16 @@ var ToolForgeHandler = /** @class */ (function () {
                                     }
                                 };
                                 for (var i = 0; i < mat_1.length; i++) {
-                                    var state_1 = _loop_4(i);
+                                    var state_1 = _loop_3(i);
                                     if (state_1 === "break")
                                         break;
                                 }
                                 items_1.length = 0;
-                                var _loop_5 = function (key) {
+                                var _loop_4 = function (key) {
                                     items_1.push.apply(items_1, Modifier[key].getRecipe().map(function (item) { return ({ id: item.id, count: addMod_1[key], data: item.data }); }));
                                 };
                                 for (var key in addMod_1) {
-                                    _loop_5(key);
+                                    _loop_4(key);
                                 }
                                 count > 0 && items_1.push({ id: find.id, count: count, data: 0 });
                                 if (items_1.length > 0) {
@@ -3901,7 +3110,7 @@ var ToolForgeHandler = /** @class */ (function () {
                             Thread.sleep(100);
                         };
                         while (win.isOpened()) {
-                            _loop_2();
+                            _loop_1();
                         }
                     }
                     catch (e) {
@@ -3943,36 +3152,6 @@ Callback.addCallback("PreLoaded", function () {
     ToolForgeHandler.addVariation("tcon_block_alubrass", BlockID.blockAlubrass);
     ToolForgeHandler.createForge();
 });
-createBlock("tcon_toolstation", [{ name: "Tool Station" }], "wood");
-Recipes2.addShaped(BlockID.tcon_toolstation, "a:b", { a: ItemID.tcon_pattern_blank, b: "crafting_table" });
-BlockModel.register(BlockID.tcon_toolstation, function (model, index) {
-    model.addBox(0 / 16, 12 / 16, 0 / 16, 16 / 16, 16 / 16, 16 / 16, [["tcon_toolstation", 0], ["tcon_toolstation", 0], ["tcon_table_side", 0]]);
-    model.addBox(0 / 16, 0 / 16, 0 / 16, 4 / 16, 12 / 16, 4 / 16, "tcon_table_side", 0);
-    model.addBox(12 / 16, 0 / 16, 0 / 16, 16 / 16, 12 / 16, 4 / 16, "tcon_table_side", 0);
-    model.addBox(12 / 16, 0 / 16, 12 / 16, 16 / 16, 12 / 16, 16 / 16, "tcon_table_side", 0);
-    model.addBox(0 / 16, 0 / 16, 12 / 16, 4 / 16, 12 / 16, 16 / 16, "tcon_table_side", 0);
-    return model;
-}, 1);
-var ToolForge = /** @class */ (function (_super) {
-    __extends(ToolForge, _super);
-    function ToolForge() {
-        var _this = _super.call(this, 6, 0.46875) || this;
-        _this.defaultValues = {
-            meta: 0,
-            page: 0
-        };
-        return _this;
-    }
-    ToolForge.prototype.getGuiScreen = function () {
-        return ToolForgeHandler.getWindow();
-    };
-    ToolForge.prototype.setAnimItem = function () {
-        var info = ToolForgeHandler.getInfo(this.data.page);
-        this.displayItem(info.coords);
-    };
-    return ToolForge;
-}(TableBase));
-TileEntity.registerPrototype(BlockID.tcon_toolstation, new ToolForge());
 var Modifier = {
     haste: new ModHaste(),
     luck: new ModLuck(),
@@ -4273,31 +3452,35 @@ var TinkersTool3x3 = /** @class */ (function (_super) {
     };
     return TinkersTool3x3;
 }(TinkersTool));
-Callback.addCallback("LevelLoaded", function () {
+/*
+Callback.addCallback("LevelLoaded", () => {
     Updatable.addUpdatable({
-        update: function () {
-            if (World.getThreadTime() % 150 === 0) {
-                var item = Player.getCarriedItem();
-                var toolData = ToolAPI.getToolData(item.id);
+        update: () => {
+            if(World.getThreadTime() % 150 === 0){
+                const item = Player.getCarriedItem();
+                const toolData = ToolAPI.getToolData(item.id);
                 toolData && toolData.onMending && toolData.onMending(item);
             }
         }
     });
 });
-Callback.addCallback("EntityHurt", function (attacker, victim, damageValue, damageType) {
-    if (attacker === player) {
-        var item = Player.getCarriedItem();
-        var toolData = ToolAPI.getToolData(item.id);
+
+Callback.addCallback("EntityHurt", (attacker: number, victim: number, damageValue: number, damageType: number) => {
+    if(attacker === player){
+        const item = Player.getCarriedItem();
+        const toolData = ToolAPI.getToolData(item.id);
         toolData && toolData.onDealDamage && toolData.onDealDamage(item, victim, damageValue, damageType);
     }
 });
-Callback.addCallback("EntityDeath", function (entity, attacker, damageType) {
-    if (attacker === player) {
-        var item = Player.getCarriedItem();
-        var toolData = ToolAPI.getToolData(item.id);
+
+Callback.addCallback("EntityDeath", (entity: number, attacker: number, damageType: number) => {
+    if(attacker === player){
+        const item = Player.getCarriedItem();
+        const toolData = ToolAPI.getToolData(item.id);
         toolData && toolData.onKillEntity && toolData.onKillEntity(item, entity, damageType);
     }
 });
+*/
 /*
 let posX = 0;
 let posY = 0.1;
@@ -4442,7 +3625,7 @@ var TinkersShovel = /** @class */ (function (_super) {
     TinkersShovel.prototype.useItem = function (coords, item, block) {
         if (item.extra && block.id == VanillaBlockID.grass && coords.side == 1) {
             var toolData = new ToolData(item);
-            World.setBlock(coords.x, coords.y, coords.z, VanillaBlockID.grass_path);
+            World.setBlock(coords.x, coords.y, coords.z, VanillaBlockID.grass_path, 0);
             World.playSound(coords.x + 0.5, coords.y + 1, coords.z + 0.5, "step.grass", 1, 0.8);
             toolData.consumeDurability(1);
             toolData.addXp(1);
@@ -4576,7 +3759,7 @@ var TinkersMattock = /** @class */ (function (_super) {
     TinkersMattock.prototype.useItem = function (coords, item, block) {
         if (item.extra && (block.id == VanillaBlockID.grass || block.id == VanillaBlockID.dirt) && coords.side == 1) {
             var toolData = new ToolData(item);
-            World.setBlock(coords.x, coords.y, coords.z, VanillaBlockID.farmland);
+            World.setBlock(coords.x, coords.y, coords.z, VanillaBlockID.farmland, 0);
             World.playSound(coords.x + 0.5, coords.y + 1, coords.z + 0.5, "step.gravel", 1, 0.8);
             toolData.consumeDurability(1);
             toolData.addXp(1);

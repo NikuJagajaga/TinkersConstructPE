@@ -9,11 +9,11 @@ class ToolTexture {
     getPath(): string {
         return this.path;
     }
-
+/*
     getBitmap(partNum: number, index: number): android.graphics.Bitmap {
         return Bitmap.createBitmap(this.bitmap, (index & 15) << 4, (index >> 4) + (partNum << 1) << 4, 16, 16);//null, true
     }
-
+*/
     getCoords(partNum: number, index: number): {x: number, y: number} {
         return {
             x: ((index & 15) << 4) / 256,

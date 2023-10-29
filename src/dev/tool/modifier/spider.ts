@@ -1,10 +1,10 @@
 class ModSpider extends TinkersModifier {
 
     private static readonly targets = {
-        [Native.EntityType.SPIDER]: true,
-        [Native.EntityType.CAVE_SPIDER]: true,
-        [Native.EntityType.SILVERFISH]: true,
-        [Native.EntityType.ENDERMITE]: true
+        [EEntityType.SPIDER]: true,
+        [EEntityType.CAVE_SPIDER]: true,
+        [EEntityType.SILVERFISH]: true,
+        [EEntityType.ENDERMITE]: true
     };
 
     constructor(){

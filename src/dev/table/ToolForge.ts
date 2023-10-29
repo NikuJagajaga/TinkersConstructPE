@@ -87,7 +87,7 @@ class ToolForgeHandler {
         this.variation.forEach((v, i) => {
             Recipes2.addShaped({id: id, data: i}, "aaa:bcb:b_b", {a: BlockID.tcon_stone, b: v.block, c: BlockID.tcon_toolstation});
         });
-        TileEntity.registerPrototype(id, new ToolForge());
+        //TileEntity.registerPrototype(id, new ToolForge());
     }
 
     static addContents(info: ForgeInfo): void {
@@ -138,6 +138,7 @@ class ToolForgeHandler {
                 slot5: {type: "slot", x: 0, y: 0, z: 1, size: 80},
                 slotResult: {type: "slot", x: 420, y: 190, size: 120, visual: true, clicker: {
                     onClick: (container, tile) => {
+                        /*
                         if(container.getSlot("slotResult").id !== 0){
                             try{
                                 let index = -1;
@@ -167,6 +168,7 @@ class ToolForgeHandler {
                                 alert("craftError: " + e);
                             }
                         }
+                        */
                     }
                 }},
                 buttonPrev: {type: "button", x: 50, y: 452, bitmap: "_button_prev_48x24", bitmap2: "_button_prev_48x24p", scale: 2, clicker: {
@@ -424,11 +426,11 @@ class ToolForgeHandler {
             slot = this.content.elements["slot" + i];
             slot.x = info.slots[i].x;
             slot.y = info.slots[i].y;
-            slot.bitmap = info.slots[i].bitmap;
+            //slot.bitmap = info.slots[i].bitmap;
         }
         tile.container.setText("textTitle", info.title);
         tile.container.setText("textStats", info.intro);
-        this.content.elements.background.bitmap = info.background;
+        //this.content.elements.background.bitmap = info.background;
     }
 
     private static showInfo(item: ItemInstance): void {
@@ -479,41 +481,3 @@ Callback.addCallback("PreLoaded", () => {
     ToolForgeHandler.addVariation("tcon_block_alubrass", BlockID.blockAlubrass);
     ToolForgeHandler.createForge();
 });
-
-
-createBlock("tcon_toolstation", [{name: "Tool Station"}], "wood");
-Recipes2.addShaped(BlockID.tcon_toolstation, "a:b", {a: ItemID.tcon_pattern_blank, b: "crafting_table"});
-BlockModel.register(BlockID.tcon_toolstation, (model, index) => {
-    model.addBox( 0/16, 12/16,  0/16,  16/16, 16/16, 16/16, [["tcon_toolstation", 0], ["tcon_toolstation", 0], ["tcon_table_side", 0]]);
-    model.addBox( 0/16,  0/16,  0/16,   4/16, 12/16,  4/16, "tcon_table_side", 0);
-    model.addBox(12/16,  0/16,  0/16,  16/16, 12/16,  4/16, "tcon_table_side", 0);
-    model.addBox(12/16,  0/16, 12/16,  16/16, 12/16, 16/16, "tcon_table_side", 0);
-    model.addBox( 0/16,  0/16, 12/16,   4/16, 12/16, 16/16, "tcon_table_side", 0);
-    return model;
-}, 1);
-
-
-class ToolForge extends TableBase {
-
-    constructor(){
-        super(6, 0.46875);
-    }
-
-    defaultValues = {
-        meta: 0,
-        page: 0
-    }
-
-    getGuiScreen(): UI.StandardWindow {
-        return ToolForgeHandler.getWindow();
-    }
-
-    setAnimItem(): void {
-        const info = ToolForgeHandler.getInfo(this.data.page);
-        this.displayItem(info.coords);
-    }
-
-}
-
-
-TileEntity.registerPrototype(BlockID.tcon_toolstation, new ToolForge());

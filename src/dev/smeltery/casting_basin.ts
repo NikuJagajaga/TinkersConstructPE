@@ -21,43 +21,69 @@ BlockModel.register(BlockID.tcon_blockcast, model => {
 
 class CastingBasin extends CastingTable {
 
-    init(): void {
-        this.animInput = createAnimItem(this.x + 0.5, this.y + 10/16, this.z + 0.5);
-        this.animOutput = createAnimItem(this.x + 0.5, this.y + 10/16, this.z + 0.5);
-        this.setAnimItem();
-        this.setLiquidLimit();
-        MoltenLiquid.initAnim(this, 0.5, 5/16, 0.5, 12/16, 11/16, 12/16, true);
+    @ClientSide
+    override setupAnimPosScale(): void {
+        this.animPos = {x: 0.5, y: 5/16, z: 0.5};
+        this.animScale = {x: 12/16, y: 11/16, z: 12/16};
     }
 
-    setAnimItem(): void {
-        const input = this.container.getSlot("slotInput");
-        const output = this.container.getSlot("slotOutput");
-        this.animInput.describeItem(input.id === 0 ? {id: 0, count: 0, data: 0} : {id: input.id, count: 1, data: input.data, size: 12/16 - 0.01});
-        this.animOutput.describeItem(output.id === 0 ? {id: 0, count: 0, data: 0} : {id: output.id, count: 1, data: output.data, size: 12/16 - 0.01});
+    @ClientSide
+    override setupAnimItem(): void {
+
+        this.animInput = new Animation.Item(this.x + 0.5, this.y + 10/16, this.z + 0.5);
+        this.animInput.load();
+        this.animInput.setSkylightMode();
+
+        this.animOutput = new Animation.Item(this.x + 0.5, this.y + 10/16, this.z + 0.5);
+        this.animOutput.load();
+        this.animOutput.setSkylightMode();
+
+        this.updateAnimItem();
+        this.networkData.addOnDataChangedListener((data: SyncedNetworkData, isExternal: boolean) => {
+            this.updateAnimItem();
+        });
+        
     }
 
-    setLiquidLimit(): void {
+    @ClientSide
+    override updateAnimItem(): void {
+        const inputId = this.networkData.getInt("inputId");
+        const inputData = this.networkData.getInt("inputData");
+        const outputId = this.networkData.getInt("outputId");
+        const outputData = this.networkData.getInt("outputData");
+        const empty = {id: 0, count: 0, data: 0};
+        this.animInput?.describeItem(inputId === 0 ? empty : {id: Network.serverToLocalId(inputId), count: 1, data: inputData, size: 12/16 - 0.01});
+        this.animOutput?.describeItem(outputId === 0 ? empty : {id: Network.serverToLocalId(outputId), count: 1, data: outputData, size: 12/16 - 0.01});
+    }
+
+    override updateLiquidLimits(): void {
         this.liquidStorage.liquidLimits = CastingRecipe.getBasinLimits(this.container.getSlot("slotInput").id);
     }
 
-    isValidCast(id: number): boolean {
+    override isValidCast(id: number): boolean {
         return isBlockID(id);
     }
 
-    getRecipe(stored: string): ICastingRecipe {
+    override getRecipe(stored: string): ICastingRecipe {
         return CastingRecipe.getBasinRecipe(this.container.getSlot("slotInput").id, stored);
     }
 
 }
 
 
-class CastingBasinInterface extends CastingTableInterface {
-    canReceiveLiquid(liquid: string, side: number): boolean {
-        const stored = this.liquidStorage.getLiquidStored();
-        return (!stored || stored === liquid) && CastingRecipe.isValidLiquidForBasin(this.container.getSlot("slotInput").id, liquid);
-    }
-}
-
-
 TileEntity.registerPrototype(BlockID.tcon_blockcast, new CastingBasin());
-StorageInterface.createInterface(BlockID.tcon_blockcast, new CastingBasinInterface());
+
+StorageInterface.createInterface(BlockID.tcon_blockcast, {
+
+    liquidUnitRatio: 0.001,
+
+    slots: {
+        slotOutput: {output: true}
+    },
+
+    canReceiveLiquid(liquid: string, side: number): boolean {
+        const stored = this.tileEntity.liquidStorage.getLiquidStored();
+        return (!stored || stored === liquid) && CastingRecipe.isValidLiquidForBasin(this.tileEntity.container.getSlot("slotInput").id, liquid);
+    }
+
+});

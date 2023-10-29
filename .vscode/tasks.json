@@ -2,15 +2,6 @@
 	"version": "2.0.0",
 	"tasks": [
         {
-            "label": "Compile Pre",
-            "type": "typescript",
-            "tsconfig": "src/pre/tsconfig.json",
-            "problemMatcher": [
-                "$tsc"
-            ],
-            "group": "build"
-        },
-        {
             "label": "Compile Dev",
             "type": "typescript",
             "tsconfig": "src/dev/tsconfig.json",
@@ -27,39 +18,11 @@
             "problemMatcher": []
         },
         {
-            "label": "Push Libs",
-            "type": "shell",
-            "command": "adb push '${workspaceFolder}/src/lib/.' '/storage/emulated/0/games/horizon/packs/Inner_Core_Test/innercore/mods/${workspaceFolderBasename}/lib/.'",
-            "group": "build",
-            "problemMatcher": []
-        },
-        {
-            "label": "Push Pre Code",
-            "type": "shell",
-            "command": "adb push '${workspaceFolder}/src/preloader.js' '/storage/emulated/0/games/horizon/packs/Inner_Core_Test/innercore/mods/${workspaceFolderBasename}/preloader.js'",
-            "group": "build",
-            "problemMatcher": []
-        },
-        {
             "label": "Push Code",
             "type": "shell",
             "command": "adb push '${workspaceFolder}/src/main.js' '/storage/emulated/0/games/horizon/packs/Inner_Core/innercore/mods/${workspaceFolderBasename}/main.js'",
             "group": "build",
             "problemMatcher": []
-        },
-        {
-            "label": "Build And Push All",
-            "dependsOn": [
-                "Compile",
-                "Push All"
-            ]
-        },
-        {
-            "label": "Build And Push Code",
-            "dependsOn": [
-                "Compile",
-                "Push Code"
-            ]
         }
     ]
 }

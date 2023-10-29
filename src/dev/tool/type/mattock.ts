@@ -34,7 +34,7 @@ class TinkersMattock extends TinkersTool {
     useItem(coords: Callback.ItemUseCoordinates, item: ItemInstance, block: Tile): void {
         if(item.extra && (block.id == VanillaBlockID.grass || block.id == VanillaBlockID.dirt) && coords.side == 1){ 
             const toolData = new ToolData(item);
-            World.setBlock(coords.x, coords.y, coords.z, VanillaBlockID.farmland);
+            World.setBlock(coords.x, coords.y, coords.z, VanillaBlockID.farmland, 0);
             World.playSound(coords.x + 0.5, coords.y + 1, coords.z + 0.5, "step.gravel", 1, 0.8);
             toolData.consumeDurability(1);
             toolData.addXp(1);

@@ -15,39 +15,76 @@ BlockModel.register(BlockID.tcon_itemcast, model => {
 });
 
 
-class CastingTable extends TileBase {
+class CastingTable extends TileWithLiquidModel {
 
-    render: any;
-    anim: any;
-    animInput: any;
-    animOutput: any;
+    animInput: Animation.Item;
+    animOutput: Animation.Item;
 
-    defaultValues = {
+    override defaultValues = {
         progress: 0
     };
 
-    init(): void {
-        this.animInput = createAnimItem(this.x + 9/16, this.y + 31/32, this.z + 9/16);
-        this.animOutput = createAnimItem(this.x + 9/16, this.y + 31/32, this.z + 9/16);
-        this.setAnimItem();
-        this.setLiquidLimit();
-        MoltenLiquid.initAnim(this, 0.5, 15/16, 0.5, 14/16, 1/16, 14/16, true);
+    override putDefaultNetworkData(): void {
+        this.networkData.putInt("inputId", 0);
+        this.networkData.putInt("inputData", 0);
+        this.networkData.putInt("outputId", 0);
+        this.networkData.putInt("outputData", 0);
     }
 
-    destroy(): void {
-        this.anim && this.anim.destroy();
-        this.animInput && this.animInput.destroy();
-        this.animOutput && this.animOutput.destroy();
+    override clientLoad(): void {
+        this.setupAnimPosScale();
+        super.clientLoad();
+        this.setupAnimItem();
     }
 
-    setAnimItem(): void {
-        const input = this.container.getSlot("slotInput");
-        const output = this.container.getSlot("slotOutput");
-        this.animInput.describeItem(input.id === 0 ? {id: 0, count: 0, data: 0} : {id: input.id, count: 1, data: input.data, size: 14/16, rotation: [Math.PI/2, 0, 0]});
-        this.animOutput.describeItem(output.id === 0 ? {id: 0, count: 0, data: 0} : {id: output.id, count: 1, data: output.data, size: 14/16, rotation: [Math.PI/2, 0, 0]});
+    @ClientSide
+    setupAnimPosScale(): void {
+        this.animPos = {x: 0.5, y: 15/16, z: 0.5};
+        this.animScale = {x: 14/16, y: 1/16, z: 14/16};
     }
 
-    setLiquidLimit(): void {
+    @ClientSide
+    setupAnimItem(): void {
+
+        this.animInput = new Animation.Item(this.x + 9/16, this.y + 31/32, this.z + 9/16);
+        this.animInput.load();
+        this.animInput.setSkylightMode();
+
+        this.animOutput = new Animation.Item(this.x + 9/16, this.y + 31/32, this.z + 9/16);
+        this.animOutput.load();
+        this.animOutput.setSkylightMode();
+
+        this.updateAnimItem();
+        this.networkData.addOnDataChangedListener((data: SyncedNetworkData, isExternal: boolean) => {
+            this.updateAnimItem();
+        });
+
+    }
+
+    override clientUnload(): void {
+        super.clientUnload();
+        this.animInput?.destroy();
+        this.animOutput?.destroy();
+    }
+
+    override setupContainer(): void {
+        this.updateLiquidLimits();
+    }
+
+    @ClientSide
+    updateAnimItem(): void {
+        const inputId = this.networkData.getInt("inputId");
+        const inputData = this.networkData.getInt("inputData");
+        const outputId = this.networkData.getInt("outputId");
+        const outputData = this.networkData.getInt("outputData");
+        //const input = this.container.getSlot("slotInput");
+        //const output = this.container.getSlot("slotOutput");
+        const empty = {id: 0, count: 0, data: 0};
+        this.animInput?.describeItem(inputId === 0 ? empty : {id: Network.serverToLocalId(inputId), count: 1, data: inputData, size: 14/16, rotation: [Math.PI/2, 0, 0]});
+        this.animOutput?.describeItem(outputId === 0 ? empty : {id: Network.serverToLocalId(outputId), count: 1, data: outputData, size: 14/16, rotation: [Math.PI/2, 0, 0]});
+    }
+
+    updateLiquidLimits(): void {
         this.liquidStorage.liquidLimits = CastingRecipe.getTableLimits(this.container.getSlot("slotInput").id);
     }
 
@@ -55,53 +92,58 @@ class CastingTable extends TileBase {
         return isItemID(id);
     }
 
-    click(id: number, count: number, data: number): boolean {
-        if(this.liquidStorage.getLiquidStored()){
-            return false;
-        }
-        label: {
-            if(this.container.getSlot("slotOutput").id !== 0){
-                this.container.dropSlot("slotOutput", this.x + 0.5, this.y + 1, this.z + 0.5);
-                break label;
-            }
-            if(this.container.getSlot("slotInput").id !== 0){
-                this.container.dropSlot("slotInput", this.x + 0.5, this.y + 1, this.z + 0.5);
-                break label;
-            }
-            if(this.isValidCast(id) && !Player.getCarriedItem().extra){
-                this.container.setSlot("slotInput", id, 1, data);
-                Player.decreaseCarriedItem();
-                break label;
-            }
-            return false;
-        }
-        //this.setAnimItem();
-        this.setLiquidLimit();
-        return true;
-    }
-
-    spawnParticle(id: number): void {
-        for(let i = 0; i < 4; i++){
-            Particles.addParticle(id, this.x + Math.random(), this.y + 1, this.z + Math.random(), 0, 0, 0);
-        }
-    }
-
     getRecipe(stored: string): ICastingRecipe {
         return CastingRecipe.getTableRecipe(this.container.getSlot("slotInput").id, stored);
     }
 
-    tick(): void {
+    override onItemUse(coords: Callback.ItemUseCoordinates, item: ItemStack, playerUid: number): boolean {
+
+        if(this.liquidStorage.getLiquidStored()){
+            return false;
+        }
+
+        label: {
+            if(this.container.getSlot("slotOutput").id !== 0){
+                this.container.dropSlot(this.blockSource, "slotOutput", this.x + 0.5, this.y + 1, this.z + 0.5);
+                break label;
+            }
+            if(this.container.getSlot("slotInput").id !== 0){
+                this.container.dropSlot(this.blockSource, "slotInput", this.x + 0.5, this.y + 1, this.z + 0.5);
+                break label;
+            }
+            if(this.isValidCast(item.id) && !item.extra){
+                this.container.setSlot("slotInput", item.id, 1, item.data);
+                const player = new PlayerEntity(playerUid);
+                player.decreaseCarriedItem();
+                break label;
+            }
+            return false;
+        }
+
+        //this.setAnimItem();
+        this.updateLiquidLimits();
+        return true;
+
+    }
+
+    override onTick(): void {
+
+        super.onTick();
+
         const stored = this.liquidStorage.getLiquidStored();
+
         if(stored && this.liquidStorage.isFull(stored)){
             if(++this.data.progress < CastingRecipe.calcCooldownTime(stored, this.liquidStorage.getAmount(stored))){
-                (World.getThreadTime() & 15) === 0 && this.spawnParticle(Native.ParticleType.smoke);
+                if((World.getThreadTime() & 15) === 0){
+                    this.sendPacket("spawnParticle", {});
+                }
             }
             else{
                 const result = this.getRecipe(stored);
                 if(result){
                     this.container.setSlot("slotOutput", result.id, 1, result.data);
                     result.consume && this.container.clearSlot("slotInput");
-                    this.spawnParticle(Native.ParticleType.flame);
+                    this.sendPacket("spawnParticle", {});
                 }
                 this.data.progress = 0;
                 this.liquidStorage.setAmount(stored, 0);
@@ -110,26 +152,47 @@ class CastingTable extends TileBase {
                 }
             }
         }
-        this.setAnimItem();
+
         StorageInterface.checkHoppers(this);
+        this.updateAnimItem();
+        this.container.sendChanges();
+
+        const slotInput = this.container.getSlot("slotInput");
+        const slotOutput = this.container.getSlot("slotOutput");
+
+        this.networkData.putInt("inputId", slotInput.id);
+        this.networkData.putInt("inputData", slotInput.data);
+        this.networkData.putInt("outputId", slotOutput.id);
+        this.networkData.putInt("outputData", slotOutput.data);
+        this.networkData.sendChanges();
+        
+    }
+
+    @NetworkEvent(Side.Client)
+    spawnParticle(data: {}): void {
+        for(let i = 0; i < 4; i++){
+            Particles.addParticle(EParticleType.SMOKE, this.x + Math.random(), this.y + 1, this.z + Math.random(), 0, 0, 0);
+        }
     }
 
 }
 
 
-class CastingTableInterface extends FluidTileInterface {
-
-    slots = {
-        slotOutput: {output: true}
-    };
-
-    canReceiveLiquid(liquid: string, side: number): boolean {
-        const stored = this.liquidStorage.getLiquidStored();
-        return (!stored || stored === liquid) && CastingRecipe.isValidLiquidForTable(this.container.getSlot("slotInput").id, liquid);
-    }
-
-}
 
 
 TileEntity.registerPrototype(BlockID.tcon_itemcast, new CastingTable());
-StorageInterface.createInterface(BlockID.tcon_itemcast, new CastingTableInterface());
+
+StorageInterface.createInterface(BlockID.tcon_itemcast, {
+
+    liquidUnitRatio: 0.001,
+
+    slots: {
+        slotOutput: {output: true}
+    },
+
+    canReceiveLiquid(liquid: string, side: number): boolean {
+        const stored = this.tileEntity.liquidStorage.getLiquidStored();
+        return (!stored || stored === liquid) && CastingRecipe.isValidLiquidForTable(this.tileEntity.container.getSlot("slotInput").id, liquid);
+    }
+
+});

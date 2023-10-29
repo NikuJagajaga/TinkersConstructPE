@@ -17,121 +17,126 @@ BlockModel.register(BlockID.tcon_tank, (model, index) => {
 
 
 Block.registerDropFunction("tcon_tank", () => []);
-Item.registerNameOverrideFunction(BlockID.tcon_tank, (item, name) => item.extra ? name + "\n§7" + LiquidRegistry.getLiquidName(item.extra.getString("stored")) + ": " + (item.extra.getInt("amount")) + " mB" : name);
 
-
-Block.registerPlaceFunction(BlockID.tcon_tank, (coords, item, block) => {
-    const c = World.canTileBeReplaced(block.id, block.data) ? coords : coords.relative;
-    World.setBlock(c.x, c.y, c.z, item.id, item.data);
-    const tile = World.addTileEntity(c.x, c.y, c.z);
-    item.extra && tile.liquidStorage.addLiquid(item.extra.getString("stored"), item.extra.getInt("amount"));
+Item.registerNameOverrideFunction(BlockID.tcon_tank, (item, name) => {
+    if(item.extra){
+        const liquid = LiquidRegistry.getLiquidName(item.extra.getString("stored"));
+        const amount = item.extra.getInt("amount");
+        return name + "\n§7" + liquid + ": " + amount + " mB";
+    }
+    return name;
 });
 
 
-class SearedTank extends TileBase {
+Block.registerPlaceFunction(BlockID.tcon_tank, (coords, item, block, player, blockSource) => {
+    const region = new WorldRegion(blockSource);
+    const place = BlockRegistry.getPlacePosition(coords, block, blockSource);
+    region.setBlock(place, item.id, item.data);
+    const tile = region.addTileEntity(place);
+    if(item.extra){
+        tile.liquidStorage.setAmount(item.extra.getString("stored"), item.extra.getInt("amount"));
+    }
+});
 
-    render: any;
-    anim: any;
 
-    init(): void {
+class SearedTank extends TileWithLiquidModel {
+
+    @ClientSide animPos: Vector;
+    @ClientSide animScale: Vector;
+
+    override clientLoad(): void {
+        this.animPos = {x: 0.5, y: 0, z: 0.5};
+        this.animScale = {x: 31/32, y: 31/32, z: 31/32};
+        super.clientLoad();
+    }
+
+    override setupContainer(): void {
         this.liquidStorage.setLimit(null, 4000);
-        MoltenLiquid.initAnim(this, 0.5, 0, 0.5, 31/32, 31/32, 31/32, true);
     }
 
-    destroy(): void {
-        this.anim && this.anim.destroy();
-    }
+    override onItemUse(coords: Callback.ItemUseCoordinates, item: ItemStack, playerUid: number): boolean {
 
-    click(id: number, count: number, data: number): boolean {
+        if(Entity.getSneaking(playerUid)) return true;
+
+        const player = new PlayerEntity(playerUid);
         const stored = this.liquidStorage.getLiquidStored();
-        const amount = this.liquidStorage.getAmount(stored);
-        const liquid = LiquidRegistry.getItemLiquid(id, data);
-        if(MoltenLiquid.isExist(liquid)){
-            if(!stored || stored === liquid && amount + 1000 <= this.liquidStorage.getLimit(stored)){
-                const empty = LiquidRegistry.getEmptyItem(id, data);
-                this.liquidStorage.addLiquid(liquid, 1000);
-                Player.decreaseCarriedItem();
-                Player.addItemToInventory(empty.id, 1, empty.data);
+        const empty = LiquidItemRegistry.getEmptyItem(item.id, item.data);
+
+        if(empty){
+            if(!this.liquidStorage.isFull() && (stored === empty.liquid || !stored)){
+                if(this.liquidStorage.getLimit(stored) - this.liquidStorage.getAmount(stored) >= empty.amount){
+                    this.liquidStorage.addLiquid(empty.liquid, empty.amount);
+                    item.count--;
+                    player.setCarriedItem(item);
+                    player.addItemToInventory(empty.id, 1, empty.data);
+                    this.preventClick();
+                    return true;
+                }
+                if(item.count === 1 && empty.storage){
+                    item.data += this.liquidStorage.addLiquid(empty.liquid, empty.amount);
+                    player.setCarriedItem(item);
+                    this.preventClick();
+                    return true;
+                }
             }
-            return true;
         }
-        const full = LiquidRegistry.getFullItem(id, data, stored);
-        if(full && amount >= 1000){
-            this.liquidStorage.getLiquid(stored, 1000);
-            Player.decreaseCarriedItem();
-            Player.addItemToInventory(full.id, 1, full.data);
-            return true;
+
+        if(stored){
+            const full = LiquidItemRegistry.getFullItem(item.id, item.data, stored);
+            if(full){
+                const amount = this.liquidStorage.getAmount(stored);
+                if(full.amount <= amount){
+                    this.liquidStorage.getLiquid(stored, full.amount);
+                    if(item.count === 1){
+                        player.setCarriedItem(full.id, 1, full.data);
+                    }
+                    else{
+                        item.count--;
+                        player.setCarriedItem(item);
+                        player.addItemToInventory(full.id, 1, full.data);
+                    }
+                    this.preventClick();
+                    return true;
+                }
+                if(item.count === 1 && full.storage){
+                    player.setCarriedItem(full.id, 1, full.amount - this.liquidStorage.getLiquid(stored, full.amount));
+                    this.preventClick();
+                    return true;
+                }
+            }
         }
+
         return false;
+
     }
 
-    consumeFuel(): {duration: number, temp: number} {
-        const liquid = this.liquidStorage.getLiquidStored();
-        const amount = this.liquidStorage.getAmount(liquid);
-        const fuelData = SmelteryFuel.getFuel(liquid);
-        if(fuelData && amount >= fuelData.amount){
-            this.liquidStorage.getLiquid(liquid, fuelData.amount);
-            return {duration: fuelData.duration, temp: fuelData.temp};
-        }
-        return null;
-    }
-
-    destroyBlock(): void {
-        
-        const liquid = this.liquidStorage.getLiquidStored();
-        let extra: ItemExtraData;
-        if(liquid){
-            extra = new ItemExtraData();
-            extra.putString("stored", liquid);
-            extra.putInt("amount", this.liquidStorage.getAmount(liquid));
-        }
-        World.drop(this.x + 0.5, this.y, this.z + 0.5, this.blockID, 1, World.getBlock(this.x, this.y, this.z).data, extra);
-    }
-
-}
-
-
-abstract class FluidTileInterface extends TileBase {
-    addLiquid(liquid: string, amount: number, onlyFullAmount: boolean): number {
-        const limit = this.liquidStorage.getLimit(liquid);
-        const stored = this.liquidStorage.getAmount(liquid);
-        const result = Math.round(stored + amount * 1000);
-        const left = result - Math.min(limit, result);
-        if(!onlyFullAmount || left <= 0){
-            this.liquidStorage.setAmount(liquid, result - left);
-            return Math.max(left / 1000, 0);
-        }
-        return amount;
-    }
-    getLiquid(liquid: string, amount: number, onlyFullAmount: boolean): number {
-        const amountMilli = Math.round(amount * 1000);
-        let stored = this.liquidStorage.getAmount(liquid);
-        if(!this.liquidStorage.getLiquid_flag && this.tileEntity && stored < amountMilli){
-            this.liquidStorage.getLiquid_flag = true;
-            this.tileEntity.requireMoreLiquid(liquid, amountMilli - stored);
-            this.liquidStorage.getLiquid_flag = false;
-            stored = this.liquidStorage.getAmount(liquid);
-        }
-        const got = Math.min(stored, amountMilli);
-        if(!onlyFullAmount || got >= amountMilli){
-            this.liquidStorage.setAmount(liquid, stored - got);
-            return got / 1000;
-        }
-        return 0;
-    }
-    abstract canReceiveLiquid(liquid: string, side: number): boolean;
-}
-
-
-class TankInterface extends FluidTileInterface {
-    canReceiveLiquid(liquid: string, side: number): boolean {
+    override destroyBlock(coords: Callback.ItemUseCoordinates, player: number): void {
+        const region = WorldRegion.getForActor(player);
         const stored = this.liquidStorage.getLiquidStored();
-        return !stored || stored === liquid;
+        let extra: ItemExtraData;
+        if(stored){
+            extra = new ItemExtraData();
+            extra.putString("stored", stored);
+            extra.putInt("amount", this.liquidStorage.getAmount(stored));
+        }
+        region.dropItem(this.x + 0.5, this.y, this.z + 0.5, this.blockID, 1, this.networkData.getInt("blockData"), extra);
     }
+
 }
-
-
 
 
 TileEntity.registerPrototype(BlockID.tcon_tank, new SearedTank());
-StorageInterface.createInterface(BlockID.tcon_tank, new TankInterface());
+
+StorageInterface.createInterface(BlockID.tcon_tank, {
+    liquidUnitRatio: 0.001,
+    canReceiveLiquid(liquid: string, side: number): boolean {
+        const stored = this.tileEntity.liquidStorage.getLiquidStored();
+        return !stored || stored === liquid;
+    },
+    getInputTank(): ILiquidStorage {
+        return this.tileEntity.liquidStorage;
+    },
+    getOutputTank(): ILiquidStorage {
+        return this.tileEntity.liquidStorage;
+    }
+});

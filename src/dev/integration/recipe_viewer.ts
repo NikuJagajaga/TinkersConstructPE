@@ -121,7 +121,7 @@ ModAPI.addAPICallback("RecipeViewer", (api: {Core: any, RecipeType: typeof Recip
         private readonly castType: "table" | "basin";
 
         constructor(name: string, icon: number, tileBitmap: string, castType: "table" | "basin"){
-            const content = {
+            const content: RecipeContents = {
                 drawing: [
                     {type: "bitmap", x: 86, y: 50, bitmap: "tcon.rv.smeltery", scale: 6},
                     {type: "bitmap", x: 386, y: 122, bitmap: "tcon.rv.faucet", scale: 6},

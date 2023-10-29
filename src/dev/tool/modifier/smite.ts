@@ -7,19 +7,19 @@ Recipes.addFurnace(BlockID.tcon_graveyard_soil, BlockID.tcon_consecrated_soil);
 class ModSmite extends TinkersModifier {
 
     private static readonly targets = {
-        [Native.EntityType.SKELETON]: true,
-        [Native.EntityType.STRAY]: true,
-        [Native.EntityType.WHITHER_SKELETON]: true,
-        [Native.EntityType.ZOMBIE]: true,
-        [Native.EntityType.DROWNED]: true,
-        [Native.EntityType.HUSK]: true,
-        [Native.EntityType.PIG_ZOMBIE]: true,
-        [Native.EntityType.ZOMBIE_VILLAGER]: true,
-        [Native.EntityType.ZOMBIE_VILLAGE_V2]: true,
-        [Native.EntityType.PHANTOM]: true,
-        [Native.EntityType.WHITHER]: true,
-        [Native.EntityType.SKELETON_HORSE]: true,
-        [Native.EntityType.ZOMBIE_HORSE]: true
+        [EEntityType.SKELETON]: true,
+        [EEntityType.STRAY]: true,
+        [EEntityType.WHITHER_SKELETON]: true,
+        [EEntityType.ZOMBIE]: true,
+        [EEntityType.DROWNED]: true,
+        [EEntityType.HUSK]: true,
+        [EEntityType.PIG_ZOMBIE]: true,
+        [EEntityType.ZOMBIE_VILLAGER]: true,
+        [EEntityType.ZOMBIE_VILLAGE_V2]: true,
+        [EEntityType.PHANTOM]: true,
+        [EEntityType.WHITHER]: true,
+        [EEntityType.SKELETON_HORSE]: true,
+        [EEntityType.ZOMBIE_HORSE]: true
     };
 
     constructor(){

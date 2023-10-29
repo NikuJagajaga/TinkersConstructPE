@@ -1,12 +1,12 @@
 class ModBeheading extends TinkersModifier {
 
     private static readonly headMeta = {
-        [Native.EntityType.SKELETON]: 0,
-        [Native.EntityType.WHITHER_SKELETON]: 1,
-        [Native.EntityType.ZOMBIE]: 2,
-        1: 3,//Native.EntityType.PLAYER
-        [Native.EntityType.CREEPER]: 4,
-        [Native.EntityType.ENDER_DRAGON]: 5
+        [EEntityType.SKELETON]: 0,
+        [EEntityType.WHITHER_SKELETON]: 1,
+        [EEntityType.ZOMBIE]: 2,
+        [EEntityType.PLAYER]: 3,
+        [EEntityType.CREEPER]: 4,
+        [EEntityType.ENDER_DRAGON]: 5
     };
 
     constructor(){

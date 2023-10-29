@@ -10,7 +10,7 @@ class ToolData {
     }
 
     private init(): void {
-        this.toolData = ToolAPI.getToolData(this.item.id);
+        //this.toolData = ToolAPI.getToolData(this.item.id);
         this.materials = new String(this.item.extra.getString("materials")).split("_");
         this.modifiers = TinkersModifierHandler.decodeToObj(this.item.extra.getString("modifiers"));
         this.stats = this.getStats();
@@ -67,7 +67,7 @@ class ToolData {
         const newLv = this.getLevel();
         if(oldLv < newLv){
             Game.message("§3" + this.getLevelupMessage(newLv));
-            SoundManager.startPlaySound(SourceType.ENTITY, player, "saw.ogg", 0.5);
+            //SoundManager.startPlaySound(SourceType.ENTITY, player, "saw.ogg", 0.5);
         }
     }
 
@@ -109,7 +109,7 @@ class ToolData {
     }
 
     getLevelupMessage(lv: number): string {
-        const name = Item.getName(this.item.id);
+        const name = Item.getName(this.item.id, this.item.data);
         switch(lv){
             case 1: return `You begin to feel comfortable handling the ${name}`;
             case 2: return `You are now accustomed to the weight of the ${name}`;

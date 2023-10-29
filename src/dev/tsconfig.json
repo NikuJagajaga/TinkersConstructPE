@@ -7,11 +7,14 @@
         "strict": false,
         "skipLibCheck": true,
         "outFile": "../main.js",
-        "newLine": "LF"
+        "newLine": "LF",
+        "experimentalDecorators":true
     },
     "include": [
 
         "header.ts",
+        "util/TconTileEntity.ts",
+        "util/TileWithLiquidModel.ts",
         "util/BlockModel.ts",
         "util/Sound.ts",
 
@@ -58,7 +61,6 @@
 
         "table/PatternChest.ts",
         "table/TableBase.ts",
-        "teble/CraftingStation.ts",
         "table/StencilTable.ts",
         "table/PartBuilder.ts",
         "table/ToolForge.ts",
@@ -77,7 +79,6 @@
         "integration/redpower.ts",
         "integration/forestry.ts",
         "integration/recipe_viewer.ts",
-        "integration/guide_api.ts",
 
         "footer.ts"
 

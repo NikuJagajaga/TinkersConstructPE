@@ -329,7 +329,7 @@ abstract class TinkersTool3x3 extends TinkersTool {
 
 }
 
-
+/*
 Callback.addCallback("LevelLoaded", () => {
     Updatable.addUpdatable({
         update: () => {
@@ -357,7 +357,7 @@ Callback.addCallback("EntityDeath", (entity: number, attacker: number, damageTyp
         toolData && toolData.onKillEntity && toolData.onKillEntity(item, entity, damageType);
     }
 });
-
+*/
 
 /*
 let posX = 0;

@@ -6,33 +6,43 @@ IMPORT("EnhancedRecipes");
 IMPORT("ConnectedTexture");
 
 const Color = android.graphics.Color;
-const Bitmap = android.graphics.Bitmap;
-const Canvas = android.graphics.Canvas;
-const Paint = android.graphics.Paint;
-const ColorFilter = android.graphics.PorterDuffColorFilter;
-const PorterDuff = android.graphics.PorterDuff;
 const Thread = java.lang.Thread;
-const ScreenHeight = UI.getScreenHeight();
+const ClientSide = BlockEngine.Decorators.ClientSide;
+const NetworkEvent = BlockEngine.Decorators.NetworkEvent;
+const ContainerEvent = BlockEngine.Decorators.ContainerEvent;
 
-const setLoadingTip = ModAPI.requireGlobal("MCSystem.setLoadingTip");
-//const getAllEntity = ModAPI.requireGlobal("EntityDataRegistry.getAllData");
-//const getEntityForType = ModAPI.requireGlobal("EntityDataRegistry.getDataForType");
+const ScreenHeight = UI.getScreenHeight();
 
 const SCALE = 5; //GUI Scale
 
-const Cfg = {
+__config__.checkAndRestore({
     toolLeveling: {
-        baseXp: __config__.getNumber("toolLeveling.baseXp") - 0 ?? 500,
-        multiplier: __config__.getNumber("toolLeveling.multiplier") - 0 ?? 2
+        baseXp: 500,
+        multiplier: 2
     },
     oreGen: {
-        cobaltRate: __config__.getNumber("oreGen.cobaltRate") - 0 ?? 20,
-        arditeRate: __config__.getNumber("oreGen.arditeRate") - 0 ?? 20
+        cobaltRate: 20,
+        arditeRate: 20
     },
-    oreToIngotRatio: __config__.getNumber("oreToIngotRatio") - 0 ?? 2,
-    modifierSlots: __config__.getNumber("modifierSlots") - 0 ?? 3,
-    showItemOnTable: __config__.getBool("showItemOnTable") ?? true,
-    checkInsideSmeltery: __config__.getBool("checkInsideSmeltery") ?? true
+    oreToIngotRatio: 2,
+    modifierSlots: 3,
+    showItemOnTable: true,
+    checkInsideSmeltery: true
+});
+
+const Cfg = {
+    toolLeveling: {
+        baseXp: __config__.getNumber("toolLeveling.baseXp").intValue(),
+        multiplier: __config__.getNumber("toolLeveling.multiplier").intValue()
+    },
+    oreGen: {
+        cobaltRate: __config__.getNumber("oreGen.cobaltRate").intValue(),
+        arditeRate: __config__.getNumber("oreGen.arditeRate").intValue()
+    },
+    oreToIngotRatio: __config__.getNumber("oreToIngotRatio").intValue(),
+    modifierSlots: __config__.getNumber("modifierSlots").intValue(),
+    showItemOnTable: __config__.getBool("showItemOnTable"),
+    checkInsideSmeltery: __config__.getBool("checkInsideSmeltery")
 };
 
 class MatValue {
@@ -49,18 +59,6 @@ class MatValue {
     static readonly SLIME_BALL = 250;
     static readonly ORE = MatValue.INGOT * Cfg.oreToIngotRatio;
 }
-
-interface LiquidInstance {
-    liquid: string;
-    amount: number;
-};
-
-
-let player: number;
-Callback.addCallback("LevelLoaded", () => {
-    player = Player.get();
-});
-
 
 const addLineBreaks = (length: number, text: string): string => {
     const array: string[] = [];
@@ -121,45 +119,3 @@ const createItem = (namedID: string, name: string, texture: Item.TextureData = {
     Item.createItem(namedID, name, texture, params);
     return id;
 };
-
-const createAnimItem = (x: number, y: number, z: number): any => {
-    const anim = new Animation.Item(x, y, z);
-    anim.load();
-    anim.setSkylightMode();
-    return anim;
-}
-
-const registerRotationModel = (namedID: string, ...texture: ([string, number] | number)[][]): void => {
-    const id = BlockID[namedID];
-    const texture2 = texture.map(tex => tex.map(t => typeof t === "number" ? [namedID, t] : t));
-    TileRenderer.setStandartModel(id, texture2[0]);
-    for(let i = 0; i < texture2.length; i++){
-        TileRenderer.registerRotationModel(id, i * 4, texture2[i]);
-    }
-};
-
-
-class TileBase {
-    isLoaded: boolean;
-    remove: boolean;
-    x: number;
-    y: number;
-    z: number;
-    blockID: number;
-    data: {[key: string]: any};
-    container: any;
-    liquidStorage: any;
-    tileEntity: any;
-    interface: any;
-}
-/*
-class TileWithoutContainer extends TileBase {
-    init(): void {
-        delete this.container;
-        delete this.liquidStorage;
-    }
-    destroy(): void {
-        this.container = {dropAt: () => {}};
-    }
-}
-*/

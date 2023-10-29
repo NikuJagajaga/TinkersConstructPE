@@ -10,7 +10,7 @@ Item.registerUseFunction(ItemID.tcon_moss, (coords, item, block) => {
         Player.addLevel(-10);
         Player.decreaseCarriedItem();
         Player.addItemToInventory(ItemID.tcon_mending_moss, 1, 0);
-        World.playSoundAtEntity(player, "random.orb", 1);
+        //World.playSoundAtEntity(player, "random.orb", 1);
     }
 });
 

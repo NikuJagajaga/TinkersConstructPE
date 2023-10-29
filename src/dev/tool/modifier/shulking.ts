@@ -5,7 +5,7 @@ class ModShulking extends TinkersModifier {
     }
 
     onAttack(item: ItemInstance, victim: number, level: number): number {
-        Entity.addEffect(victim, Native.PotionEffect.levitation, 0, (level >> 1) + 10);
+        Entity.addEffect(victim, EPotionEffect.LEVITATION, 0, (level >> 1) + 10);
         return 0;
     }
     
