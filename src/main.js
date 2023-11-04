@@ -45,6 +45,7 @@ IMPORT("StorageInterface");
 IMPORT("SoundLib");
 IMPORT("EnhancedRecipes");
 IMPORT("ConnectedTexture");
+IMPORT("WindowMaker");
 var Color = android.graphics.Color;
 var Thread = java.lang.Thread;
 var ClientSide = BlockEngine.Decorators.ClientSide;
@@ -523,6 +524,7 @@ MeltingRecipe.addEntRecipe(EEntityType.VILLAGER_V2, "molten_emerald", 6);
 MeltingRecipe.addEntRecipe(EEntityType.VINDICATOR, "molten_emerald", 6);
 MeltingRecipe.addEntRecipe(EEntityType.EVOCATION_ILLAGER, "molten_emerald", 6);
 //MeltingRecipe.addEntRecipe(EEntityType.ILLUSIONER, "molten_emerald", 6);
+;
 var AlloyRecipe = /** @class */ (function () {
     function AlloyRecipe() {
     }
@@ -531,17 +533,18 @@ var AlloyRecipe = /** @class */ (function () {
         for (var _i = 1; _i < arguments.length; _i++) {
             inputs[_i - 1] = arguments[_i];
         }
+        var inputAmount = 0;
+        for (var i = 0; i < inputs.length; i++) {
+            inputAmount += inputs[i].amount;
+        }
+        if (result.amount > inputAmount) {
+            alert("[TCon]: Invalid alloy recipe -> " + result.liquid);
+            return;
+        }
         this.data.push({ inputs: inputs.map(function (input) { return ({ liquid: input.liquid, amount: input.amount }); }), result: result });
     };
-    AlloyRecipe.alloyAlloys = function (liquids, liquidStorage) {
-        this.data.forEach(function (recipe) {
-            if (recipe.inputs.every(function (input) { return liquids[input.liquid] >= input.amount; })) {
-                recipe.inputs.forEach(function (input) {
-                    liquidStorage.getLiquid(input.liquid, input.amount);
-                });
-                liquidStorage.addLiquid(recipe.result.liquid, recipe.result.amount);
-            }
-        });
+    AlloyRecipe.getRecipes = function (liquidAmounts) {
+        return this.data.filter(function (recipe) { return recipe.inputs.every(function (input) { return (liquidAmounts[input.liquid] || 0) >= input.amount; }); });
     };
     AlloyRecipe.getAllRecipeForRV = function () {
         return this.data.map(function (recipe) { return ({
@@ -791,7 +794,7 @@ var SearedTank = /** @class */ (function (_super) {
         var stored = this.liquidStorage.getLiquidStored();
         var empty = LiquidItemRegistry.getEmptyItem(item.id, item.data);
         if (empty) {
-            if (!this.liquidStorage.isFull() && (stored === empty.liquid || !stored)) {
+            if (stored === empty.liquid || !stored) {
                 if (this.liquidStorage.getLimit(stored) - this.liquidStorage.getAmount(stored) >= empty.amount) {
                     this.liquidStorage.addLiquid(empty.liquid, empty.amount);
                     item.count--;
@@ -867,6 +870,30 @@ StorageInterface.createInterface(BlockID.tcon_tank, {
         return this.tileEntity.liquidStorage;
     }
 });
+createBlock("tcon_drain", [{ name: "Seared Drain", texture: [0, 0, 1, 0, 0, 0] }]);
+TileRenderer.setStandardModelWithRotation(BlockID.tcon_drain, 2, [0, 0, 1, 0, 0, 0].map(function (meta) { return ["tcon_drain", meta]; }));
+TileRenderer.setRotationFunction(BlockID.tcon_drain);
+Recipes2.addShaped(BlockID.tcon_drain, "a_a:a_a:a_a", { a: ItemID.tcon_brick });
+var SearedDrain = /** @class */ (function (_super) {
+    __extends(SearedDrain, _super);
+    function SearedDrain() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    SearedDrain.prototype.onItemUse = function (coords, item, player) {
+        return false;
+    };
+    return SearedDrain;
+}(TconTileEntity));
+TileEntity.registerPrototype(BlockID.tcon_drain, new SearedDrain());
+StorageInterface.createInterface(BlockID.tcon_drain, {
+    liquidUnitRatio: 0.001,
+    getInputTank: function (side) {
+        return this.tileEntity.controller || null;
+    },
+    getOutputTank: function (side) {
+        return this.tileEntity.controller || null;
+    }
+});
 createBlock("tcon_faucet", [
     { name: "Seared Faucet" },
     { name: "faucet", isTech: true },
@@ -909,15 +936,6 @@ Block.setShape(BlockID.tcon_faucet, 4 / 16, 4 / 16, 0 / 16, 12 / 16, 10 / 16, 6 
 Block.setShape(BlockID.tcon_faucet, 4 / 16, 4 / 16, 10 / 16, 12 / 16, 10 / 16, 16 / 16, 1);
 Block.setShape(BlockID.tcon_faucet, 0 / 16, 4 / 16, 4 / 16, 6 / 16, 10 / 16, 12 / 16, 2);
 Block.setShape(BlockID.tcon_faucet, 10 / 16, 4 / 16, 4 / 16, 16 / 16, 10 / 16, 12 / 16, 3);
-var FaucetLiquidRenders = (function () {
-    var renders = [
-        new Render(),
-        new Render(),
-        new Render(),
-        new Render(),
-    ];
-    return renders;
-})();
 var SearedFaucet = /** @class */ (function (_super) {
     __extends(SearedFaucet, _super);
     function SearedFaucet() {
@@ -1285,6 +1303,41 @@ Recipes2.addShaped(BlockID.tcon_smeltery, "aaa:a_a:aaa", { a: ItemID.tcon_brick 
 var SmelteryHandler = /** @class */ (function () {
     function SmelteryHandler() {
     }
+    SmelteryHandler.setup = function () {
+        var i = 0;
+        var z = 1000;
+        for (var key in LiquidRegistry.liquids) {
+            this.elements["liquid" + i] = {
+                type: "scale",
+                x: 93 * SCALE,
+                y: 11 * SCALE,
+                z: z--,
+                width: 52 * SCALE,
+                height: 52 * SCALE,
+                //bitmap: LiquidRegistry.getLiquidUITexture(key, 18 * SCALE, 18 * SCALE),
+                direction: 1,
+                pixelate: false
+            };
+            i++;
+        }
+        this.liquidCount = i;
+        this.window = new UI.StandardWindow({
+            standard: {
+                header: { text: { text: "Smeltery" } },
+                inventory: { standard: true },
+                background: { standard: true }
+            },
+            drawing: [
+                { type: "frame", x: 20 * SCALE, y: 10 * SCALE, width: 18 * SCALE, height: 18 * SCALE, bitmap: "classic_slot", scale: SCALE },
+                { type: "frame", x: 20 * SCALE, y: 28 * SCALE, width: 18 * SCALE, height: 18 * SCALE, bitmap: "classic_slot", scale: SCALE },
+                { type: "frame", x: 20 * SCALE, y: 46 * SCALE, width: 18 * SCALE, height: 18 * SCALE, bitmap: "classic_slot", scale: SCALE },
+                { type: "frame", x: 92 * SCALE, y: 10 * SCALE, width: 54 * SCALE, height: 54 * SCALE, bitmap: "classic_slot", scale: SCALE },
+                //{type: "frame", x: 160 * SCALE, y: 10 * SCALE, width: 14 * SCALE, height: 54 * SCALE, bitmap: "classic_slot", scale: SCALE},
+                { type: "bitmap", x: 56 * SCALE, y: 30 * SCALE, bitmap: "tcon.arrow", scale: SCALE }
+            ],
+            elements: SmelteryHandler.elements
+        });
+    };
     SmelteryHandler.getWindow = function () {
         return this.window;
     };
@@ -1294,32 +1347,6 @@ var SmelteryHandler = /** @class */ (function () {
     SmelteryHandler.isValidBlock = function (id) {
         return this.blocks[id] || false;
     };
-    SmelteryHandler.updateScale = function () {
-        if (this.window.isOpened()) {
-            var container = this.window.getContainer();
-            var tile = container.getParent();
-            var liquids = tile.liquidStorage.liquidAmounts;
-            var capacity = tile.getLiquidCapacity();
-            var liqArray = tile.getLiquidArray();
-            var key = void 0;
-            var y = 11;
-            for (var i = 0; i < liqArray.length; i++) {
-                key = "liquid-" + liqArray[i];
-                this.elements[key] = this.elements[key] || { type: "scale", x: 93 * SCALE, y: 11 * SCALE, width: 52 * SCALE, height: 52 * SCALE, direction: 1, pixelate: true };
-                this.elements[key].y = y * SCALE;
-                tile.liquidStorage.updateUiScale(key, liqArray[i]);
-                y -= liquids[liqArray[i]] / capacity * 52;
-            }
-            var split = void 0;
-            for (key in this.elements) {
-                split = key.split("-");
-                if (split[0] === "liquid" && !liquids[split[1]]) {
-                    container.setScale(key, 0);
-                }
-            }
-            container.setText("textLiquid", liqArray[0] ? LiquidRegistry.getLiquidName(liqArray[0]) + "\n" + liquids[liqArray[0]] + " mB" : "");
-        }
-    };
     SmelteryHandler.blocks = (_a = {},
         _a[BlockID.tcon_stone] = true,
         _a[BlockID.tcon_seared_glass] = true,
@@ -1328,7 +1355,7 @@ var SmelteryHandler = /** @class */ (function () {
         _a[BlockID.tcon_smeltery] = true,
         _a);
     SmelteryHandler.elements = {
-        line: { type: "image", x: 93 * SCALE, y: 11 * SCALE, z: 1, bitmap: "tcon.smeltery_line", scale: SCALE },
+        imageOvl: { type: "image", x: 93 * SCALE, y: 11 * SCALE, z: 1001, bitmap: "tcon.smeltery_ovl", scale: SCALE },
         slot0: { type: "slot", x: 24 * SCALE, y: 10 * SCALE, size: 18 * SCALE /*, isValid: (id, count, data) => MeltingRecipe.isExist(id, data)*/ },
         slot1: { type: "slot", x: 24 * SCALE, y: 28 * SCALE, size: 18 * SCALE /*, isValid: (id, count, data) => MeltingRecipe.isExist(id, data)*/ },
         slot2: { type: "slot", x: 24 * SCALE, y: 46 * SCALE, size: 18 * SCALE /*, isValid: (id, count, data) => MeltingRecipe.isExist(id, data)*/ },
@@ -1336,48 +1363,32 @@ var SmelteryHandler = /** @class */ (function () {
         gauge1: { type: "scale", x: 21 * SCALE, y: 29 * SCALE, bitmap: "tcon.heat_gauge_0", scale: SCALE, direction: 1 },
         gauge2: { type: "scale", x: 21 * SCALE, y: 47 * SCALE, bitmap: "tcon.heat_gauge_0", scale: SCALE, direction: 1 },
         //scaleLava: {type: "scale", x: 161 * SCALE, y: 11 * SCALE, width: 12 * SCALE, height: 52 * SCALE, bitmap: "_liquid_lava_texture_0", direction: 1},
-        buttonSelect: { type: "button", x: 130 * SCALE, y: 70 * SCALE, bitmap: "classic_button_up", bitmap2: "classic_button_down", scale: SCALE, clicker: {
+        textFuel: { type: "text", x: 67 * SCALE, y: 50 * SCALE, font: { size: 30, color: Color.WHITE, shadow: 0.5, align: UI.Font.ALIGN_CENTER } },
+        textLiquid: { type: "text", x: 92 * SCALE, y: 65 * SCALE, z: 1002, font: { size: 30, color: Color.WHITE, shadow: 0.5 }, multiline: true },
+        buttonDump: { type: "button", x: 92 * SCALE, y: 80 * SCALE, z: 1002, bitmap: "_craft_button_up", bitmap2: "_craft_button_down", scale: SCALE / 2, clicker: {
                 onClick: function (_, container) {
-                    container.sendEvent("", {});
-                    //tile.data.select++;
-                    //tile.data.select %= Object.keys(tile.liquidStorage.liquidAmounts).length;
+                    container.sendEvent("dumpLiquid", {});
                 }
             } },
-        buttonDump: { type: "button", x: 92 * SCALE, y: 70 * SCALE, bitmap: "_craft_button_up", bitmap2: "_craft_button_down", scale: SCALE / 2, clicker: {
+        buttonSelect: { type: "button", x: 130 * SCALE, y: 80 * SCALE, z: 1002, bitmap: "classic_button_up", bitmap2: "classic_button_down", scale: SCALE, clicker: {
                 onClick: function (_, container) {
-                    container.sendEvent("", {});
-                    //const liquids = tile.liquidStorage.liquidAmounts;
-                    //delete liquids[Object.keys(liquids)[tile.data.select]];
-                    //tile.data.select %= Object.keys(liquids).length;
+                    container.sendEvent("selectLiquid", {});
                 }
             } },
-        iconSelect: { type: "image", x: 131.6 * SCALE, y: 71.6 * SCALE, z: 1, bitmap: "mod_browser_update_icon", scale: SCALE * 0.8 },
-        textDump: { type: "text", x: 104 * SCALE, y: 68 * SCALE, z: 1, text: "Dump", font: { size: 30, color: Color.WHITE, shadow: 0.5, alignment: 1 } },
-        textLiquid: { type: "text", x: 150 * SCALE, y: 50 * SCALE, font: { size: 30, color: Color.WHITE, shadow: 0.5 }, multiline: true }
+        textDump: { type: "text", x: 104 * SCALE, y: 78 * SCALE, z: 1003, text: "Dump", font: { size: 30, color: Color.WHITE, shadow: 0.5, alignment: 1 } },
+        iconSelect: { type: "image", x: 131.6 * SCALE, y: 81.6 * SCALE, z: 1003, bitmap: "mod_browser_update_icon", scale: SCALE * 0.8 }
     };
-    SmelteryHandler.window = new UI.StandardWindow({
-        standard: {
-            header: { text: { text: "Smeltery" } },
-            inventory: { standard: true },
-            background: { standard: true }
-        },
-        drawing: [
-            { type: "frame", x: 20 * SCALE, y: 10 * SCALE, width: 18 * SCALE, height: 18 * SCALE, bitmap: "classic_slot", scale: SCALE },
-            { type: "frame", x: 20 * SCALE, y: 28 * SCALE, width: 18 * SCALE, height: 18 * SCALE, bitmap: "classic_slot", scale: SCALE },
-            { type: "frame", x: 20 * SCALE, y: 46 * SCALE, width: 18 * SCALE, height: 18 * SCALE, bitmap: "classic_slot", scale: SCALE },
-            { type: "frame", x: 92 * SCALE, y: 10 * SCALE, width: 54 * SCALE, height: 54 * SCALE, bitmap: "classic_slot", scale: SCALE },
-            //{type: "frame", x: 160 * SCALE, y: 10 * SCALE, width: 14 * SCALE, height: 54 * SCALE, bitmap: "classic_slot", scale: SCALE},
-            { type: "bitmap", x: 56 * SCALE, y: 30 * SCALE, bitmap: "tcon.arrow", scale: SCALE }
-        ],
-        elements: SmelteryHandler.elements
-    });
+    SmelteryHandler.liquidCount = 0;
     return SmelteryHandler;
 }());
+Callback.addCallback("PostLoaded", function () {
+    SmelteryHandler.setup();
+});
 var SmelteryControler = /** @class */ (function (_super) {
     __extends(SmelteryControler, _super);
     function SmelteryControler() {
         var _this = _super !== null && _super.apply(this, arguments) || this;
-        _this.tanks = [];
+        _this.tanksPos = [];
         _this.defaultValues = {
             select: 0,
             temp: 0,
@@ -1389,6 +1400,45 @@ var SmelteryControler = /** @class */ (function (_super) {
         };
         return _this;
     }
+    SmelteryControler.prototype.getLiquidStored = function () {
+        var _a;
+        return ((_a = this.getLiquidArray()[0]) === null || _a === void 0 ? void 0 : _a.liquid) || null;
+    };
+    SmelteryControler.prototype.getLimit = function (liquid) {
+        var capacity = this.getLiquidCapacity();
+        var otherTotal = this.totalLiquidAmount() - this.getAmount(liquid);
+        return capacity - otherTotal;
+    };
+    SmelteryControler.prototype.getAmount = function (liquid) {
+        return this.liquidStorage.getAmount(liquid) || 0;
+    };
+    SmelteryControler.prototype.getRelativeAmount = function (liquid) {
+        var capacity = this.getLiquidCapacity();
+        return capacity > 0 ? this.getAmount(liquid) / capacity : 0;
+    };
+    SmelteryControler.prototype.getLiquid = function (liquid, amount) {
+        var got = Math.min(this.getAmount(liquid), amount);
+        this.liquidStorage.liquidAmounts[liquid] -= got;
+        if (this.liquidStorage.liquidAmounts[liquid] <= 0) {
+            delete this.liquidStorage.liquidAmounts[liquid];
+        }
+        return got;
+    };
+    SmelteryControler.prototype.addLiquid = function (liquid, amount) {
+        var _a;
+        var _b;
+        var freespace = this.getLiquidCapacity() - this.totalLiquidAmount();
+        var add = Math.min(freespace, amount);
+        (_a = (_b = this.liquidStorage.liquidAmounts)[liquid]) !== null && _a !== void 0 ? _a : (_b[liquid] = 0);
+        this.liquidStorage.liquidAmounts[liquid] += add;
+        return add;
+    };
+    SmelteryControler.prototype.isFull = function (liquid) {
+        return this.totalLiquidAmount() > this.getLiquidCapacity();
+    };
+    SmelteryControler.prototype.isEmpty = function (liquid) {
+        return this.totalLiquidAmount() <= 0;
+    };
     SmelteryControler.prototype.getScreenByName = function (screenName, container) {
         return SmelteryHandler.getWindow();
     };
@@ -1449,8 +1499,6 @@ var SmelteryControler = /** @class */ (function (_super) {
     };
     SmelteryControler.prototype.checkStructure = function () {
         var facing = this.networkData.getInt("blockData") - 2;
-        Game.message("facing: " + facing);
-        Game.message("blockData: " + this.blockSource.getBlockData(this.x, this.y, this.z));
         var backPos = { x: this.x, y: this.y, z: this.z };
         backPos[facing >> 1 ? "x" : "z"] += facing & 1 ? -1 : 1;
         if (this.region.getBlockId(backPos) !== 0) {
@@ -1461,7 +1509,6 @@ var SmelteryControler = /** @class */ (function (_super) {
         var z1 = this.searchWall(backPos, "z", -1);
         var z2 = this.searchWall(backPos, "z", 1);
         if (x1 === 0 || x2 === 0 || z1 === 0 || z2 === 0) {
-            Game.message("xz: " + [x1, x2, z1, z2].join(","));
             return false;
         }
         var from = { x: backPos.x + x1, z: backPos.z + z1 };
@@ -1472,7 +1519,6 @@ var SmelteryControler = /** @class */ (function (_super) {
         for (x = from.x + 1; x <= to.x - 1; x++) {
             for (z = from.z + 1; z <= to.z - 1; z++) {
                 if (this.region.getBlockId(x, this.y - 1, z) !== BlockID.tcon_stone) {
-                    Game.message("Floor Invalid");
                     return false;
                 }
             }
@@ -1502,14 +1548,13 @@ var SmelteryControler = /** @class */ (function (_super) {
                     if (tile) {
                         switch (tile.blockID) {
                             case BlockID.tcon_tank:
-                                tanks.push(tile);
+                                tanks.push({ x: x, y: y, z: z });
                                 break;
                             case BlockID.tcon_drain:
-                                tile.setController(this);
+                                tile.controller = this;
                                 break;
                             case BlockID.tcon_smeltery:
                                 if (tile.x !== this.x || tile.y !== this.y || tile.z !== this.z) {
-                                    Game.message("Double Controller");
                                     return false;
                                 }
                                 break;
@@ -1519,17 +1564,66 @@ var SmelteryControler = /** @class */ (function (_super) {
             }
         }
         if (y === this.y || tanks.length === 0) {
-            Game.message("Height or Tank");
             return false;
         }
-        this.area.from.x = from.x;
-        this.area.from.y = this.y - 1;
-        this.area.from.z = from.z;
-        this.area.to.x = to.x;
-        this.area.to.y = y - 1;
-        this.area.to.z = to.z;
-        this.tanks = tanks;
+        this.area = {
+            from: { x: from.x, y: this.y - 1, z: from.z },
+            to: { x: to.x, y: y - 1, z: to.z }
+        };
+        this.tanksPos = tanks;
         return true;
+    };
+    SmelteryControler.prototype.getItemCapacity = function () {
+        return (this.area.to.x - this.area.from.x - 1) * (this.area.to.y - this.area.from.y) * (this.area.to.z - this.area.from.z - 1);
+    };
+    SmelteryControler.prototype.getLiquidCapacity = function () {
+        return this.getItemCapacity() * MatValue.INGOT * 8;
+    };
+    SmelteryControler.prototype.totalLiquidAmount = function () {
+        var liquids = this.liquidStorage.liquidAmounts;
+        var amount = 0;
+        for (var key in liquids) {
+            if (liquids[key] <= 0) {
+                delete liquids[key];
+                continue;
+            }
+            amount += liquids[key];
+        }
+        return amount;
+    };
+    SmelteryControler.prototype.getLiquidArray = function () {
+        var liquids = this.liquidStorage.liquidAmounts;
+        var array = [];
+        for (var key in liquids) {
+            if (liquids[key] > 0) {
+                array.push({ liquid: key, amount: liquids[key] });
+            }
+        }
+        for (var i = 0; i < this.data.select; i++) {
+            array.push(array.shift());
+        }
+        return array;
+    };
+    SmelteryControler.prototype.consumeFuel = function () {
+        var iTank;
+        var tank;
+        var stored = "";
+        var amount = 0;
+        var fuelData;
+        for (var i = 0; i < this.tanksPos.length; i++) {
+            iTank = StorageInterface.getLiquidStorage(this.blockSource, this.tanksPos[i].x, this.tanksPos[i].y, this.tanksPos[i].z);
+            tank = iTank === null || iTank === void 0 ? void 0 : iTank.getOutputTank(-1);
+            if (tank) {
+                stored = tank.getLiquidStored();
+                amount = tank.getAmount(stored);
+                fuelData = SmelteryFuel.getFuel(stored);
+                if (fuelData && amount >= fuelData.amount) {
+                    tank.getLiquid(stored, fuelData.amount);
+                    return { duration: fuelData.duration, temp: fuelData.temp };
+                }
+            }
+        }
+        return null;
     };
     SmelteryControler.prototype.onItemUse = function (coords, item, player) {
         this.data.isActive = this.checkStructure();
@@ -1539,10 +1633,179 @@ var SmelteryControler = /** @class */ (function (_super) {
         }
         else {
             Game.message("invalid");
+            return true;
         }
         return false;
     };
+    SmelteryControler.prototype.setAnim = function (data) {
+        if (!this.render || !this.anim) {
+            return;
+        }
+        var parts = [];
+        var sizeX = data.area.to.x - data.area.from.x - 1;
+        var sizeY = data.area.to.y - data.area.from.y;
+        var sizeZ = data.area.to.z - data.area.from.z - 1;
+        var texScale = MoltenLiquid.getTexScale();
+        if (data.isActive) {
+            var height = void 0;
+            var max = void 0;
+            var y = 0;
+            for (var i = 0; i < data.liqArray.length; i++) {
+                height = data.liqArray[i].amount / data.capacity * sizeY;
+                max = Math.max(sizeX, sizeZ, height);
+                parts.push({
+                    type: "box",
+                    uv: { x: 0, y: MoltenLiquid.getY(data.liqArray[i].liquid) * max },
+                    coords: { x: 0, y: y - height * 16 / 2, z: 0 },
+                    size: { x: sizeX * 16, y: height * 16, z: sizeZ * 16 }
+                });
+                y -= height * 16;
+            }
+            texScale.width *= max;
+            texScale.height *= max;
+        }
+        if (isFinite(texScale.width) && isFinite(texScale.height)) {
+            this.render.setPart("head", parts, texScale);
+        }
+        this.anim.setPos((data.area.from.x + data.area.to.x) / 2 + 0.5, (data.area.from.y + data.area.to.y) / 2 - (sizeY + 1) * 0.5, (data.area.from.z + data.area.to.z) / 2 + 0.5);
+        this.anim.refresh();
+    };
+    SmelteryControler.prototype.interactWithEntitiesInside = function () {
+        var _this = this;
+        var allEnt = Entity.getAll();
+        var entities = [];
+        var pos;
+        for (var i = 0; i < allEnt.length; i++) {
+            pos = Entity.getPosition(allEnt[i]);
+            if (this.area.from.x <= pos.x && pos.x <= this.area.to.x && this.area.from.y <= pos.y && pos.y <= this.area.to.y && this.area.from.z <= pos.z && pos.z <= this.area.to.z) {
+                if (MeltingRecipe.getEntRecipe(allEnt[i])) {
+                    entities.push(allEnt[i]);
+                }
+            }
+        }
+        var liquidCapacity = this.getLiquidCapacity();
+        entities.forEach(function (ent) {
+            var result = MeltingRecipe.getEntRecipe(ent);
+            if (_this.totalLiquidAmount() + result.amount <= liquidCapacity) {
+                _this.liquidStorage.addLiquid(result.liquid, result.amount);
+            }
+            Entity.damageEntity(ent, 2);
+        });
+    };
     SmelteryControler.prototype.onTick = function () {
+        var _this = this;
+        var tick = World.getThreadTime();
+        var liqArray = this.getLiquidArray();
+        var totalAmount = this.totalLiquidAmount();
+        var capacity = this.getItemCapacity();
+        var liquidCapacity = this.getLiquidCapacity();
+        var canSmelt = true;
+        if ((tick & 63) === 0) {
+            this.data.isActive = this.checkStructure();
+            this.setActive();
+            this.sendPacket("setAnim", { capacity: liquidCapacity, liqArray: liqArray, area: this.area, isActive: this.data.isActive });
+            if (this.data.isActive) {
+                this.sendPacket("spawnParticle", {});
+            }
+        }
+        if (this.data.isActive) {
+            if (Cfg.checkInsideSmeltery && tick % 20 === 0) {
+                this.interactWithEntitiesInside();
+            }
+            if ((tick & 3) === 0) {
+                AlloyRecipe.getRecipes(this.liquidStorage.liquidAmounts).forEach(function (recipe) {
+                    for (var i = 0; i < recipe.inputs.length; i++) {
+                        _this.getLiquid(recipe.inputs[i].liquid, recipe.inputs[i].amount);
+                    }
+                    _this.addLiquid(recipe.result.liquid, recipe.result.amount);
+                });
+            }
+            if (this.data.fuel <= 0) {
+                var fuelData = this.consumeFuel();
+                if (fuelData) {
+                    this.data.fuel = fuelData.duration;
+                    this.data.temp = fuelData.temp;
+                }
+                if (this.data.fuel <= 0) {
+                    canSmelt = false;
+                }
+            }
+        }
+        else {
+            canSmelt = false;
+        }
+        var modes = [0, 0, 0];
+        var values = [0, 0, 0];
+        if (canSmelt) {
+            var slots = [
+                this.container.getSlot("slot0"),
+                this.container.getSlot("slot1"),
+                this.container.getSlot("slot2")
+            ];
+            var smeltCount = slots.reduce(function (sum, slot) { return sum + slot.count; }, 0);
+            var recipe = void 0;
+            var time = 0;
+            var count = 0;
+            var consume = false;
+            if (smeltCount > capacity) {
+                for (var i = 0; i < 3; i++) {
+                    modes[i] = 2;
+                    values[i] = 1;
+                }
+            }
+            else {
+                for (var i = 0; i < 3; i++) {
+                    recipe = MeltingRecipe.getRecipe(slots[i].id, slots[i].data);
+                    if (recipe && i < capacity) {
+                        time = Math.max(5, recipe.temp) * SmelteryHandler.getHeatFactor();
+                        this.data["heat" + i] += this.data.temp / 100;
+                        consume = true;
+                        if (this.data["heat" + i] >= time) {
+                            count = slots[i].count;
+                            while (totalAmount + recipe.amount * count > liquidCapacity) {
+                                count--;
+                            }
+                            if (count > 0) {
+                                slots[i].count -= count;
+                                this.container.validateSlot("slot" + i);
+                                this.liquidStorage.addLiquid(recipe.liquid, recipe.amount * count);
+                                this.data["heat" + i] = 0;
+                            }
+                            else {
+                                modes[i] = 2;
+                                values[i] = 1;
+                            }
+                        }
+                        else {
+                            values[i] = this.data["heat" + i] / time;
+                        }
+                    }
+                    else {
+                        this.data["heat" + i] = 0;
+                        if (slots[i].id !== 0) {
+                            modes[i] = 3;
+                            values[i] = 1;
+                        }
+                    }
+                }
+            }
+            if (consume) {
+                this.data.fuel--;
+            }
+        }
+        for (var i = 0; i < 3; i++) {
+            this.container.setScale("gauge" + i, values[i]);
+        }
+        for (var i = 0; i < SmelteryHandler.liquidCount; i++) {
+            if (i < liqArray.length) {
+                this.container.setScale("liquid" + i, 1);
+            }
+        }
+        this.container.sendEvent("changeScales", { mode0: modes[0], mode1: modes[1], mode2: modes[2] });
+        this.container.sendEvent("updateLiquidScales", { capacity: liquidCapacity, liqArray: liqArray });
+        this.container.setText("textFuel", "fuel: " + this.data.fuel);
+        this.container.setText("textLiquid", liqArray[0] ? LiquidRegistry.getLiquidName(liqArray[0].liquid) + "\n" + liqArray[0].amount + " mB" : "");
+        this.container.sendChanges();
     };
     SmelteryControler.prototype.spawnParticle = function (data) {
         //270, 90, 180, 0 degree
@@ -1559,12 +1822,62 @@ var SmelteryControler = /** @class */ (function (_super) {
         Particles.addParticle(EParticleType.SMOKE, coords.x, coords.y, coords.z, 0, 0, 0);
         Particles.addParticle(EParticleType.FLAME, coords.x, coords.y, coords.z, 0, 0, 0);
     };
+    SmelteryControler.prototype.changeScales = function (container, window, content, data) {
+        if (window === null || window === void 0 ? void 0 : window.isOpened()) {
+            var elements = window.getElements();
+            elements.get("gauge0").setBinding("texture", "tcon.heat_gauge_" + data.mode0);
+            elements.get("gauge1").setBinding("texture", "tcon.heat_gauge_" + data.mode1);
+            elements.get("gauge2").setBinding("texture", "tcon.heat_gauge_" + data.mode2);
+        }
+    };
+    SmelteryControler.prototype.updateLiquidScales = function (container, window, content, data) {
+        if (!(window === null || window === void 0 ? void 0 : window.isOpened())) {
+            return;
+        }
+        var elements = window.getElements();
+        var elem;
+        var y = (11 + 52) * SCALE;
+        for (var i = 0; i < SmelteryHandler.liquidCount; i++) {
+            elem = elements.get("liquid" + i);
+            if (i < data.liqArray.length) {
+                y -= data.liqArray[i].amount / data.capacity * 52 * SCALE;
+                elem.setPosition(elem.x, y);
+                elem.setBinding("texture", LiquidRegistry.getLiquidUITexture(data.liqArray[i].liquid, 18 * SCALE, 18 * SCALE));
+            }
+            else {
+                elem.setPosition(elem.x, 2000);
+            }
+        }
+    };
+    SmelteryControler.prototype.selectLiquid = function () {
+        this.data.select = (this.data.select + 1) % this.getLiquidArray().length;
+    };
+    SmelteryControler.prototype.dumpLiquid = function () {
+        var stored = this.getLiquidStored();
+        this.getLiquid(stored, this.getAmount(stored));
+        this.data.select %= this.getLiquidArray().length;
+    };
     __decorate([
         ClientSide
     ], SmelteryControler.prototype, "renderModel", null);
     __decorate([
         NetworkEvent(Side.Client)
+    ], SmelteryControler.prototype, "setAnim", null);
+    __decorate([
+        NetworkEvent(Side.Client)
     ], SmelteryControler.prototype, "spawnParticle", null);
+    __decorate([
+        ContainerEvent(Side.Client)
+    ], SmelteryControler.prototype, "changeScales", null);
+    __decorate([
+        ContainerEvent(Side.Client)
+    ], SmelteryControler.prototype, "updateLiquidScales", null);
+    __decorate([
+        ContainerEvent(Side.Server)
+    ], SmelteryControler.prototype, "selectLiquid", null);
+    __decorate([
+        ContainerEvent(Side.Server)
+    ], SmelteryControler.prototype, "dumpLiquid", null);
     return SmelteryControler;
 }(TconTileEntity));
 TileEntity.registerPrototype(BlockID.tcon_smeltery, new SmelteryControler());
@@ -1574,10 +1887,10 @@ StorageInterface.createInterface(BlockID.tcon_smeltery, {
         return true;
     },
     getInputTank: function () {
-        return this.tileEntity.liquidStorage;
+        return this.tileEntity;
     },
     getOutputTank: function () {
-        return this.tileEntity.liquidStorage;
+        return this.tileEntity;
     }
 });
 ;

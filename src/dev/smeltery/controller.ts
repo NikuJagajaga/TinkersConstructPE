@@ -16,50 +16,73 @@ class SmelteryHandler {
     };
 
     private static elements: UI.ElementSet = {
-            line: {type: "image", x: 93 * SCALE, y: 11 * SCALE, z: 1, bitmap: "tcon.smeltery_line", scale: SCALE},
-            slot0: {type: "slot", x: 24 * SCALE, y: 10 * SCALE, size: 18 * SCALE/*, isValid: (id, count, data) => MeltingRecipe.isExist(id, data)*/},
-            slot1: {type: "slot", x: 24 * SCALE, y: 28 * SCALE, size: 18 * SCALE/*, isValid: (id, count, data) => MeltingRecipe.isExist(id, data)*/},
-            slot2: {type: "slot", x: 24 * SCALE, y: 46 * SCALE, size: 18 * SCALE/*, isValid: (id, count, data) => MeltingRecipe.isExist(id, data)*/},
-            gauge0: {type: "scale", x: 21 * SCALE, y: 11 * SCALE, bitmap: "tcon.heat_gauge_0", scale: SCALE, direction: 1},
-            gauge1: {type: "scale", x: 21 * SCALE, y: 29 * SCALE, bitmap: "tcon.heat_gauge_0", scale: SCALE, direction: 1},
-            gauge2: {type: "scale", x: 21 * SCALE, y: 47 * SCALE, bitmap: "tcon.heat_gauge_0", scale: SCALE, direction: 1},
-            //scaleLava: {type: "scale", x: 161 * SCALE, y: 11 * SCALE, width: 12 * SCALE, height: 52 * SCALE, bitmap: "_liquid_lava_texture_0", direction: 1},
-            buttonSelect: {type: "button", x: 130 * SCALE, y: 70 * SCALE, bitmap: "classic_button_up", bitmap2: "classic_button_down", scale: SCALE, clicker: {
-                onClick: (_, container: ItemContainer) => {
-                    container.sendEvent("", {});
-                    //tile.data.select++;
-                    //tile.data.select %= Object.keys(tile.liquidStorage.liquidAmounts).length;
-                }
-            }},
-            buttonDump: {type: "button", x: 92 * SCALE, y: 70 * SCALE, bitmap: "_craft_button_up", bitmap2: "_craft_button_down", scale: SCALE / 2, clicker: {
-                onClick: (_, container: ItemContainer) => {
-                    container.sendEvent("", {});
-                    //const liquids = tile.liquidStorage.liquidAmounts;
-                    //delete liquids[Object.keys(liquids)[tile.data.select]];
-                    //tile.data.select %= Object.keys(liquids).length;
-                }
-            }},
-            iconSelect: {type: "image", x: 131.6 * SCALE, y: 71.6 * SCALE, z: 1, bitmap: "mod_browser_update_icon", scale: SCALE * 0.8},
-            textDump: {type: "text", x: 104 * SCALE, y: 68 * SCALE, z: 1, text: "Dump", font: {size: 30, color: Color.WHITE, shadow: 0.5, alignment: 1}},
-            textLiquid: {type: "text", x: 150 * SCALE, y: 50 * SCALE, font: {size: 30, color: Color.WHITE, shadow: 0.5}, multiline: true}
-        };
+        imageOvl: {type: "image", x: 93 * SCALE, y: 11 * SCALE, z: 1001, bitmap: "tcon.smeltery_ovl", scale: SCALE},
+        slot0: {type: "slot", x: 24 * SCALE, y: 10 * SCALE, size: 18 * SCALE/*, isValid: (id, count, data) => MeltingRecipe.isExist(id, data)*/},
+        slot1: {type: "slot", x: 24 * SCALE, y: 28 * SCALE, size: 18 * SCALE/*, isValid: (id, count, data) => MeltingRecipe.isExist(id, data)*/},
+        slot2: {type: "slot", x: 24 * SCALE, y: 46 * SCALE, size: 18 * SCALE/*, isValid: (id, count, data) => MeltingRecipe.isExist(id, data)*/},
+        gauge0: {type: "scale", x: 21 * SCALE, y: 11 * SCALE, bitmap: "tcon.heat_gauge_0", scale: SCALE, direction: 1},
+        gauge1: {type: "scale", x: 21 * SCALE, y: 29 * SCALE, bitmap: "tcon.heat_gauge_0", scale: SCALE, direction: 1},
+        gauge2: {type: "scale", x: 21 * SCALE, y: 47 * SCALE, bitmap: "tcon.heat_gauge_0", scale: SCALE, direction: 1},
+        //scaleLava: {type: "scale", x: 161 * SCALE, y: 11 * SCALE, width: 12 * SCALE, height: 52 * SCALE, bitmap: "_liquid_lava_texture_0", direction: 1},
+        textFuel: {type: "text", x: 67 * SCALE, y: 50 * SCALE, font: {size: 30, color: Color.WHITE, shadow: 0.5, align: UI.Font.ALIGN_CENTER}},
+        textLiquid: {type: "text", x: 92 * SCALE, y: 65 * SCALE, z: 1002, font: {size: 30, color: Color.WHITE, shadow: 0.5}, multiline: true},
+        buttonDump: {type: "button", x: 92 * SCALE, y: 80 * SCALE, z: 1002, bitmap: "_craft_button_up", bitmap2: "_craft_button_down", scale: SCALE / 2, clicker: {
+            onClick: (_, container: ItemContainer) => {
+                container.sendEvent("dumpLiquid", {});
+            }
+        }},
+        buttonSelect: {type: "button", x: 130 * SCALE, y: 80 * SCALE, z: 1002, bitmap: "classic_button_up", bitmap2: "classic_button_down", scale: SCALE, clicker: {
+            onClick: (_, container: ItemContainer) => {
+                container.sendEvent("selectLiquid", {});
+            }
+        }},
+        textDump: {type: "text", x: 104 * SCALE, y: 78 * SCALE, z: 1003, text: "Dump", font: {size: 30, color: Color.WHITE, shadow: 0.5, alignment: 1}},
+        iconSelect: {type: "image", x: 131.6 * SCALE, y: 81.6 * SCALE, z: 1003, bitmap: "mod_browser_update_icon", scale: SCALE * 0.8}
+    };
 
-    private static window = new UI.StandardWindow({
-        standard: {
-            header: {text: {text: "Smeltery"}},
-            inventory: {standard: true},
-            background: {standard: true}
-        },
-        drawing: [
-            {type: "frame", x: 20 * SCALE, y: 10 * SCALE, width: 18 * SCALE, height: 18 * SCALE, bitmap: "classic_slot", scale: SCALE},
-            {type: "frame", x: 20 * SCALE, y: 28 * SCALE, width: 18 * SCALE, height: 18 * SCALE, bitmap: "classic_slot", scale: SCALE},
-            {type: "frame", x: 20 * SCALE, y: 46 * SCALE, width: 18 * SCALE, height: 18 * SCALE, bitmap: "classic_slot", scale: SCALE},
-            {type: "frame", x: 92 * SCALE, y: 10 * SCALE, width: 54 * SCALE, height: 54 * SCALE, bitmap: "classic_slot", scale: SCALE},
-            //{type: "frame", x: 160 * SCALE, y: 10 * SCALE, width: 14 * SCALE, height: 54 * SCALE, bitmap: "classic_slot", scale: SCALE},
-            {type: "bitmap", x: 56 * SCALE, y: 30 * SCALE, bitmap: "tcon.arrow", scale: SCALE}
-        ],
-        elements: SmelteryHandler.elements
-    });
+    private static window: UI.StandardWindow;
+    public static liquidCount = 0;
+
+    static setup(): void {
+
+        let i = 0;
+        let z = 1000;
+
+        for(let key in LiquidRegistry.liquids){
+            this.elements["liquid" + i] = {
+                type: "scale",
+                x: 93 * SCALE,
+                y: 11 * SCALE,
+                z: z--,
+                width: 52 * SCALE,
+                height: 52 * SCALE,
+                //bitmap: LiquidRegistry.getLiquidUITexture(key, 18 * SCALE, 18 * SCALE),
+                direction: 1,
+                pixelate: false
+            };
+            i++;
+        }
+
+        this.liquidCount = i;
+
+        this.window = new UI.StandardWindow({
+            standard: {
+                header: {text: {text: "Smeltery"}},
+                inventory: {standard: true},
+                background: {standard: true}
+            },
+            drawing: [
+                {type: "frame", x: 20 * SCALE, y: 10 * SCALE, width: 18 * SCALE, height: 18 * SCALE, bitmap: "classic_slot", scale: SCALE},
+                {type: "frame", x: 20 * SCALE, y: 28 * SCALE, width: 18 * SCALE, height: 18 * SCALE, bitmap: "classic_slot", scale: SCALE},
+                {type: "frame", x: 20 * SCALE, y: 46 * SCALE, width: 18 * SCALE, height: 18 * SCALE, bitmap: "classic_slot", scale: SCALE},
+                {type: "frame", x: 92 * SCALE, y: 10 * SCALE, width: 54 * SCALE, height: 54 * SCALE, bitmap: "classic_slot", scale: SCALE},
+                //{type: "frame", x: 160 * SCALE, y: 10 * SCALE, width: 14 * SCALE, height: 54 * SCALE, bitmap: "classic_slot", scale: SCALE},
+                {type: "bitmap", x: 56 * SCALE, y: 30 * SCALE, bitmap: "tcon.arrow", scale: SCALE}
+            ],
+            elements: SmelteryHandler.elements
+        });
+
+    }
 
     static getWindow(): UI.StandardWindow {
         return this.window;
@@ -73,34 +96,12 @@ class SmelteryHandler {
         return this.blocks[id] || false;
     }
 
-    static updateScale(): void {
-        if(this.window.isOpened()){
-            const container = this.window.getContainer();
-            const tile = container.getParent();
-            const liquids = tile.liquidStorage.liquidAmounts;
-            const capacity = tile.getLiquidCapacity();
-            const liqArray = tile.getLiquidArray();
-            let key: string;
-            let y = 11;
-            for(let i = 0; i < liqArray.length; i++){
-                key = "liquid-" + liqArray[i];
-                this.elements[key] = this.elements[key] || {type: "scale", x: 93 * SCALE, y: 11 * SCALE, width: 52 * SCALE, height: 52 * SCALE, direction: 1, pixelate: true};
-                this.elements[key].y = y * SCALE;
-                tile.liquidStorage.updateUiScale(key, liqArray[i]);
-                y -= liquids[liqArray[i]] / capacity * 52;
-            }
-            let split: string[];
-            for(key in this.elements){
-                split = key.split("-");
-                if(split[0] === "liquid" && !liquids[split[1]]){
-                    container.setScale(key, 0);
-                }
-            }
-            container.setText("textLiquid", liqArray[0] ? LiquidRegistry.getLiquidName(liqArray[0]) + "\n" + liquids[liqArray[0]] + " mB" : "");
-        }
-    }
-
 }
+
+
+Callback.addCallback("PostLoaded", () => {
+    SmelteryHandler.setup();
+});
 
 
 class SmelteryControler extends TconTileEntity implements ILiquidStorage {
@@ -110,7 +111,7 @@ class SmelteryControler extends TconTileEntity implements ILiquidStorage {
 
     area: {from: Vector, to: Vector};
 
-    tanks: SearedTank[] = [];
+    tanksPos: Vector[] = [];
 
     override defaultValues = {
         select: 0,
@@ -123,25 +124,40 @@ class SmelteryControler extends TconTileEntity implements ILiquidStorage {
     };
 
     getLiquidStored(): string {
-        return "";
+        return this.getLiquidArray()[0]?.liquid || null;
     }
     getLimit(liquid: string): number {
-        return 0;
+        const capacity = this.getLiquidCapacity();
+        const otherTotal = this.totalLiquidAmount() - this.getAmount(liquid);
+        return capacity - otherTotal;
     }
     getAmount(liquid: string): number {
-        return 0;
+        return this.liquidStorage.getAmount(liquid) || 0;
+    }
+    getRelativeAmount(liquid: string): number {
+        const capacity = this.getLiquidCapacity();
+        return capacity > 0 ? this.getAmount(liquid) / capacity : 0;
     }
     getLiquid(liquid: string, amount: number): number {
-        return 0;
+        const got = Math.min(this.getAmount(liquid), amount);
+        this.liquidStorage.liquidAmounts[liquid] -= got;
+        if(this.liquidStorage.liquidAmounts[liquid] <= 0){
+            delete this.liquidStorage.liquidAmounts[liquid];
+        }
+        return got;
     }
     addLiquid(liquid: string, amount: number): number {
-        return 0;
+        const freespace = this.getLiquidCapacity() - this.totalLiquidAmount();
+        const add = Math.min(freespace, amount);
+        this.liquidStorage.liquidAmounts[liquid] ??= 0;
+        this.liquidStorage.liquidAmounts[liquid] += add;
+        return add;
     }
     isFull(liquid?: string): boolean {
-        return false;
+        return this.totalLiquidAmount() > this.getLiquidCapacity();
     }
     isEmpty(liquid?: string): boolean {
-        return false;
+        return this.totalLiquidAmount() <= 0;
     }
 
     override getScreenByName(screenName: string, container: ItemContainer): UI.IWindow {
@@ -227,7 +243,6 @@ class SmelteryControler extends TconTileEntity implements ILiquidStorage {
         const z1 = this.searchWall(backPos, "z", -1);
         const z2 = this.searchWall(backPos, "z", 1);
         if(x1 === 0 || x2 === 0 || z1 === 0 || z2 === 0){
-            Game.message("xz: " + [x1, x2, z1, z2].join(","));
             return false;
         }
         const from = {x: backPos.x + x1, z: backPos.z + z1};
@@ -243,7 +258,7 @@ class SmelteryControler extends TconTileEntity implements ILiquidStorage {
         }
         }
         //Wall Check
-        const tanks: SearedTank[] = [];
+        const tanks: Vector[] = [];
         let y: number;
         let block: number;
         let tile: TileEntity;
@@ -267,7 +282,7 @@ class SmelteryControler extends TconTileEntity implements ILiquidStorage {
             tile = this.region.getTileEntity(x, y, z);
             if(tile){
                 switch(tile.blockID){
-                    case BlockID.tcon_tank: tanks.push(tile as SearedTank); break;
+                    case BlockID.tcon_tank: tanks.push({x: x, y: y, z: z}); break;
                     case BlockID.tcon_drain: tile.controller = this; break;
                     case BlockID.tcon_smeltery:
                         if(tile.x !== this.x || tile.y !== this.y || tile.z !== this.z){
@@ -282,13 +297,11 @@ class SmelteryControler extends TconTileEntity implements ILiquidStorage {
         if(y === this.y || tanks.length === 0){
             return false;
         }
-        this.area.from.x = from.x;
-        this.area.from.y = this.y - 1;
-        this.area.from.z = from.z;
-        this.area.to.x = to.x;
-        this.area.to.y = y - 1;
-        this.area.to.z = to.z;
-        this.tanks = tanks;
+        this.area = {
+            from: {x: from.x, y: this.y - 1, z: from.z},
+            to: {x: to.x, y: y - 1, z: to.z}
+        };
+        this.tanksPos = tanks;
         return true;
     }
 
@@ -313,22 +326,38 @@ class SmelteryControler extends TconTileEntity implements ILiquidStorage {
         return amount;
     }
 
-    getLiquidArray(): string[] {
+    getLiquidArray(): LiquidInstance[] {
         const liquids = this.liquidStorage.liquidAmounts;
-        const array = Object.keys(liquids).filter(liq => liquids[liq] > 0);
+        const array: LiquidInstance[] = [];
+        for(let key in liquids){
+            if(liquids[key] > 0){
+                array.push({liquid: key, amount: liquids[key]});
+            }
+        }
         for(let i = 0; i < this.data.select; i++){
             array.push(array.shift());
         }
         return array;
     }
 
-    consumeFuel(tank: SearedTank): {duration: number, temp: number} {
-        const liquid = tank.liquidStorage?.getLiquidStored();
-        const amount = tank.liquidStorage?.getAmount(liquid) || 0;
-        const fuelData = SmelteryFuel.getFuel(liquid);
-        if(fuelData && amount >= fuelData.amount){
-            this.liquidStorage.getLiquid(liquid, fuelData.amount);
-            return {duration: fuelData.duration, temp: fuelData.temp};
+    consumeFuel(): {duration: number, temp: number} {
+        let iTank: TileEntityInterface;
+        let tank: ILiquidStorage;
+        let stored = "";
+        let amount = 0;
+        let fuelData: ISmelteryFuel;
+        for(let i = 0; i < this.tanksPos.length; i++){
+            iTank = StorageInterface.getLiquidStorage(this.blockSource, this.tanksPos[i].x, this.tanksPos[i].y, this.tanksPos[i].z);
+            tank = iTank?.getOutputTank(-1);
+            if(tank){
+                stored = tank.getLiquidStored();
+                amount = tank.getAmount(stored);
+                fuelData = SmelteryFuel.getFuel(stored);
+                if(fuelData && amount >= fuelData.amount){
+                    tank.getLiquid(stored, fuelData.amount);
+                    return {duration: fuelData.duration, temp: fuelData.temp};
+                }
+            }
         }
         return null;
     }
@@ -338,18 +367,205 @@ class SmelteryControler extends TconTileEntity implements ILiquidStorage {
         this.data.isActive = this.checkStructure();
 
         if(this.data.isActive){
-            this.region.setBlock(this.area.from, VanillaBlockID.wool, 0);
-            this.region.setBlock(this.area.to, VanillaBlockID.wool, 1);
-        }
-        else{
-            Game.message("invalid");
+            return false;
         }
 
-        return false;
+        BlockEngine.sendMessage(Network.getClientForPlayer(player), "Invalid Structure");
+        return true;
 
     }
 
+    @NetworkEvent(Side.Client)
+    setAnim(data: {capacity: number, liqArray: LiquidInstance[], area: {from: Vector, to: Vector}, isActive: boolean}): void {
+        if(!this.render || !this.anim){
+            return;
+        }
+        const parts = [];
+        const sizeX = data.area.to.x - data.area.from.x - 1;
+        const sizeY = data.area.to.y - data.area.from.y;
+        const sizeZ = data.area.to.z - data.area.from.z - 1;
+        const texScale = MoltenLiquid.getTexScale();
+        if(data.isActive){
+            let height: number;
+            let max: number;
+            let y = 0;
+            for(let i = 0; i < data.liqArray.length; i++){
+                height = data.liqArray[i].amount / data.capacity * sizeY;
+                max = Math.max(sizeX, sizeZ, height);
+                parts.push({
+                    type: "box",
+                    uv: {x: 0, y: MoltenLiquid.getY(data.liqArray[i].liquid) * max},
+                    coords: {x: 0, y: y - height * 16 / 2, z: 0},
+                    size: {x: sizeX * 16, y: height * 16, z: sizeZ * 16}
+                });
+                y -= height * 16;
+            }
+            texScale.width *= max;
+            texScale.height *= max;
+        }
+        if(isFinite(texScale.width) && isFinite(texScale.height)){
+            this.render.setPart("head", parts, texScale);
+        }
+        this.anim.setPos(
+            (data.area.from.x + data.area.to.x) / 2 + 0.5,
+            (data.area.from.y + data.area.to.y) / 2 - (sizeY + 1) * 0.5,
+            (data.area.from.z + data.area.to.z) / 2 + 0.5
+        );
+        this.anim.refresh();
+    }
+
+    interactWithEntitiesInside(): void {
+        const allEnt = Entity.getAll();
+        const entities: number[] = [];
+        let pos: Vector;
+        for(let i = 0; i < allEnt.length; i++){
+            pos = Entity.getPosition(allEnt[i]);
+            if(this.area.from.x <= pos.x && pos.x <= this.area.to.x && this.area.from.y <= pos.y && pos.y <= this.area.to.y && this.area.from.z <= pos.z && pos.z <= this.area.to.z){
+                if(MeltingRecipe.getEntRecipe(allEnt[i])){
+                    entities.push(allEnt[i]);
+                }
+            }
+        }
+        const liquidCapacity = this.getLiquidCapacity();
+        entities.forEach(ent => {
+            const result = MeltingRecipe.getEntRecipe(ent);
+            if(this.totalLiquidAmount() + result.amount <= liquidCapacity){
+                this.liquidStorage.addLiquid(result.liquid, result.amount);
+            }
+            Entity.damageEntity(ent, 2);
+        });
+    }
+
     override onTick(): void {
+
+        const tick = World.getThreadTime();
+        const liqArray = this.getLiquidArray();
+        const totalAmount = this.totalLiquidAmount();
+        const capacity = this.getItemCapacity();
+        const liquidCapacity = this.getLiquidCapacity();
+        let canSmelt = true;
+
+        if((tick & 63) === 0){
+            this.data.isActive = this.checkStructure();
+            this.setActive();
+            this.sendPacket("setAnim", {capacity: liquidCapacity, liqArray: liqArray, area: this.area, isActive: this.data.isActive});
+            if(this.data.isActive){
+                this.sendPacket("spawnParticle", {});
+            }
+        }
+
+        if(this.data.isActive){
+
+            if(Cfg.checkInsideSmeltery && tick % 20 === 0){
+                this.interactWithEntitiesInside();
+            }
+    
+            if((tick & 3) === 0){
+                AlloyRecipe.getRecipes(this.liquidStorage.liquidAmounts).forEach(recipe => {
+                    for(let i = 0; i < recipe.inputs.length; i++){
+                        this.getLiquid(recipe.inputs[i].liquid, recipe.inputs[i].amount);
+                    }
+                    this.addLiquid(recipe.result.liquid, recipe.result.amount);
+                });
+            }
+    
+            if(this.data.fuel <= 0){
+                const fuelData = this.consumeFuel();
+                if(fuelData){
+                    this.data.fuel = fuelData.duration;
+                    this.data.temp = fuelData.temp;
+                }
+                if(this.data.fuel <= 0){
+                    canSmelt = false;
+                }
+            }
+
+        }
+        else{
+            canSmelt = false;
+        }
+
+        const modes: (0 | 1 | 2 | 3)[] = [0, 0, 0];
+        const values: number[] = [0, 0, 0];
+
+        if(canSmelt){
+            
+            const slots: UI.Slot[] = [
+                this.container.getSlot("slot0"),
+                this.container.getSlot("slot1"),
+                this.container.getSlot("slot2")
+            ];
+
+            const smeltCount = slots.reduce((sum, slot) => sum + slot.count, 0);
+            let recipe: IMeltingRecipe;
+            let time = 0;
+            let count = 0;
+            let consume = false;
+
+            if(smeltCount > capacity){
+                for(let i = 0; i < 3; i++){
+                    modes[i] = 2;
+                    values[i] = 1;
+                }
+            }
+            else{
+                for(let i = 0; i < 3; i++){
+                    recipe = MeltingRecipe.getRecipe(slots[i].id, slots[i].data);
+                    if(recipe && i < capacity){
+                        time = Math.max(5, recipe.temp) * SmelteryHandler.getHeatFactor();
+                        this.data["heat" + i] += this.data.temp / 100;
+                        consume = true;
+                        if(this.data["heat" + i] >= time){
+                            count = slots[i].count;
+                            while(totalAmount + recipe.amount * count > liquidCapacity){
+                                count--;
+                            }
+                            if(count > 0){
+                                slots[i].count -= count;
+                                this.container.validateSlot("slot" + i);
+                                this.liquidStorage.addLiquid(recipe.liquid, recipe.amount * count);
+                                this.data["heat" + i] = 0;
+                            }
+                            else{
+                                modes[i] = 2;
+                                values[i] = 1;
+                            }
+                        }
+                        else{
+                            values[i] = this.data["heat" + i] / time;
+                        }
+                    }
+                    else{
+                        this.data["heat" + i] = 0;
+                        if(slots[i].id !== 0){
+                            modes[i] = 3;
+                            values[i] = 1;
+                        }
+                    }
+                }
+            }
+
+            if(consume){
+                this.data.fuel--;
+            }
+
+        }
+
+        for(let i = 0; i < 3; i++){
+            this.container.setScale("gauge" + i, values[i]);
+        }
+
+        for(let i = 0; i < SmelteryHandler.liquidCount; i++){
+            if(i < liqArray.length){
+                this.container.setScale("liquid" + i, 1);
+            }
+        }
+        
+        this.container.sendEvent("changeScales", {mode0: modes[0], mode1: modes[1], mode2: modes[2]});
+        this.container.sendEvent("updateLiquidScales", {capacity: liquidCapacity, liqArray: liqArray});
+        this.container.setText("textFuel", "fuel: " + this.data.fuel);
+        this.container.setText("textLiquid", liqArray[0] ? LiquidRegistry.getLiquidName(liqArray[0].liquid) + "\n" + liqArray[0].amount + " mB" : "");
+        this.container.sendChanges();
         
     }
 
@@ -370,6 +586,49 @@ class SmelteryControler extends TconTileEntity implements ILiquidStorage {
         Particles.addParticle(EParticleType.FLAME, coords.x, coords.y, coords.z, 0, 0, 0);
     }
 
+    @ContainerEvent(Side.Client)
+    changeScales(container: ItemContainer, window: UI.IWindow, content: any, data: {mode0: number, mode1: number, mode2: number}): void {
+        if(window?.isOpened()){
+            const elements = window.getElements();
+            elements.get("gauge0").setBinding("texture", "tcon.heat_gauge_" + data.mode0);
+            elements.get("gauge1").setBinding("texture", "tcon.heat_gauge_" + data.mode1);
+            elements.get("gauge2").setBinding("texture", "tcon.heat_gauge_" + data.mode2);
+        }
+    }
+
+    @ContainerEvent(Side.Client)
+    updateLiquidScales(container: ItemContainer, window: UI.IWindow, content: any, data: {capacity: number, liqArray: LiquidInstance[]}): void {
+        if(!window?.isOpened()){
+            return;
+        }
+        const elements = window.getElements();
+        let elem: UI.Element;
+        let y = (11 + 52) * SCALE;
+        for(let i = 0; i < SmelteryHandler.liquidCount; i++){
+            elem = elements.get("liquid" + i);
+            if(i < data.liqArray.length){
+                y -= data.liqArray[i].amount / data.capacity * 52 * SCALE;
+                elem.setPosition(elem.x, y);
+                elem.setBinding("texture", LiquidRegistry.getLiquidUITexture(data.liqArray[i].liquid, 18 * SCALE, 18 * SCALE));
+            }
+            else{
+                elem.setPosition(elem.x, 2000);
+            }
+        }
+    }
+
+    @ContainerEvent(Side.Server)
+    selectLiquid(): void {
+        this.data.select = (this.data.select + 1) % this.getLiquidArray().length;
+    }
+
+    @ContainerEvent(Side.Server)
+    dumpLiquid(): void {
+        const stored = this.getLiquidStored();
+        this.getLiquid(stored, this.getAmount(stored));
+        this.data.select %= this.getLiquidArray().length;
+    }
+
 }
 
 
@@ -381,9 +640,9 @@ StorageInterface.createInterface(BlockID.tcon_smeltery, {
         return true;
     },
     getInputTank(): ILiquidStorage {
-        return this.tileEntity.liquidStorage;
+        return this.tileEntity;
     },
     getOutputTank(): ILiquidStorage {
-        return this.tileEntity.liquidStorage;
+        return this.tileEntity;
     }
 });

@@ -1,20 +1,26 @@
+interface IAlloyRecipe {
+    inputs: LiquidInstance[],
+    result: LiquidInstance
+};
+
 class AlloyRecipe {
 
-    private static data: {inputs: LiquidInstance[], result: LiquidInstance}[] = [];
+    private static data: IAlloyRecipe[] = [];
 
     static addRecipe(result: LiquidInstance, ...inputs: LiquidInstance[]): void {
+        let inputAmount = 0;
+        for(let i = 0; i < inputs.length; i++){
+            inputAmount += inputs[i].amount;
+        }
+        if(result.amount > inputAmount){
+            alert("[TCon]: Invalid alloy recipe -> " + result.liquid);
+            return;
+        }
         this.data.push({inputs: inputs.map(input => ({liquid: input.liquid, amount: input.amount})), result: result});
     }
 
-    static alloyAlloys(liquids: {[key: string]: number}, liquidStorage: any): void {
-        this.data.forEach(recipe => {
-            if(recipe.inputs.every(input => liquids[input.liquid] >= input.amount)){
-                recipe.inputs.forEach(input => {
-                    liquidStorage.getLiquid(input.liquid, input.amount);
-                });
-                liquidStorage.addLiquid(recipe.result.liquid, recipe.result.amount);
-            }
-        });
+    static getRecipes(liquidAmounts: {[key: string]: number}): IAlloyRecipe[] {
+        return this.data.filter(recipe => recipe.inputs.every(input => (liquidAmounts[input.liquid] || 0) >= input.amount));
     }
 
     static getAllRecipeForRV(): RecipePattern[] {

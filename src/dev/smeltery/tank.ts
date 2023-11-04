@@ -63,7 +63,7 @@ class SearedTank extends TileWithLiquidModel {
         const empty = LiquidItemRegistry.getEmptyItem(item.id, item.data);
 
         if(empty){
-            if(!this.liquidStorage.isFull() && (stored === empty.liquid || !stored)){
+            if(stored === empty.liquid || !stored){
                 if(this.liquidStorage.getLimit(stored) - this.liquidStorage.getAmount(stored) >= empty.amount){
                     this.liquidStorage.addLiquid(empty.liquid, empty.amount);
                     item.count--;

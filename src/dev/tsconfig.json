@@ -93,6 +93,7 @@
         "../../declarations/SoundLib.d.ts",
         "../../declarations/RecipeViewer.d.ts",
         "../../declarations/ConnectedTexture.d.ts",
-        "../../declarations/EnhancedRecipes.d.ts"
+        "../../declarations/EnhancedRecipes.d.ts",
+        "../../declarations/WindowMaker.d.ts"
     ]
 }

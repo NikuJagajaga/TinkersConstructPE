@@ -4,6 +4,7 @@ IMPORT("StorageInterface");
 IMPORT("SoundLib");
 IMPORT("EnhancedRecipes");
 IMPORT("ConnectedTexture");
+IMPORT("WindowMaker");
 
 const Color = android.graphics.Color;
 const Thread = java.lang.Thread;

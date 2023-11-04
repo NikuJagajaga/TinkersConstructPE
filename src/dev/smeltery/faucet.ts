@@ -38,20 +38,6 @@ Block.setShape(BlockID.tcon_faucet,  0/16,  4/16,  4/16,  6/16, 10/16, 12/16, 2)
 Block.setShape(BlockID.tcon_faucet, 10/16,  4/16,  4/16, 16/16, 10/16, 12/16, 3);
 
 
-const FaucetLiquidRenders: Render[] = (() => {
-
-    const renders: Render[] = [
-        new Render(),
-        new Render(),
-        new Render(),
-        new Render(),
-    ];
-
-    return renders;
-
-})();
-
-
 class SearedFaucet extends TconTileEntity {
 
     render: Render;

@@ -12895,7 +12895,7 @@ declare namespace UI {
         equals: (value: any) => boolean;
         x: number;
         y: number;
-        z: number;
+        z: java.lang.Integer;
         size?: java.lang.Integer;
         source?: ItemInstance;
         elementRect: android.graphics.Rect;
