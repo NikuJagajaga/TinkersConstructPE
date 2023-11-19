@@ -4,10 +4,10 @@ ModAPI.addAPICallback("RecipeViewer", (api: {Core: any, RecipeType: typeof Recip
 
     RV = api.Core;
 
-    UI.TextureSource.put("tcon.rv.table", FileTools.ReadImage(__dir__ + "res/terrain-atlas/smeltery/tcon_itemcast_2.png"));
-    UI.TextureSource.put("tcon.rv.basin", FileTools.ReadImage(__dir__ + "res/terrain-atlas/smeltery/tcon_blockcast_2.png"));
+    //UI.TextureSource.put("tcon.rv.table", FileTools.ReadImage(__dir__ + "res/terrain-atlas/smeltery/tcon_itemcast_2.png"));
+    //UI.TextureSource.put("tcon.rv.basin", FileTools.ReadImage(__dir__ + "res/terrain-atlas/smeltery/tcon_blockcast_2.png"));
 
-
+/*
     class PartBuilderRV extends api.RecipeType {
 
         constructor(){
@@ -30,7 +30,7 @@ ModAPI.addAPICallback("RecipeViewer", (api: {Core: any, RecipeType: typeof Recip
     }
 
     api.RecipeTypeRegistry.register("tcon_partbuilder", new PartBuilderRV());
-
+*/
 
     class MeltingRV extends api.RecipeType {
 

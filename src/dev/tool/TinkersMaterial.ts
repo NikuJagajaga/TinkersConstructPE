@@ -19,7 +19,7 @@ class TinkersMaterial {
         5: "Cobalt"
     };
 
-    private item: number;
+    private item: Tile;
     private headStats: HeadStats;
     private handleStats: HandleStats;
     private extraStats: ExtraStats;
@@ -40,11 +40,13 @@ class TinkersMaterial {
         return this.moltenLiquid || "";
     }
 
-    setItem(id: number): void {
-        this.item = id;
+    setItem(item: AnyID): void {
+        if(item){
+            this.item = getIDData(item, -1);
+        }
     }
 
-    getItem(): number {
+    getItem(): Tile {
         return this.item;
     }
 
@@ -106,47 +108,47 @@ const Material: {[key: string]: TinkersMaterial} = {
 };
 
 
-Material.wood.setItem(VanillaBlockID.planks);
+Material.wood.setItem("planks");
 Material.wood.setHeadStats(35, 2, 2, TinkersMaterial.STONE);
 Material.wood.setHandleStats(1, 25);
 Material.wood.setExtraStats(15);
 
-Material.stone.setItem(VanillaBlockID.cobblestone);
+Material.stone.setItem("cobblestone");
 Material.stone.setHeadStats(120, 4, 3, TinkersMaterial.IRON);
 Material.stone.setHandleStats(0.5, -50);
 Material.stone.setExtraStats(20);
 
-Material.flint.setItem(VanillaItemID.flint);
+Material.flint.setItem("flint");
 Material.flint.setHeadStats(150, 5, 2.9, TinkersMaterial.IRON);
 Material.flint.setHandleStats(0.6, -60);
 Material.flint.setExtraStats(40);
 
-Material.cactus.setItem(VanillaBlockID.cactus);
+Material.cactus.setItem("cactus");
 Material.cactus.setHeadStats(210, 4, 3.4, TinkersMaterial.IRON);
 Material.cactus.setHandleStats(0.85, 20);
 Material.cactus.setExtraStats(50);
 
-Material.obsidian.setItem(VanillaBlockID.obsidian);
+Material.obsidian.setItem("obsidian");
 Material.obsidian.setHeadStats(139, 7.07, 4.2, TinkersMaterial.COBALT);
 Material.obsidian.setHandleStats(0.9, -100);
 Material.obsidian.setExtraStats(90);
 
-Material.prismarine.setItem(VanillaBlockID.prismarine);
+Material.prismarine.setItem("prismarine");
 Material.prismarine.setHeadStats(430, 5.5, 6.2, TinkersMaterial.IRON);
 Material.prismarine.setHandleStats(0.6, -150);
 Material.prismarine.setExtraStats(100);
 
-Material.netherrack.setItem(VanillaBlockID.netherrack);
+Material.netherrack.setItem("netherrack");
 Material.netherrack.setHeadStats(270, 4.5, 3, TinkersMaterial.IRON);
 Material.netherrack.setHandleStats(0.85, -150);
 Material.netherrack.setExtraStats(75);
 
-Material.endstone.setItem(VanillaBlockID.end_stone);
+Material.endstone.setItem("end_stone");
 Material.endstone.setHeadStats(420, 3.23, 3.23, TinkersMaterial.OBSIDIAN);
 Material.endstone.setHandleStats(0.85, 0);
 Material.endstone.setExtraStats(42);
 
-Material.bone.setItem(VanillaItemID.bone);
+Material.bone.setItem("bone");
 Material.bone.setHeadStats(200, 5.09, 2.5, TinkersMaterial.IRON);
 Material.bone.setHandleStats(1.1, 50);
 Material.bone.setExtraStats(65);
@@ -156,7 +158,7 @@ Material.paper.setHeadStats(12, 0.51, 0.05, TinkersMaterial.STONE);
 Material.paper.setHandleStats(0.1, 5);
 Material.paper.setExtraStats(15);
 
-Material.sponge.setItem(VanillaBlockID.sponge);
+Material.sponge.setItem("sponge");
 Material.sponge.setHeadStats(1050, 3.02, 0, TinkersMaterial.STONE);
 Material.sponge.setHandleStats(1.2, 250);
 Material.sponge.setExtraStats(250);
@@ -186,7 +188,7 @@ Material.knightslime.setHeadStats(850, 5.8, 5.1, TinkersMaterial.OBSIDIAN);
 Material.knightslime.setHandleStats(0.5, 500);
 Material.knightslime.setExtraStats(125);
 
-Material.iron.setItem(VanillaItemID.iron_ingot);
+Material.iron.setItem("iron_ingot");
 Material.iron.setHeadStats(204, 6, 5.5, TinkersMaterial.DIAMOND);
 Material.iron.setHandleStats(0.85, 60);
 Material.iron.setExtraStats(50);

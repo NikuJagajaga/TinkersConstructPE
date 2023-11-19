@@ -102,26 +102,34 @@ class CastingTable extends TileWithLiquidModel {
             return false;
         }
 
-        label: {
-            if(this.container.getSlot("slotOutput").id !== 0){
-                this.container.dropSlot(this.blockSource, "slotOutput", this.x + 0.5, this.y + 1, this.z + 0.5);
-                break label;
-            }
-            if(this.container.getSlot("slotInput").id !== 0){
-                this.container.dropSlot(this.blockSource, "slotInput", this.x + 0.5, this.y + 1, this.z + 0.5);
-                break label;
-            }
-            if(this.isValidCast(item.id) && !item.extra){
-                this.container.setSlot("slotInput", item.id, 1, item.data);
-                const player = new PlayerEntity(playerUid);
+        const player = new PlayerEntity(playerUid);
+        const input = this.container.getSlot("slotInput");
+        const output = this.container.getSlot("slotOutput");
+
+        if(output.id !== 0){
+            output.dropAt(this.blockSource, this.x + 0.5, this.y + 1, this.z + 0.5);
+        }
+        else if(input.id !== 0){
+            const result = CastingRecipe.getSandMoldingRecipe(item.id);
+            if(input.id === ItemID.tcon_sandcast_blank && result){
+                input.setSlot(result, 1, 0);
+                output.setSlot(item.id, 1, item.data);
                 player.decreaseCarriedItem();
-                break label;
             }
+            else{
+                input.dropAt(this.blockSource, this.x + 0.5, this.y + 1, this.z + 0.5);
+            }
+        }
+        else if(this.isValidCast(item.id) && !item.extra){
+            input.setSlot(item.id, 1, item.data);
+            player.decreaseCarriedItem();
+        }
+        else{
             return false;
         }
 
-        //this.setAnimItem();
         this.updateLiquidLimits();
+        this.container.sendChanges();
         return true;
 
     }
@@ -154,7 +162,6 @@ class CastingTable extends TileWithLiquidModel {
         }
 
         StorageInterface.checkHoppers(this);
-        this.updateAnimItem();
         this.container.sendChanges();
 
         const slotInput = this.container.getSlot("slotInput");

@@ -67,7 +67,7 @@ class SmelteryHandler {
 
         this.window = new UI.StandardWindow({
             standard: {
-                header: {text: {text: "Smeltery"}},
+                header: {text: {text: "Smeltery"}, height: 60},
                 inventory: {standard: true},
                 background: {standard: true}
             },

@@ -28,7 +28,7 @@ MeltingRecipe.addRecipe(BlockID.tcon_stone, "molten_stone", MatValue.SEARED_BLOC
 MeltingRecipe.addRecipe(ItemID.tcon_brick, "molten_stone", MatValue.SEARED_MATERIAL);
 MeltingRecipe.addRecipeForAmount(BlockID.tcon_grout, "molten_stone", MatValue.SEARED_MATERIAL, MatValue.SEARED_MATERIAL / 3);
 
-CastingRecipe.addTableRecipeForBoth("ingot", "molten_stone", ItemID.tcon_brick, MatValue.SEARED_MATERIAL);
+CastingRecipe.addTableRecipeForAll("ingot", "molten_stone", ItemID.tcon_brick, MatValue.SEARED_MATERIAL);
 CastingRecipe.addBasinRecipe(0, "molten_stone", {id: BlockID.tcon_stone, data: 0}, MatValue.SEARED_BLOCK);
 CastingRecipe.addBasinRecipe(VanillaBlockID.cobblestone, "molten_stone", {id: BlockID.tcon_stone, data: 1}, MatValue.SEARED_MATERIAL * 3);
 

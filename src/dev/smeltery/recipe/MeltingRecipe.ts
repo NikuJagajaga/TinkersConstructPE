@@ -147,7 +147,7 @@ MeltingRecipe.addRecipe("iron_ore", "molten_iron", MatValue.ORE);
 MeltingRecipe.addRecipe("gold_ore", "molten_gold", MatValue.ORE);
 
 
-MeltingRecipe.addEntRecipe(1, "blood", 20);//EEntityType.PLAYER
+MeltingRecipe.addEntRecipe(EEntityType.PLAYER, "blood", 20);
 MeltingRecipe.addEntRecipe(EEntityType.ZOMBIE, "blood", 20);
 MeltingRecipe.addEntRecipe(EEntityType.ZOMBIE_VILLAGER, "blood", 20);
 MeltingRecipe.addEntRecipe(EEntityType.ZOMBIE_VILLAGE_V2, "blood", 20);

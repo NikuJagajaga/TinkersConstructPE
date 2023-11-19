@@ -7,7 +7,7 @@ class PartRegistry {
 
     private static data: {[id: number]: TinkersPartData} = {};
 
-    private static readonly types: {key: string, name: string, cost: number}[] = [
+    static readonly types: {key: ECastType, name: string, cost: number}[] = [
         {key: "pickaxe", name: "Pickaxe Head", cost: 2},
         {key: "shovel", name: "Shovel Head", cost: 2},
         {key: "axe", name: "Axe Head", cost: 2},
@@ -32,7 +32,7 @@ class PartRegistry {
             const liquid = material.getMoltenLiquid();
             if(liquid){
                 MeltingRecipe.addRecipe(id, liquid, MatValue.INGOT * type.cost);
-                CastingRecipe.addTableRecipeForBoth(type.key, liquid, id);
+                CastingRecipe.addTableRecipeForAll(type.key, liquid, id);
             }
             CastingRecipe.addMakeCastRecipes(id, type.key);
         });

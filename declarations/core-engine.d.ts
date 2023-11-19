@@ -13198,6 +13198,7 @@ declare namespace UI {
 		 * used to create interfaces functionality
 		 */
 		elements: ElementSet,
+        isButtonHidden?: boolean
 	}
 
 	interface ColorDrawing {
@@ -13445,6 +13446,8 @@ declare namespace UI {
 		maxStackSize?: number,
 
 		visual?: boolean,
+
+        source?: ItemInstance,
 
 		darken?: boolean,
 

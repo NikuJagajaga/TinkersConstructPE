@@ -1,3 +1,4 @@
+/*
 class PatternRegistry {
 
     private static data: {[id: number]: {type: string, cost: number}} = {};
@@ -34,10 +35,9 @@ class PatternRegistry {
     }
 
 }
-
+*/
 
 createItem("tcon_pattern_blank", "Pattern");
-
 Recipes2.addShaped({id: ItemID.tcon_pattern_blank, count: 4}, "ab:ba", {a: "planks", b: "stick"});
 /*
 PatternRegistry.registerData(ItemID.tcon_pattern_pickaxe, "pickaxe", 2);
@@ -56,9 +56,51 @@ PatternRegistry.registerData(ItemID.tcon_pattern_largeplate, "largeplate", 8);
 */
 
 
+Item.addCreativeGroup("tcon_sandcast", "Sand Cast", [
+    createItem("tcon_sandcast_blank", "Blank Sand Cast"),
+    createItem("tcon_sandcast_pickaxe", "Pickaxe Head Sand Cast"),
+    createItem("tcon_sandcast_shovel", "Shovel Head Sand Cast"),
+    createItem("tcon_sandcast_axe", "Axe Head Sand Cast"),
+    createItem("tcon_sandcast_broadaxe", "Broad Axe Head Sand Cast"),
+    createItem("tcon_sandcast_sword", "Sword Blade Head Sand Cast"),
+    createItem("tcon_sandcast_hammer", "Hammer Head Sand Cast"),
+    createItem("tcon_sandcast_excavator", "Excavator Head Sand Cast"),
+    createItem("tcon_sandcast_rod", "Tool Rod Sand Cast"),
+    createItem("tcon_sandcast_rod2", "Tough Tool Rod Sand Cast"),
+    createItem("tcon_sandcast_binding", "Binding Sand Cast"),
+    createItem("tcon_sandcast_binding2", "Tough Binding Sand Cast"),
+    createItem("tcon_sandcast_guard", "Wide Guard Sand Cast"),
+    createItem("tcon_sandcast_largeplate", "Large Plate Sand Cast"),
+    createItem("tcon_sandcast_ingot", "Ingot Sand Cast"),
+    createItem("tcon_sandcast_nugget", "Nugget Sand Cast"),
+    createItem("tcon_sandcast_gem", "Gem Sand Cast"),
+    createItem("tcon_sandcast_plate", "Plate Sand Cast"),
+    createItem("tcon_sandcast_gear", "Gear Sand Cast")
+]);
+
+Recipes2.addShapeless({id: ItemID.tcon_sandcast_blank, count: 4}, ["sand"]);
+
+CastingRecipe.setDefaultCapacity(ItemID.tcon_sandcast_pickaxe, MatValue.INGOT * 2);
+CastingRecipe.setDefaultCapacity(ItemID.tcon_sandcast_shovel, MatValue.INGOT * 2);
+CastingRecipe.setDefaultCapacity(ItemID.tcon_sandcast_axe, MatValue.INGOT * 2);
+CastingRecipe.setDefaultCapacity(ItemID.tcon_sandcast_broadaxe, MatValue.INGOT * 8);
+CastingRecipe.setDefaultCapacity(ItemID.tcon_sandcast_sword, MatValue.INGOT * 2);
+CastingRecipe.setDefaultCapacity(ItemID.tcon_sandcast_hammer, MatValue.INGOT * 8);
+CastingRecipe.setDefaultCapacity(ItemID.tcon_sandcast_excavator, MatValue.INGOT * 8);
+CastingRecipe.setDefaultCapacity(ItemID.tcon_sandcast_rod, MatValue.INGOT * 1);
+CastingRecipe.setDefaultCapacity(ItemID.tcon_sandcast_rod2, MatValue.INGOT * 3);
+CastingRecipe.setDefaultCapacity(ItemID.tcon_sandcast_binding, MatValue.INGOT * 1);
+CastingRecipe.setDefaultCapacity(ItemID.tcon_sandcast_binding2, MatValue.INGOT * 3);
+CastingRecipe.setDefaultCapacity(ItemID.tcon_sandcast_guard, MatValue.INGOT * 1);
+CastingRecipe.setDefaultCapacity(ItemID.tcon_sandcast_largeplate, MatValue.INGOT * 8);
+CastingRecipe.setDefaultCapacity(ItemID.tcon_sandcast_ingot, MatValue.INGOT);
+CastingRecipe.setDefaultCapacity(ItemID.tcon_sandcast_nugget, MatValue.NUGGET);
+CastingRecipe.setDefaultCapacity(ItemID.tcon_sandcast_gem, MatValue.GEM);
+CastingRecipe.setDefaultCapacity(ItemID.tcon_sandcast_plate, MatValue.INGOT);
+CastingRecipe.setDefaultCapacity(ItemID.tcon_sandcast_gear, MatValue.INGOT * 4);
 
 
-Item.addCreativeGroup("tcon_claycast", "Clay Cast", [
+Item.addCreativeGroup("tcon_Sandcast", "Clay Cast", [
     createItem("tcon_claycast_pickaxe", "Pickaxe Head Clay Cast"),
     createItem("tcon_claycast_shovel", "Shovel Head Clay Cast"),
     createItem("tcon_claycast_axe", "Axe Head Clay Cast"),
@@ -71,7 +113,12 @@ Item.addCreativeGroup("tcon_claycast", "Clay Cast", [
     createItem("tcon_claycast_binding", "Binding Clay Cast"),
     createItem("tcon_claycast_binding2", "Tough Binding Clay Cast"),
     createItem("tcon_claycast_guard", "Wide Guard Clay Cast"),
-    createItem("tcon_claycast_largeplate", "Large Plate Clay Cast")
+    createItem("tcon_claycast_largeplate", "Large Plate Clay Cast"),
+    createItem("tcon_claycast_ingot", "Ingot Clay Cast"),
+    createItem("tcon_claycast_nugget", "Nugget Clay Cast"),
+    createItem("tcon_claycast_gem", "Gem Clay Cast"),
+    createItem("tcon_claycast_plate", "Plate Clay Cast"),
+    createItem("tcon_claycast_gear", "Gear Clay Cast")
 ]);
 
 CastingRecipe.setDefaultCapacity(ItemID.tcon_claycast_pickaxe, MatValue.INGOT * 2);
@@ -87,8 +134,11 @@ CastingRecipe.setDefaultCapacity(ItemID.tcon_claycast_binding, MatValue.INGOT * 
 CastingRecipe.setDefaultCapacity(ItemID.tcon_claycast_binding2, MatValue.INGOT * 3);
 CastingRecipe.setDefaultCapacity(ItemID.tcon_claycast_guard, MatValue.INGOT * 1);
 CastingRecipe.setDefaultCapacity(ItemID.tcon_claycast_largeplate, MatValue.INGOT * 8);
-
-
+CastingRecipe.setDefaultCapacity(ItemID.tcon_claycast_ingot, MatValue.INGOT);
+CastingRecipe.setDefaultCapacity(ItemID.tcon_claycast_nugget, MatValue.NUGGET);
+CastingRecipe.setDefaultCapacity(ItemID.tcon_claycast_gem, MatValue.GEM);
+CastingRecipe.setDefaultCapacity(ItemID.tcon_claycast_plate, MatValue.INGOT);
+CastingRecipe.setDefaultCapacity(ItemID.tcon_claycast_gear, MatValue.INGOT * 4);
 
 
 Item.addCreativeGroup("tcon_cast", "Cast", [

@@ -15,6 +15,7 @@
         "header.ts",
         "util/TconTileEntity.ts",
         "util/TileWithLiquidModel.ts",
+        "util/CraftingWindow.ts",
         "util/BlockModel.ts",
         "util/Sound.ts",
 
@@ -59,9 +60,8 @@
         "tool/modifier/shulking.ts",
         "tool/modifier/web.ts",
 
-        "table/PatternChest.ts",
+        "table/TableWindow.ts",
         "table/TableBase.ts",
-        "table/StencilTable.ts",
         "table/PartBuilder.ts",
         "table/ToolForge.ts",
 

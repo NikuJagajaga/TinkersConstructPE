@@ -12,9 +12,11 @@ class RepairHandler {
 
     private static readonly value = MatValue.SHARD * 4 / MatValue.INGOT | 0;
 
-    static calcRepairAmount(id: number): number {
+    static calcRepairAmount(id: number, data): number {
+        let item: Tile;
         for(let key in Material){
-            if(Material[key].getItem() === id){
+            item = Material[key].getItem();
+            if(item.id === id && (item.data === -1 || item.data === data)){
                 return Material[key].getHeadStats().durability * this.value;
             }
         }
@@ -285,9 +287,9 @@ class ToolForgeHandler {
                                 count = 0;
 
                                 for(let i = 0; i < mat.length; i++){
-                                    find = items.find(item => item.id === mat[i]);
+                                    find = items.find(item => item.id === mat[i].id && (mat[i].data === -1 || item.data === mat[i].data));
                                     if(find){
-                                        value = RepairHandler.calcRepairAmount(find.id);
+                                        value = RepairHandler.calcRepairAmount(find.id, find.data);
                                         if(value > 0){
                                             value *= toolData.toolData.getRepairModifierForPart(i);
                                             while(count < find.count && RepairHandler.calcRepair(slotTool, value * count) < space){
