@@ -1,24 +1,5 @@
 interface ICastingRecipe {id: number, data: number, consume: boolean, amount: number};
 
-type ECastType = "pickaxe"
-| "shovel"
-| "axe"
-| "broadaxe"
-| "sword"
-| "hammer"
-| "excavator"
-| "rod"
-| "rod2"
-| "binding"
-| "binding2"
-| "guard"
-| "largeplate"
-| "ingot"
-| "nugget"
-| "gem"
-| "plate"
-| "gear";
-
 class CastingRecipe {
 
     private static sandmolding: {[id: number]: number} = {};

@@ -20,7 +20,7 @@ class TinkersLumberaxe extends TinkersTool {
         super(["wood"], 3, 1);
     }
 
-    buildStats(materials: string[]): ToolStats {
+    override buildStats(materials: string[]): ToolStats {
         const stats = new ToolStats();
         stats.head(materials[1], materials[2]);
         stats.extra(materials[3]);
@@ -30,27 +30,27 @@ class TinkersLumberaxe extends TinkersTool {
         return stats;
     }
 
-    miningSpeedModifier(): number {
+    override miningSpeedModifier(): number {
         return 0.35;
     }
 
-    damagePotential(): number {
+    override damagePotential(): number {
         return 1.2;
     }
 
-    getTexture(): ToolTexture {
+    override getTexture(): ToolTexture {
         return textureLumberaxe;
     }
 
-    getRepairParts(): number[] {
+    override getRepairParts(): number[] {
         return [1, 2];
     }
 
-    getRepairModifierForPart(index: number): number {
+    override getRepairModifierForPart(index: number): number {
         return index === 1 ? TinkersLumberaxe.DURABILITY_MODIFIER : TinkersLumberaxe.DURABILITY_MODIFIER * 0.625;
     }
 
-    onDestroy(item: ItemInstance, coords: Callback.ItemUseCoordinates, block: Tile): true {
+    override onDestroy(item: ItemInstance, coords: Callback.ItemUseCoordinates, block: Tile): true {
 
         if(!item.extra){
             return true;
@@ -156,17 +156,17 @@ class TinkersLumberaxe extends TinkersTool {
 }
 
 
-TinkersToolHandler.registerTool("lumberaxe", "Lumber Axe", new TinkersLumberaxe());
+TinkersToolHandler.createTool("tcontool_lumberaxe", "Lumber Axe", new TinkersLumberaxe());
 ToolForgeHandler.addRecipe(ItemID.tcontool_lumberaxe, ["rod2", "broadaxe", "largeplate", "binding2"]);
-ToolForgeHandler.addContents({
+ToolForgeHandler.addLayout({
     title: "Lumber Axe",
     background: "tcon.icon.lumberaxe",
     intro: "The Lumber Axe is a broad chopping tool. It can fell entire trees in one swoop or gather wood in a wide range. Timber!",
     slots: [
-        {x: -1, y: 4, bitmap: "rod2"},
-        {x: 0, y: -20, bitmap: "broadaxe"},
-        {x: 20, y: -4, bitmap: "plate"},
-        {x: -20, y: 20, bitmap: "binding2"}
+        {x: -1, y: 4, bitmap: "tcon.slot.rod2"},
+        {x: 0, y: -20, bitmap: "tcon.slot.broadaxe"},
+        {x: 20, y: -4, bitmap: "tcon.slot.plate"},
+        {x: -20, y: 20, bitmap: "tcon.slot.binding2"}
     ],
     forgeOnly: true
 });

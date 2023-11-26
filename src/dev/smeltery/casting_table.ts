@@ -39,7 +39,7 @@ class CastingTable extends TileWithLiquidModel {
 
     @ClientSide
     setupAnimPosScale(): void {
-        this.animPos = {x: 0.5, y: 15/16, z: 0.5};
+        this.animPos = {x: 0.5, y: 29/32, z: 0.5};
         this.animScale = {x: 14/16, y: 1/16, z: 14/16};
     }
 

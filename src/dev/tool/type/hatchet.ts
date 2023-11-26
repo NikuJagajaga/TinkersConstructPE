@@ -7,7 +7,7 @@ class TinkersHatchet extends TinkersTool {
         super(["wood", "plant"], 3, 1);
     }
 
-    buildStats(materials: string[]): ToolStats {
+    override buildStats(materials: string[]): ToolStats {
         const stats = new ToolStats();
         stats.head(materials[1]);
         stats.extra(materials[2]);
@@ -16,15 +16,15 @@ class TinkersHatchet extends TinkersTool {
         return stats;
     }
 
-    damagePotential(): number {
+    override damagePotential(): number {
         return 1.1;
     }
 
-    getTexture(): ToolTexture {
+    override getTexture(): ToolTexture {
         return textureHatchet;
     }
 
-    onDestroy(item: ItemInstance, coords: Callback.ItemUseCoordinates, block: Tile): true {
+    override onDestroy(item: ItemInstance, coords: Callback.ItemUseCoordinates, block: Tile): true {
         if(!item.extra){
             return true;
         }
@@ -72,15 +72,15 @@ class TinkersHatchet extends TinkersTool {
 }
 
 
-TinkersToolHandler.registerTool("hatchet", "Hatchet", new TinkersHatchet());
+TinkersToolHandler.createTool("tcontool_hatchet", "Hatchet", new TinkersHatchet());
 ToolForgeHandler.addRecipe(ItemID.tcontool_hatchet, ["rod", "axe", "binding"]);
-ToolForgeHandler.addContents({
+ToolForgeHandler.addLayout({
     title: "Hatchet",
     background: "tcon.icon.hatchet",
     intro: "The Hatchet chops up wood and makes short work of leaves. It also makes for a passable weapon. Chop chop!",
     slots: [
-        {x: -11, y: 11, bitmap: "rod"},
-        {x: -2, y: -20, bitmap: "axe"},
-        {x: 18, y: -8, bitmap: "binding"}
+        {x: -11, y: 11, bitmap: "tcon.slot.rod"},
+        {x: -2, y: -20, bitmap: "tcon.slot.axe"},
+        {x: 18, y: -8, bitmap: "tcon.slot.binding"}
     ]
 });

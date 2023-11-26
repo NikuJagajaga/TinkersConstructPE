@@ -34,8 +34,8 @@ ModAPI.addAPICallback("ForestryAPI", (api: any) => {
     CastingRecipe.addTableRecipe(ItemID.tcon_cast_gear, "molten_bronze", ItemID.gearBronze, false);
 
 
-    ToolForgeHandler.addVariation("block_copper", BlockID.blockCopper);
-    ToolForgeHandler.addVariation("block_tin", BlockID.blockTin);
-    ToolForgeHandler.addVariation("block_bronze", BlockID.blockBronze);
+    //ToolForgeHandler.addVariation("block_copper", BlockID.blockCopper);
+    //ToolForgeHandler.addVariation("block_tin", BlockID.blockTin);
+    //ToolForgeHandler.addVariation("block_bronze", BlockID.blockBronze);
 
 });

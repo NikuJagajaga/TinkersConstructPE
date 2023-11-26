@@ -7,7 +7,7 @@ class TinkersMattock extends TinkersTool {
         super(["wood", "dirt"], 3, 1);
     }
 
-    buildStats(materials: string[]): ToolStats {
+    override buildStats(materials: string[]): ToolStats {
         const stats = new ToolStats();
         stats.head(materials[1], materials[2]);
         stats.handle(materials[0]);
@@ -15,19 +15,19 @@ class TinkersMattock extends TinkersTool {
         return stats;
     }
 
-    miningSpeedModifier(): number {
+    override miningSpeedModifier(): number {
         return 0.95;
     }
 
-    damagePotential(): number {
+    override damagePotential(): number {
         return 0.9;
     }
 
-    getTexture(): ToolTexture {
+    override getTexture(): ToolTexture {
         return textureMattock;
     }
 
-    getRepairParts(): number[] {
+    override getRepairParts(): number[] {
         return [1, 2];
     }
 
@@ -45,15 +45,15 @@ class TinkersMattock extends TinkersTool {
 }
 
 
-TinkersToolHandler.registerTool("mattock", "Mattock", new TinkersMattock());
+TinkersToolHandler.createTool("tcontool_mattock", "Mattock", new TinkersMattock());
 ToolForgeHandler.addRecipe(ItemID.tcontool_mattock, ["rod", "axe", "shovel"]);
-ToolForgeHandler.addContents({
+ToolForgeHandler.addLayout({
     title: "Mattock",
     background: "tcon.icon.mattock",
     intro: "The Cutter Mattock is a versatile farming tool. It is effective on wood, dirt, and plants. It also packs quite a punch.",
     slots: [
-        {x: -11, y: 11, bitmap: "rod"},
-        {x: -2, y: -20, bitmap: "axe"},
-        {x: 18, y: -8, bitmap: "shovel"}
+        {x: -11, y: 11, bitmap: "tcon.slot.rod"},
+        {x: -2, y: -20, bitmap: "tcon.slot.axe"},
+        {x: 18, y: -8, bitmap: "tcon.slot.shovel"}
     ]
 });

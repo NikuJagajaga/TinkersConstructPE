@@ -7,7 +7,7 @@ class TinkersShovel extends TinkersTool {
         super(["dirt"], 3, 1);
     }
 
-    buildStats(materials: string[]): ToolStats {
+    override buildStats(materials: string[]): ToolStats {
         const stats = new ToolStats();
         stats.head(materials[1]);
         stats.extra(materials[2]);
@@ -15,11 +15,11 @@ class TinkersShovel extends TinkersTool {
         return stats;
     }
 
-    damagePotential(): number {
+    override damagePotential(): number {
         return 0.9;
     }
 
-    getTexture(): ToolTexture {
+    override getTexture(): ToolTexture {
         return textureShovel;
     }
 
@@ -37,15 +37,15 @@ class TinkersShovel extends TinkersTool {
 }
 
 
-TinkersToolHandler.registerTool("shovel", "Shovel", new TinkersShovel());
+TinkersToolHandler.createTool("tcontool_shovel", "Shovel", new TinkersShovel());
 ToolForgeHandler.addRecipe(ItemID.tcontool_shovel, ["rod", "shovel", "binding"]);
-ToolForgeHandler.addContents({
+ToolForgeHandler.addLayout({
     title: "Shovel",
     background: "tcon.icon.shovel",
     intro: "The Shovel digs up dirt. It is effective on dirt, sand, gravel, and snow. Just don't dig your own grave!",
     slots: [
-        {x: 0, y: 0, bitmap: "rod"},
-        {x: 18, y: -18, bitmap: "shovel"},
-        {x: -20, y: 20, bitmap: "binding"}
+        {x: 0, y: 0, bitmap: "tcon.slot.rod"},
+        {x: 18, y: -18, bitmap: "tcon.slot.shovel"},
+        {x: -20, y: 20, bitmap: "tcon.slot.binding"}
     ]
 });

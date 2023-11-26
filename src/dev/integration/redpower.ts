@@ -33,9 +33,9 @@ ModAPI.addAPICallback("RedCore", (api: any) => {
     CastingRecipe.addTableRecipe(ItemID.tcon_cast_ingot, "molten_silver", ItemID.ingotSilver, false);
 
 
-    ToolForgeHandler.addVariation("block_copper", BlockID.blockCopper);
-    ToolForgeHandler.addVariation("block_tin", BlockID.blockTin);
-    ToolForgeHandler.addVariation("block_bronze", BlockID.blockBronze);
-    ToolForgeHandler.addVariation("block_silver", BlockID.blockSilver);
+    //ToolForgeHandler.addVariation("block_copper", BlockID.blockCopper);
+    //ToolForgeHandler.addVariation("block_tin", BlockID.blockTin);
+    //ToolForgeHandler.addVariation("block_bronze", BlockID.blockBronze);
+    //ToolForgeHandler.addVariation("block_silver", BlockID.blockSilver);
 
 });

@@ -11,7 +11,10 @@ class SmelteryHandler {
         [BlockID.tcon_stone]: true,
         [BlockID.tcon_seared_glass]: true,
         [BlockID.tcon_drain]: true,
-        [BlockID.tcon_tank]: true,
+        [BlockID.tcon_tank_fuel]: true,
+        [BlockID.tcon_gauge_fuel]: true,
+        [BlockID.tcon_tank_ingot]: true,
+        [BlockID.tcon_gauge_ingot]: true,
         [BlockID.tcon_smeltery]: true
     };
 
@@ -282,8 +285,15 @@ class SmelteryControler extends TconTileEntity implements ILiquidStorage {
             tile = this.region.getTileEntity(x, y, z);
             if(tile){
                 switch(tile.blockID){
-                    case BlockID.tcon_tank: tanks.push({x: x, y: y, z: z}); break;
-                    case BlockID.tcon_drain: tile.controller = this; break;
+                    case BlockID.tcon_tank_fuel:
+                    case BlockID.tcon_gauge_fuel:
+                    case BlockID.tcon_tank_ingot:
+                    case BlockID.tcon_gauge_ingot:
+                        tanks.push({x: x, y: y, z: z});
+                        break;
+                    case BlockID.tcon_drain:
+                        tile.controller = this;
+                        break;
                     case BlockID.tcon_smeltery:
                         if(tile.x !== this.x || tile.y !== this.y || tile.z !== this.z){
                             return false;

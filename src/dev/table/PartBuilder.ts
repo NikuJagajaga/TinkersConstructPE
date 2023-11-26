@@ -1,31 +1,79 @@
-createBlock("tcon_partbuilder", [
-    {name: "Part Builder", texture: [0, 0, ["log_side", 0]]},
-    {name: "Part Builder", texture: [0, 0, ["log_side", 1]]},
-    {name: "Part Builder", texture: [0, 0, ["log_side", 2]]},
-    {name: "Part Builder", texture: [0, 0, ["log_side", 3]]},
-    {name: "Part Builder", texture: [0, 0, ["log2", 0]]},
-    {name: "Part Builder", texture: [0, 0, ["log2", 2]]}
-], "wood");
+Item.addCreativeGroup("tcon_partbuilder", "Part Builder", [
+    createBlock("tcon_partbuilder0", [{name: "Part Builder", texture: [0, 0, ["log_side", 0]]}], "wood"),
+    createBlock("tcon_partbuilder1", [{name: "Part Builder", texture: [0, 0, ["log_side", 1]]}], "wood"),
+    createBlock("tcon_partbuilder2", [{name: "Part Builder", texture: [0, 0, ["log_side", 2]]}], "wood"),
+    createBlock("tcon_partbuilder3", [{name: "Part Builder", texture: [0, 0, ["log_side", 3]]}], "wood"),
+    createBlock("tcon_partbuilder4", [{name: "Part Builder", texture: [0, 0, ["log2", 0]]}], "wood"),
+    createBlock("tcon_partbuilder5", [{name: "Part Builder", texture: [0, 0, ["log2", 2]]}], "wood")
+]);
 
-Item.addCreativeGroup("tcon_partbuilder", "Part Builder", [BlockID.tcon_partbuilder]);
-
-BlockModel.register(BlockID.tcon_partbuilder, (model, index) => {
-    const tex = index <= 3 ? "log_side" : "log2";
-    const meta = index <= 3 ? index : (index - 4) * 2;
+BlockModel.register(BlockID.tcon_partbuilder0, (model, index) => {
+    const tex = "log_side";
+    const meta = 0;
     model.addBox( 0/16, 12/16,  0/16,  16/16, 16/16, 16/16, [[tex, meta], ["tcon_partbuilder", 0], ["tcon_table_side", 0]]);
     model.addBox( 0/16,  0/16,  0/16,   4/16, 12/16,  4/16, tex, meta);
     model.addBox(12/16,  0/16,  0/16,  16/16, 12/16,  4/16, tex, meta);
     model.addBox(12/16,  0/16, 12/16,  16/16, 12/16, 16/16, tex, meta);
     model.addBox( 0/16,  0/16, 12/16,   4/16, 12/16, 16/16, tex, meta);
     return model;
-}, 6);
+});
+BlockModel.register(BlockID.tcon_partbuilder1, (model, index) => {
+    const tex = "log_side";
+    const meta = 1;
+    model.addBox( 0/16, 12/16,  0/16,  16/16, 16/16, 16/16, [[tex, meta], ["tcon_partbuilder", 0], ["tcon_table_side", 0]]);
+    model.addBox( 0/16,  0/16,  0/16,   4/16, 12/16,  4/16, tex, meta);
+    model.addBox(12/16,  0/16,  0/16,  16/16, 12/16,  4/16, tex, meta);
+    model.addBox(12/16,  0/16, 12/16,  16/16, 12/16, 16/16, tex, meta);
+    model.addBox( 0/16,  0/16, 12/16,   4/16, 12/16, 16/16, tex, meta);
+    return model;
+});
+BlockModel.register(BlockID.tcon_partbuilder2, (model, index) => {
+    const tex = "log_side";
+    const meta = 2;
+    model.addBox( 0/16, 12/16,  0/16,  16/16, 16/16, 16/16, [[tex, meta], ["tcon_partbuilder", 0], ["tcon_table_side", 0]]);
+    model.addBox( 0/16,  0/16,  0/16,   4/16, 12/16,  4/16, tex, meta);
+    model.addBox(12/16,  0/16,  0/16,  16/16, 12/16,  4/16, tex, meta);
+    model.addBox(12/16,  0/16, 12/16,  16/16, 12/16, 16/16, tex, meta);
+    model.addBox( 0/16,  0/16, 12/16,   4/16, 12/16, 16/16, tex, meta);
+    return model;
+});
+BlockModel.register(BlockID.tcon_partbuilder3, (model, index) => {
+    const tex = "log_side";
+    const meta = 3;
+    model.addBox( 0/16, 12/16,  0/16,  16/16, 16/16, 16/16, [[tex, meta], ["tcon_partbuilder", 0], ["tcon_table_side", 0]]);
+    model.addBox( 0/16,  0/16,  0/16,   4/16, 12/16,  4/16, tex, meta);
+    model.addBox(12/16,  0/16,  0/16,  16/16, 12/16,  4/16, tex, meta);
+    model.addBox(12/16,  0/16, 12/16,  16/16, 12/16, 16/16, tex, meta);
+    model.addBox( 0/16,  0/16, 12/16,   4/16, 12/16, 16/16, tex, meta);
+    return model;
+});
+BlockModel.register(BlockID.tcon_partbuilder4, (model, index) => {
+    const tex = "log2";
+    const meta = 0;
+    model.addBox( 0/16, 12/16,  0/16,  16/16, 16/16, 16/16, [[tex, meta], ["tcon_partbuilder", 0], ["tcon_table_side", 0]]);
+    model.addBox( 0/16,  0/16,  0/16,   4/16, 12/16,  4/16, tex, meta);
+    model.addBox(12/16,  0/16,  0/16,  16/16, 12/16,  4/16, tex, meta);
+    model.addBox(12/16,  0/16, 12/16,  16/16, 12/16, 16/16, tex, meta);
+    model.addBox( 0/16,  0/16, 12/16,   4/16, 12/16, 16/16, tex, meta);
+    return model;
+});
+BlockModel.register(BlockID.tcon_partbuilder5, (model, index) => {
+    const tex = "log2";
+    const meta = 2;
+    model.addBox( 0/16, 12/16,  0/16,  16/16, 16/16, 16/16, [[tex, meta], ["tcon_partbuilder", 0], ["tcon_table_side", 0]]);
+    model.addBox( 0/16,  0/16,  0/16,   4/16, 12/16,  4/16, tex, meta);
+    model.addBox(12/16,  0/16,  0/16,  16/16, 12/16,  4/16, tex, meta);
+    model.addBox(12/16,  0/16, 12/16,  16/16, 12/16, 16/16, tex, meta);
+    model.addBox( 0/16,  0/16, 12/16,   4/16, 12/16, 16/16, tex, meta);
+    return model;
+});
 
-Recipes2.addShaped({id: BlockID.tcon_partbuilder, data: 0}, "a:b", {a: ItemID.tcon_pattern_blank, b: {id: "log", data: 1}});
-Recipes2.addShaped({id: BlockID.tcon_partbuilder, data: 1}, "a:b", {a: ItemID.tcon_pattern_blank, b: {id: "log", data: 1}});
-Recipes2.addShaped({id: BlockID.tcon_partbuilder, data: 2}, "a:b", {a: ItemID.tcon_pattern_blank, b: {id: "log", data: 2}});
-Recipes2.addShaped({id: BlockID.tcon_partbuilder, data: 3}, "a:b", {a: ItemID.tcon_pattern_blank, b: {id: "log", data: 3}});
-Recipes2.addShaped({id: BlockID.tcon_partbuilder, data: 4}, "a:b", {a: ItemID.tcon_pattern_blank, b: {id: "log2", data: 0}});
-Recipes2.addShaped({id: BlockID.tcon_partbuilder, data: 5}, "a:b", {a: ItemID.tcon_pattern_blank, b: {id: "log2", data: 1}});
+Recipes2.addShaped(BlockID.tcon_partbuilder0, "a:b", {a: ItemID.tcon_pattern_blank, b: {id: "log", data: 1}});
+Recipes2.addShaped(BlockID.tcon_partbuilder1, "a:b", {a: ItemID.tcon_pattern_blank, b: {id: "log", data: 1}});
+Recipes2.addShaped(BlockID.tcon_partbuilder2, "a:b", {a: ItemID.tcon_pattern_blank, b: {id: "log", data: 2}});
+Recipes2.addShaped(BlockID.tcon_partbuilder3, "a:b", {a: ItemID.tcon_pattern_blank, b: {id: "log", data: 3}});
+Recipes2.addShaped(BlockID.tcon_partbuilder4, "a:b", {a: ItemID.tcon_pattern_blank, b: {id: "log2", data: 0}});
+Recipes2.addShaped(BlockID.tcon_partbuilder5, "a:b", {a: ItemID.tcon_pattern_blank, b: {id: "log2", data: 1}});
 
 
 const PartBuilderWindow = new class extends CraftingWindow {
@@ -176,4 +224,9 @@ const PartBuilderWindow = new class extends CraftingWindow {
 }
 
 
-PartBuilderWindow.setTargetBlock(BlockID.tcon_partbuilder);
+PartBuilderWindow.addTargetBlock(BlockID.tcon_partbuilder0);
+PartBuilderWindow.addTargetBlock(BlockID.tcon_partbuilder1);
+PartBuilderWindow.addTargetBlock(BlockID.tcon_partbuilder2);
+PartBuilderWindow.addTargetBlock(BlockID.tcon_partbuilder3);
+PartBuilderWindow.addTargetBlock(BlockID.tcon_partbuilder4);
+PartBuilderWindow.addTargetBlock(BlockID.tcon_partbuilder5);

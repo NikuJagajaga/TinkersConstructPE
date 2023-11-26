@@ -1,5 +1,5 @@
 interface TinkersPartData {
-    type: string;
+    type: EPartType;
     material: string;
 }
 
@@ -7,7 +7,7 @@ class PartRegistry {
 
     private static data: {[id: number]: TinkersPartData} = {};
 
-    static readonly types: {key: ECastType, name: string, cost: number}[] = [
+    static readonly types: {key: EPartType, name: string, cost: number}[] = [
         {key: "pickaxe", name: "Pickaxe Head", cost: 2},
         {key: "shovel", name: "Shovel Head", cost: 2},
         {key: "axe", name: "Axe Head", cost: 2},

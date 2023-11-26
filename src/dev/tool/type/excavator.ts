@@ -9,7 +9,7 @@ class TinkersExcavator extends TinkersTool3x3 {
         super(["dirt"], 4, 0);
     }
 
-    buildStats(materials: string[]): ToolStats {
+    override buildStats(materials: string[]): ToolStats {
         const stats = new ToolStats();
         stats.head(materials[1], materials[2]);
         stats.extra(materials[3]);
@@ -18,40 +18,40 @@ class TinkersExcavator extends TinkersTool3x3 {
         return stats;
     }
 
-    miningSpeedModifier(): number {
+    override miningSpeedModifier(): number {
         return 0.28;
     }
 
-    damagePotential(): number {
+    override damagePotential(): number {
         return 1.25;
     }
 
-    getTexture(): ToolTexture {
+    override getTexture(): ToolTexture {
         return textureExcavator;
     }
 
-    getRepairParts(): number[] {
+    override getRepairParts(): number[] {
         return [1, 2];
     }
 
-    getRepairModifierForPart(index: number): number {
+    override getRepairModifierForPart(index: number): number {
         return index === 1 ? TinkersExcavator.DURABILITY_MODIFIER : TinkersExcavator.DURABILITY_MODIFIER * 0.75;
     }
 
 }
 
 
-TinkersToolHandler.registerTool("excavator", "Excavator", new TinkersExcavator());
+TinkersToolHandler.createTool("tcontool_excavator", "Excavator", new TinkersExcavator());
 ToolForgeHandler.addRecipe(ItemID.tcontool_excavator, ["rod2", "excavator", "largeplate", "binding2"]);
-ToolForgeHandler.addContents({
+ToolForgeHandler.addLayout({
     title: "Excavator",
     background: "tcon.icon.excavator",
     intro: "The Excavator is a broad digging tool. It digs up large areas of soil and snow in a wide range. Terraforming!",
     slots: [
-        {x: -8, y: 4, bitmap: "rod2"},
-        {x: 12, y: -16, bitmap: "excavator"},
-        {x: -8, y: -16, bitmap: "plate"},
-        {x: -26, y: 20, bitmap: "binding2"}
+        {x: -8, y: 4, bitmap: "tcon.slot.rod2"},
+        {x: 12, y: -16, bitmap: "tcon.slot.excavator"},
+        {x: -8, y: -16, bitmap: "tcon.slot.plate"},
+        {x: -26, y: 20, bitmap: "tcon.slot.binding2"}
     ],
     forgeOnly: true
 });

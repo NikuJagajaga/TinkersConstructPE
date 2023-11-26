@@ -10,7 +10,8 @@ class ToolData {
     }
 
     private init(): void {
-        //this.toolData = ToolAPI.getToolData(this.item.id);
+        //this.toolData = ToolAPI.getToolData(this.item.id) as TinkersTool;
+        this.toolData = TinkersToolHandler.getToolData(this.item.id);
         this.materials = new String(this.item.extra.getString("materials")).split("_");
         this.modifiers = TinkersModifierHandler.decodeToObj(this.item.extra.getString("modifiers"));
         this.stats = this.getStats();

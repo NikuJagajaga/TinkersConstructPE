@@ -61,11 +61,13 @@
         "tool/modifier/web.ts",
 
         "table/TableWindow.ts",
-        "table/TableBase.ts",
         "table/PartBuilder.ts",
+        "table/ToolForgeHandler.ts",
         "table/ToolForge.ts",
 
-        "tool/type/TinkersTool.ts",
+        "tool/TinkersTool.ts",
+        "tool/TinkersToolHandler.ts",
+
         "tool/type/pickaxe.ts",
         "tool/type/shovel.ts",
         "tool/type/hatchet.ts",

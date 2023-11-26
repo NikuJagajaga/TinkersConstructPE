@@ -7,7 +7,7 @@ class TinkersPickaxe extends TinkersTool {
         super(["stone"], 3, 1);
     }
 
-    buildStats(materials: string[]): ToolStats {
+    override buildStats(materials: string[]): ToolStats {
         const stats = new ToolStats();
         stats.head(materials[1]);
         stats.extra(materials[2]);
@@ -15,22 +15,24 @@ class TinkersPickaxe extends TinkersTool {
         return stats;
     }
 
-    getTexture(): ToolTexture {
+    override getTexture(): ToolTexture {
         return texturePickaxe;
     }
 
 }
 
 
-TinkersToolHandler.registerTool("pickaxe", "Pickaxe", new TinkersPickaxe());
+const myPickaxe = new TinkersPickaxe();
+alert("buildStats: " + !!myPickaxe.buildStats);
+TinkersToolHandler.createTool("tcontool_pickaxe", "Pickaxe", myPickaxe);
 ToolForgeHandler.addRecipe(ItemID.tcontool_pickaxe, ["rod", "pickaxe", "binding"]);
-ToolForgeHandler.addContents({
+ToolForgeHandler.addLayout({
     title: "Pickaxe",
     background: "tcon.icon.pickaxe",
     intro: "The Pickaxe is a precise mining tool. It is effective on stone and ores. It breaks blocks, OK?",
     slots: [
-        {x: -18, y: 18, bitmap: "rod"},
-        {x: 20, y: -20, bitmap: "pickaxe"},
-        {x: 0, y: 0, bitmap: "binding"}
+        {x: -18, y: 18, bitmap: "tcon.slot.rod"},
+        {x: 20, y: -20, bitmap: "tcon.slot.pickaxe"},
+        {x: 0, y: 0, bitmap: "tcon.slot.binding"}
     ]
 });

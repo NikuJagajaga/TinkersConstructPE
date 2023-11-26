@@ -46,6 +46,9 @@ const Cfg = {
     checkInsideSmeltery: __config__.getBool("checkInsideSmeltery")
 };
 
+type EPartType = "pickaxe" | "shovel" | "axe" | "broadaxe" | "sword" | "hammer" | "excavator" | "rod" | "rod2" | "binding" | "binding2" | "guard" | "largeplate";
+type ECastType = EPartType | "ingot" | "nugget" | "gem" | "plate" | "gear";
+
 class MatValue {
     static readonly INGOT = 144;
     static readonly NUGGET = MatValue.INGOT / 9;

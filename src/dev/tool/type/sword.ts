@@ -9,7 +9,7 @@ class TinkersSword extends TinkersTool {
         super(["fibre"], 3, 1, true);
     }
 
-    buildStats(materials: string[]): ToolStats {
+    override buildStats(materials: string[]): ToolStats {
         const stats = new ToolStats();
         stats.head(materials[1]);
         stats.extra(materials[2]);
@@ -19,26 +19,26 @@ class TinkersSword extends TinkersTool {
         return stats;
     }
 
-    getTexture(): ToolTexture {
+    override getTexture(): ToolTexture {
         return textureSword;
     }
 
-    getRepairModifierForPart(index: number): number {
+    override getRepairModifierForPart(index: number): number {
         return TinkersSword.DURABILITY_MODIFIER;
     }
 
 }
 
 
-TinkersToolHandler.registerTool("sword", "Broad Sword", new TinkersSword());
+TinkersToolHandler.createTool("tcontool_sword", "Broad Sword", new TinkersSword());
 ToolForgeHandler.addRecipe(ItemID.tcontool_sword, ["rod", "sword", "guard"]);
-ToolForgeHandler.addContents({
+ToolForgeHandler.addLayout({
     title: "Broad Sword",
     background: "tcon.icon.sword",
     intro: "The Broad Sword is a universal weapon. Sweep attacks keep enemy hordes at bay. Also good against cobwebs!",
     slots: [
-        {x: -21, y: 20, bitmap: "rod"},
-        {x: 15, y: -16, bitmap: "sword"},
-        {x: -3, y: 2, bitmap: "guard"}
+        {x: -21, y: 20, bitmap: "tcon.slot.rod"},
+        {x: 15, y: -16, bitmap: "tcon.slot.sword"},
+        {x: -3, y: 2, bitmap: "tcon.slot.guard"}
     ]
 });

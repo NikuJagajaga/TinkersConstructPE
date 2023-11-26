@@ -93,12 +93,12 @@ ModAPI.addAPICallback("ICore", (api: any) => {
     CastingRecipe.addTableRecipe(ItemID.tcon_cast_plate, "molten_steel", ItemID.plateSteel, false);
 
 
-    ToolForgeHandler.addVariation("block_copper", BlockID.blockCopper);
-    ToolForgeHandler.addVariation("block_tin", BlockID.blockTin);
-    ToolForgeHandler.addVariation("block_bronze", BlockID.blockBronze);
-    ToolForgeHandler.addVariation("block_lead", BlockID.blockLead);
-    ToolForgeHandler.addVariation("block_silver", BlockID.blockSilver);
-    ToolForgeHandler.addVariation("block_steel", BlockID.blockSteel);
+    //ToolForgeHandler.addVariation("block_copper", BlockID.blockCopper);
+    //ToolForgeHandler.addVariation("block_tin", BlockID.blockTin);
+    //ToolForgeHandler.addVariation("block_bronze", BlockID.blockBronze);
+    //ToolForgeHandler.addVariation("block_lead", BlockID.blockLead);
+    //ToolForgeHandler.addVariation("block_silver", BlockID.blockSilver);
+    //ToolForgeHandler.addVariation("block_steel", BlockID.blockSteel);
 
 
     TinkersLumberaxe.logs[BlockID.rubberTreeLog] = true;

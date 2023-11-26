@@ -24,7 +24,7 @@ abstract class CraftingWindow {
 
     }
 
-    setTargetBlock(id: number, data: number = -1): void {
+    addTargetBlock(id: number, data: number = -1): void {
         CraftingWindow.blocks.push({block: {id: id, data: data}, window: this});
     }
 
@@ -34,14 +34,19 @@ abstract class CraftingWindow {
 
     abstract onUpdate(elements: java.util.HashMap<string, UI.Element>): void;
 
-    private onOpen(window: UI.Window): void {
+    onOpen(window: UI.Window): void {
 
         Threading.initThread("CraftingWindow", () => {
 
             const elements = window.getElements();
 
             while(window.isOpened()){
-                this.onUpdate(elements);
+                try{
+                    this.onUpdate(elements);
+                }
+                catch(e){
+                    alert("onUpdate: " + e);
+                }
                 Thread.sleep(this.sleepTime);
             }
 
@@ -49,7 +54,7 @@ abstract class CraftingWindow {
 
     }
 
-    private onClose(window: UI.Window): void {
+    onClose(window: UI.Window): void {
         const pos = Player.getPosition();
         this.container.dropAt(pos.x, pos.y, pos.z);
     }
