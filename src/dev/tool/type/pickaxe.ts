@@ -1,30 +1,24 @@
-const texturePickaxe = new ToolTexture("model/tcontool_pickaxe");
-
-
-class TinkersPickaxe extends TinkersTool {
+ItemRegistry.registerItem(new class extends TconTool {
 
     constructor(){
-        super(["stone"], 3, 1);
+
+        super("tcontool_pickaxe", "Pickaxe", "tcontool_pickaxe");
+
+        this.blockTypes = ["stone"];
+        this.texture = new ToolTexture("model/tcontool_pickaxe", 3, 1);
+
+        this.setToolParams();
+
     }
 
-    override buildStats(materials: string[]): ToolStats {
-        const stats = new ToolStats();
+    override buildStats(stats: ToolStats, materials: string[]): void {
         stats.head(materials[1]);
         stats.extra(materials[2]);
         stats.handle(materials[0]);
-        return stats;
     }
 
-    override getTexture(): ToolTexture {
-        return texturePickaxe;
-    }
+});
 
-}
-
-
-const myPickaxe = new TinkersPickaxe();
-alert("buildStats: " + !!myPickaxe.buildStats);
-TinkersToolHandler.createTool("tcontool_pickaxe", "Pickaxe", myPickaxe);
 ToolForgeHandler.addRecipe(ItemID.tcontool_pickaxe, ["rod", "pickaxe", "binding"]);
 ToolForgeHandler.addLayout({
     title: "Pickaxe",

@@ -21,7 +21,7 @@ class ModMending extends TinkersModifier {
         super("mending", "Mending", 13, [ItemID.tcon_mending_moss], 1, true);
     }
 
-    onMending(level: number): number {
+    override onMending(level: number): number {
         return level;
     }
     

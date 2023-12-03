@@ -64,7 +64,7 @@ abstract class TinkersTool implements ToolAPI.ToolParams {
         const blockData = ToolAPI.getBlockData(block.id);
         if(this.blockMaterials[blockData.material.name] && toolData.stats.level >= blockData.level && !toolData.isBroken()){
             toolData.forEachModifiers((mod, level) => {
-                mod.onDestroy(item, coords, block, level);
+                mod.onDestroy(item, coords, block, 0, level);
             });
             toolData.consumeDurability(this.isWeapon ? 2 : 1);
             if(!this.isWeapon){
@@ -81,7 +81,7 @@ abstract class TinkersTool implements ToolAPI.ToolParams {
         const toolData = new ToolData(item);
         let bonus = 0;
         toolData.forEachModifiers((mod, level) => {
-            bonus += mod.onAttack(item, victim, level);
+            bonus += mod.onAttack(item, victim, 0, level);
         });
         this.toolMaterial.damage = toolData.stats.damage + bonus;
         toolData.consumeDurability(this.isWeapon ? 1 : 2);
@@ -156,7 +156,7 @@ abstract class TinkersTool3x3 extends TinkersTool {
             if(this.blockMaterials[ToolAPI.getBlockMaterialName(block2.id)]){
                 World.destroyBlock(c.x, c.y, c.z, true);
                 toolData.forEachModifiers((mod, level) => {
-                    mod.onDestroy(item, {...c, side: coords.side, relative: World.getRelativeCoords(c.x, c.y, c.z, coords.side)}, block2, level)
+                    mod.onDestroy(item, {...c, side: coords.side, relative: World.getRelativeCoords(c.x, c.y, c.z, coords.side)}, block2, 0, level)
                 });
                 damage++;
             }

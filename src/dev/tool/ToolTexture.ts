@@ -1,9 +1,9 @@
 class ToolTexture {
 
-    private bitmap: android.graphics.Bitmap;
+    //private bitmap: android.graphics.Bitmap;
 
-    constructor(private path: string){
-        this.bitmap = FileTools.ReadImage(__dir__ + "res/" + path);
+    constructor(private path: string, public partsCount: number, public brokenIndex: number){
+        //this.bitmap = FileTools.ReadImage(__dir__ + "res/" + path);
     }
 
     getPath(): string {

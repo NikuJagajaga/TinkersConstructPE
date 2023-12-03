@@ -24,8 +24,8 @@ abstract class CraftingWindow {
 
     }
 
-    addTargetBlock(id: number, data: number = -1): void {
-        CraftingWindow.blocks.push({block: {id: id, data: data}, window: this});
+    addTargetBlock(block: AnyID): void {
+        CraftingWindow.blocks.push({block: getIDData(block, -1), window: this});
     }
 
     open(): void {
@@ -72,6 +72,7 @@ Callback.addCallback("ItemUseLocal", (coords, item, block, player) => {
         block2 = CraftingWindow.blocks[i].block;
         if(block.id === block2.id && (block2.data === -1 || block.data === block2.data)){
             CraftingWindow.blocks[i].window.open();
+            Game.prevent();
             return;
         }
     }

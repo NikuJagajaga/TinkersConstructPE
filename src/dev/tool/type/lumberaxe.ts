@@ -1,4 +1,4 @@
-const textureLumberaxe = new ToolTexture("model/tcontool_lumberaxe");
+const textureLumberaxe = new ToolTexture("model/tcontool_lumberaxe", 3, 1);
 
 
 class TinkersLumberaxe extends TinkersTool {
@@ -108,7 +108,7 @@ class TinkersLumberaxe extends TinkersTool {
 
                     World.destroyBlock(pos.x, pos.y, pos.z, true);
                     toolData.forEachModifiers((mod, level) => {
-                        mod.onDestroy(item, {...pos, side: 0, relative: pos}, blo, level);
+                        mod.onDestroy(item, {...pos, side: 0, relative: pos}, blo, 0, level);
                     });
                     toolData.consumeDurability(1);
                     toolData.addXp(1);
@@ -139,7 +139,7 @@ class TinkersLumberaxe extends TinkersTool {
                 if(this.blockMaterials[ToolAPI.getBlockMaterialName(block2.id)]){
                     World.destroyBlock(x, y, z, true);
                     toolData.forEachModifiers((mod, level) => {
-                        mod.onDestroy(item, {x: x, y: y, z: z, side: coords.side, relative: World.getRelativeCoords(x, y, z, coords.side)}, block2, level);
+                        mod.onDestroy(item, {x: x, y: y, z: z, side: coords.side, relative: World.getRelativeCoords(x, y, z, coords.side)}, block2, 0, level);
                     });
                     damage++;
                 }

@@ -4,7 +4,7 @@ class ModKnockback extends TinkersModifier {
         super("knockback", "Knockback", 12, ["piston"], 10, true);
     }
 
-    onAttack(item: ItemInstance, victim: number, level: number): number {
+    override onAttack(item: ItemInstance, victim: number, player: number, level: number): number {
         /*
         const vec = Entity.getLookVector(player);
         const speed = 1 + level * 0.1;

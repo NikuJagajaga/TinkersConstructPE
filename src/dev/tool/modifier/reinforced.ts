@@ -8,7 +8,7 @@ class ModReinforced extends TinkersModifier {
         super("reinforced", "Reinforced", 6, [ItemID.tcon_reinforcement], 1, true);
     }
 
-    onConsume(level: number): boolean {
+    override onConsume(level: number): boolean {
         return level >= 5 ? true : level * 0.2 < Math.random();
     }
     

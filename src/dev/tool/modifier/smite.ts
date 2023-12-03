@@ -26,7 +26,7 @@ class ModSmite extends TinkersModifier {
         super("smite", "Smite", 8, [BlockID.tcon_consecrated_soil], 24, true);
     }
 
-    onAttack(item: ItemInstance, victim: number, level: number): number {
+    override onAttack(item: ItemInstance, victim: number, player: number, level: number): number {
         return ModSmite.targets[Entity.getType(victim)] ? 7 / this.max * level : 0;
     }
 

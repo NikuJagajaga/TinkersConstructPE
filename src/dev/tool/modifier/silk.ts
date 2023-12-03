@@ -11,12 +11,12 @@ class ModSilk extends TinkersModifier {
         super("silk", "SilkTouch", 5, [ItemID.tcon_silky_jewel], 1, false, ["luck"]);
     }
     
-    applyStats(stats: ToolStats, level: number): void {
+    override applyStats(stats: ToolStats, level: number): void {
         stats.speed = Math.max(1, stats.speed - 3);
         stats.attack = Math.max(1, stats.attack - 3);
     }
 
-    applyEnchant(enchant: ToolAPI.EnchantData, level: number): void {
+    override applyEnchant(enchant: ToolAPI.EnchantData, level: number): void {
         enchant.silk = true;
     }
 

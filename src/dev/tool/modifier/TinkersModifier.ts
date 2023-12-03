@@ -49,11 +49,11 @@ abstract class TinkersModifier {
         
     }
 
-    onDestroy(item: ItemInstance, coords: Callback.ItemUseCoordinates, block: Tile, level: number): void {
+    onDestroy(item: ItemInstance, coords: Callback.ItemUseCoordinates, block: Tile, player: number, level: number): void {
 
     }
 
-    onAttack(item: ItemInstance, victim: number, level: number): number {
+    onAttack(item: ItemInstance, victim: number, player: number, level: number): number {
         return 0;
     }
 

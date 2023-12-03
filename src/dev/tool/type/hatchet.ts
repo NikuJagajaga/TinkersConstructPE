@@ -1,4 +1,4 @@
-const textureHatchet = new ToolTexture("model/tcontool_hatchet");
+const textureHatchet = new ToolTexture("model/tcontool_hatchet", 3, 1);
 
 
 class TinkersHatchet extends TinkersTool {
@@ -32,7 +32,7 @@ class TinkersHatchet extends TinkersTool {
         const blockData = ToolAPI.getBlockData(block.id);
         if(this.blockMaterials[blockData.material.name] && toolData.stats.level >= blockData.level && !toolData.isBroken()){
             toolData.forEachModifiers((mod, level) => {
-                mod.onDestroy(item, coords, block, level);
+                mod.onDestroy(item, coords, block, 0, level);
             });
             if(blockData.material.name !== "plant"){
                 toolData.consumeDurability(this.isWeapon ? 2 : 1);

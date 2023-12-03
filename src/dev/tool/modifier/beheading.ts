@@ -4,7 +4,8 @@ class ModBeheading extends TinkersModifier {
         [EEntityType.SKELETON]: 0,
         [EEntityType.WHITHER_SKELETON]: 1,
         [EEntityType.ZOMBIE]: 2,
-        [EEntityType.PLAYER]: 3,
+        1: 3, //PLAYER
+        63: 3, //PLAYER
         [EEntityType.CREEPER]: 4,
         [EEntityType.ENDER_DRAGON]: 5
     };
@@ -13,7 +14,7 @@ class ModBeheading extends TinkersModifier {
         super("beheading", "Beheading", 7, ["ender_pearl", "obsidian"], 1, true);
     }
 
-    onKillEntity(entity: number, damageType: number, level: number): void {
+    override onKillEntity(entity: number, damageType: number, level: number): void {
         const headMeta = ModBeheading.headMeta[Entity.getType(entity)];
         if(headMeta && Math.random() * 10 < level){
             const pos = Entity.getPosition(entity);

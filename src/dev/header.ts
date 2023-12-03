@@ -84,17 +84,6 @@ const addLineBreaks = (length: number, text: string): string => {
 }
 
 
-const isBlockID = (id: number): boolean => {
-    const info = IDRegistry.getIdInfo(id);
-    return info && info.startsWith("block");
-}
-
-const isItemID = (id: number): boolean => {
-    const info = IDRegistry.getIdInfo(id);
-    return info && info.startsWith("item");
-}
-
-
 type AnyID = number | Recipes2.VanillaID | Tile | {id: Recipes2.VanillaID, data: number};
 
 const getIDData = (item: AnyID, defaultData: number = -1): Tile => {

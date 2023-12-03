@@ -11,7 +11,7 @@ class ModSpider extends TinkersModifier {
         super("spider", "Bane of Arthropods", 9, ["fermented_spider_eye"], 24, true);
     }
 
-    onAttack(item: ItemInstance, victim: number, level: number): number {
+    override onAttack(item: ItemInstance, victim: number, player: number, level: number): number {
         return ModSpider.targets[Entity.getType(victim)] ? 7 / this.max * level : 0;
     }
     

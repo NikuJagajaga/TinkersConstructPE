@@ -78,9 +78,9 @@ class TinkersToolHandler {
         return id;
     }
 
-    static isTool(id: number): boolean {
-        return id in this.tools;
-    }
+    // static isTool(id: number): boolean {
+    //     return id in this.tools;
+    // }
 
     static getToolData(id: number): TinkersTool {
         return this.tools[id] || null;

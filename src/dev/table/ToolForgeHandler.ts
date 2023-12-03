@@ -10,7 +10,7 @@ interface ForgeLayout {
 class ToolForgeHandler {
 
     private static layouts: ForgeLayout[] = [];
-    private static recipe: {result: number, pattern: EPartType[]}[] = [];
+    private static recipes: {result: number, pattern: EPartType[]}[] = [];
 
     static addLayout(layout: ForgeLayout): void {
         this.layouts.push(layout);
@@ -21,11 +21,15 @@ class ToolForgeHandler {
     }
 
     static addRecipe(result: number, pattern: EPartType[]): void {
-        this.recipe.push({result: result, pattern: pattern});
+        this.recipes.push({result: result, pattern: pattern});
     }
 
-    static getRecipes(): {result: number, pattern: EPartType[]}[] {
-        return this.recipe;
+    static getRecipes(isForge: boolean): {result: number, pattern: EPartType[]}[] {
+        return this.recipes.filter(recipe => isForge || recipe.pattern.length <= 3);
+    }
+
+    static isTool(id: number): boolean {
+        return this.recipes.some(recipe => recipe.result === id);
     }
 
     static createForgeBlock(namedID: string, block: AnyID): number {
@@ -57,25 +61,24 @@ class RepairHandler {
 
     private static readonly value = MatValue.SHARD * 4 / MatValue.INGOT | 0;
 
-    static calcRepairAmount(id: number, data): number {
+    static calcRepairAmount(material: ItemInstance): number {
         let item: Tile;
         for(let key in Material){
             item = Material[key].getItem();
-            if(item.id === id && (item.data === -1 || item.data === data)){
+            if(item.id === material.id && (item.data === -1 || item.data === material.data)){
                 return Material[key].getHeadStats().durability * this.value;
             }
         }
         return 0;
     }
 
-    static calcRepair(tool: ItemInstance, amount: number): number {
-        const toolData = new ToolData(tool);
-        const origDur = toolData.getBaseStats().durability;
-        const actDur = toolData.stats.durability;
-        const modCount = TinkersModifierHandler.decodeToArray(tool.extra.getString("modifiers")).length;
+    static calcRepair(toolStack: TconToolStack, amount: number): number {
+        const origDur = toolStack.getBaseStats().durability;
+        const actDur = toolStack.stats.durability;
+        const modCount = TinkersModifierHandler.decodeToArray(toolStack.extra.getString("modifiers")).length;
         let increase = Math.max(Math.min(10, actDur / origDur) * amount, actDur / 64);
         increase *= 1 - Math.min(3, modCount) * 0.05;
-        increase *= Math.max(0.5, 1 - tool.extra.getInt("repair") * 0.005);
+        increase *= Math.max(0.5, 1 - toolStack.repairCount * 0.005);
         return Math.ceil(increase);
     }
 

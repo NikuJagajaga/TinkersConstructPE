@@ -1,4 +1,4 @@
-const textureHammer = new ToolTexture("model/tcontool_hammer");
+const textureHammer = new ToolTexture("model/tcontool_hammer", 4, 0);
 
 
 class TinkersHammer extends TinkersTool3x3 {

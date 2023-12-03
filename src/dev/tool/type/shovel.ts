@@ -1,4 +1,4 @@
-const textureShovel = new ToolTexture("model/tcontool_shovel");
+const textureShovel = new ToolTexture("model/tcontool_shovel", 3, 1);
 
 
 class TinkersShovel extends TinkersTool {

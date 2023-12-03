@@ -1,4 +1,4 @@
-const textureMattock = new ToolTexture("model/tcontool_mattock");
+const textureMattock = new ToolTexture("model/tcontool_mattock", 3, 1);
 
 
 class TinkersMattock extends TinkersTool {

@@ -1,4 +1,4 @@
-const textureSword = new ToolTexture("model/tcontool_sword");
+const textureSword = new ToolTexture("model/tcontool_sword", 3, 1);
 
 
 class TinkersSword extends TinkersTool {

@@ -13,10 +13,13 @@
     "include": [
 
         "header.ts",
+
         "util/TconTileEntity.ts",
         "util/TileWithLiquidModel.ts",
         "util/CraftingWindow.ts",
         "util/BlockModel.ts",
+        "util/EntityHelper.ts",
+        "util/ToolLeveling.ts",
         "util/Sound.ts",
 
         "smeltery/MoltenLiquid.ts",
@@ -35,6 +38,7 @@
         "tool/TinkersMaterial.ts",
         "tool/ToolStats.ts",
         "tool/ToolData.ts",
+        "tool/TconToolStack.ts",
         "tool/PartRegistry.ts",
         "tool/ToolTexture.ts",
 
@@ -66,6 +70,8 @@
         "table/ToolForge.ts",
 
         "tool/TinkersTool.ts",
+        "tool/TconTool.ts",
+        "tool/ToolModelManager.ts",
         "tool/TinkersToolHandler.ts",
 
         "tool/type/pickaxe.ts",

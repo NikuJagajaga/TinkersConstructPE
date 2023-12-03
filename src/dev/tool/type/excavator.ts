@@ -1,4 +1,4 @@
-const textureExcavator = new ToolTexture("model/tcontool_excavator");
+const textureExcavator = new ToolTexture("model/tcontool_excavator", 4, 0);
 
 
 class TinkersExcavator extends TinkersTool3x3 {

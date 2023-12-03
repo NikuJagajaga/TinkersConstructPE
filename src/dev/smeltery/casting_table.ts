@@ -89,7 +89,7 @@ class CastingTable extends TileWithLiquidModel {
     }
 
     isValidCast(id: number): boolean {
-        return isItemID(id);
+        return ItemRegistry.isItem(id);
     }
 
     getRecipe(stored: string): ICastingRecipe {

@@ -86,7 +86,7 @@ class ToolCrafterWindow extends CraftingWindow {
 
         const slotTool = this.container.getSlot("slot0");
 
-        if(TinkersToolHandler.isTool(slotTool.id) && slotTool.extra){
+        if(ToolForgeHandler.isTool(slotTool.id) && slotTool.extra){
 
             const slots: ItemInstance[] = [];
             const items: ItemInstance[] = [];
@@ -114,8 +114,8 @@ class ToolCrafterWindow extends CraftingWindow {
                 }
             }
 
-            const toolData = new ToolData(slotTool);
-            const modifiers = TinkersModifierHandler.decodeToArray(slotTool.extra.getString("modifiers"));
+            const stack = new TconToolStack(slotTool);
+            const modifiers = TinkersModifierHandler.decodeToArray(stack.extra.getString("modifiers"));
             let find3: {type: string, level: number};
             for(let key in addMod){
                 find3 = modifiers.find(mod => mod.type === key);
@@ -124,7 +124,7 @@ class ToolCrafterWindow extends CraftingWindow {
                     find3.level += addMod[key];
                     continue;
                 }
-                if(Modifier[key].canBeTogether(modifiers) && modifiers.length < Cfg.modifierSlots + toolData.getLevel()){
+                if(Modifier[key].canBeTogether(modifiers) && modifiers.length < Cfg.modifierSlots + ToolLeveling.getLevel(stack.xp, stack.instance.is3x3)){
                     addMod[key] = Math.min(addMod[key], Modifier[key].max);
                     modifiers.push({type: key, level: addMod[key]});
                 }
@@ -133,8 +133,8 @@ class ToolCrafterWindow extends CraftingWindow {
                 }
             }
 
-            const mat = toolData.toolData.getRepairParts().map(index => Material[toolData.materials[index]].getItem());
-            const space = slotTool.extra.getInt("durability");
+            const mat = stack.instance.repairParts.map(index => Material[stack.materials[index]].getItem());
+            const space = stack.durability;
             let newDur = space;
             let value = 0;
             find = null;
@@ -143,13 +143,13 @@ class ToolCrafterWindow extends CraftingWindow {
             for(let i = 0; i < mat.length; i++){
                 find = items.find(item => item.id === mat[i].id && (mat[i].data === -1 || item.data === mat[i].data));
                 if(find){
-                    value = RepairHandler.calcRepairAmount(find.id, find.data);
+                    value = RepairHandler.calcRepairAmount(find);
                     if(value > 0){
-                        value *= toolData.toolData.getRepairModifierForPart(i);
-                        while(count < find.count && RepairHandler.calcRepair(slotTool, value * count) < space){
+                        value *= stack.instance.getRepairModifierForPart(i);
+                        while(count < find.count && RepairHandler.calcRepair(stack, value * count) < space){
                             count++;
                         }
-                        newDur = Math.max(0, space - (RepairHandler.calcRepair(slotTool, value * count) | 0));
+                        newDur = Math.max(0, space - (RepairHandler.calcRepair(stack, value * count) | 0));
                         break;
                     }
                 }
@@ -174,10 +174,16 @@ class ToolCrafterWindow extends CraftingWindow {
                 });
                 consume[0] = 1;
 
-                const extra = slotTool.extra.copy();
-                extra.putInt("durability", newDur);
-                extra.putString("modifiers", TinkersModifierHandler.encodeToString(modifiers));
-                this.container.setSlot("slotResult", slotTool.id, 1, Math.ceil(newDur / toolData.stats.durability * 14), extra);
+                const result = stack.clone();
+                result.durability = newDur;
+                result.extra.putInt("repair", stack.repairCount + 1);
+                result.extra.putString("modifiers", TinkersModifierHandler.encodeToString(modifiers));
+                this.container.setSlot("slotResult", result.id, result.count, result.data, result.extra);
+                // const extra = stack.extra.copy();
+                // extra.putInt("durability", newDur);
+                // extra.putInt("repair", stack.repairCount + 1);
+                // extra.putString("modifiers", TinkersModifierHandler.encodeToString(modifiers));
+                // this.container.setSlot("slotResult", stack.id, 1, Math.ceil(newDur / stack.stats.durability * stack.instance.maxDamage), extra);
             }
             else{
                 this.container.clearSlot("slotResult");
@@ -186,7 +192,7 @@ class ToolCrafterWindow extends CraftingWindow {
         }
         else{
 
-            const result = ToolForgeHandler.getRecipes().find(recipe => {
+            const result = ToolForgeHandler.getRecipes(this.isForge).find(recipe => {
                 let slot: UI.Slot;
                 let partData: TinkersPartData;
                 for(let i = 0; i < 6; i++){
@@ -229,10 +235,10 @@ class ToolCrafterWindow extends CraftingWindow {
         }
 
         const slotResult = this.container.getSlot("slotResult");
-        if(TinkersToolHandler.isTool(slotResult.id) && slotResult.extra){
+        if(ToolForgeHandler.isTool(slotResult.id) && slotResult.extra){
             this.showInfo(slotResult);
         }
-        else if(TinkersToolHandler.isTool(slotTool.id) && slotTool.extra){
+        else if(ToolForgeHandler.isTool(slotTool.id) && slotTool.extra){
             this.showInfo(slotTool);
         }
         else{
@@ -261,7 +267,6 @@ class ToolCrafterWindow extends CraftingWindow {
                     return;
                 }
                 let slot: UI.Slot;
-                alert("consume: " + this.consume);
                 for(let i = 0; i < 6; i++){
                     slot = this.container.getSlot("slot" + i);
                     slot.count -= this.consume[i] || 0;
@@ -270,8 +275,8 @@ class ToolCrafterWindow extends CraftingWindow {
                 slot = this.container.getSlot("slotResult");
                 Player.setInventorySlot(index, slot.id, 1, slot.data, slot.extra);
                 this.isForge ?
-                    World.playSoundAtEntity(Player.get(), "random.anvil_use", 0.9, 0.95 + 0.2 * Math.random()) :
-                    SoundManager.playSound("saw.ogg", 0.5);
+                    SoundManager.playSound("random.anvil_use", 1, 0.95 + 0.2 * Math.random()) :
+                    SoundManager.playSound("tcon.little_saw.ogg");
             }
             catch(e){
                 alert("craftError: " + e);
@@ -313,15 +318,15 @@ class ToolCrafterWindow extends CraftingWindow {
 
     private showInfo(item: ItemInstance): void {
 
-        const toolData = new ToolData(item);
+        const stack = new TconToolStack(item);
         const modifiers = TinkersModifierHandler.decodeToArray(item.extra.getString("modifiers"));
 
         this.container.setText("textStats",
-            "Durability: " + (toolData.stats.durability - item.extra.getInt("durability")) + "/" + toolData.stats.durability + "\n" +
-            "Mining Level: " + TinkersMaterial.level[toolData.stats.level] + "\n" +
-            "Mining Speed: " + ((toolData.stats.efficiency * 100 | 0) / 100) + "\n" +
-            "Attack: " + ((toolData.stats.damage * 100 | 0) / 100) + "\n" +
-            "Modifiers: " + (Cfg.modifierSlots + toolData.getLevel() - modifiers.length)
+            "Durability: " + (stack.stats.durability - item.extra.getInt("durability")) + "/" + stack.stats.durability + "\n" +
+            "Mining Level: " + TinkersMaterial.level[stack.stats.level] + "\n" +
+            "Mining Speed: " + ((stack.stats.efficiency * 100 | 0) / 100) + "\n" +
+            "Attack: " + ((stack.stats.damage * 100 | 0) / 100) + "\n" +
+            "Modifiers: " + (Cfg.modifierSlots + ToolLeveling.getLevel(stack.xp, stack.instance.is3x3) - modifiers.length)
         );
 
         this.container.setText("textModifiers", modifiers.map(mod => {
@@ -331,11 +336,6 @@ class ToolCrafterWindow extends CraftingWindow {
     }
 
 }
-
-
-const forgeWindow = new ToolCrafterWindow("Tool Station", false);
-
-forgeWindow.addTargetBlock(BlockID.tcon_toolstation);
 
 
 createBlock("tcon_toolstation", [{name: "Tool Station"}], "wood");
@@ -356,3 +356,20 @@ ToolForgeHandler.createForgeBlock("tcon_toolforge_ardite", BlockID.blockArdite);
 ToolForgeHandler.createForgeBlock("tcon_toolforge_manyullyn", BlockID.blockManyullyn);
 ToolForgeHandler.createForgeBlock("tcon_toolforge_pigiron", BlockID.blockPigiron);
 ToolForgeHandler.createForgeBlock("tcon_toolforge_alubrass", BlockID.blockAlubrass);
+
+
+(() => {
+
+    const winStation = new ToolCrafterWindow("Tool Station", false);
+    const winForge = new ToolCrafterWindow("Tool Forge", true);
+
+    winStation.addTargetBlock(BlockID.tcon_toolstation);
+    winForge.addTargetBlock(BlockID.tcon_toolforge_iron);
+    winForge.addTargetBlock(BlockID.tcon_toolforge_gold);
+    winForge.addTargetBlock(BlockID.tcon_toolforge_cobalt);
+    winForge.addTargetBlock(BlockID.tcon_toolforge_ardite);
+    winForge.addTargetBlock(BlockID.tcon_toolforge_manyullyn);
+    winForge.addTargetBlock(BlockID.tcon_toolforge_pigiron);
+    winForge.addTargetBlock(BlockID.tcon_toolforge_alubrass);
+
+})();

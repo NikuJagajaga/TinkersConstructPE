@@ -61,7 +61,7 @@ class CastingBasin extends CastingTable {
     }
 
     override isValidCast(id: number): boolean {
-        return isBlockID(id);
+        return ItemRegistry.isBlock(id);
     }
 
     override getRecipe(stored: string): ICastingRecipe {
