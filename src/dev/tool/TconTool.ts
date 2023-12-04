@@ -1,3 +1,23 @@
+const Modifier: {[key: string]: TinkersModifier} = {
+    haste: new ModHaste(),
+    luck: new ModLuck(),
+    sharp: new ModSharp(),
+    diamond: new ModDiamond(),
+    emerald: new ModEmerald(),
+    silk: new ModSilk(),
+    reinforced: new ModReinforced(),
+    beheading: new ModBeheading(),
+    smite: new ModSmite(),
+    spider: new ModSpider(),
+    fiery: new ModFiery(),
+    necrotic: new ModNecrotic(),
+    knockback: new ModKnockback(),
+    mending: new ModMending(),
+    shuling: new ModShulking(),
+    web: new ModWeb()
+};
+
+
 class TconTool extends ItemCommon implements ItemBehavior, ToolAPI.ToolParams {
 
     blockTypes: string[];
@@ -10,7 +30,7 @@ class TconTool extends ItemCommon implements ItemBehavior, ToolAPI.ToolParams {
 
     toolMaterial: ToolAPI.ToolMaterial;
 
-    constructor(stringID: string, name: string, icon: string){
+    constructor(stringID: string, name: string, icon: string = stringID){
 
         super(stringID, name, icon, true);
 
@@ -24,9 +44,11 @@ class TconTool extends ItemCommon implements ItemBehavior, ToolAPI.ToolParams {
         this.setMaxStack(1);
         this.setMaxDamage(13);
 
-        for(let i = 0; i <= this.maxDamage; i++){
-            ItemModel.getFor(this.id, i).setModelOverrideCallback(item => this.onModelOverride(item));
-        }
+        ItemModel.getFor(this.id, -1).setModelOverrideCallback(item => this.onModelOverride(item));
+
+        //for(let i = 0; i <= this.maxDamage; i++){
+            //ItemModel.getFor(this.id, i).setModelOverrideCallback(item => this.onModelOverride(item));
+        //}
 
     }
 
@@ -81,7 +103,7 @@ class TconTool extends ItemCommon implements ItemBehavior, ToolAPI.ToolParams {
         const stack = new TconToolStack(item);
         const blockData = ToolAPI.getBlockData(block.id);
         let devider = 1;
-        if(this.blockTypes.indexOf(blockData.material.name) !== -1 && stack.stats.level >= blockData.level && !stack.isBroken()){
+        if(this.blockTypes.includes(blockData.material.name) && stack.stats.level >= blockData.level && !stack.isBroken()){
             devider = stack.stats.efficiency;
             if(blockData.isNative){
                 devider *= blockData.material.multiplier;
@@ -100,7 +122,7 @@ class TconTool extends ItemCommon implements ItemBehavior, ToolAPI.ToolParams {
         }
         const stack = new TconToolStack(item);
         const blockData = ToolAPI.getBlockData(block.id);
-        if(this.blockTypes.indexOf(blockData.material.name) !== -1 && stack.stats.level >= blockData.level && !stack.isBroken()){
+        if(blockData && this.blockTypes.includes(blockData.material.name) && stack.stats.level >= blockData.level && !stack.isBroken()){
             stack.forEachModifiers((mod, level) => {
                 mod.onDestroy(item, coords, block, player, level);
             });
@@ -137,23 +159,23 @@ class TconTool extends ItemCommon implements ItemBehavior, ToolAPI.ToolParams {
         return true;
     }
 
-    onDealDamage(item: ItemInstance, victim: number, damageValue: number, damageType: number): void {
+    onDealDamage(item: ItemInstance, victim: number, player: number, damageValue: number, damageType: number): void {
         if(!item.extra){
             return;
         }
         const stack = new TconToolStack(item);
         stack.forEachModifiers((mod, level) => {
-            mod.onDealDamage(victim, damageValue, damageType, level);
+            mod.onDealDamage(victim, player, damageValue, damageType, level);
         });
     }
 
-    onKillEntity(item: ItemInstance, entity: number, damageType: number): void {
+    onKillEntity(item: ItemInstance, victim: number, player: number, damageType: number): void {
         if(!item.extra){
             return;
         }
         const stack = new TconToolStack(item);
         stack.forEachModifiers((mod, level) => {
-            mod.onKillEntity(entity, damageType, level);
+            mod.onKillEntity(victim, player, damageType, level);
         });
     }
 
@@ -172,8 +194,80 @@ class TconTool extends ItemCommon implements ItemBehavior, ToolAPI.ToolParams {
         });
         if(add > 0){
             stack.durability -= add;
-            Entity.setCarriedItem(player, stack.id, 1, stack.data, stack.extra);
+            stack.applyToHand(player);
         }
+        
+    }
+
+}
+
+
+class TconTool3x3 extends TconTool {
+
+    constructor(stringID: string, name: string, icon?: string){
+        super(stringID, name, icon);
+        this.is3x3 = true;
+    }
+
+    override onDestroy(item: ItemInstance, coords: Callback.ItemUseCoordinates, block: Tile, player: number): true {
+
+        if(!item.extra){
+            return true;
+        }
+
+        const stack = new TconToolStack(item);
+
+        if(stack.isBroken()){
+            return true;
+        }
+
+        const region = WorldRegion.getForActor(player);
+        const pos = new Vector3(0, 0, 0);
+        const radius: Vector = {x: 1, y: 1, z: 1};
+
+        switch(coords.side >> 1){
+            case 0: radius.y = 0; break;
+            case 1: radius.z = 0; break;
+            case 2: radius.x = 0; break;
+        }
+
+        let blockData: ToolAPI.BlockData;
+        let block2: Tile;
+        let consume = 0;
+
+        for(let x = -radius.x; x <= radius.x; x++){
+        for(let y = -radius.y; y <= radius.y; y++){
+        for(let z = -radius.z; z <= radius.z; z++){
+            if(x === 0 && y === 0 && z === 0) continue;
+            pos.set(coords);
+            pos.add(x, y, z);
+            block2 = region.getBlock(pos);
+            blockData = ToolAPI.getBlockData(block2.id);
+            if(blockData && this.blockTypes.includes(blockData.material.name) && stack.stats.level >= blockData.level){
+                region.destroyBlock(pos, true, player);
+                consume++;
+                stack.forEachModifiers((mod, level) => {
+                    mod.onDestroy(item, {x: pos.x, y: pos.y, z: pos.z, side: coords.side, relative: World.getRelativeCoords(pos.x, pos.y, pos.z, coords.side)}, block2, player, level);
+                });
+            }
+        }
+        }
+        }
+
+        blockData = ToolAPI.getBlockData(block.id);
+
+        if(blockData && this.blockTypes.includes(blockData.material.name) && stack.stats.level >= blockData.level){
+            consume++;
+            stack.forEachModifiers((mod, level) => {
+                mod.onDestroy(item, coords, block, player, level);
+            });
+        }
+
+        stack.consumeDurability(consume);
+        stack.addXp(consume);
+        item.data = stack.data;
+
+        return true;
         
     }
 
@@ -183,26 +277,23 @@ class TconTool extends ItemCommon implements ItemBehavior, ToolAPI.ToolParams {
 Callback.addCallback("EntityHurt", (attacker: number, victim: number, damageValue: number, damageType: number) => {
     if(EntityHelper.isPlayer(attacker)){
         const item = Entity.getCarriedItem(attacker);
-        //const tool = ToolAPI.getToolData(item.id) as TconTool;
-        const tool = ItemRegistry.getInstanceOf(this.id) as TconTool;
-        tool?.onDealDamage(item, victim, damageValue, damageType);
+        const tool = ToolAPI.getToolData(item.id) as TconTool;
+        tool?.onDealDamage(item, victim, attacker, damageValue, damageType);
     }
 });
 
 Callback.addCallback("EntityDeath", (entity: number, attacker: number, damageType: number) => {
     if(EntityHelper.isPlayer(attacker)){
         const item = Entity.getCarriedItem(attacker);
-        //const tool = ToolAPI.getToolData(item.id) as TconTool;
-        const tool = ItemRegistry.getInstanceOf(this.id) as TconTool;
-        tool?.onKillEntity(item, entity, damageType);
+        const tool = ToolAPI.getToolData(item.id) as TconTool;
+        tool?.onKillEntity(item, entity, attacker, damageType);
     }
 });
 
 Callback.addCallback("LocalTick", () => {
     if(World.getThreadTime() % 150 === 0){
         const item = Player.getCarriedItem();
-        //const tool = ToolAPI.getToolData(item.id) as TconTool;
-        const tool = ItemRegistry.getInstanceOf(this.id) as TconTool;
+        const tool = ToolAPI.getToolData(item.id) as TconTool;
         tool?.onMending(item, Player.get());
     }
 });

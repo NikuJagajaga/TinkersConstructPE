@@ -1,78 +1,89 @@
-const textureHatchet = new ToolTexture("model/tcontool_hatchet", 3, 1);
+class TconHatchet extends TconTool {
 
-
-class TinkersHatchet extends TinkersTool {
+    private static readonly STRIPPED_LOGS: {id: number, data: number, stripped: number, isStem: boolean}[] = [
+        {id: VanillaTileID.log, data: 0, stripped: VanillaTileID.stripped_oak_log, isStem: false},
+        {id: VanillaTileID.log, data: 1, stripped: VanillaTileID.stripped_spruce_log, isStem: false},
+        {id: VanillaTileID.log, data: 2, stripped: VanillaTileID.stripped_birch_log, isStem: false},
+        {id: VanillaTileID.log, data: 3, stripped: VanillaTileID.stripped_jungle_log, isStem: false},
+        {id: VanillaTileID.log2, data: 0, stripped: VanillaTileID.stripped_acacia_log, isStem: false},
+        {id: VanillaTileID.log2, data: 1, stripped: VanillaTileID.stripped_dark_oak_log, isStem: false},
+        {id: VanillaTileID.warped_stem, data: -1, stripped: VanillaTileID.stripped_warped_stem, isStem: true},
+        {id: VanillaTileID.crimson_stem, data: -1, stripped: VanillaTileID.stripped_crimson_stem, isStem: true}
+    ];
 
     constructor(){
-        super(["wood", "plant"], 3, 1);
+
+        super("tcontool_hatchet", "Hatchet");
+
+        this.blockTypes = ["wood", "plant"];
+        this.texture = new ToolTexture("model/tcontool_hatchet", 3, 1);
+        this.damagePotential = 1.1;
+
+        this.setToolParams();
+
     }
 
-    override buildStats(materials: string[]): ToolStats {
-        const stats = new ToolStats();
-        stats.head(materials[1]);
-        stats.extra(materials[2]);
-        stats.handle(materials[0]);
+    override buildStats(stats: ToolStats, materials: string[]): void {
+        stats.head(materials[1])
+             .extra(materials[2])
+             .handle(materials[0]);
         stats.attack += 0.5;
-        return stats;
     }
 
-    override damagePotential(): number {
-        return 1.1;
-    }
-
-    override getTexture(): ToolTexture {
-        return textureHatchet;
-    }
-
-    override onDestroy(item: ItemInstance, coords: Callback.ItemUseCoordinates, block: Tile): true {
+    //Destroying plants does not reduce durability.
+    onDestroy(item: ItemInstance, coords: Callback.ItemUseCoordinates, block: Tile, player: number): true {
         if(!item.extra){
             return true;
         }
-        const toolData = new ToolData(item);
+        const stack = new TconToolStack(item);
         const blockData = ToolAPI.getBlockData(block.id);
-        if(this.blockMaterials[blockData.material.name] && toolData.stats.level >= blockData.level && !toolData.isBroken()){
-            toolData.forEachModifiers((mod, level) => {
-                mod.onDestroy(item, coords, block, 0, level);
+        if(blockData && this.blockTypes.includes(blockData.material.name) && stack.stats.level >= blockData.level && !stack.isBroken()){
+            stack.forEachModifiers((mod, level) => {
+                mod.onDestroy(item, coords, block, player, level);
             });
             if(blockData.material.name !== "plant"){
-                toolData.consumeDurability(this.isWeapon ? 2 : 1);
-                if(!this.isWeapon){
-                    toolData.addXp(1);
+                if(this.isWeapon){
+                    stack.consumeDurability(2);
                 }
+                else{
+                    stack.consumeDurability(1);
+                    stack.addXp(1);
+                }
+                item.data = stack.data;
             }
         }
         return true;
     }
 
-    useItem(coords: Callback.ItemUseCoordinates, item: ItemInstance, block: Tile): void {
-        if(!item.extra){
-            return;
-        }
-        const toolData = new ToolData(item);
-        let id: number;
-        if(block.id === VanillaBlockID.log){
-            switch(block.data){
-                case 0: id = VanillaBlockID.stripped_oak_log; break;
-                case 1: id = VanillaBlockID.stripped_spruce_log; break;
-                case 2: id = VanillaBlockID.stripped_birch_log; break;
-                case 3: id = VanillaBlockID.stripped_jungle_log; break;
+    onItemUse(coords: Callback.ItemUseCoordinates, item: ItemStack, block: Tile, player: number): void {
+        if(item.extra){
+            const log = TconHatchet.STRIPPED_LOGS.find(stripped => stripped.id === block.id && (stripped.data === -1 || stripped.data === block.data));
+            const stack = new TconToolStack(item);
+            if(log && !stack.isBroken()){
+                const region = WorldRegion.getForActor(player);
+                if(BlockEngine.getMainGameVersion() >= 16){
+                    const blockState = region.getBlock(coords);
+                    const states = {pillar_axis: blockState.getState(EBlockStates.PILLAR_AXIS)};
+                    if(log.isStem){
+                        states["deprecated"] = 0;
+                    }
+                    region.setBlock(coords, new BlockState(log.stripped, states));
+                }
+                else{
+                    region.setBlock(coords, log.stripped, 0);
+                }
+                region.playSound(coords.x, coords.y, coords.z, log.isStem ? "step.stem" : "step.wood");
+                stack.consumeDurability(1);
+                stack.addXp(1);
+                stack.applyToHand(player);
             }
-        }
-        else if(block.id === VanillaBlockID.log2){
-            id = block.data === 0 ? VanillaBlockID.stripped_acacia_log : VanillaBlockID.stripped_dark_oak_log;
-        }
-        if(id !== undefined){
-            World.setBlock(coords.x, coords.y, coords.z, id, 0);
-            toolData.consumeDurability(1);
-            toolData.addXp(1);
-            toolData.applyHand();
         }
     }
 
 }
 
 
-TinkersToolHandler.createTool("tcontool_hatchet", "Hatchet", new TinkersHatchet());
+ItemRegistry.registerItem(new TconHatchet());
 ToolForgeHandler.addRecipe(ItemID.tcontool_hatchet, ["rod", "axe", "binding"]);
 ToolForgeHandler.addLayout({
     title: "Hatchet",

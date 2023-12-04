@@ -42,6 +42,10 @@ class TconToolStack implements ItemInstance {
         return this.extra.getInt("repair", 0);
     }
 
+    applyToHand(player: number): void {
+        Entity.setCarriedItem(player, this.id, this.count, this.data, this.extra);
+    }
+
     getBaseStats(): ToolStats {
         const stats = new ToolStats();
         for(let i = 0; i < this.materials.length; i++){
@@ -73,16 +77,21 @@ class TconToolStack implements ItemInstance {
         return this.durability >= this.stats.durability;
     }
 
-    consumeDurability(val: number): void {
+    consumeDurability(value: number): void {
+
         let cancel = false;
-        this.forEachModifiers((mod, level) => {
-            if(mod.onConsume(level)){
-                cancel = true;
-            }
-        });
-        if(!cancel){
-            this.durability += val;
+        let consume = 0;
+
+        for(let i = 0; i < value; i++){
+            cancel = false;
+            this.forEachModifiers((mod, level) => {
+                if(mod.onConsume(level)) cancel = true;
+            });
+            if(!cancel) consume++;
         }
+
+        this.durability += consume;
+        
     }
 
     addXp(val: number): void {

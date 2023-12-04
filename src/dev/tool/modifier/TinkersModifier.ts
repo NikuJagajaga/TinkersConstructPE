@@ -57,11 +57,11 @@ abstract class TinkersModifier {
         return 0;
     }
 
-    onDealDamage(victim: number, damageValue: number, damageType: number, level: number): void {
+    onDealDamage(victim: number, player: number, damageValue: number, damageType: number, level: number): void {
 
     }
     
-    onKillEntity(entity: number, damageType: number, level: number): void {
+    onKillEntity(victim: number, player: number, damageType: number, level: number): void {
 
     }
 

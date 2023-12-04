@@ -112,3 +112,8 @@ const createItem = (namedID: string, name: string, texture: Item.TextureData = {
     Item.createItem(namedID, name, texture, params);
     return id;
 };
+
+
+Array.prototype.includes = function(elem){
+    return this.indexOf(elem) !== -1;
+};

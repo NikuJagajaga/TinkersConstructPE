@@ -1,43 +1,41 @@
-const textureShovel = new ToolTexture("model/tcontool_shovel", 3, 1);
-
-
-class TinkersShovel extends TinkersTool {
+class TconShovel extends TconTool {
 
     constructor(){
-        super(["dirt"], 3, 1);
+
+        super("tcontool_shovel", "Shovel");
+
+        this.blockTypes = ["dirt"];
+        this.texture = new ToolTexture("model/tcontool_shovel", 3, 1);
+        this.damagePotential = 0.9;
+
+        this.setToolParams();
+
     }
 
-    override buildStats(materials: string[]): ToolStats {
-        const stats = new ToolStats();
-        stats.head(materials[1]);
-        stats.extra(materials[2]);
-        stats.handle(materials[0]);
-        return stats;
+    override buildStats(stats: ToolStats, materials: string[]): void {
+        stats.head(materials[1])
+             .extra(materials[2])
+             .handle(materials[0]);
     }
 
-    override damagePotential(): number {
-        return 0.9;
-    }
-
-    override getTexture(): ToolTexture {
-        return textureShovel;
-    }
-
-    useItem(coords: Callback.ItemUseCoordinates, item: ItemInstance, block: Tile): void {
-        if(item.extra && block.id == VanillaBlockID.grass && coords.side == 1){ 
-            const toolData = new ToolData(item);
-            World.setBlock(coords.x, coords.y, coords.z, VanillaBlockID.grass_path, 0);
-            World.playSound(coords.x + 0.5, coords.y + 1, coords.z + 0.5, "step.grass", 1, 0.8);
-            toolData.consumeDurability(1);
-            toolData.addXp(1);
-            toolData.applyHand();
+    override onItemUse(coords: Callback.ItemUseCoordinates, item: ItemStack, block: Tile, player: number): void {
+        if(item.extra && block.id === VanillaTileID.grass && coords.side === EBlockSide.UP){
+            const stack = new TconToolStack(item);
+            if(!stack.isBroken()){
+                const region = WorldRegion.getForActor(player);
+                region.setBlock(coords, VanillaTileID.grass_path, 0);
+                region.playSound(coords.x, coords.y, coords.z, "step.grass");
+                stack.consumeDurability(1);
+                stack.addXp(1);
+                stack.applyToHand(player);
+            }
         }
     }
 
 }
 
 
-TinkersToolHandler.createTool("tcontool_shovel", "Shovel", new TinkersShovel());
+ItemRegistry.registerItem(new TconShovel());
 ToolForgeHandler.addRecipe(ItemID.tcontool_shovel, ["rod", "shovel", "binding"]);
 ToolForgeHandler.addLayout({
     title: "Shovel",

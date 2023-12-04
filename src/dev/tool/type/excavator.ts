@@ -1,47 +1,36 @@
-const textureExcavator = new ToolTexture("model/tcontool_excavator", 4, 0);
-
-
-class TinkersExcavator extends TinkersTool3x3 {
+class TconExcavator extends TconTool3x3 {
 
     private static readonly DURABILITY_MODIFIER = 1.75;
 
     constructor(){
-        super(["dirt"], 4, 0);
+
+        super("tcontool_excavator", "Excavator");
+
+        this.blockTypes = ["stone"];
+        this.texture = new ToolTexture("model/tcontool_excavator", 4, 0);
+        this.miningSpeedModifier = 0.28;
+        this.damagePotential = 1.25;
+        this.repairParts = [1, 2];
+
+        this.setToolParams();
+
     }
 
-    override buildStats(materials: string[]): ToolStats {
-        const stats = new ToolStats();
-        stats.head(materials[1], materials[2]);
-        stats.extra(materials[3]);
-        stats.handle(materials[0]);
-        stats.durability *= TinkersExcavator.DURABILITY_MODIFIER;
-        return stats;
-    }
-
-    override miningSpeedModifier(): number {
-        return 0.28;
-    }
-
-    override damagePotential(): number {
-        return 1.25;
-    }
-
-    override getTexture(): ToolTexture {
-        return textureExcavator;
-    }
-
-    override getRepairParts(): number[] {
-        return [1, 2];
+    override buildStats(stats: ToolStats, materials: string[]): void {
+        stats.head(materials[1], materials[2])
+             .extra(materials[3])
+             .handle(materials[0]);
+        stats.durability *= TconExcavator.DURABILITY_MODIFIER;
     }
 
     override getRepairModifierForPart(index: number): number {
-        return index === 1 ? TinkersExcavator.DURABILITY_MODIFIER : TinkersExcavator.DURABILITY_MODIFIER * 0.75;
+        return index === 1 ? TconExcavator.DURABILITY_MODIFIER : TconExcavator.DURABILITY_MODIFIER * 0.75;
     }
 
 }
 
 
-TinkersToolHandler.createTool("tcontool_excavator", "Excavator", new TinkersExcavator());
+ItemRegistry.registerItem(new TconExcavator());
 ToolForgeHandler.addRecipe(ItemID.tcontool_excavator, ["rod2", "excavator", "largeplate", "binding2"]);
 ToolForgeHandler.addLayout({
     title: "Excavator",

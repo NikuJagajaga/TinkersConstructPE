@@ -23,6 +23,16 @@ class EntityHelper {
         EEntityType.ENDERMITE
     ];
 
+    private static headMeta: {[ent: number]: number} = {
+        [EEntityType.SKELETON]: 0,
+        [EEntityType.WHITHER_SKELETON]: 1,
+        [EEntityType.ZOMBIE]: 2,
+        1: 3, //PLAYER
+        63: 3, //PLAYER
+        [EEntityType.CREEPER]: 4,
+        [EEntityType.ENDER_DRAGON]: 5
+    };
+
     static isPlayer(entity: number): boolean {
         const type = Entity.getType(entity);
         return type === EEntityType.PLAYER || type === 63;
@@ -30,12 +40,17 @@ class EntityHelper {
 
     static isUndead(entity: number): boolean {
         const type = Entity.getType(entity);
-        return this.undeads.indexOf(type) !== -1;
+        return this.undeads.includes(type);
     }
 
     static isArthropods(entity: number): boolean {
         const type = Entity.getType(entity);
-        return this.arthropods.indexOf(type) !== -1;
+        return this.arthropods.includes(type);
+    }
+
+    static getHeadMeta(entity: number): number {
+        const type = Entity.getType(entity);
+        return this.headMeta[type] || -1;
     }
 
 }

@@ -1,47 +1,36 @@
-const textureHammer = new ToolTexture("model/tcontool_hammer", 4, 0);
-
-
-class TinkersHammer extends TinkersTool3x3 {
+class TconHammer extends TconTool3x3 {
 
     private static readonly DURABILITY_MODIFIER = 2.5;
 
     constructor(){
-        super(["stone"], 4, 0);
+
+        super("tcontool_hammer", "Hammer");
+
+        this.blockTypes = ["stone"];
+        this.texture = new ToolTexture("model/tcontool_hammer", 4, 0);
+        this.miningSpeedModifier = 0.4;
+        this.damagePotential = 1.2;
+        this.repairParts = [1, 2, 3];
+
+        this.setToolParams();
+
     }
 
-    override buildStats(materials: string[]): ToolStats {
-        const stats = new ToolStats();
-        stats.head(materials[1], materials[1], materials[2], materials[3]);
-        stats.handle(materials[0]);
+    override buildStats(stats: ToolStats, materials: string[]): void {
+        stats.head(materials[1], materials[1], materials[2], materials[3])
+             .handle(materials[0]);
         stats.level = Material[materials[1]].getHeadStats().level;
-        stats.durability *= TinkersHammer.DURABILITY_MODIFIER;
-        return stats;
-    }
-
-    override miningSpeedModifier(): number {
-        return 0.4;
-    }
-
-    override damagePotential(): number {
-        return 1.2;
-    }
-
-    override getTexture(): ToolTexture {
-        return textureHammer;
-    }
-
-    override getRepairParts(): number[] {
-        return [1, 2, 3];
+        stats.durability *= TconHammer.DURABILITY_MODIFIER;
     }
 
     override getRepairModifierForPart(index: number): number {
-        return index === 1 ? TinkersHammer.DURABILITY_MODIFIER : TinkersHammer.DURABILITY_MODIFIER * 0.6;
+        return index === 1 ? TconHammer.DURABILITY_MODIFIER : TconHammer.DURABILITY_MODIFIER * 0.6;
     }
 
 }
 
 
-TinkersToolHandler.createTool("tcontool_hammer", "Hammer", new TinkersHammer());
+ItemRegistry.registerItem(new TconHammer());
 ToolForgeHandler.addRecipe(ItemID.tcontool_hammer, ["rod2", "hammer", "largeplate", "largeplate"]);
 ToolForgeHandler.addLayout({
     title: "Hammer",

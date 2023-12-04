@@ -1,36 +1,35 @@
-const textureSword = new ToolTexture("model/tcontool_sword", 3, 1);
-
-
-class TinkersSword extends TinkersTool {
+class TconSword extends TconTool {
 
     private static DURABILITY_MODIFIER = 1.1;
 
     constructor(){
-        super(["fibre"], 3, 1, true);
+
+        super("tcontool_sword", "Broad Sword");
+
+        this.blockTypes = ["fibre"];
+        this.texture = new ToolTexture("model/tcontool_sword", 3, 1);
+        this.isWeapon = true;
+
+        this.setToolParams();
+
     }
 
-    override buildStats(materials: string[]): ToolStats {
-        const stats = new ToolStats();
-        stats.head(materials[1]);
-        stats.extra(materials[2]);
-        stats.handle(materials[0]);
+    override buildStats(stats: ToolStats, materials: string[]): void {
+        stats.head(materials[1])
+             .extra(materials[2])
+             .handle(materials[0]);
         stats.attack += 1;
-        stats.durability *= TinkersSword.DURABILITY_MODIFIER;
-        return stats;
-    }
-
-    override getTexture(): ToolTexture {
-        return textureSword;
+        stats.durability *= TconSword.DURABILITY_MODIFIER;
     }
 
     override getRepairModifierForPart(index: number): number {
-        return TinkersSword.DURABILITY_MODIFIER;
+        return TconSword.DURABILITY_MODIFIER;
     }
 
 }
 
 
-TinkersToolHandler.createTool("tcontool_sword", "Broad Sword", new TinkersSword());
+ItemRegistry.registerItem(new TconSword());
 ToolForgeHandler.addRecipe(ItemID.tcontool_sword, ["rod", "sword", "guard"]);
 ToolForgeHandler.addLayout({
     title: "Broad Sword",

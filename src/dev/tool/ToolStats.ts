@@ -10,7 +10,7 @@ class ToolStats {
     }
 
     //call this first
-    head(...materials: string[]): void {
+    head(...materials: string[]): this {
         const length = materials.length;
         this.durability = this.level = this.attack = this.speed = 0;
         let stats: HeadStats;
@@ -26,10 +26,11 @@ class ToolStats {
         this.durability = Math.max(1, this.durability / length | 0);
         this.attack /= length;
         this.speed /= length;
+        return this;
     }
 
     //call this second
-    extra(...materials: string[]): void {
+    extra(...materials: string[]): this {
         const length = materials.length;
         let stats: ExtraStats;
         let dur = 0;
@@ -38,10 +39,11 @@ class ToolStats {
             dur += stats.durability;
         }
         this.durability += Math.round(dur / length);
+        return this;
     }
 
     //call this last
-    handle(...materials: string[]): void {
+    handle(...materials: string[]): this {
         const length = materials.length;
         let stats: HandleStats;
         let dur = 0;
@@ -55,6 +57,7 @@ class ToolStats {
         this.durability = Math.round(this.durability * mod);
         this.durability += Math.round(dur / length);
         this.durability = Math.max(1, this.durability);
+        return this;
     }
 
     getToolMaterial(): ToolAPI.ToolMaterial {

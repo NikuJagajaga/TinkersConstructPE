@@ -37,7 +37,6 @@
 
         "tool/TinkersMaterial.ts",
         "tool/ToolStats.ts",
-        "tool/ToolData.ts",
         "tool/TconToolStack.ts",
         "tool/PartRegistry.ts",
         "tool/ToolTexture.ts",
@@ -69,10 +68,8 @@
         "table/ToolForgeHandler.ts",
         "table/ToolForge.ts",
 
-        "tool/TinkersTool.ts",
         "tool/TconTool.ts",
         "tool/ToolModelManager.ts",
-        "tool/TinkersToolHandler.ts",
 
         "tool/type/pickaxe.ts",
         "tool/type/shovel.ts",

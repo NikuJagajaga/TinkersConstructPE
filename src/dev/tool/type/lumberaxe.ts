@@ -1,55 +1,74 @@
-const textureLumberaxe = new ToolTexture("model/tcontool_lumberaxe", 3, 1);
+class TconLumberaxe extends TconTool {
 
+    static logs: number[] = [
+        VanillaTileID.log,
+        VanillaTileID.log2,
+        VanillaTileID.warped_stem,
+        VanillaTileID.crimson_stem
+    ];
 
-class TinkersLumberaxe extends TinkersTool {
-
-    is3x3 = true;
     private static readonly DURABILITY_MODIFIER = 2;
 
-    static logs = {
-        [VanillaBlockID.log]: true,
-        [VanillaBlockID.log2]: true
-    };
-/*
-    static leaves = {
-        [VanillaBlockID.leaves]: true,
-        [VanillaBlockID.leaves2]: true
-    }
-*/
     constructor(){
-        super(["wood"], 3, 1);
+
+        super("tcontool_lumberaxe", "Lumber Axe");
+
+        this.is3x3 = true;
+        this.blockTypes = ["wood"];
+        this.texture = new ToolTexture("model/tcontool_lumberaxe", 3, 1);
+        this.miningSpeedModifier = 0.35;
+        this.damagePotential = 1.2;
+        this.repairParts = [1, 2];
+
+        this.setToolParams();
+
     }
 
-    override buildStats(materials: string[]): ToolStats {
-        const stats = new ToolStats();
-        stats.head(materials[1], materials[2]);
-        stats.extra(materials[3]);
-        stats.handle(materials[0]);
+    override buildStats(stats: ToolStats, materials: string[]): void {
+        stats.head(materials[1], materials[2])
+             .extra(materials[3])
+             .handle(materials[0]);
         stats.attack += 2;
-        stats.durability *= TinkersLumberaxe.DURABILITY_MODIFIER;
-        return stats;
-    }
-
-    override miningSpeedModifier(): number {
-        return 0.35;
-    }
-
-    override damagePotential(): number {
-        return 1.2;
-    }
-
-    override getTexture(): ToolTexture {
-        return textureLumberaxe;
-    }
-
-    override getRepairParts(): number[] {
-        return [1, 2];
+        stats.durability *= TconLumberaxe.DURABILITY_MODIFIER;
     }
 
     override getRepairModifierForPart(index: number): number {
-        return index === 1 ? TinkersLumberaxe.DURABILITY_MODIFIER : TinkersLumberaxe.DURABILITY_MODIFIER * 0.625;
+        return index === 1 ? TconLumberaxe.DURABILITY_MODIFIER : TconLumberaxe.DURABILITY_MODIFIER * 0.625;
     }
 
+    override onDestroy(item: ItemInstance, coords: Callback.ItemUseCoordinates, block: Tile, player: number): true {
+
+        const client = Network.getClientForPlayer(player);
+
+        client.send("tcon.choptree", {x: coords.x, y: coords.y, z: coords.z});
+
+        return true;
+        
+    }
+
+}
+
+
+Network.addClientPacket("tcon.choptree", (data: {x: number, y: number, z: number}) => {
+
+    if(Threading.getThread("tcon_choptree")){
+        return;
+    }
+
+    Threading.initThread("tcon_choptree", () => {
+
+        while(true){
+
+        }
+
+        Thread.sleep(25);
+
+    });
+
+});
+
+
+/*
     override onDestroy(item: ItemInstance, coords: Callback.ItemUseCoordinates, block: Tile): true {
 
         if(!item.extra){
@@ -153,10 +172,10 @@ class TinkersLumberaxe extends TinkersTool {
         return true;
     }
 
-}
+*/
 
 
-TinkersToolHandler.createTool("tcontool_lumberaxe", "Lumber Axe", new TinkersLumberaxe());
+ItemRegistry.registerItem(new TconLumberaxe());
 ToolForgeHandler.addRecipe(ItemID.tcontool_lumberaxe, ["rod2", "broadaxe", "largeplate", "binding2"]);
 ToolForgeHandler.addLayout({
     title: "Lumber Axe",

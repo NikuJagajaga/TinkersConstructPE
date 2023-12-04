@@ -1,8 +1,8 @@
-ItemRegistry.registerItem(new class extends TconTool {
+class TconPickaxe extends TconTool {
 
     constructor(){
 
-        super("tcontool_pickaxe", "Pickaxe", "tcontool_pickaxe");
+        super("tcontool_pickaxe", "Pickaxe");
 
         this.blockTypes = ["stone"];
         this.texture = new ToolTexture("model/tcontool_pickaxe", 3, 1);
@@ -12,13 +12,15 @@ ItemRegistry.registerItem(new class extends TconTool {
     }
 
     override buildStats(stats: ToolStats, materials: string[]): void {
-        stats.head(materials[1]);
-        stats.extra(materials[2]);
-        stats.handle(materials[0]);
+        stats.head(materials[1])
+             .extra(materials[2])
+             .handle(materials[0]);
     }
 
-});
+}
 
+
+ItemRegistry.registerItem(new TconPickaxe());
 ToolForgeHandler.addRecipe(ItemID.tcontool_pickaxe, ["rod", "pickaxe", "binding"]);
 ToolForgeHandler.addLayout({
     title: "Pickaxe",
