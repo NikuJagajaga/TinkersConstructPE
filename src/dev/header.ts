@@ -69,7 +69,7 @@ const addLineBreaks = (length: number, text: string): string => {
     const words = text.split(" ");
     let i = 0;
     let line: string[];
-    let count: number;
+    let count = 0;
     while(i < words.length){
         line = [];
         count = 0;

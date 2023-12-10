@@ -77,8 +77,8 @@ BlockModel.register(BlockID.tcon_tank_ingot, (model, index) => {
 
 class SearedTank extends TileWithLiquidModel {
 
-    @ClientSide animPos: Vector;
-    @ClientSide animScale: Vector;
+    animPos: Vector;
+    animScale: Vector;
 
     constructor(private tankCapacity: number){
         super();

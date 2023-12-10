@@ -23,12 +23,18 @@ class PartRegistry {
         {key: "largeplate", name: "Large Plate", cost: 8}
     ];
 
-    private static createParts(key: string, material: TinkersMaterial): void {
+    static createParts(key: string, material: TinkersMaterial): void {
         const name = material.getName();
         this.types.forEach(type => {
             const id = createItem(`tconpart_${type.key}_${key}`, `${name} ${type.name}`);
             Item.addCreativeGroup("tconpart_" + type.key, type.name, [id]);
             this.data[id] = {type: type.key, material: key};
+        });
+    }
+
+    static registerRecipes(key: string, material: TinkersMaterial): void {
+        this.types.forEach(type => {
+            const id = ItemID[`tconpart_${type.key}_${key}`];
             const liquid = material.getMoltenLiquid();
             if(liquid){
                 MeltingRecipe.addRecipe(id, liquid, MatValue.INGOT * type.cost);
@@ -38,13 +44,7 @@ class PartRegistry {
         });
     }
 
-    static setup(): void {
-        for(let key in Material){
-            PartRegistry.createParts(key, Material[key]);
-        }
-    }
-
-    static getPartData(id: number) : TinkersPartData {
+    static getPartData(id: number): TinkersPartData {
         return this.data[id];
     }
 
@@ -57,7 +57,38 @@ class PartRegistry {
         return 0;
     }
 
+    static getAllPartBuildRecipeForRV(): RecipePattern[] {
+
+        const list: RecipePattern[] = [];
+
+        for(let key in Material){
+            if(!Material[key].isMetal){
+                for(let i = 0; i < this.types.length; i++){
+                    list.push({
+                        input: [{id: ItemID.tcon_pattern_blank, count: 1, data: 0}, {...Material[key].getItem(), count: this.types[i].cost}],
+                        output: [{id: this.getIDFromData(this.types[i].key, key), count: 1, data: 0}],
+                        pattern: this.types[i].key
+                    });
+                }
+            }
+        }
+
+        return list;
+
+    }
+
 }
 
 
-PartRegistry.setup();
+(() => {
+    for(let key in Material){
+        PartRegistry.createParts(key, Material[key]);
+    }
+})();
+
+
+Callback.addCallback("PreLoaded", () => {
+    for(let key in Material){
+        PartRegistry.registerRecipes(key, Material[key]);
+    }
+});

@@ -44,11 +44,7 @@ class TconTool extends ItemCommon implements ItemBehavior, ToolAPI.ToolParams {
         this.setMaxStack(1);
         this.setMaxDamage(13);
 
-        ItemModel.getFor(this.id, -1).setModelOverrideCallback(item => this.onModelOverride(item));
-
-        //for(let i = 0; i <= this.maxDamage; i++){
-            //ItemModel.getFor(this.id, i).setModelOverrideCallback(item => this.onModelOverride(item));
-        //}
+        ItemModel.getFor(this.id, -1).setModelOverrideCallback(item => ToolModelManager.getModel(item));
 
     }
 
@@ -61,10 +57,6 @@ class TconTool extends ItemCommon implements ItemBehavior, ToolAPI.ToolParams {
 
     getRepairModifierForPart(index: number): number {
         return 1.0;
-    }
-
-    onModelOverride(item: ItemInstance): ItemModel {
-        return ToolModelManager.getModel(item);
     }
 
     onNameOverride(item: ItemInstance, translation: string, name: string): string {

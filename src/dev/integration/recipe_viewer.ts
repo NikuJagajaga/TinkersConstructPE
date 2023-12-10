@@ -1,38 +1,39 @@
-var RV;
+var RV: RecipeViewerAPI;
 
-ModAPI.addAPICallback("RecipeViewer", (api: {Core: any, RecipeType: typeof RecipeType, RecipeTypeRegistry: RecipeTypeRegistry}) => {
+ModAPI.addAPICallback("RecipeViewer", (api: RecipeViewerAPI) => {
 
-    RV = api.Core;
+    RV = api;
 
-    //UI.TextureSource.put("tcon.rv.table", FileTools.ReadImage(__dir__ + "res/terrain-atlas/smeltery/tcon_itemcast_2.png"));
-    //UI.TextureSource.put("tcon.rv.basin", FileTools.ReadImage(__dir__ + "res/terrain-atlas/smeltery/tcon_blockcast_2.png"));
-
-/*
-    class PartBuilderRV extends api.RecipeType {
+    api.RecipeTypeRegistry.register("tcon_partbuilder", new class extends api.RecipeType {
 
         constructor(){
-            super("Part Build", BlockID.tcon_partbuilder, {
+            const centerY = 80;
+            super("Part Build", BlockID.tcon_partbuilder0, {
                 drawing: [
-                    {type: "bitmap", x: 476, y: 104, bitmap: "tcon.arrow", scale: 8}
+                    {type: "bitmap", x: 500 - 132 / 2, y: centerY - 90 / 2, bitmap: "tcon.arrow", scale: 6}
                 ],
                 elements: {
-                    input0: {x: 180, y: 100, size: 128},
-                    input1: {x: 308, y: 100, size: 128},
-                    output0: {x: 692, y: 100, size: 128}
+                    input0: {x: 500 - 66 - 48 - 108 * 2, y: centerY - 108 / 2, size: 108},
+                    input1: {x: 500 - 66 - 48 - 108, y: centerY - 108 / 2, size: 108},
+                    output0: {x: 500 + 66 + 48, y: centerY - 108 / 2, size: 108},
+                    imagePattern: {type: "scale", x: 500 - 24, y: centerY + 50, width: 48, height: 48, value: 1}
                 }
             });
+            this.setGridView(3, 1, true);
         }
 
         getAllList(): RecipePattern[] {
-            return PatternRegistry.getAllRecipeForRV();
+            return PartRegistry.getAllPartBuildRecipeForRV();
         }
 
-    }
+        onOpen(elements: java.util.HashMap<string, UI.Element>, recipe: RecipePattern): void {
+            elements.get("imagePattern").setBinding("texture", "tcon.pattern." + recipe.pattern);
+        }
 
-    api.RecipeTypeRegistry.register("tcon_partbuilder", new PartBuilderRV());
-*/
+    });
 
-    class MeltingRV extends api.RecipeType {
+
+    api.RecipeTypeRegistry.register("tcon_melting", new class extends api.RecipeType {
 
         constructor(){
             super("Melting", BlockID.tcon_smeltery, {
@@ -59,12 +60,9 @@ ModAPI.addAPICallback("RecipeViewer", (api: {Core: any, RecipeType: typeof Recip
             elements.get("textTemp").setBinding("text", recipe.temp + "°C");
         }
 
-    }
+    });
 
-    api.RecipeTypeRegistry.register("tcon_melting", new MeltingRV());
-
-
-    class AlloyingRV extends api.RecipeType {
+    api.RecipeTypeRegistry.register("tcon_alloying", new class extends api.RecipeType {
 
         constructor(){
             super("Alloying", BlockID.tcon_smeltery, {
@@ -111,9 +109,7 @@ ModAPI.addAPICallback("RecipeViewer", (api: {Core: any, RecipeType: typeof Recip
             }
         }
 
-    }
-
-    api.RecipeTypeRegistry.register("tcon_alloying", new AlloyingRV());
+    });
 
 
     class CastingRV extends api.RecipeType {

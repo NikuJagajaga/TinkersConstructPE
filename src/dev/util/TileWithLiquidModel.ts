@@ -3,9 +3,9 @@ abstract class TileWithLiquidModel extends TconTileEntity {
     anim: Animation.Base;
     render: Render;
 
-    @ClientSide animPos: Vector;
-    @ClientSide animScale: Vector;
-    @ClientSide animHeight: number;
+    animPos: Vector;
+    animScale: Vector;
+    animHeight: number;
 
     override putDefaultNetworkData(): void {
         this.networkData.putString("liquidStored", "");

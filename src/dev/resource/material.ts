@@ -22,7 +22,7 @@ createItem("nuggetAlubrass", "Aluminum Brass Nugget", {name: "tcon_nugget_alubra
 Recipes.addFurnace(BlockID.oreCobalt, ItemID.ingotCobalt);
 Recipes.addFurnace(BlockID.oreArdite, ItemID.ingotArdite);
 
-(() => {
+Callback.addCallback("PreLoaded", () => {
 
     const addRecipes = (liquid: string, block: number, ingot: number/*, nugget: number*/): void => {
         MeltingRecipe.addRecipe(block, liquid, MatValue.BLOCK);
@@ -45,7 +45,7 @@ Recipes.addFurnace(BlockID.oreArdite, ItemID.ingotArdite);
     addRecipes("molten_pigiron", BlockID.blockPigiron, ItemID.ingotPigiron/*, ItemID.nuggetPigiron*/);
     addRecipes("molten_alubrass", BlockID.blockAlubrass, ItemID.ingotAlubrass/*, ItemID.nuggetAlubrass*/);
 
-})();
+});
 
 
 createItem("tcon_paperstack", "Paper Stack");

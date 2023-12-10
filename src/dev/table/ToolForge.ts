@@ -103,7 +103,7 @@ class ToolCrafterWindow extends CraftingWindow {
             }
 
             const addMod: {[key: string]: number} = {};
-            let count: number;
+            let count = 0;
             for(let key in Modifier){
                 count = Math.min(...Modifier[key].getRecipe().map(recipe => {
                     const find2 = items.find(item => item.id === recipe.id && (recipe.data === -1 || item.data === recipe.data));

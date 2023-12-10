@@ -1,59 +1,5 @@
-/*
-class PatternRegistry {
-
-    private static data: {[id: number]: {type: string, cost: number}} = {};
-
-    static registerData(id: number, type: string, cost: number): void {
-        this.data[id] = {type: type, cost: cost};
-    }
-
-    static getData(id: number): {type: string, cost: number} {
-        return this.data[id];
-    }
-
-    static isPattern(id: number): boolean {
-        return id in this.data;
-    }
-
-    static getAllRecipeForRV(): RecipePattern[] {
-        const list: RecipePattern[] = [];
-        let material: number;
-        let pattern: string;
-        for(let mat in Material){
-            if(Material[mat].isMetal){
-                continue;
-            }
-            material = Material[mat].getItem();
-            for(pattern in this.data){
-                list.push({
-                    input: [{id: parseInt(pattern), count: 1, data: 0}, {id: material, count: this.data[pattern].cost, data: 0}],
-                    output: [{id: PartRegistry.getIDFromData(this.data[pattern].type, mat), count: 1, data: 0}]
-                });
-            }
-        }
-        return list;
-    }
-
-}
-*/
-
 createItem("tcon_pattern_blank", "Pattern");
 Recipes2.addShaped({id: ItemID.tcon_pattern_blank, count: 4}, "ab:ba", {a: "planks", b: "stick"});
-/*
-PatternRegistry.registerData(ItemID.tcon_pattern_pickaxe, "pickaxe", 2);
-PatternRegistry.registerData(ItemID.tcon_pattern_shovel, "shovel", 2);
-PatternRegistry.registerData(ItemID.tcon_pattern_axe, "axe", 2);
-PatternRegistry.registerData(ItemID.tcon_pattern_broadaxe, "broadaxe", 8);
-PatternRegistry.registerData(ItemID.tcon_pattern_sword, "sword", 2);
-PatternRegistry.registerData(ItemID.tcon_pattern_hammer, "hammer", 8);
-PatternRegistry.registerData(ItemID.tcon_pattern_excavator, "excavator", 8);
-PatternRegistry.registerData(ItemID.tcon_pattern_rod, "rod", 1);
-PatternRegistry.registerData(ItemID.tcon_pattern_rod2, "rod2", 3);
-PatternRegistry.registerData(ItemID.tcon_pattern_binding, "binding", 1);
-PatternRegistry.registerData(ItemID.tcon_pattern_binding2, "binding2", 3);
-PatternRegistry.registerData(ItemID.tcon_pattern_guard, "guard", 1);
-PatternRegistry.registerData(ItemID.tcon_pattern_largeplate, "largeplate", 8);
-*/
 
 
 Item.addCreativeGroup("tcon_sandcast", "Sand Cast", [

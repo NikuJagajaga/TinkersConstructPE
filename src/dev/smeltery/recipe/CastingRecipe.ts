@@ -83,7 +83,7 @@ class CastingRecipe {
         const list: RecipePattern[] = [];
         let key: string;
         let liquid: string;
-        let id: number;
+        let id = 0;
         let limits: {[liq: string]: number};
         let result: ICastingRecipe;
         for(key in this[type]){

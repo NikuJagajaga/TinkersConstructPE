@@ -223,8 +223,8 @@ class SmelteryControler extends TconTileEntity implements ILiquidStorage {
 
     searchWall(coords: Vector, axis: "x" | "z", dir: -1 | 1): number {
         const pos: Vector = {...coords};
-        let i: number;
-        let block: number;
+        let i = 0;
+        let block = 0;
         for(i = 0; i < 16; i++){
             pos[axis] += dir;
             block = this.region.getBlockId(pos);
@@ -251,8 +251,8 @@ class SmelteryControler extends TconTileEntity implements ILiquidStorage {
         const from = {x: backPos.x + x1, z: backPos.z + z1};
         const to = {x: backPos.x + x2, z: backPos.z + z2};
         //Floor Check
-        let x: number;
-        let z: number;
+        let x = 0;
+        let z = 0;
         for(x = from.x + 1; x <= to.x - 1; x++){
         for(z = from.z + 1; z <= to.z - 1; z++){
             if(this.region.getBlockId(x, this.y - 1, z) !== BlockID.tcon_stone){
@@ -262,8 +262,8 @@ class SmelteryControler extends TconTileEntity implements ILiquidStorage {
         }
         //Wall Check
         const tanks: Vector[] = [];
-        let y: number;
-        let block: number;
+        let y = 0;
+        let block = 0;
         let tile: TileEntity;
         loop:
         for(y = this.y; y < 256; y++){
@@ -396,8 +396,8 @@ class SmelteryControler extends TconTileEntity implements ILiquidStorage {
         const sizeZ = data.area.to.z - data.area.from.z - 1;
         const texScale = MoltenLiquid.getTexScale();
         if(data.isActive){
-            let height: number;
-            let max: number;
+            let height = 0;
+            let max = 0;
             let y = 0;
             for(let i = 0; i < data.liqArray.length; i++){
                 height = data.liqArray[i].amount / data.capacity * sizeY;

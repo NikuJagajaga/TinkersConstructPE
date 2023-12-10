@@ -10,11 +10,17 @@ declare interface LiquidInstance {
     liquid: string,
     amount: number;
 }
+declare interface ItemInstanceWithTips extends ItemInstance {
+    tips?: {[key: string]: any};
+}
+declare interface LiquidInstanceWithTips extends LiquidInstance {
+    tips?: {[key: string]: any};
+}
 declare interface RecipePattern {
-    input?: ItemInstance[],
-    output?: ItemInstance[],
-    inputLiq?: LiquidInstance[],
-    outputLiq?: LiquidInstance[],
+    input?: ItemInstanceWithTips[],
+    output?: ItemInstanceWithTips[],
+    inputLiq?: LiquidInstanceWithTips[],
+    outputLiq?: LiquidInstanceWithTips[],
     [key: string]: any;
 }
 declare interface OldRecipeContents {
@@ -57,21 +63,20 @@ declare interface RecipeContents {
 }
 declare abstract class RecipeType {
     constructor(name: string, icon: number | Tile, content: RecipeContents);
+    setGridView(row: number, col: number, border?: boolean | number): this;
     setDescription(text: string): this;
     setTankLimit(limit: number): this;
     abstract getAllList(): RecipePattern[];
     getList(id: number, data: number, isUsage: boolean): RecipePattern[];
     onOpen(elements: java.util.HashMap<string, UI.Element>, recipe: RecipePattern): void;
-    slotTooltip(name: string, item: ItemInstance, tips: {
-        [key: string]: any;
-    }): string;
-    tankTooltip(name: string, liquid: LiquidInstance, tips: {
-        [key: string]: any;
-    }): string;
+    slotTooltip(name: string, item: ItemInstance, tips: {[key: string]: any}): string;
+    tankTooltip(name: string, liquid: LiquidInstance, tips: {[key: string]: any}): string;
 }
 declare interface RecipeTypeRegistry {
     register(key: string, recipeType: RecipeType): void;
     openRecipePage(key: string | string[]): void;
+    openRecipePageByItem(id: number, data: number, isUsage: boolean): boolean;
+    openRecipePageByLiquid(liquid: string, isUsage: boolean): boolean;
 }
 declare interface ItemList {
     get(): ItemInfo[];

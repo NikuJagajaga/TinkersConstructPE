@@ -103,7 +103,7 @@ var addLineBreaks = function (length, text) {
     var words = text.split(" ");
     var i = 0;
     var line;
-    var count;
+    var count = 0;
     while (i < words.length) {
         line = [];
         count = 0;
@@ -177,21 +177,26 @@ var TileWithLiquidModel = /** @class */ (function (_super) {
         this.networkData.putFloat("liquidRelativeAmount", 0);
     };
     TileWithLiquidModel.prototype.clientLoad = function () {
-        this.render = new Render();
-        this.anim = new Animation.Base(this.x + this.animPos.x, this.y + this.animPos.y - 1.5, this.z + this.animPos.z);
-        this.anim.describe({ render: this.render.getId(), skin: "model/tcon_liquids.png" });
-        this.anim.load();
-        this.anim.setSkylightMode();
-        var amount = this.networkData.getFloat("liquidRelativeAmount");
-        this.animHeight = 0;
-        if (amount > 0) {
-            this.animHeight = amount;
-            this.render.setPart("head", [{
-                    uv: { x: 0, y: MoltenLiquid.getY(this.networkData.getString("liquidStored")) },
-                    coords: { x: 0, y: -this.animHeight * 16 * this.animScale.y / 2, z: 0 },
-                    size: { x: 16 * this.animScale.x, y: 16 * this.animScale.y * this.animHeight, z: 16 * this.animScale.z }
-                }], MoltenLiquid.getTexScale());
-            this.anim.refresh();
+        try {
+            this.render = new Render();
+            this.anim = new Animation.Base(this.x + this.animPos.x, this.y + this.animPos.y - 1.5, this.z + this.animPos.z);
+            this.anim.describe({ render: this.render.getId(), skin: "model/tcon_liquids.png" });
+            this.anim.load();
+            this.anim.setSkylightMode();
+            var amount = this.networkData.getFloat("liquidRelativeAmount");
+            this.animHeight = 0;
+            if (amount > 0) {
+                this.animHeight = amount;
+                this.render.setPart("head", [{
+                        uv: { x: 0, y: MoltenLiquid.getY(this.networkData.getString("liquidStored")) },
+                        coords: { x: 0, y: -this.animHeight * 16 * this.animScale.y / 2, z: 0 },
+                        size: { x: 16 * this.animScale.x, y: 16 * this.animScale.y * this.animHeight, z: 16 * this.animScale.z }
+                    }], MoltenLiquid.getTexScale());
+                this.anim.refresh();
+            }
+        }
+        catch (e) {
+            Game.message("render: " + e);
         }
     };
     TileWithLiquidModel.prototype.clientUnload = function () {
@@ -220,8 +225,13 @@ var TileWithLiquidModel = /** @class */ (function (_super) {
             needRefresh = true;
         }
         if (needRefresh) {
-            this.render.setPart("head", parts, MoltenLiquid.getTexScale());
-            this.anim.refresh();
+            try {
+                this.render.setPart("head", parts, MoltenLiquid.getTexScale());
+                this.anim.refresh();
+            }
+            catch (e) {
+                Game.message("render: " + e);
+            }
         }
     };
     TileWithLiquidModel.prototype.onTick = function () {
@@ -234,15 +244,6 @@ var TileWithLiquidModel = /** @class */ (function (_super) {
             this.networkData.sendChanges();
         }
     };
-    __decorate([
-        ClientSide
-    ], TileWithLiquidModel.prototype, "animPos", void 0);
-    __decorate([
-        ClientSide
-    ], TileWithLiquidModel.prototype, "animScale", void 0);
-    __decorate([
-        ClientSide
-    ], TileWithLiquidModel.prototype, "animHeight", void 0);
     return TileWithLiquidModel;
 }(TconTileEntity));
 var CraftingWindow = /** @class */ (function () {
@@ -828,7 +829,7 @@ var CastingRecipe = /** @class */ (function () {
         var list = [];
         var key;
         var liquid;
-        var id;
+        var id = 0;
         var limits;
         var result;
         for (key in this[type]) {
@@ -1079,12 +1080,6 @@ var SearedTank = /** @class */ (function (_super) {
         }
         region.dropItem(this.x + 0.5, this.y, this.z + 0.5, this.blockID, 1, this.networkData.getInt("blockData"), extra);
     };
-    __decorate([
-        ClientSide
-    ], SearedTank.prototype, "animPos", void 0);
-    __decorate([
-        ClientSide
-    ], SearedTank.prototype, "animScale", void 0);
     return SearedTank;
 }(TileWithLiquidModel));
 (function () {
@@ -1785,8 +1780,8 @@ var SmelteryControler = /** @class */ (function (_super) {
     };
     SmelteryControler.prototype.searchWall = function (coords, axis, dir) {
         var pos = __assign({}, coords);
-        var i;
-        var block;
+        var i = 0;
+        var block = 0;
         for (i = 0; i < 16; i++) {
             pos[axis] += dir;
             block = this.region.getBlockId(pos);
@@ -1813,8 +1808,8 @@ var SmelteryControler = /** @class */ (function (_super) {
         var from = { x: backPos.x + x1, z: backPos.z + z1 };
         var to = { x: backPos.x + x2, z: backPos.z + z2 };
         //Floor Check
-        var x;
-        var z;
+        var x = 0;
+        var z = 0;
         for (x = from.x + 1; x <= to.x - 1; x++) {
             for (z = from.z + 1; z <= to.z - 1; z++) {
                 if (this.region.getBlockId(x, this.y - 1, z) !== BlockID.tcon_stone) {
@@ -1824,8 +1819,8 @@ var SmelteryControler = /** @class */ (function (_super) {
         }
         //Wall Check
         var tanks = [];
-        var y;
-        var block;
+        var y = 0;
+        var block = 0;
         var tile;
         loop: for (y = this.y; y < 256; y++) {
             for (x = from.x; x <= to.x; x++) {
@@ -1945,8 +1940,8 @@ var SmelteryControler = /** @class */ (function (_super) {
         var sizeZ = data.area.to.z - data.area.from.z - 1;
         var texScale = MoltenLiquid.getTexScale();
         if (data.isActive) {
-            var height = void 0;
-            var max = void 0;
+            var height = 0;
+            var max = 0;
             var y = 0;
             for (var i = 0; i < data.liqArray.length; i++) {
                 height = data.liqArray[i].amount / data.capacity * sizeY;
@@ -2579,6 +2574,11 @@ var PartRegistry = /** @class */ (function () {
             var id = createItem("tconpart_".concat(type.key, "_").concat(key), "".concat(name, " ").concat(type.name));
             Item.addCreativeGroup("tconpart_" + type.key, type.name, [id]);
             _this.data[id] = { type: type.key, material: key };
+        });
+    };
+    PartRegistry.registerRecipes = function (key, material) {
+        this.types.forEach(function (type) {
+            var id = ItemID["tconpart_".concat(type.key, "_").concat(key)];
             var liquid = material.getMoltenLiquid();
             if (liquid) {
                 MeltingRecipe.addRecipe(id, liquid, MatValue.INGOT * type.cost);
@@ -2586,11 +2586,6 @@ var PartRegistry = /** @class */ (function () {
             }
             CastingRecipe.addMakeCastRecipes(id, type.key);
         });
-    };
-    PartRegistry.setup = function () {
-        for (var key in Material) {
-            PartRegistry.createParts(key, Material[key]);
-        }
     };
     PartRegistry.getPartData = function (id) {
         return this.data[id];
@@ -2602,6 +2597,21 @@ var PartRegistry = /** @class */ (function () {
             }
         }
         return 0;
+    };
+    PartRegistry.getAllPartBuildRecipeForRV = function () {
+        var list = [];
+        for (var key in Material) {
+            if (!Material[key].isMetal) {
+                for (var i = 0; i < this.types.length; i++) {
+                    list.push({
+                        input: [{ id: ItemID.tcon_pattern_blank, count: 1, data: 0 }, __assign(__assign({}, Material[key].getItem()), { count: this.types[i].cost })],
+                        output: [{ id: this.getIDFromData(this.types[i].key, key), count: 1, data: 0 }],
+                        pattern: this.types[i].key
+                    });
+                }
+            }
+        }
+        return list;
     };
     PartRegistry.data = {};
     PartRegistry.types = [
@@ -2621,7 +2631,16 @@ var PartRegistry = /** @class */ (function () {
     ];
     return PartRegistry;
 }());
-PartRegistry.setup();
+(function () {
+    for (var key in Material) {
+        PartRegistry.createParts(key, Material[key]);
+    }
+})();
+Callback.addCallback("PreLoaded", function () {
+    for (var key in Material) {
+        PartRegistry.registerRecipes(key, Material[key]);
+    }
+});
 var ToolTexture = /** @class */ (function () {
     //private bitmap: android.graphics.Bitmap;
     function ToolTexture(path, partsCount, brokenIndex) {
@@ -2692,7 +2711,7 @@ createItem("nuggetAlubrass", "Aluminum Brass Nugget", {name: "tcon_nugget_alubra
 */
 Recipes.addFurnace(BlockID.oreCobalt, ItemID.ingotCobalt);
 Recipes.addFurnace(BlockID.oreArdite, ItemID.ingotArdite);
-(function () {
+Callback.addCallback("PreLoaded", function () {
     var addRecipes = function (liquid, block, ingot /*, nugget: number*/) {
         MeltingRecipe.addRecipe(block, liquid, MatValue.BLOCK);
         MeltingRecipe.addRecipe(ingot, liquid, MatValue.INGOT);
@@ -2712,7 +2731,7 @@ Recipes.addFurnace(BlockID.oreArdite, ItemID.ingotArdite);
     addRecipes("molten_manyullyn", BlockID.blockManyullyn, ItemID.ingotManyullyn /*, ItemID.nuggetManyullyn*/);
     addRecipes("molten_pigiron", BlockID.blockPigiron, ItemID.ingotPigiron /*, ItemID.nuggetPigiron*/);
     addRecipes("molten_alubrass", BlockID.blockAlubrass, ItemID.ingotAlubrass /*, ItemID.nuggetAlubrass*/);
-})();
+});
 createItem("tcon_paperstack", "Paper Stack");
 Recipes2.addShapeless(ItemID.tcon_paperstack, [{ id: "paper", count: 4 }]);
 createBlock("tcon_lavawood", [{ name: "Lavawood" }]);
@@ -2745,61 +2764,8 @@ createBlock("tcon_seared_glass", [{ name: "Seared Glass" }]);
 Recipes2.addShaped(BlockID.tcon_seared_glass, "_a_:aba:_a_", { a: ItemID.tcon_brick, b: "glass" });
 CastingRecipe.addBasinRecipe(VanillaBlockID.glass, "molten_stone", BlockID.tcon_seared_glass, MatValue.SEARED_BLOCK);
 ConnectedTexture.setModelForGlass(BlockID.tcon_seared_glass, -1, "tcon_seared_glass");
-/*
-class PatternRegistry {
-
-    private static data: {[id: number]: {type: string, cost: number}} = {};
-
-    static registerData(id: number, type: string, cost: number): void {
-        this.data[id] = {type: type, cost: cost};
-    }
-
-    static getData(id: number): {type: string, cost: number} {
-        return this.data[id];
-    }
-
-    static isPattern(id: number): boolean {
-        return id in this.data;
-    }
-
-    static getAllRecipeForRV(): RecipePattern[] {
-        const list: RecipePattern[] = [];
-        let material: number;
-        let pattern: string;
-        for(let mat in Material){
-            if(Material[mat].isMetal){
-                continue;
-            }
-            material = Material[mat].getItem();
-            for(pattern in this.data){
-                list.push({
-                    input: [{id: parseInt(pattern), count: 1, data: 0}, {id: material, count: this.data[pattern].cost, data: 0}],
-                    output: [{id: PartRegistry.getIDFromData(this.data[pattern].type, mat), count: 1, data: 0}]
-                });
-            }
-        }
-        return list;
-    }
-
-}
-*/
 createItem("tcon_pattern_blank", "Pattern");
 Recipes2.addShaped({ id: ItemID.tcon_pattern_blank, count: 4 }, "ab:ba", { a: "planks", b: "stick" });
-/*
-PatternRegistry.registerData(ItemID.tcon_pattern_pickaxe, "pickaxe", 2);
-PatternRegistry.registerData(ItemID.tcon_pattern_shovel, "shovel", 2);
-PatternRegistry.registerData(ItemID.tcon_pattern_axe, "axe", 2);
-PatternRegistry.registerData(ItemID.tcon_pattern_broadaxe, "broadaxe", 8);
-PatternRegistry.registerData(ItemID.tcon_pattern_sword, "sword", 2);
-PatternRegistry.registerData(ItemID.tcon_pattern_hammer, "hammer", 8);
-PatternRegistry.registerData(ItemID.tcon_pattern_excavator, "excavator", 8);
-PatternRegistry.registerData(ItemID.tcon_pattern_rod, "rod", 1);
-PatternRegistry.registerData(ItemID.tcon_pattern_rod2, "rod2", 3);
-PatternRegistry.registerData(ItemID.tcon_pattern_binding, "binding", 1);
-PatternRegistry.registerData(ItemID.tcon_pattern_binding2, "binding2", 3);
-PatternRegistry.registerData(ItemID.tcon_pattern_guard, "guard", 1);
-PatternRegistry.registerData(ItemID.tcon_pattern_largeplate, "largeplate", 8);
-*/
 Item.addCreativeGroup("tcon_sandcast", "Sand Cast", [
     createItem("tcon_sandcast_blank", "Blank Sand Cast"),
     createItem("tcon_sandcast_pickaxe", "Pickaxe Head Sand Cast"),
@@ -3338,7 +3304,9 @@ var PartBuilderWindow = new /** @class */ (function (_super) {
             cursor: { type: "image", x: 0, y: 2000, z: 1, width: 64, height: 64, bitmap: "_selection" },
             textCost: { type: "text", x: 288, y: 300, font: { size: 24, color: Color.GRAY, alignment: UI.Font.ALIGN_CENTER } },
             textTitle: { type: "text", x: 780, y: 4, font: { size: 32, color: Color.YELLOW, bold: true, alignment: UI.Font.ALIGN_CENTER }, text: "Title" },
-            textStats: { type: "text", x: 608, y: 64, font: { size: 24, color: Color.WHITE }, multiline: true, text: "Description" }
+            textStats: { type: "text", x: 608, y: 64, font: { size: 24, color: Color.WHITE }, multiline: true, text: "Description" },
+            btnR: { type: "button", x: 440 + 104 - 36, y: 136 + 52 + 24, bitmap: "classic_button_up", bitmap2: "classic_button_down", scale: 2, clicker: { onClick: function () { return RV === null || RV === void 0 ? void 0 : RV.RecipeTypeRegistry.openRecipePage("tcon_partbuilder"); } } },
+            textR: { type: "text", x: 440 + 104 - 22, y: 136 + 52 + 18, z: 1, text: "R", font: { color: Color.WHITE, size: 20, shadow: 0.5, align: UI.Font.ALIGN_CENTER } }
         };
         var _loop_1 = function (i) {
             elements["btn" + i] = {
@@ -3626,7 +3594,7 @@ var ToolCrafterWindow = /** @class */ (function (_super) {
                 find ? find.count += slot_1.count : items_1.push({ id: slot_1.id, count: slot_1.count, data: slot_1.data });
             }
             var addMod_1 = {};
-            var count = void 0;
+            var count = 0;
             for (var key in Modifier) {
                 count = Math.min.apply(Math, Modifier[key].getRecipe().map(function (recipe) {
                     var find2 = items_1.find(function (item) { return item.id === recipe.id && (recipe.data === -1 || item.data === recipe.data); });
@@ -3900,11 +3868,8 @@ var TconTool = /** @class */ (function (_super) {
         _this.setHandEquipped(true);
         _this.setMaxStack(1);
         _this.setMaxDamage(13);
-        ItemModel.getFor(_this.id, -1).setModelOverrideCallback(function (item) { return _this.onModelOverride(item); });
+        ItemModel.getFor(_this.id, -1).setModelOverrideCallback(function (item) { return ToolModelManager.getModel(item); });
         return _this;
-        //for(let i = 0; i <= this.maxDamage; i++){
-        //ItemModel.getFor(this.id, i).setModelOverrideCallback(item => this.onModelOverride(item));
-        //}
     }
     TconTool.prototype.setToolParams = function () {
         ToolAPI.registerTool(this.id, { durability: this.maxDamage }, this.blockTypes || [], this);
@@ -3913,9 +3878,6 @@ var TconTool = /** @class */ (function (_super) {
     };
     TconTool.prototype.getRepairModifierForPart = function (index) {
         return 1.0;
-    };
-    TconTool.prototype.onModelOverride = function (item) {
-        return ToolModelManager.getModel(item);
     };
     TconTool.prototype.onNameOverride = function (item, translation, name) {
         if (item.extra) {
@@ -4129,14 +4091,13 @@ var ToolModelManager = /** @class */ (function () {
     function ToolModelManager() {
     }
     ToolModelManager.getModel = function (item) {
-        if (!item.extra) {
+        if (!item.extra || Network.inRemoteWorld()) {
             return null;
         }
         try {
             var stack = new TconToolStack(item);
             var suffix = stack.isBroken() ? "broken" : "normal";
             var texture = stack.instance.texture;
-            var path = texture.getPath();
             var uniqueKey = stack.uniqueKey();
             if (this.models[uniqueKey]) {
                 return this.models[uniqueKey][suffix];
@@ -4144,7 +4105,7 @@ var ToolModelManager = /** @class */ (function () {
             var mesh = [new RenderMesh(), new RenderMesh(), new RenderMesh(), new RenderMesh()];
             var coordsNormal_1 = [];
             var coordsBroken_1 = [];
-            var index = void 0;
+            var index = 0;
             for (var i = 0; i < texture.partsCount; i++) {
                 index = Material[stack.materials[i]].getTexIndex();
                 coordsNormal_1.push(texture.getCoords(i, index));
@@ -4157,17 +4118,22 @@ var ToolModelManager = /** @class */ (function () {
             }
             mesh.forEach(function (m, i) {
                 var coords = i >> 1 ? coordsBroken_1 : coordsNormal_1;
-                var z;
+                var size = 1 / 16;
+                var x = 0;
+                var y = 0;
+                var z = 0;
                 for (var j = 0; j < coords.length; j++) {
+                    x = coords[j].x;
+                    y = coords[j].y;
                     z = i & 1 ? -0.001 * (coords.length - j) : 0.001 * (coords.length - j);
                     m.setColor(1, 1, 1);
                     m.setNormal(1, 1, 0);
-                    m.addVertex(0, 1, z, coords[j].x, coords[j].y);
-                    m.addVertex(1, 1, z, coords[j].x + 0.0625, coords[j].y);
-                    m.addVertex(0, 0, z, coords[j].x, coords[j].y + 0.0625);
-                    m.addVertex(1, 1, z, coords[j].x + 0.0625, coords[j].y);
-                    m.addVertex(0, 0, z, coords[j].x, coords[j].y + 0.0625);
-                    m.addVertex(1, 0, z, coords[j].x + 0.0625, coords[j].y + 0.0625);
+                    m.addVertex(0, 1, z, x, y);
+                    m.addVertex(1, 1, z, x + size, y);
+                    m.addVertex(0, 0, z, x, y + size);
+                    m.addVertex(1, 1, z, x + size, y);
+                    m.addVertex(0, 0, z, x, y + size);
+                    m.addVertex(1, 0, z, x + size, y + size);
                 }
                 if ((i & 1) === 0) { //hand
                     m.translate(0.4, -0.1, 0.2);
@@ -4181,6 +4147,7 @@ var ToolModelManager = /** @class */ (function () {
             };
             var modelNormal = ItemModel.newStandalone();
             var modelBroken = ItemModel.newStandalone();
+            var path = texture.getPath();
             modelNormal.setModel(data.normal.hand, path);
             modelNormal.setUiModel(data.normal.ui, path);
             modelNormal.setSpriteUiRender(true);
@@ -4195,6 +4162,26 @@ var ToolModelManager = /** @class */ (function () {
             alert("toolModel: " + e);
             return null;
         }
+    };
+    ToolModelManager.getModelTest = function () {
+        var model = ItemModel.newStandalone();
+        var meshHand = new RenderMesh();
+        var meshUi = new RenderMesh();
+        var size = 1;
+        var x = 0;
+        var y = 0;
+        meshUi.setColor(1, 1, 1);
+        meshUi.setNormal(1, 1, 0);
+        meshUi.addVertex(0, 1, 0, x, y);
+        meshUi.addVertex(1, 1, 0, x + size, y);
+        meshUi.addVertex(0, 0, 0, x, y + size);
+        meshUi.addVertex(1, 1, 0, x + size, y);
+        meshUi.addVertex(0, 0, 0, x, y + size);
+        meshUi.addVertex(1, 0, 0, x + size, y + size);
+        model.setModel(meshHand, "items-opaque/tcon_silky_jewel");
+        model.setUiModel(meshUi, "items-opaque/tcon_silky_jewel");
+        model.setSpriteUiRender(true);
+        return model;
     };
     ToolModelManager.models = {};
     return ToolModelManager;
@@ -4536,11 +4523,114 @@ var TconLumberaxe = /** @class */ (function (_super) {
         return index === 1 ? TconLumberaxe.DURABILITY_MODIFIER : TconLumberaxe.DURABILITY_MODIFIER * 0.625;
     };
     TconLumberaxe.prototype.onDestroy = function (item, coords, block, player) {
-        var client = Network.getClientForPlayer(player);
-        client.send("tcon.choptree", { x: coords.x, y: coords.y, z: coords.z });
+        if (!item.extra) {
+            return true;
+        }
+        var stack = new TconToolStack(item);
+        if (stack.isBroken()) {
+            return true;
+        }
+        if (TconLumberaxe.LOGS.includes(block.id)) {
+            this.chopTree(stack, coords, player);
+            return true;
+        }
+        var blockData = ToolAPI.getBlockData(block.id);
+        if (blockData && this.blockTypes.includes(blockData.material.name) && stack.stats.level >= blockData.level) {
+            var region = WorldRegion.getForActor(player);
+            var center = World.getRelativeCoords(coords.x, coords.y, coords.z, coords.side ^ 1);
+            var block2_1;
+            var consume = 0;
+            var _loop_5 = function (x) {
+                var _loop_6 = function (y) {
+                    var _loop_7 = function (z) {
+                        if (x === coords.x && y === coords.y && z === coords.z)
+                            return "continue";
+                        block2_1 = region.getBlock(x, y, z);
+                        blockData = ToolAPI.getBlockData(block2_1.id);
+                        if (blockData && this_1.blockTypes.includes(blockData.material.name) && stack.stats.level >= blockData.level) {
+                            region.destroyBlock(x, y, z, true, player);
+                            stack.forEachModifiers(function (mod, level) {
+                                mod.onDestroy(item, { x: x, y: y, z: z, side: coords.side, relative: World.getRelativeCoords(x, y, z, coords.side) }, block2_1, player, level);
+                            });
+                            consume++;
+                        }
+                    };
+                    for (var z = center.z - 1; z <= center.z + 1; z++) {
+                        _loop_7(z);
+                    }
+                };
+                for (var y = center.y - 1; y <= center.y + 1; y++) {
+                    _loop_6(y);
+                }
+            };
+            var this_1 = this;
+            for (var x = center.x - 1; x <= center.x + 1; x++) {
+                _loop_5(x);
+            }
+            stack.consumeDurability(consume);
+            stack.addXp(consume);
+            item.data = stack.data;
+        }
         return true;
     };
-    TconLumberaxe.logs = [
+    TconLumberaxe.prototype.chopTree = function (toolStack, coords, player) {
+        var _a;
+        if ((_a = Threading.getThread("tcon_choptree")) === null || _a === void 0 ? void 0 : _a.isAlive()) {
+            Game.message("processing...");
+            return;
+        }
+        Threading.initThread("tcon_choptree", function () {
+            var array = [];
+            var visited = [];
+            var item;
+            var stack;
+            var pos;
+            var pos2;
+            var block;
+            var region;
+            array.push(coords);
+            while (array.length > 0) {
+                item = Entity.getCarriedItem(player);
+                if (toolStack.id !== item.id || !item.extra)
+                    return;
+                stack = new TconToolStack(item);
+                if (stack.isBroken() || toolStack.uniqueKey() !== stack.uniqueKey())
+                    return;
+                pos = array.shift();
+                if (visited.some(function (p) { return p.x === pos.x && p.y === pos.y && p.z === pos.z; }))
+                    continue;
+                visited.push(pos);
+                region = WorldRegion.getForActor(player);
+                block = region.getBlock(pos);
+                if (!TconLumberaxe.LOGS.includes(block.id) && (coords.x !== pos.x || coords.y !== pos.y || coords.z !== pos.z)) {
+                    continue;
+                }
+                for (var i = 2; i <= 5; i++) {
+                    pos2 = World.getRelativeCoords(pos.x, pos.y, pos.z, i);
+                    if (!visited.some(function (p) { return p.x === pos2.x && p.y === pos2.y && p.z === pos2.z; })) {
+                        array.push(pos2);
+                    }
+                }
+                for (var i = -1; i <= 1; i++) {
+                    for (var j = -1; j <= 1; j++) {
+                        pos2 = { x: pos.x + i, y: pos.y + 1, z: pos.z + j };
+                        if (!visited.some(function (p) { return p.x === pos2.x && p.y === pos2.y && p.z === pos2.z; })) {
+                            array.push(pos2);
+                        }
+                    }
+                }
+                region.destroyBlock(pos, true, player);
+                stack.forEachModifiers(function (mod, level) {
+                    mod.onDestroy(item, { x: pos.x, y: pos.y, z: pos.z, side: EBlockSide.DOWN, relative: pos }, block, player, level);
+                });
+                stack.consumeDurability(1);
+                stack.addXp(1);
+                stack.applyToHand(player);
+                Thread.sleep(25);
+            }
+        });
+    };
+    TconLumberaxe.LOGS = [
         VanillaTileID.log,
         VanillaTileID.log2,
         VanillaTileID.warped_stem,
@@ -4549,120 +4639,20 @@ var TconLumberaxe = /** @class */ (function (_super) {
     TconLumberaxe.DURABILITY_MODIFIER = 2;
     return TconLumberaxe;
 }(TconTool));
-Network.addClientPacket("tcon.choptree", function (data) {
-    if (Threading.getThread("tcon_choptree")) {
-        return;
-    }
-    Threading.initThread("tcon_choptree", function () {
-        while (true) {
-        }
-        Thread.sleep(25);
-    });
-});
 /*
-    override onDestroy(item: ItemInstance, coords: Callback.ItemUseCoordinates, block: Tile): true {
+Callback.addCallback("LocalTick", () => {
 
-        if(!item.extra){
-            return true;
-        }
+    if(World.getThreadTime() % 20 === 0){
 
-        const toolData = new ToolData(item);
+        const player = Player.get();
+        const pointed = Player.getPointed();
+        const region = WorldRegion.getForActor(player);
 
-        if(TinkersLumberaxe.logs[block.id]){
-            const thread = Threading.getThread("tcon_choptree");
-            if(thread && thread.isAlive()){
-                Game.tipMessage("");
-                return;
-            }
-            Threading.initThread("tcon_choptree", () => {
+        region.destroyBlock(pointed.pos, true, player);
 
-                const array: Vector[] = [];
-                const visited: Vector[] = [];
-
-                let pos: Vector;
-                let pos2: Vector;
-                let blo: Tile;
-                let i: number;
-                let j: number;
-
-                array.push({x: coords.x, y: coords.y, z: coords.z});
-
-                while(array.length > 0 && Player.getCarriedItem().id === item.id && !toolData.isBroken()){
-
-                    pos = array.shift();
-                    if(visited.some(p => p.x === pos.x && p.y === pos.y && p.z === pos.z)){
-                        continue;
-                    }
-                    visited.push(pos);
-
-                    blo = World.getBlock(pos.x, pos.y, pos.z);
-                    if(!TinkersLumberaxe.logs[blo.id] && (coords.x !== pos.x || coords.y !== pos.y || coords.z !== pos.z)){
-                        continue;
-                    }
-
-                    for(i = 2; i < 6; i++){
-                        pos2 = World.getRelativeCoords(pos.x, pos.y, pos.z, i);
-                        if(!visited.some(p => p.x === pos2.x && p.y === pos2.y && p.z === pos2.z)){
-                            array.push(pos2);
-                        }
-                    }
-
-                    for(i = -1; i <= 1; i++){
-                    for(j = -1; j <= 1; j++){
-                        pos2 = {x: pos.x + i, y: pos.y + 1, z: pos.z + j};
-                        if(!visited.some(p => p.x === pos2.x && p.y === pos2.y && p.z === pos2.z)){
-                            array.push(pos2);
-                        }
-                    }
-                    }
-
-                    World.destroyBlock(pos.x, pos.y, pos.z, true);
-                    toolData.forEachModifiers((mod, level) => {
-                        mod.onDestroy(item, {...pos, side: 0, relative: pos}, blo, 0, level);
-                    });
-                    toolData.consumeDurability(1);
-                    toolData.addXp(1);
-                    toolData.applyHand();
-
-                    Thread.sleep(25);
-
-                }
-
-            });
-            return true;
-        }
-
-        if(this.blockMaterials[ToolAPI.getBlockMaterialName(block.id)]){
-            const center = World.getRelativeCoords(coords.x, coords.y, coords.z, coords.side ^ 1);
-            let x: number;
-            let y: number;
-            let z: number;
-            let block2: Tile;
-            let damage = 0;
-            for(x = center.x - 1; x <= center.x + 1; x++){
-            for(y = center.y - 1; y <= center.y + 1; y++){
-            for(z = center.z - 1; z <= center.z + 1; z++){
-                if(x === coords.x && y === coords.y && z === coords.z){
-                    continue;
-                }
-                block2 = World.getBlock(x, y, z);
-                if(this.blockMaterials[ToolAPI.getBlockMaterialName(block2.id)]){
-                    World.destroyBlock(x, y, z, true);
-                    toolData.forEachModifiers((mod, level) => {
-                        mod.onDestroy(item, {x: x, y: y, z: z, side: coords.side, relative: World.getRelativeCoords(x, y, z, coords.side)}, block2, 0, level);
-                    });
-                    damage++;
-                }
-            }
-            }
-            }
-            toolData.consumeDurability(damage);
-            toolData.addXp(damage);
-        }
-
-        return true;
     }
 
+});
 */
 ItemRegistry.registerItem(new TconLumberaxe());
 ToolForgeHandler.addRecipe(ItemID.tcontool_lumberaxe, ["rod2", "broadaxe", "largeplate", "binding2"]);
@@ -4823,36 +4813,37 @@ ModAPI.addAPICallback("ForestryAPI", function (api) {
 });
 var RV;
 ModAPI.addAPICallback("RecipeViewer", function (api) {
-    RV = api.Core;
-    //UI.TextureSource.put("tcon.rv.table", FileTools.ReadImage(__dir__ + "res/terrain-atlas/smeltery/tcon_itemcast_2.png"));
-    //UI.TextureSource.put("tcon.rv.basin", FileTools.ReadImage(__dir__ + "res/terrain-atlas/smeltery/tcon_blockcast_2.png"));
-    /*
-        class PartBuilderRV extends api.RecipeType {
-    
-            constructor(){
-                super("Part Build", BlockID.tcon_partbuilder, {
-                    drawing: [
-                        {type: "bitmap", x: 476, y: 104, bitmap: "tcon.arrow", scale: 8}
-                    ],
-                    elements: {
-                        input0: {x: 180, y: 100, size: 128},
-                        input1: {x: 308, y: 100, size: 128},
-                        output0: {x: 692, y: 100, size: 128}
-                    }
-                });
-            }
-    
-            getAllList(): RecipePattern[] {
-                return PatternRegistry.getAllRecipeForRV();
-            }
-    
+    RV = api;
+    api.RecipeTypeRegistry.register("tcon_partbuilder", new /** @class */ (function (_super) {
+        __extends(class_2, _super);
+        function class_2() {
+            var _this = this;
+            var centerY = 80;
+            _this = _super.call(this, "Part Build", BlockID.tcon_partbuilder0, {
+                drawing: [
+                    { type: "bitmap", x: 500 - 132 / 2, y: centerY - 90 / 2, bitmap: "tcon.arrow", scale: 6 }
+                ],
+                elements: {
+                    input0: { x: 500 - 66 - 48 - 108 * 2, y: centerY - 108 / 2, size: 108 },
+                    input1: { x: 500 - 66 - 48 - 108, y: centerY - 108 / 2, size: 108 },
+                    output0: { x: 500 + 66 + 48, y: centerY - 108 / 2, size: 108 },
+                    imagePattern: { type: "scale", x: 500 - 24, y: centerY + 50, width: 48, height: 48, value: 1 }
+                }
+            }) || this;
+            _this.setGridView(3, 1, true);
+            return _this;
         }
-    
-        api.RecipeTypeRegistry.register("tcon_partbuilder", new PartBuilderRV());
-    */
-    var MeltingRV = /** @class */ (function (_super) {
-        __extends(MeltingRV, _super);
-        function MeltingRV() {
+        class_2.prototype.getAllList = function () {
+            return PartRegistry.getAllPartBuildRecipeForRV();
+        };
+        class_2.prototype.onOpen = function (elements, recipe) {
+            elements.get("imagePattern").setBinding("texture", "tcon.pattern." + recipe.pattern);
+        };
+        return class_2;
+    }(api.RecipeType)));
+    api.RecipeTypeRegistry.register("tcon_melting", new /** @class */ (function (_super) {
+        __extends(class_3, _super);
+        function class_3() {
             var _this = _super.call(this, "Melting", BlockID.tcon_smeltery, {
                 drawing: [
                     { type: "bitmap", x: 86, y: 50, bitmap: "tcon.rv.smeltery", scale: 6 },
@@ -4869,18 +4860,17 @@ ModAPI.addAPICallback("RecipeViewer", function (api) {
             _this.setTankLimit(MatValue.BLOCK);
             return _this;
         }
-        MeltingRV.prototype.getAllList = function () {
+        class_3.prototype.getAllList = function () {
             return MeltingRecipe.getAllRecipeForRV();
         };
-        MeltingRV.prototype.onOpen = function (elements, recipe) {
+        class_3.prototype.onOpen = function (elements, recipe) {
             elements.get("textTemp").setBinding("text", recipe.temp + "°C");
         };
-        return MeltingRV;
-    }(api.RecipeType));
-    api.RecipeTypeRegistry.register("tcon_melting", new MeltingRV());
-    var AlloyingRV = /** @class */ (function (_super) {
-        __extends(AlloyingRV, _super);
-        function AlloyingRV() {
+        return class_3;
+    }(api.RecipeType)));
+    api.RecipeTypeRegistry.register("tcon_alloying", new /** @class */ (function (_super) {
+        __extends(class_4, _super);
+        function class_4() {
             var _this = _super.call(this, "Alloying", BlockID.tcon_smeltery, {
                 drawing: [
                     { type: "bitmap", x: 50, y: 50, bitmap: "tcon.rv.smeltery_wide", scale: 6 },
@@ -4902,10 +4892,10 @@ ModAPI.addAPICallback("RecipeViewer", function (api) {
             _this.setDescription("Alloy");
             return _this;
         }
-        AlloyingRV.prototype.getAllList = function () {
+        class_4.prototype.getAllList = function () {
             return AlloyRecipe.getAllRecipeForRV();
         };
-        AlloyingRV.prototype.onOpen = function (elements, recipe) {
+        class_4.prototype.onOpen = function (elements, recipe) {
             if (recipe.inputLiq && recipe.outputLiq) {
                 var len = recipe.inputLiq.length;
                 var width = 216 / len;
@@ -4923,9 +4913,8 @@ ModAPI.addAPICallback("RecipeViewer", function (api) {
                 this.setTankLimit(Math.max.apply(Math, __spreadArray(__spreadArray([], recipe.inputLiq.map(function (rec) { return rec.amount; }), false), [recipe.outputLiq[0].amount], false)));
             }
         };
-        return AlloyingRV;
-    }(api.RecipeType));
-    api.RecipeTypeRegistry.register("tcon_alloying", new AlloyingRV());
+        return class_4;
+    }(api.RecipeType)));
     var CastingRV = /** @class */ (function (_super) {
         __extends(CastingRV, _super);
         function CastingRV(name, icon, tileBitmap, castType) {

@@ -4,7 +4,7 @@ class ToolModelManager {
 
     static getModel(item: ItemInstance): ItemModel {
 
-        if(!item.extra){
+        if(!item.extra || Network.inRemoteWorld()){
             return null;
         }
 
@@ -13,7 +13,6 @@ class ToolModelManager {
             const stack = new TconToolStack(item);
             const suffix = stack.isBroken() ? "broken" : "normal";
             const texture = stack.instance.texture;
-            const path = texture.getPath();
             const uniqueKey = stack.uniqueKey();
 
             if(this.models[uniqueKey]){
@@ -23,7 +22,7 @@ class ToolModelManager {
             const mesh = [new RenderMesh(), new RenderMesh(), new RenderMesh(), new RenderMesh()];
             const coordsNormal: {x: number, y: number}[] = [];
             const coordsBroken: {x: number, y: number}[] = [];
-            let index: number;
+            let index = 0;
 
             for(let i = 0; i < texture.partsCount; i++){
                 index = Material[stack.materials[i]].getTexIndex();
@@ -39,17 +38,22 @@ class ToolModelManager {
 
             mesh.forEach((m, i) => {
                 const coords = i >> 1 ? coordsBroken : coordsNormal;
-                let z: number;
+                const size = 1 / 16;
+                let x = 0;
+                let y = 0;
+                let z = 0;
                 for(let j = 0; j < coords.length; j++){
+                    x = coords[j].x;
+                    y = coords[j].y;
                     z = i & 1 ? -0.001 * (coords.length - j) : 0.001 * (coords.length - j);
                     m.setColor(1, 1, 1);
                     m.setNormal(1, 1, 0);
-                    m.addVertex(0, 1, z, coords[j].x, coords[j].y);
-                    m.addVertex(1, 1, z, coords[j].x + 0.0625, coords[j].y);
-                    m.addVertex(0, 0, z, coords[j].x, coords[j].y + 0.0625);
-                    m.addVertex(1, 1, z, coords[j].x + 0.0625, coords[j].y);
-                    m.addVertex(0, 0, z, coords[j].x, coords[j].y + 0.0625);
-                    m.addVertex(1, 0, z, coords[j].x + 0.0625, coords[j].y + 0.0625);
+                    m.addVertex(0, 1, z, x, y);
+                    m.addVertex(1, 1, z, x + size, y);
+                    m.addVertex(0, 0, z, x, y + size);
+                    m.addVertex(1, 1, z, x + size, y);
+                    m.addVertex(0, 0, z, x, y + size);
+                    m.addVertex(1, 0, z, x + size, y + size);
                 }
                 if((i & 1) === 0){ //hand
                     m.translate(0.4, -0.1, 0.2);
@@ -65,6 +69,7 @@ class ToolModelManager {
 
             const modelNormal = ItemModel.newStandalone();
             const modelBroken = ItemModel.newStandalone();
+            const path = texture.getPath();
 
             modelNormal.setModel(data.normal.hand, path);
             modelNormal.setUiModel(data.normal.ui, path);
@@ -82,6 +87,34 @@ class ToolModelManager {
             alert("toolModel: " + e);
             return null;
         }
+
+    }
+
+
+    static getModelTest(): ItemModel {
+
+        const model = ItemModel.newStandalone();
+        const meshHand = new RenderMesh();
+        const meshUi = new RenderMesh();
+
+        const size = 1;
+        let x = 0;
+        let y = 0;
+
+        meshUi.setColor(1, 1, 1);
+        meshUi.setNormal(1, 1, 0);
+        meshUi.addVertex(0, 1, 0, x, y);
+        meshUi.addVertex(1, 1, 0, x + size, y);
+        meshUi.addVertex(0, 0, 0, x, y + size);
+        meshUi.addVertex(1, 1, 0, x + size, y);
+        meshUi.addVertex(0, 0, 0, x, y + size);
+        meshUi.addVertex(1, 0, 0, x + size, y + size);
+
+        model.setModel(meshHand, "items-opaque/tcon_silky_jewel");
+        model.setUiModel(meshUi, "items-opaque/tcon_silky_jewel");
+        model.setSpriteUiRender(true);
+
+        return model;
 
     }
 
