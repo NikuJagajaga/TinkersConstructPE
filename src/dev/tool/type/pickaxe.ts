@@ -11,7 +11,7 @@ class TconPickaxe extends TconTool {
 
     }
 
-    override buildStats(stats: ToolStats, materials: string[]): void {
+    override buildStats(stats: ToolStats, materials: TinkersMaterial[]): void {
         stats.head(materials[1])
              .extra(materials[2])
              .handle(materials[0]);

@@ -16,10 +16,10 @@ class TconHammer extends TconTool3x3 {
 
     }
 
-    override buildStats(stats: ToolStats, materials: string[]): void {
+    override buildStats(stats: ToolStats, materials: TinkersMaterial[]): void {
         stats.head(materials[1], materials[1], materials[2], materials[3])
              .handle(materials[0]);
-        stats.level = Material[materials[1]].getHeadStats().level;
+        stats.level = materials[1].getHeadStats().level;
         stats.durability *= TconHammer.DURABILITY_MODIFIER;
     }
 

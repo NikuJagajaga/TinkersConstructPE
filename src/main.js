@@ -743,8 +743,9 @@ var AlloyRecipe = /** @class */ (function () {
             inputs[_i - 1] = arguments[_i];
         }
         var inputAmount = 0;
-        for (var i = 0; i < inputs.length; i++) {
-            inputAmount += inputs[i].amount;
+        for (var _a = 0, inputs_1 = inputs; _a < inputs_1.length; _a++) {
+            var input = inputs_1[_a];
+            inputAmount += input.amount;
         }
         if (result.amount > inputAmount) {
             alert("[TCon]: Invalid alloy recipe -> " + result.liquid);
@@ -924,18 +925,18 @@ Recipes2.addShapeless({ id: BlockID.tcon_grout, count: 8 }, [{ id: "sand", count
 createItem("tcon_brick", "Seared Brick");
 Recipes.addFurnace(BlockID.tcon_grout, ItemID.tcon_brick);
 createBlock("tcon_stone", [
-    { name: "Seared Stone", texture: [0], isTech: true },
-    { name: "Seared Cobblestone", texture: [1], isTech: true },
-    { name: "Seared Paver", texture: [2], isTech: true },
+    { name: "Seared Stone", texture: [0] },
+    { name: "Seared Cobblestone", texture: [1] },
+    { name: "Seared Paver", texture: [2] },
     { name: "Seared Bricks", texture: [3] },
-    { name: "Cracked Seared Bricks", texture: [4], isTech: true },
-    { name: "Fancy Seared Bricks", texture: [5], isTech: true },
-    { name: "Square Seared Bricks", texture: [6], isTech: true },
-    { name: "Seared Road", texture: [7], isTech: true },
-    { name: "Seared Creeperface", texture: [2, 2, 8], isTech: true },
-    { name: "Triangle Seared Bricks", texture: [9], isTech: true },
-    { name: "Small Seared Bricks", texture: [10], isTech: true },
-    { name: "Seared Tiles", texture: [11], isTech: true }
+    { name: "Cracked Seared Bricks", texture: [4] },
+    { name: "Fancy Seared Bricks", texture: [5] },
+    { name: "Square Seared Bricks", texture: [6] },
+    { name: "Seared Road", texture: [7] },
+    { name: "Seared Creeperface", texture: [2, 2, 8] },
+    { name: "Triangle Seared Bricks", texture: [9] },
+    { name: "Small Seared Bricks", texture: [10] },
+    { name: "Seared Tiles", texture: [11] }
 ]);
 MeltingRecipe.addRecipe(BlockID.tcon_stone, "molten_stone", MatValue.SEARED_BLOCK);
 MeltingRecipe.addRecipe(ItemID.tcon_brick, "molten_stone", MatValue.SEARED_MATERIAL);
@@ -1927,8 +1928,9 @@ var SmelteryControler = /** @class */ (function (_super) {
         var stored = "";
         var amount = 0;
         var fuelData;
-        for (var i = 0; i < this.tanksPos.length; i++) {
-            iTank = StorageInterface.getLiquidStorage(this.blockSource, this.tanksPos[i].x, this.tanksPos[i].y, this.tanksPos[i].z);
+        for (var _i = 0, _a = this.tanksPos; _i < _a.length; _i++) {
+            var pos = _a[_i];
+            iTank = StorageInterface.getLiquidStorage(this.blockSource, pos.x, pos.y, pos.z);
             tank = iTank === null || iTank === void 0 ? void 0 : iTank.getOutputTank(-1);
             if (tank) {
                 stored = tank.getLiquidStored();
@@ -1963,12 +1965,13 @@ var SmelteryControler = /** @class */ (function (_super) {
             var height = 0;
             var max = 0;
             var y = 0;
-            for (var i = 0; i < data.liqArray.length; i++) {
-                height = data.liqArray[i].amount / data.capacity * sizeY;
+            for (var _i = 0, _a = data.liqArray; _i < _a.length; _i++) {
+                var liq = _a[_i];
+                height = liq.amount / data.capacity * sizeY;
                 max = Math.max(sizeX, sizeZ, height);
                 parts.push({
                     type: "box",
-                    uv: { x: 0, y: MoltenLiquid.getY(data.liqArray[i].liquid) * max },
+                    uv: { x: 0, y: MoltenLiquid.getY(liq.liquid) * max },
                     coords: { x: 0, y: y - height * 16 / 2, z: 0 },
                     size: { x: sizeX * 16, y: height * 16, z: sizeZ * 16 }
                 });
@@ -1984,25 +1987,25 @@ var SmelteryControler = /** @class */ (function (_super) {
         this.anim.refresh();
     };
     SmelteryControler.prototype.interactWithEntitiesInside = function () {
-        var allEnt = this.region.listEntitiesInAABB(this.area.from, this.area.to);
         var entities = [];
-        for (var i = 0; i < allEnt.length; i++) {
-            if (MeltingRecipe.getEntRecipe(allEnt[i])) {
-                entities.push(allEnt[i]);
+        for (var _i = 0, _a = this.region.listEntitiesInAABB(this.area.from, this.area.to); _i < _a.length; _i++) {
+            var ent = _a[_i];
+            if (MeltingRecipe.getEntRecipe(ent)) {
+                entities.push(ent);
             }
         }
         var liquidCapacity = this.getLiquidCapacity();
         var result;
-        for (var i = 0; i < entities.length; i++) {
-            result = MeltingRecipe.getEntRecipe(entities[i]);
+        for (var _b = 0, entities_1 = entities; _b < entities_1.length; _b++) {
+            var ent = entities_1[_b];
+            result = MeltingRecipe.getEntRecipe(ent);
             if (this.totalLiquidAmount() + result.amount <= liquidCapacity) {
                 this.liquidStorage.addLiquid(result.liquid, result.amount);
             }
-            Entity.damageEntity(entities[i], 2);
+            Entity.damageEntity(ent, 2);
         }
     };
     SmelteryControler.prototype.onTick = function () {
-        var _this = this;
         var tick = World.getThreadTime();
         var liqArray = this.getLiquidArray();
         var totalAmount = this.totalLiquidAmount();
@@ -2022,12 +2025,14 @@ var SmelteryControler = /** @class */ (function (_super) {
                 this.interactWithEntitiesInside();
             }
             if ((tick & 3) === 0) {
-                AlloyRecipe.getRecipes(this.liquidStorage.liquidAmounts).forEach(function (recipe) {
-                    for (var i = 0; i < recipe.inputs.length; i++) {
-                        _this.getLiquid(recipe.inputs[i].liquid, recipe.inputs[i].amount);
+                for (var _i = 0, _a = AlloyRecipe.getRecipes(this.liquidStorage.liquidAmounts); _i < _a.length; _i++) {
+                    var recipe = _a[_i];
+                    for (var _b = 0, _c = recipe.inputs; _b < _c.length; _b++) {
+                        var input = _c[_b];
+                        this.getLiquid(input.liquid, input.amount);
                     }
-                    _this.addLiquid(recipe.result.liquid, recipe.result.amount);
-                });
+                    this.addLiquid(recipe.result.liquid, recipe.result.amount);
+                }
             }
             if (this.data.fuel <= 0) {
                 var fuelData = this.consumeFuel();
@@ -2416,7 +2421,7 @@ var ToolStats = /** @class */ (function () {
         this.durability = this.level = this.attack = this.speed = 0;
         var stats;
         for (var i = 0; i < length; i++) {
-            stats = Material[materials[i]].getHeadStats();
+            stats = materials[i].getHeadStats();
             this.durability += stats.durability;
             this.attack += stats.attack;
             this.speed += stats.speed;
@@ -2439,7 +2444,7 @@ var ToolStats = /** @class */ (function () {
         var stats;
         var dur = 0;
         for (var i = 0; i < length; i++) {
-            stats = Material[materials[i]].getExtraStats();
+            stats = materials[i].getExtraStats();
             dur += stats.durability;
         }
         this.durability += Math.round(dur / length);
@@ -2456,7 +2461,7 @@ var ToolStats = /** @class */ (function () {
         var dur = 0;
         var mod = 0;
         for (var i = 0; i < length; i++) {
-            stats = Material[materials[i]].getHandleStats();
+            stats = materials[i].getHandleStats();
             dur += stats.durability;
             mod += stats.modifier;
         }
@@ -2483,7 +2488,7 @@ var TconToolStack = /** @class */ (function () {
         this.data = item.data;
         this.extra = item.extra || null;
         this.instance = ItemRegistry.getInstanceOf(this.id);
-        this.materials = new String(this.extra.getString("materials")).split("_");
+        this.materials = new String(this.extra.getString("materials")).split("_").map(function (mat) { return Material[mat]; });
         this.modifiers = TinkersModifierHandler.decodeToObj(this.extra.getString("modifiers"));
         this.stats = this.getStats();
     }
@@ -2518,11 +2523,6 @@ var TconToolStack = /** @class */ (function () {
     };
     TconToolStack.prototype.getBaseStats = function () {
         var stats = new ToolStats();
-        for (var i = 0; i < this.materials.length; i++) {
-            if (!Material[this.materials[i]]) {
-                return null;
-            }
-        }
         this.instance.buildStats(stats, this.materials);
         return stats;
     };
@@ -2568,7 +2568,7 @@ var TconToolStack = /** @class */ (function () {
         }
     };
     TconToolStack.prototype.uniqueKey = function () {
-        var hash = this.materials.reduce(function (a, v) { return 31 * a + Material[v].getTexIndex(); }, 0);
+        var hash = this.materials.reduce(function (value, material) { return 31 * value + material.getTexIndex(); }, 0);
         var mask = 0;
         for (var key in this.modifiers) {
             mask |= 1 << Modifier[key].getTexIndex();
@@ -2584,24 +2584,30 @@ var PartRegistry = /** @class */ (function () {
     function PartRegistry() {
     }
     PartRegistry.createParts = function (key, material) {
-        var _this = this;
         var name = material.getName();
-        this.types.forEach(function (type) {
-            var id = createItem("tconpart_".concat(type.key, "_").concat(key), "".concat(name, " ").concat(type.name));
+        var id = 0;
+        for (var _i = 0, _a = this.types; _i < _a.length; _i++) {
+            var type = _a[_i];
+            id = createItem("tconpart_".concat(type.key, "_").concat(key), "".concat(name, " ").concat(type.name));
             Item.addCreativeGroup("tconpart_" + type.key, type.name, [id]);
-            _this.data[id] = { type: type.key, material: key };
-        });
+            this.data[id] = { type: type.key, material: key };
+        }
+        ;
     };
     PartRegistry.registerRecipes = function (key, material) {
-        this.types.forEach(function (type) {
-            var id = ItemID["tconpart_".concat(type.key, "_").concat(key)];
-            var liquid = material.getMoltenLiquid();
+        var id = 0;
+        var liquid = "";
+        for (var _i = 0, _a = this.types; _i < _a.length; _i++) {
+            var type = _a[_i];
+            id = ItemID["tconpart_".concat(type.key, "_").concat(key)];
+            liquid = material.getMoltenLiquid();
             if (liquid) {
                 MeltingRecipe.addRecipe(id, liquid, MatValue.INGOT * type.cost);
                 CastingRecipe.addTableRecipeForAll(type.key, liquid, id);
             }
             CastingRecipe.addMakeCastRecipes(id, type.key);
-        });
+        }
+        ;
     };
     PartRegistry.getPartData = function (id) {
         return this.data[id];
@@ -2618,11 +2624,12 @@ var PartRegistry = /** @class */ (function () {
         var list = [];
         for (var key in Material) {
             if (!Material[key].isMetal) {
-                for (var i = 0; i < this.types.length; i++) {
+                for (var _i = 0, _a = this.types; _i < _a.length; _i++) {
+                    var type = _a[_i];
                     list.push({
-                        input: [{ id: ItemID.tcon_pattern_blank, count: 1, data: 0 }, __assign(__assign({}, Material[key].getItem()), { count: this.types[i].cost })],
-                        output: [{ id: this.getIDFromData(this.types[i].key, key), count: 1, data: 0 }],
-                        pattern: this.types[i].key
+                        input: [{ id: ItemID.tcon_pattern_blank, count: 1, data: 0 }, __assign(__assign({}, Material[key].getItem()), { count: type.cost })],
+                        output: [{ id: this.getIDFromData(type.key, key), count: 1, data: 0 }],
+                        pattern: type.key
                     });
                 }
             }
@@ -2907,7 +2914,6 @@ CastingRecipe.addMakeCastRecipes(VanillaItemID.gold_nugget, "nugget");
 CastingRecipe.addMakeCastRecipes(VanillaItemID.emerald, "gem");
 var TinkersModifier = /** @class */ (function () {
     function TinkersModifier(key, name, texIndex, recipe, max, multi, hate) {
-        var _this = this;
         this.key = key;
         this.name = name;
         this.texIndex = texIndex;
@@ -2918,9 +2924,10 @@ var TinkersModifier = /** @class */ (function () {
             this.hate[key] = true;
         }
         if (hate) {
-            hate.forEach(function (mod) {
-                _this.hate[mod] = true;
-            });
+            for (var _i = 0, hate_1 = hate; _i < hate_1.length; _i++) {
+                var mod = hate_1[_i];
+                this.hate[mod] = true;
+            }
         }
     }
     TinkersModifier.prototype.getKey = function () {
@@ -2936,8 +2943,9 @@ var TinkersModifier = /** @class */ (function () {
         return this.recipe;
     };
     TinkersModifier.prototype.canBeTogether = function (modifiers) {
-        for (var i = 0; i < modifiers.length; i++) {
-            if (this.hate[modifiers[i].type]) {
+        for (var _i = 0, modifiers_1 = modifiers; _i < modifiers_1.length; _i++) {
+            var mod = modifiers_1[_i];
+            if (this.hate[mod.type]) {
                 return false;
             }
         }
@@ -3641,7 +3649,7 @@ var ToolCrafterWindow = /** @class */ (function (_super) {
             for (var key in addMod_1) {
                 _loop_2(key);
             }
-            var mat_1 = stack_1.instance.repairParts.map(function (index) { return Material[stack_1.materials[index]].getItem(); });
+            var mat_1 = stack_1.instance.repairParts.map(function (index) { return stack_1.materials[index].getItem(); });
             var space = stack_1.durability;
             var newDur = space;
             var value = 0;
@@ -3900,7 +3908,7 @@ var TconTool = /** @class */ (function (_super) {
     TconTool.prototype.onNameOverride = function (item, translation, name) {
         if (item.extra) {
             var stack = new TconToolStack(item);
-            var head = Material[stack.materials[1]].getName();
+            var head = stack.materials[1].getName();
             if (stack.isBroken()) {
                 return "Broken ".concat(head, " ").concat(name);
             }
@@ -4113,68 +4121,66 @@ var ToolModelManager = /** @class */ (function () {
             return null;
         }
         try {
-            var stack = new TconToolStack(item);
-            var suffix = stack.isBroken() ? "broken" : "normal";
-            var texture = stack.instance.texture;
-            var uniqueKey = stack.uniqueKey();
+            var stack_2 = new TconToolStack(item);
+            var suffix = stack_2.isBroken() ? "broken" : "normal";
+            var texture = stack_2.instance.texture;
+            var uniqueKey = stack_2.uniqueKey();
             if (this.models[uniqueKey]) {
                 return this.models[uniqueKey][suffix];
             }
-            var mesh = [ItemModel.getEmptyMeshFromPool(), ItemModel.getEmptyMeshFromPool(), ItemModel.getEmptyMeshFromPool(), ItemModel.getEmptyMeshFromPool()];
+            var modelNormal_1 = ItemModel.newStandalone();
+            var modelBroken_1 = ItemModel.newStandalone();
+            var path_1 = texture.getPath();
+            var mesh_1 = [ItemModel.getEmptyMeshFromPool(), ItemModel.getEmptyMeshFromPool(), ItemModel.getEmptyMeshFromPool(), ItemModel.getEmptyMeshFromPool()];
             var coordsNormal_1 = [];
             var coordsBroken_1 = [];
             var index = 0;
             for (var i = 0; i < texture.partsCount; i++) {
-                index = Material[stack.materials[i]].getTexIndex();
+                index = stack_2.materials[i].getTexIndex();
                 coordsNormal_1.push(texture.getCoords(i, index));
                 coordsBroken_1.push(texture.getCoords(i === texture.brokenIndex ? texture.partsCount : i, index));
             }
-            for (var key in stack.modifiers) {
+            for (var key in stack_2.modifiers) {
                 index = Modifier[key].getTexIndex();
                 coordsNormal_1.push(texture.getModCoords(index));
                 coordsBroken_1.push(texture.getModCoords(index));
             }
-            mesh.forEach(function (m, i) {
-                var coords = i >> 1 ? coordsBroken_1 : coordsNormal_1;
-                var size = 1 / 16;
-                var x = 0;
-                var y = 0;
-                var z = 0;
-                for (var j = 0; j < coords.length; j++) {
-                    x = coords[j].x;
-                    y = coords[j].y;
-                    z = (i & 1 ? j : (coords.length - j)) * 0.001;
-                    m.setColor(1, 1, 1);
-                    m.setNormal(1, 1, 0);
-                    m.addVertex(0, 1, z, x, y);
-                    m.addVertex(1, 1, z, x + size, y);
-                    m.addVertex(0, 0, z, x, y + size);
-                    m.addVertex(1, 1, z, x + size, y);
-                    m.addVertex(0, 0, z, x, y + size);
-                    m.addVertex(1, 0, z, x + size, y + size);
-                }
-                if ((i & 1) === 0) { //hand
-                    m.translate(0.4, -0.1, 0.2);
-                    m.rotate(0.5, 0.5, 0.5, 0, -2.1, 0.4);
-                    m.scale(2, 2, 2);
-                }
+            Threading.initThread("tcon_" + uniqueKey, function () {
+                mesh_1.forEach(function (m, i) {
+                    var coords = i >> 1 ? coordsBroken_1 : coordsNormal_1;
+                    var size = 1 / 16;
+                    var x = 0;
+                    var y = 0;
+                    var z = 0;
+                    for (var j = 0; j < coords.length; j++) {
+                        x = coords[j].x;
+                        y = coords[j].y;
+                        z = (i & 1 ? j : (coords.length - j)) * 0.001;
+                        m.setColor(1, 1, 1);
+                        m.setNormal(1, 1, 0);
+                        m.addVertex(0, 1, z, x, y);
+                        m.addVertex(1, 1, z, x + size, y);
+                        m.addVertex(0, 0, z, x, y + size);
+                        m.addVertex(1, 1, z, x + size, y);
+                        m.addVertex(0, 0, z, x, y + size);
+                        m.addVertex(1, 0, z, x + size, y + size);
+                    }
+                    if ((i & 1) === 0) { //hand
+                        m.translate(0.4, -0.1, 0.2);
+                        m.rotate(0.5, 0.5, 0.5, 0, -2.1, 0.4);
+                        m.scale(2, 2, 2);
+                    }
+                });
+                modelNormal_1.setModel(mesh_1[0], path_1)
+                    .setUiModel(mesh_1[1], path_1)
+                    .setSpriteUiRender(true)
+                    .setModUiSpriteName(stack_2.instance.icon.name, stack_2.instance.icon.meta);
+                modelBroken_1.setModel(mesh_1[2], path_1)
+                    .setUiModel(mesh_1[3], path_1)
+                    .setSpriteUiRender(true)
+                    .setModUiSpriteName(stack_2.instance.icon.name, stack_2.instance.icon.meta);
             });
-            var data = {
-                normal: { hand: mesh[0], ui: mesh[1] },
-                broken: { hand: mesh[2], ui: mesh[3] }
-            };
-            var modelNormal = ItemModel.newStandalone();
-            var modelBroken = ItemModel.newStandalone();
-            var path = texture.getPath();
-            modelNormal.setModel(data.normal.hand, path)
-                .setUiModel(data.normal.ui, path)
-                .setSpriteUiRender(true)
-                .setModUiSpriteName(stack.instance.icon.name, stack.instance.icon.meta);
-            modelBroken.setModel(data.broken.hand, path)
-                .setUiModel(data.broken.ui, path)
-                .setSpriteUiRender(true)
-                .setModUiSpriteName(stack.instance.icon.name, stack.instance.icon.meta);
-            this.models[uniqueKey] = { normal: modelNormal, broken: modelBroken };
+            this.models[uniqueKey] = { normal: modelNormal_1, broken: modelBroken_1 };
             return this.models[uniqueKey][suffix];
         }
         catch (e) {
@@ -4437,7 +4443,7 @@ var TconHammer = /** @class */ (function (_super) {
     TconHammer.prototype.buildStats = function (stats, materials) {
         stats.head(materials[1], materials[1], materials[2], materials[3])
             .handle(materials[0]);
-        stats.level = Material[materials[1]].getHeadStats().level;
+        stats.level = materials[1].getHeadStats().level;
         stats.durability *= TconHammer.DURABILITY_MODIFIER;
     };
     TconHammer.prototype.getRepairModifierForPart = function (index) {

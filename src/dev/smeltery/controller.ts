@@ -356,8 +356,8 @@ class SmelteryControler extends TconTileEntity implements ILiquidStorage {
         let stored = "";
         let amount = 0;
         let fuelData: ISmelteryFuel;
-        for(let i = 0; i < this.tanksPos.length; i++){
-            iTank = StorageInterface.getLiquidStorage(this.blockSource, this.tanksPos[i].x, this.tanksPos[i].y, this.tanksPos[i].z);
+        for(let pos of this.tanksPos){
+            iTank = StorageInterface.getLiquidStorage(this.blockSource, pos.x, pos.y, pos.z);
             tank = iTank?.getOutputTank(-1);
             if(tank){
                 stored = tank.getLiquidStored();
@@ -399,12 +399,12 @@ class SmelteryControler extends TconTileEntity implements ILiquidStorage {
             let height = 0;
             let max = 0;
             let y = 0;
-            for(let i = 0; i < data.liqArray.length; i++){
-                height = data.liqArray[i].amount / data.capacity * sizeY;
+            for(let liq of data.liqArray){
+                height = liq.amount / data.capacity * sizeY;
                 max = Math.max(sizeX, sizeZ, height);
                 parts.push({
                     type: "box",
-                    uv: {x: 0, y: MoltenLiquid.getY(data.liqArray[i].liquid) * max},
+                    uv: {x: 0, y: MoltenLiquid.getY(liq.liquid) * max},
                     coords: {x: 0, y: y - height * 16 / 2, z: 0},
                     size: {x: sizeX * 16, y: height * 16, z: sizeZ * 16}
                 });
@@ -425,21 +425,20 @@ class SmelteryControler extends TconTileEntity implements ILiquidStorage {
     }
 
     interactWithEntitiesInside(): void {
-        const allEnt = this.region.listEntitiesInAABB(this.area.from, this.area.to);
         const entities: number[] = [];
-        for(let i = 0; i < allEnt.length; i++){
-            if(MeltingRecipe.getEntRecipe(allEnt[i])){
-                entities.push(allEnt[i]);
+        for(let ent of this.region.listEntitiesInAABB(this.area.from, this.area.to)){
+            if(MeltingRecipe.getEntRecipe(ent)){
+                entities.push(ent);
             }
         }
         const liquidCapacity = this.getLiquidCapacity();
         let result: LiquidInstance;
-        for(let i = 0; i < entities.length; i++){
-            result = MeltingRecipe.getEntRecipe(entities[i]);
+        for(let ent of entities){
+            result = MeltingRecipe.getEntRecipe(ent);
             if(this.totalLiquidAmount() + result.amount <= liquidCapacity){
                 this.liquidStorage.addLiquid(result.liquid, result.amount);
             }
-            Entity.damageEntity(entities[i], 2);
+            Entity.damageEntity(ent, 2);
         }
     }
 
@@ -468,12 +467,12 @@ class SmelteryControler extends TconTileEntity implements ILiquidStorage {
             }
     
             if((tick & 3) === 0){
-                AlloyRecipe.getRecipes(this.liquidStorage.liquidAmounts).forEach(recipe => {
-                    for(let i = 0; i < recipe.inputs.length; i++){
-                        this.getLiquid(recipe.inputs[i].liquid, recipe.inputs[i].amount);
+                for(let recipe of AlloyRecipe.getRecipes(this.liquidStorage.liquidAmounts)){
+                    for(let input of recipe.inputs){
+                        this.getLiquid(input.liquid, input.amount);
                     }
                     this.addLiquid(recipe.result.liquid, recipe.result.amount);
-                });
+                }
             }
     
             if(this.data.fuel <= 0){

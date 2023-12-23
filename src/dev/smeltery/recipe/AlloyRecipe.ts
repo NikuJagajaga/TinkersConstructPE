@@ -9,8 +9,8 @@ class AlloyRecipe {
 
     static addRecipe(result: LiquidInstance, ...inputs: LiquidInstance[]): void {
         let inputAmount = 0;
-        for(let i = 0; i < inputs.length; i++){
-            inputAmount += inputs[i].amount;
+        for(let input of inputs){
+            inputAmount += input.amount;
         }
         if(result.amount > inputAmount){
             alert("[TCon]: Invalid alloy recipe -> " + result.liquid);

@@ -24,7 +24,7 @@ class TconLumberaxe extends TconTool {
 
     }
 
-    override buildStats(stats: ToolStats, materials: string[]): void {
+    override buildStats(stats: ToolStats, materials: TinkersMaterial[]): void {
         stats.head(materials[1], materials[2])
              .extra(materials[3])
              .handle(materials[0]);

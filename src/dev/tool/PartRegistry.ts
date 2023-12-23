@@ -25,23 +25,26 @@ class PartRegistry {
 
     static createParts(key: string, material: TinkersMaterial): void {
         const name = material.getName();
-        this.types.forEach(type => {
-            const id = createItem(`tconpart_${type.key}_${key}`, `${name} ${type.name}`);
+        let id = 0;
+        for(let type of this.types){
+            id = createItem(`tconpart_${type.key}_${key}`, `${name} ${type.name}`);
             Item.addCreativeGroup("tconpart_" + type.key, type.name, [id]);
             this.data[id] = {type: type.key, material: key};
-        });
+        };
     }
 
     static registerRecipes(key: string, material: TinkersMaterial): void {
-        this.types.forEach(type => {
-            const id = ItemID[`tconpart_${type.key}_${key}`];
-            const liquid = material.getMoltenLiquid();
+        let id = 0;
+        let liquid = "";
+        for(let type of this.types){
+            id = ItemID[`tconpart_${type.key}_${key}`];
+            liquid = material.getMoltenLiquid();
             if(liquid){
                 MeltingRecipe.addRecipe(id, liquid, MatValue.INGOT * type.cost);
                 CastingRecipe.addTableRecipeForAll(type.key, liquid, id);
             }
             CastingRecipe.addMakeCastRecipes(id, type.key);
-        });
+        };
     }
 
     static getPartData(id: number): TinkersPartData {
@@ -63,11 +66,11 @@ class PartRegistry {
 
         for(let key in Material){
             if(!Material[key].isMetal){
-                for(let i = 0; i < this.types.length; i++){
+                for(let type of this.types){
                     list.push({
-                        input: [{id: ItemID.tcon_pattern_blank, count: 1, data: 0}, {...Material[key].getItem(), count: this.types[i].cost}],
-                        output: [{id: this.getIDFromData(this.types[i].key, key), count: 1, data: 0}],
-                        pattern: this.types[i].key
+                        input: [{id: ItemID.tcon_pattern_blank, count: 1, data: 0}, {...Material[key].getItem(), count: type.cost}],
+                        output: [{id: this.getIDFromData(type.key, key), count: 1, data: 0}],
+                        pattern: type.key
                     });
                 }
             }

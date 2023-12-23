@@ -10,9 +10,9 @@ abstract class TinkersModifier {
             this.hate[key] = true;
         }
         if(hate){
-            hate.forEach(mod => {
+            for(let mod of hate){
                 this.hate[mod] = true;
-            });
+            }
         }
     }
 
@@ -33,8 +33,8 @@ abstract class TinkersModifier {
     }
 
     canBeTogether(modifiers: {type: string, level: number}[]): boolean {
-        for(let i = 0; i < modifiers.length; i++){
-            if(this.hate[modifiers[i].type]){
+        for(let mod of modifiers){
+            if(this.hate[mod.type]){
                 return false;
             }
         }
@@ -78,6 +78,7 @@ abstract class TinkersModifier {
 
 class TinkersModifierHandler {
 
+    //haste:50_silk:1
     static encodeToString(array: {type: string, level: number}[]): string {
         return array.map(mod => mod.type + ":" + mod.level).join("_");
     }
@@ -90,13 +91,10 @@ class TinkersModifierHandler {
     }
 
     static decodeToObj(code: string): {[key: string]: number} {
-        const mods = {}
-        new String(code).split("_").filter(s => s).map(s => s.split(":")).forEach(data => {
-            const num = parseInt(data[1]);
-            if(data[0] in Modifier){
-                mods[data[0]] = data[0] in mods ? mods[data[0]] + num : num;
-            }
-        });
+        const mods: {[key: string]: number} = {};
+        for(let mod of this.decodeToArray(code)){
+            mods[mod.type] = mod.level;
+        }
         return mods;
     }
 

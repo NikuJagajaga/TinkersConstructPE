@@ -6,7 +6,7 @@ class TconToolStack implements ItemInstance {
     extra: ItemExtraData;
 
     readonly instance: TconTool;
-    readonly materials: string[];
+    readonly materials: TinkersMaterial[];
     readonly modifiers: {[key: string]: number};
     readonly stats: ToolAPI.ToolMaterial;
 
@@ -18,7 +18,7 @@ class TconToolStack implements ItemInstance {
         this.extra = item.extra || null;
 
         this.instance = ItemRegistry.getInstanceOf(this.id) as TconTool;
-        this.materials = new String(this.extra.getString("materials")).split("_");
+        this.materials = new String(this.extra.getString("materials")).split("_").map(mat => Material[mat]);
         this.modifiers = TinkersModifierHandler.decodeToObj(this.extra.getString("modifiers"));
         this.stats = this.getStats();
 
@@ -48,11 +48,6 @@ class TconToolStack implements ItemInstance {
 
     getBaseStats(): ToolStats {
         const stats = new ToolStats();
-        for(let i = 0; i < this.materials.length; i++){
-            if(!Material[this.materials[i]]){
-                return null;
-            }
-        }
         this.instance.buildStats(stats, this.materials);
         return stats;
     }
@@ -106,7 +101,7 @@ class TconToolStack implements ItemInstance {
     }
 
     uniqueKey(): string {
-        const hash = this.materials.reduce((a, v) => 31 * a + Material[v].getTexIndex(), 0);
+        const hash = this.materials.reduce((value, material) => 31 * value + material.getTexIndex(), 0);
         let mask = 0;
         for(let key in this.modifiers){
             mask |= 1 << Modifier[key].getTexIndex();

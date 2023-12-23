@@ -54,7 +54,7 @@ class TconTool extends ItemCommon implements ItemBehavior, ToolAPI.ToolParams {
         ToolAPI.registerTool(this.id, {durability: this.maxDamage}, this.blockTypes || [], this);
     }
 
-    buildStats(stats: ToolStats, materials: string[]): void {
+    buildStats(stats: ToolStats, materials: TinkersMaterial[]): void {
     }
 
     getRepairModifierForPart(index: number): number {
@@ -64,7 +64,7 @@ class TconTool extends ItemCommon implements ItemBehavior, ToolAPI.ToolParams {
     onNameOverride(item: ItemInstance, translation: string, name: string): string {
         if(item.extra){
             const stack = new TconToolStack(item);
-            const head = Material[stack.materials[1]].getName();
+            const head = stack.materials[1].getName();
             if(stack.isBroken()){
                 return `Broken ${head} ${name}`;
             }
