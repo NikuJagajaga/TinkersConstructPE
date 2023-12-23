@@ -44,7 +44,9 @@ class TconTool extends ItemCommon implements ItemBehavior, ToolAPI.ToolParams {
         this.setMaxStack(1);
         this.setMaxDamage(13);
 
-        ItemModel.getFor(this.id, -1).setModelOverrideCallback(item => ToolModelManager.getModel(item));
+        for(let i = 0; i <= this.maxDamage; i++){
+            ItemModel.getFor(this.id, i).setModelOverrideCallback(item => ToolModelManager.getModel(item));
+        }
 
     }
 
@@ -75,7 +77,7 @@ class TconTool extends ItemCommon implements ItemBehavior, ToolAPI.ToolParams {
         return name;
     }
 
-    onBroke(item: ItemInstance): boolean {
+    onBroke(item: ItemInstance): true {
         return true;
     }
 
@@ -95,7 +97,7 @@ class TconTool extends ItemCommon implements ItemBehavior, ToolAPI.ToolParams {
         const stack = new TconToolStack(item);
         const blockData = ToolAPI.getBlockData(block.id);
         let devider = 1;
-        if(this.blockTypes.includes(blockData.material.name) && stack.stats.level >= blockData.level && !stack.isBroken()){
+        if(this.blockTypes.indexOf(blockData.material.name) !== -1 && stack.stats.level >= blockData.level && !stack.isBroken()){
             devider = stack.stats.efficiency;
             if(blockData.isNative){
                 devider *= blockData.material.multiplier;
@@ -114,7 +116,7 @@ class TconTool extends ItemCommon implements ItemBehavior, ToolAPI.ToolParams {
         }
         const stack = new TconToolStack(item);
         const blockData = ToolAPI.getBlockData(block.id);
-        if(blockData && this.blockTypes.includes(blockData.material.name) && stack.stats.level >= blockData.level && !stack.isBroken()){
+        if(blockData && this.blockTypes.indexOf(blockData.material.name) !== -1 && stack.stats.level >= blockData.level && !stack.isBroken()){
             stack.forEachModifiers((mod, level) => {
                 mod.onDestroy(item, coords, block, player, level);
             });
@@ -125,7 +127,7 @@ class TconTool extends ItemCommon implements ItemBehavior, ToolAPI.ToolParams {
                 stack.consumeDurability(1);
                 stack.addXp(1);
             }
-            item.data = stack.data; //setCarriedItem by ToolAPI.destroyBlockHook
+            item.data = stack.data; //setCarriedItem in ToolAPI.destroyBlockHook
         }
         return true;
     }
@@ -147,7 +149,7 @@ class TconTool extends ItemCommon implements ItemBehavior, ToolAPI.ToolParams {
         else{
             stack.consumeDurability(2);
         }
-        item.data = stack.data; //setCarriedItem by ToolAPI.playerAttackHook
+        item.data = stack.data; //setCarriedItem in ToolAPI.playerAttackHook
         return true;
     }
 
@@ -235,7 +237,7 @@ class TconTool3x3 extends TconTool {
             pos.add(x, y, z);
             block2 = region.getBlock(pos);
             blockData = ToolAPI.getBlockData(block2.id);
-            if(blockData && this.blockTypes.includes(blockData.material.name) && stack.stats.level >= blockData.level){
+            if(blockData && this.blockTypes.indexOf(blockData.material.name) !== -1 && stack.stats.level >= blockData.level){
                 region.destroyBlock(pos, true, player);
                 consume++;
                 stack.forEachModifiers((mod, level) => {
@@ -248,7 +250,7 @@ class TconTool3x3 extends TconTool {
 
         blockData = ToolAPI.getBlockData(block.id);
 
-        if(blockData && this.blockTypes.includes(blockData.material.name) && stack.stats.level >= blockData.level){
+        if(blockData && this.blockTypes.indexOf(blockData.material.name) !== -1 && stack.stats.level >= blockData.level){
             consume++;
             stack.forEachModifiers((mod, level) => {
                 mod.onDestroy(item, coords, block, player, level);

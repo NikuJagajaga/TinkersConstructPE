@@ -32,10 +32,16 @@ class TankModelManager {
                 BlockRenderer.createModel()
             ];
 
-            for(let i = 0; i < 4; i++){
-                models[i].addBox(0, 0, 0, 1, 1, 1, id, 0);
-                models[i].addBox(1/32, 1/32, 1/32, 31/32, (i + 1) / 4 * 31 / 32, 31/32, this.textures[liquid] || "tcon_liquid_" + liquid, 0);
-                itemModels[i].setModel(models[i]);
+            try{
+                for(let i = 0; i < 4; i++){
+                    models[i].addBox(0, 0, 0, 1, 1, 1, id, 0);
+                    models[i].addBox(1/32, 1/32, 1/32, 31/32, (i + 1) / 4 * 31 / 32, 31/32, this.textures[liquid] || "tcon_liquid_" + liquid, 0);
+                    itemModels[i].setModel(models[i])
+                                 .setModUiSpriteName(IDRegistry.getNameByID(id), 0);
+                }
+            }
+            catch(e){
+                return null;
             }
 
             this.itemModels[key] = itemModels;
@@ -155,9 +161,9 @@ class SearedTank extends TileWithLiquidModel {
         const stored = this.liquidStorage.getLiquidStored();
         let extra: ItemExtraData;
         if(stored){
-            extra = new ItemExtraData();
-            extra.putString("stored", stored);
-            extra.putInt("amount", this.liquidStorage.getAmount(stored));
+            extra = new ItemExtraData()
+                .putString("stored", stored)
+                .putInt("amount", this.liquidStorage.getAmount(stored));
         }
         region.dropItem(this.x + 0.5, this.y, this.z + 0.5, this.blockID, 1, this.networkData.getInt("blockData"), extra);
     }

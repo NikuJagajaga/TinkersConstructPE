@@ -18,10 +18,8 @@ createBlock("tcon_stone", [
     {name: "Seared Creeperface", texture: [2, 2, 8]},
     {name: "Triangle Seared Bricks", texture: [9]},
     {name: "Small Seared Bricks", texture: [10]},
-    {name: "Seared Tiles", texture: [11]},
+    {name: "Seared Tiles", texture: [11]}
 ]);
-
-Item.addCreativeGroup("tcon_stone", "Seared Stones", [BlockID.tcon_stone]);
 
 
 MeltingRecipe.addRecipe(BlockID.tcon_stone, "molten_stone", MatValue.SEARED_BLOCK);

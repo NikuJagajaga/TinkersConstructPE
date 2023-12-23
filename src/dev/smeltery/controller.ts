@@ -425,25 +425,22 @@ class SmelteryControler extends TconTileEntity implements ILiquidStorage {
     }
 
     interactWithEntitiesInside(): void {
-        const allEnt = Entity.getAll();
+        const allEnt = this.region.listEntitiesInAABB(this.area.from, this.area.to);
         const entities: number[] = [];
-        let pos: Vector;
         for(let i = 0; i < allEnt.length; i++){
-            pos = Entity.getPosition(allEnt[i]);
-            if(this.area.from.x <= pos.x && pos.x <= this.area.to.x && this.area.from.y <= pos.y && pos.y <= this.area.to.y && this.area.from.z <= pos.z && pos.z <= this.area.to.z){
-                if(MeltingRecipe.getEntRecipe(allEnt[i])){
-                    entities.push(allEnt[i]);
-                }
+            if(MeltingRecipe.getEntRecipe(allEnt[i])){
+                entities.push(allEnt[i]);
             }
         }
         const liquidCapacity = this.getLiquidCapacity();
-        entities.forEach(ent => {
-            const result = MeltingRecipe.getEntRecipe(ent);
+        let result: LiquidInstance;
+        for(let i = 0; i < entities.length; i++){
+            result = MeltingRecipe.getEntRecipe(entities[i]);
             if(this.totalLiquidAmount() + result.amount <= liquidCapacity){
                 this.liquidStorage.addLiquid(result.liquid, result.amount);
             }
-            Entity.damageEntity(ent, 2);
-        });
+            Entity.damageEntity(entities[i], 2);
+        }
     }
 
     override onTick(): void {

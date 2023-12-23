@@ -48,14 +48,14 @@ class TconLumberaxe extends TconTool {
             return true;
         }
 
-        if(TconLumberaxe.LOGS.includes(block.id)){
+        if(TconLumberaxe.LOGS.indexOf(block.id) !== -1){
             this.chopTree(stack, coords, player);
             return true;
         }
         
         let blockData = ToolAPI.getBlockData(block.id);
         
-        if(blockData && this.blockTypes.includes(blockData.material.name) && stack.stats.level >= blockData.level){
+        if(blockData && this.blockTypes.indexOf(blockData.material.name) !== -1 && stack.stats.level >= blockData.level){
             const region = WorldRegion.getForActor(player);
             const center = World.getRelativeCoords(coords.x, coords.y, coords.z, coords.side ^ 1);
             let block2: Tile;
@@ -66,7 +66,7 @@ class TconLumberaxe extends TconTool {
                 if(x === coords.x && y === coords.y && z === coords.z) continue;
                 block2 = region.getBlock(x, y, z);
                 blockData = ToolAPI.getBlockData(block2.id);
-                if(blockData && this.blockTypes.includes(blockData.material.name) && stack.stats.level >= blockData.level){
+                if(blockData && this.blockTypes.indexOf(blockData.material.name) !== -1 && stack.stats.level >= blockData.level){
                     region.destroyBlock(x, y, z, true, player);
                     stack.forEachModifiers((mod, level) => {
                         mod.onDestroy(item, {x: x, y: y, z: z, side: coords.side, relative: World.getRelativeCoords(x, y, z, coords.side)}, block2, player, level);
@@ -86,7 +86,7 @@ class TconLumberaxe extends TconTool {
     }
 
     chopTree(toolStack: TconToolStack, coords: Vector, player: number): void {
-
+/*
         if(Threading.getThread("tcon_choptree")?.isAlive()){
             Game.message("processing...");
             return;
@@ -121,7 +121,7 @@ class TconLumberaxe extends TconTool {
                 region = WorldRegion.getForActor(player);
 
                 block = region.getBlock(pos);
-                if(!TconLumberaxe.LOGS.includes(block.id) && (coords.x !== pos.x || coords.y !== pos.y || coords.z !== pos.z)){
+                if(!TconLumberaxe.LOGS.indexOf(block.id) !== -1 && (coords.x !== pos.x || coords.y !== pos.y || coords.z !== pos.z)){
                     continue;
                 }
 
@@ -154,7 +154,7 @@ class TconLumberaxe extends TconTool {
             }
 
         });
-
+*/
     }
 
 }
@@ -175,6 +175,14 @@ Callback.addCallback("LocalTick", () => {
 
 });
 */
+
+Callback.addCallback("ItemUseLocal", (coords: Callback.ItemUseCoordinates, item: ItemInstance, block: Tile, player: number) => {
+    // const itemModel = ItemModel.getFor(item.id, item.data);
+    // Game.message("name: " + itemModel.getUiTextureName());
+    // Debug.bitmap(itemModel.getIconBitmap(), "icon");
+    const models = ItemModel.getAllModels();
+    Game.message("count: " + models.size());
+});
 
 ItemRegistry.registerItem(new TconLumberaxe());
 ToolForgeHandler.addRecipe(ItemID.tcontool_lumberaxe, ["rod2", "broadaxe", "largeplate", "binding2"]);

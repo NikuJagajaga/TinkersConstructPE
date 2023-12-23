@@ -114,6 +114,7 @@ const createItem = (namedID: string, name: string, texture: Item.TextureData = {
 };
 
 
-Array.prototype.includes = function(elem){
-    return this.indexOf(elem) !== -1;
-};
+//戒
+// Array.prototype.includes = function(elem){
+//     return this.indexOf(elem) !== -1;
+// };

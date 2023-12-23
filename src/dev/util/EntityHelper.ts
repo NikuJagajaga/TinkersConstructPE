@@ -40,12 +40,12 @@ class EntityHelper {
 
     static isUndead(entity: number): boolean {
         const type = Entity.getType(entity);
-        return this.undeads.includes(type);
+        return this.undeads.indexOf(type) !== -1;
     }
 
     static isArthropods(entity: number): boolean {
         const type = Entity.getType(entity);
-        return this.arthropods.includes(type);
+        return this.arthropods.indexOf(type) !== -1;
     }
 
     static getHeadMeta(entity: number): number {

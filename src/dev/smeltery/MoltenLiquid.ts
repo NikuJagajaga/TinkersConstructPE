@@ -12,8 +12,11 @@ class MoltenLiquid {
     private static liquidCount: number = 0;
     private static data: {[key: string]: {y: number, bmp: android.graphics.Bitmap, temp: number}} = {};
 
-    static getTexScale(): {width: number, height: number} {
-        return {width: 64, height: this.liquidCount * 32};
+    static getTexScale(): Render.PartParameters {
+        return {
+            width: 64,
+            height: this.liquidCount * 32
+        };
     }
 /*
     private static create(key: string, name: string, color: string, type: "metal" | "stone" | "other" = "metal"): void {

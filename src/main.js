@@ -142,9 +142,10 @@ var createItem = function (namedID, name, texture, params) {
     Item.createItem(namedID, name, texture, params);
     return id;
 };
-Array.prototype.includes = function (elem) {
-    return this.indexOf(elem) !== -1;
-};
+//戒
+// Array.prototype.includes = function(elem){
+//     return this.indexOf(elem) !== -1;
+// };
 var TconTileEntity = /** @class */ (function (_super) {
     __extends(TconTileEntity, _super);
     function TconTileEntity() {
@@ -159,9 +160,6 @@ var TconTileEntity = /** @class */ (function (_super) {
     };
     TconTileEntity.prototype.putDefaultNetworkData = function () { };
     TconTileEntity.prototype.setupContainer = function () { };
-    TconTileEntity.prototype.setUiScale = function (name, numerator, denominator) {
-        this.container.setScale(name, denominator ? numerator / denominator : 0);
-    };
     TconTileEntity.prototype.getScreenByName = function (screenName, container) {
         return null;
     };
@@ -177,26 +175,21 @@ var TileWithLiquidModel = /** @class */ (function (_super) {
         this.networkData.putFloat("liquidRelativeAmount", 0);
     };
     TileWithLiquidModel.prototype.clientLoad = function () {
-        try {
-            this.render = new Render();
-            this.anim = new Animation.Base(this.x + this.animPos.x, this.y + this.animPos.y - 1.5, this.z + this.animPos.z);
-            this.anim.describe({ render: this.render.getId(), skin: "model/tcon_liquids.png" });
-            this.anim.load();
-            this.anim.setSkylightMode();
-            var amount = this.networkData.getFloat("liquidRelativeAmount");
-            this.animHeight = 0;
-            if (amount > 0) {
-                this.animHeight = amount;
-                this.render.setPart("head", [{
-                        uv: { x: 0, y: MoltenLiquid.getY(this.networkData.getString("liquidStored")) },
-                        coords: { x: 0, y: -this.animHeight * 16 * this.animScale.y / 2, z: 0 },
-                        size: { x: 16 * this.animScale.x, y: 16 * this.animScale.y * this.animHeight, z: 16 * this.animScale.z }
-                    }], MoltenLiquid.getTexScale());
-                this.anim.refresh();
-            }
-        }
-        catch (e) {
-            Game.message("render: " + e);
+        this.render = new Render();
+        this.anim = new Animation.Base(this.x + this.animPos.x, this.y + this.animPos.y - 1.5, this.z + this.animPos.z);
+        this.anim.describe({ render: this.render.getId(), skin: "model/tcon_liquids.png" });
+        this.anim.load();
+        this.anim.setSkylightMode();
+        var amount = this.networkData.getFloat("liquidRelativeAmount");
+        this.animHeight = 0;
+        if (amount > 0) {
+            this.animHeight = amount;
+            this.render.setPart("head", [{
+                    uv: { x: 0, y: MoltenLiquid.getY(this.networkData.getString("liquidStored")) },
+                    coords: { x: 0, y: -this.animHeight * 16 * this.animScale.y / 2, z: 0 },
+                    size: { x: 16 * this.animScale.x, y: 16 * this.animScale.y * this.animHeight, z: 16 * this.animScale.z }
+                }], MoltenLiquid.getTexScale());
+            this.anim.refresh();
         }
     };
     TileWithLiquidModel.prototype.clientUnload = function () {
@@ -225,13 +218,34 @@ var TileWithLiquidModel = /** @class */ (function (_super) {
             needRefresh = true;
         }
         if (needRefresh) {
-            try {
-                this.render.setPart("head", parts, MoltenLiquid.getTexScale());
+            this.render.setPart("head", parts, MoltenLiquid.getTexScale());
+            this.anim.refresh();
+        }
+    };
+    TileWithLiquidModel.prototype.clientTickNew = function () {
+        var amount = this.networkData.getFloat("liquidRelativeAmount");
+        var diff = amount - this.animHeight;
+        if (amount > 0) {
+            if (diff !== 0) {
+                if (Math.abs(diff) > 0.01) {
+                    this.animHeight += diff * 0.2;
+                }
+                else {
+                    this.animHeight = amount;
+                }
+                this.render.setPart("head", [{
+                        uv: { x: 0, y: MoltenLiquid.getY(this.networkData.getString("liquidStored")) },
+                        coords: { x: 0, y: -this.animHeight * 16 * this.animScale.y / 2, z: 0 },
+                        size: { x: 16 * this.animScale.x, y: 16 * this.animScale.y * this.animHeight, z: 16 * this.animScale.z }
+                    }], MoltenLiquid.getTexScale());
+                this.render.setPart("head", [], MoltenLiquid.getTexScale());
                 this.anim.refresh();
             }
-            catch (e) {
-                Game.message("render: " + e);
-            }
+        }
+        else if (this.animHeight !== 0) {
+            this.animHeight = 0;
+            this.render.setPart("head", [], MoltenLiquid.getTexScale());
+            this.anim.refresh();
         }
     };
     TileWithLiquidModel.prototype.onTick = function () {
@@ -329,11 +343,11 @@ var EntityHelper = /** @class */ (function () {
     };
     EntityHelper.isUndead = function (entity) {
         var type = Entity.getType(entity);
-        return this.undeads.includes(type);
+        return this.undeads.indexOf(type) !== -1;
     };
     EntityHelper.isArthropods = function (entity) {
         var type = Entity.getType(entity);
-        return this.arthropods.includes(type);
+        return this.arthropods.indexOf(type) !== -1;
     };
     EntityHelper.getHeadMeta = function (entity) {
         var type = Entity.getType(entity);
@@ -461,13 +475,14 @@ SoundManager.registerSound("tcon.little_saw.ogg", "tcon/little_saw.ogg");
 SoundManager.registerSound("tcon.levelup.ogg", "tcon/levelup.ogg");
 SoundManager.registerSound("random.anvil_use.ogg", "random.anvil_use.ogg");
 SoundManager.registerSound("random.orb.ogg", "random.orb.ogg");
-//SoundManager.registerSound("step.grass.ogg", ["step.grass1.ogg", "step.grass2.ogg", "step.grass3.ogg", "step.grass4.ogg", "step.grass5.ogg", "step.grass6.ogg"]);
-//SoundManager.registerSound("step.gravel.ogg", ["step.gravel.ogg", "step.gravel2.ogg", "step.gravel3.ogg", "step.gravel4.ogg"]);
 var MoltenLiquid = /** @class */ (function () {
     function MoltenLiquid() {
     }
     MoltenLiquid.getTexScale = function () {
-        return { width: 64, height: this.liquidCount * 32 };
+        return {
+            width: 64,
+            height: this.liquidCount * 32
+        };
     };
     /*
         private static create(key: string, name: string, color: string, type: "metal" | "stone" | "other" = "metal"): void {
@@ -909,20 +924,19 @@ Recipes2.addShapeless({ id: BlockID.tcon_grout, count: 8 }, [{ id: "sand", count
 createItem("tcon_brick", "Seared Brick");
 Recipes.addFurnace(BlockID.tcon_grout, ItemID.tcon_brick);
 createBlock("tcon_stone", [
-    { name: "Seared Stone", texture: [0] },
-    { name: "Seared Cobblestone", texture: [1] },
-    { name: "Seared Paver", texture: [2] },
+    { name: "Seared Stone", texture: [0], isTech: true },
+    { name: "Seared Cobblestone", texture: [1], isTech: true },
+    { name: "Seared Paver", texture: [2], isTech: true },
     { name: "Seared Bricks", texture: [3] },
-    { name: "Cracked Seared Bricks", texture: [4] },
-    { name: "Fancy Seared Bricks", texture: [5] },
-    { name: "Square Seared Bricks", texture: [6] },
-    { name: "Seared Road", texture: [7] },
-    { name: "Seared Creeperface", texture: [2, 2, 8] },
-    { name: "Triangle Seared Bricks", texture: [9] },
-    { name: "Small Seared Bricks", texture: [10] },
-    { name: "Seared Tiles", texture: [11] },
+    { name: "Cracked Seared Bricks", texture: [4], isTech: true },
+    { name: "Fancy Seared Bricks", texture: [5], isTech: true },
+    { name: "Square Seared Bricks", texture: [6], isTech: true },
+    { name: "Seared Road", texture: [7], isTech: true },
+    { name: "Seared Creeperface", texture: [2, 2, 8], isTech: true },
+    { name: "Triangle Seared Bricks", texture: [9], isTech: true },
+    { name: "Small Seared Bricks", texture: [10], isTech: true },
+    { name: "Seared Tiles", texture: [11], isTech: true }
 ]);
-Item.addCreativeGroup("tcon_stone", "Seared Stones", [BlockID.tcon_stone]);
 MeltingRecipe.addRecipe(BlockID.tcon_stone, "molten_stone", MatValue.SEARED_BLOCK);
 MeltingRecipe.addRecipe(ItemID.tcon_brick, "molten_stone", MatValue.SEARED_MATERIAL);
 MeltingRecipe.addRecipeForAmount(BlockID.tcon_grout, "molten_stone", MatValue.SEARED_MATERIAL, MatValue.SEARED_MATERIAL / 3);
@@ -968,10 +982,16 @@ var TankModelManager = /** @class */ (function () {
                 BlockRenderer.createModel(),
                 BlockRenderer.createModel()
             ];
-            for (var i = 0; i < 4; i++) {
-                models[i].addBox(0, 0, 0, 1, 1, 1, id, 0);
-                models[i].addBox(1 / 32, 1 / 32, 1 / 32, 31 / 32, (i + 1) / 4 * 31 / 32, 31 / 32, this.textures[liquid] || "tcon_liquid_" + liquid, 0);
-                itemModels[i].setModel(models[i]);
+            try {
+                for (var i = 0; i < 4; i++) {
+                    models[i].addBox(0, 0, 0, 1, 1, 1, id, 0);
+                    models[i].addBox(1 / 32, 1 / 32, 1 / 32, 31 / 32, (i + 1) / 4 * 31 / 32, 31 / 32, this.textures[liquid] || "tcon_liquid_" + liquid, 0);
+                    itemModels[i].setModel(models[i])
+                        .setModUiSpriteName(IDRegistry.getNameByID(id), 0);
+                }
+            }
+            catch (e) {
+                return null;
             }
             this.itemModels[key] = itemModels;
         }
@@ -1074,9 +1094,9 @@ var SearedTank = /** @class */ (function (_super) {
         var stored = this.liquidStorage.getLiquidStored();
         var extra;
         if (stored) {
-            extra = new ItemExtraData();
-            extra.putString("stored", stored);
-            extra.putInt("amount", this.liquidStorage.getAmount(stored));
+            extra = new ItemExtraData()
+                .putString("stored", stored)
+                .putInt("amount", this.liquidStorage.getAmount(stored));
         }
         region.dropItem(this.x + 0.5, this.y, this.z + 0.5, this.blockID, 1, this.networkData.getInt("blockData"), extra);
     };
@@ -1964,26 +1984,22 @@ var SmelteryControler = /** @class */ (function (_super) {
         this.anim.refresh();
     };
     SmelteryControler.prototype.interactWithEntitiesInside = function () {
-        var _this = this;
-        var allEnt = Entity.getAll();
+        var allEnt = this.region.listEntitiesInAABB(this.area.from, this.area.to);
         var entities = [];
-        var pos;
         for (var i = 0; i < allEnt.length; i++) {
-            pos = Entity.getPosition(allEnt[i]);
-            if (this.area.from.x <= pos.x && pos.x <= this.area.to.x && this.area.from.y <= pos.y && pos.y <= this.area.to.y && this.area.from.z <= pos.z && pos.z <= this.area.to.z) {
-                if (MeltingRecipe.getEntRecipe(allEnt[i])) {
-                    entities.push(allEnt[i]);
-                }
+            if (MeltingRecipe.getEntRecipe(allEnt[i])) {
+                entities.push(allEnt[i]);
             }
         }
         var liquidCapacity = this.getLiquidCapacity();
-        entities.forEach(function (ent) {
-            var result = MeltingRecipe.getEntRecipe(ent);
-            if (_this.totalLiquidAmount() + result.amount <= liquidCapacity) {
-                _this.liquidStorage.addLiquid(result.liquid, result.amount);
+        var result;
+        for (var i = 0; i < entities.length; i++) {
+            result = MeltingRecipe.getEntRecipe(entities[i]);
+            if (this.totalLiquidAmount() + result.amount <= liquidCapacity) {
+                this.liquidStorage.addLiquid(result.liquid, result.amount);
             }
-            Entity.damageEntity(ent, 2);
-        });
+            Entity.damageEntity(entities[i], 2);
+        }
     };
     SmelteryControler.prototype.onTick = function () {
         var _this = this;
@@ -3713,12 +3729,12 @@ var ToolCrafterWindow = /** @class */ (function (_super) {
                     partData ? materials.push(partData.material) : alert("part error: " + slot.id);
                     consume[i] = 1;
                 }
-                var extra = new ItemExtraData();
-                extra.putInt("durability", 0);
-                extra.putInt("xp", 0);
-                extra.putInt("repair", 0);
-                extra.putString("materials", materials.join("_"));
-                extra.putString("modifiers", "");
+                var extra = new ItemExtraData()
+                    .putInt("durability", 0)
+                    .putInt("xp", 0)
+                    .putInt("repair", 0)
+                    .putString("materials", materials.join("_"))
+                    .putString("modifiers", "");
                 this.container.setSlot("slotResult", result.result, 1, 0, extra);
             }
             else {
@@ -3868,7 +3884,9 @@ var TconTool = /** @class */ (function (_super) {
         _this.setHandEquipped(true);
         _this.setMaxStack(1);
         _this.setMaxDamage(13);
-        ItemModel.getFor(_this.id, -1).setModelOverrideCallback(function (item) { return ToolModelManager.getModel(item); });
+        for (var i = 0; i <= _this.maxDamage; i++) {
+            ItemModel.getFor(_this.id, i).setModelOverrideCallback(function (item) { return ToolModelManager.getModel(item); });
+        }
         return _this;
     }
     TconTool.prototype.setToolParams = function () {
@@ -3912,7 +3930,7 @@ var TconTool = /** @class */ (function (_super) {
         var stack = new TconToolStack(item);
         var blockData = ToolAPI.getBlockData(block.id);
         var devider = 1;
-        if (this.blockTypes.includes(blockData.material.name) && stack.stats.level >= blockData.level && !stack.isBroken()) {
+        if (this.blockTypes.indexOf(blockData.material.name) !== -1 && stack.stats.level >= blockData.level && !stack.isBroken()) {
             devider = stack.stats.efficiency;
             if (blockData.isNative) {
                 devider *= blockData.material.multiplier;
@@ -3930,7 +3948,7 @@ var TconTool = /** @class */ (function (_super) {
         }
         var stack = new TconToolStack(item);
         var blockData = ToolAPI.getBlockData(block.id);
-        if (blockData && this.blockTypes.includes(blockData.material.name) && stack.stats.level >= blockData.level && !stack.isBroken()) {
+        if (blockData && this.blockTypes.indexOf(blockData.material.name) !== -1 && stack.stats.level >= blockData.level && !stack.isBroken()) {
             stack.forEachModifiers(function (mod, level) {
                 mod.onDestroy(item, coords, block, player, level);
             });
@@ -3941,7 +3959,7 @@ var TconTool = /** @class */ (function (_super) {
                 stack.consumeDurability(1);
                 stack.addXp(1);
             }
-            item.data = stack.data; //setCarriedItem by ToolAPI.destroyBlockHook
+            item.data = stack.data; //setCarriedItem in ToolAPI.destroyBlockHook
         }
         return true;
     };
@@ -3962,7 +3980,7 @@ var TconTool = /** @class */ (function (_super) {
         else {
             stack.consumeDurability(2);
         }
-        item.data = stack.data; //setCarriedItem by ToolAPI.playerAttackHook
+        item.data = stack.data; //setCarriedItem in ToolAPI.playerAttackHook
         return true;
     };
     TconTool.prototype.onDealDamage = function (item, victim, player, damageValue, damageType) {
@@ -4042,7 +4060,7 @@ var TconTool3x3 = /** @class */ (function (_super) {
                     pos.add(x, y, z);
                     block2 = region.getBlock(pos);
                     blockData = ToolAPI.getBlockData(block2.id);
-                    if (blockData && this.blockTypes.includes(blockData.material.name) && stack.stats.level >= blockData.level) {
+                    if (blockData && this.blockTypes.indexOf(blockData.material.name) !== -1 && stack.stats.level >= blockData.level) {
                         region.destroyBlock(pos, true, player);
                         consume++;
                         stack.forEachModifiers(function (mod, level) {
@@ -4053,7 +4071,7 @@ var TconTool3x3 = /** @class */ (function (_super) {
             }
         }
         blockData = ToolAPI.getBlockData(block.id);
-        if (blockData && this.blockTypes.includes(blockData.material.name) && stack.stats.level >= blockData.level) {
+        if (blockData && this.blockTypes.indexOf(blockData.material.name) !== -1 && stack.stats.level >= blockData.level) {
             consume++;
             stack.forEachModifiers(function (mod, level) {
                 mod.onDestroy(item, coords, block, player, level);
@@ -4091,7 +4109,7 @@ var ToolModelManager = /** @class */ (function () {
     function ToolModelManager() {
     }
     ToolModelManager.getModel = function (item) {
-        if (!item.extra || Network.inRemoteWorld()) {
+        if (!item.extra) {
             return null;
         }
         try {
@@ -4102,7 +4120,7 @@ var ToolModelManager = /** @class */ (function () {
             if (this.models[uniqueKey]) {
                 return this.models[uniqueKey][suffix];
             }
-            var mesh = [new RenderMesh(), new RenderMesh(), new RenderMesh(), new RenderMesh()];
+            var mesh = [ItemModel.getEmptyMeshFromPool(), ItemModel.getEmptyMeshFromPool(), ItemModel.getEmptyMeshFromPool(), ItemModel.getEmptyMeshFromPool()];
             var coordsNormal_1 = [];
             var coordsBroken_1 = [];
             var index = 0;
@@ -4125,7 +4143,7 @@ var ToolModelManager = /** @class */ (function () {
                 for (var j = 0; j < coords.length; j++) {
                     x = coords[j].x;
                     y = coords[j].y;
-                    z = i & 1 ? -0.001 * (coords.length - j) : 0.001 * (coords.length - j);
+                    z = (i & 1 ? j : (coords.length - j)) * 0.001;
                     m.setColor(1, 1, 1);
                     m.setNormal(1, 1, 0);
                     m.addVertex(0, 1, z, x, y);
@@ -4148,40 +4166,21 @@ var ToolModelManager = /** @class */ (function () {
             var modelNormal = ItemModel.newStandalone();
             var modelBroken = ItemModel.newStandalone();
             var path = texture.getPath();
-            modelNormal.setModel(data.normal.hand, path);
-            modelNormal.setUiModel(data.normal.ui, path);
-            modelNormal.setSpriteUiRender(true);
-            modelBroken.setModel(data.broken.hand, path);
-            modelBroken.setUiModel(data.broken.ui, path);
-            modelBroken.setSpriteUiRender(true);
+            modelNormal.setModel(data.normal.hand, path)
+                .setUiModel(data.normal.ui, path)
+                .setSpriteUiRender(true)
+                .setModUiSpriteName(stack.instance.icon.name, stack.instance.icon.meta);
+            modelBroken.setModel(data.broken.hand, path)
+                .setUiModel(data.broken.ui, path)
+                .setSpriteUiRender(true)
+                .setModUiSpriteName(stack.instance.icon.name, stack.instance.icon.meta);
             this.models[uniqueKey] = { normal: modelNormal, broken: modelBroken };
-            //Game.message(uniqueKey);
             return this.models[uniqueKey][suffix];
         }
         catch (e) {
             alert("toolModel: " + e);
             return null;
         }
-    };
-    ToolModelManager.getModelTest = function () {
-        var model = ItemModel.newStandalone();
-        var meshHand = new RenderMesh();
-        var meshUi = new RenderMesh();
-        var size = 1;
-        var x = 0;
-        var y = 0;
-        meshUi.setColor(1, 1, 1);
-        meshUi.setNormal(1, 1, 0);
-        meshUi.addVertex(0, 1, 0, x, y);
-        meshUi.addVertex(1, 1, 0, x + size, y);
-        meshUi.addVertex(0, 0, 0, x, y + size);
-        meshUi.addVertex(1, 1, 0, x + size, y);
-        meshUi.addVertex(0, 0, 0, x, y + size);
-        meshUi.addVertex(1, 0, 0, x + size, y + size);
-        model.setModel(meshHand, "items-opaque/tcon_silky_jewel");
-        model.setUiModel(meshUi, "items-opaque/tcon_silky_jewel");
-        model.setSpriteUiRender(true);
-        return model;
     };
     ToolModelManager.models = {};
     return ToolModelManager;
@@ -4279,7 +4278,7 @@ var TconHatchet = /** @class */ (function (_super) {
         }
         var stack = new TconToolStack(item);
         var blockData = ToolAPI.getBlockData(block.id);
-        if (blockData && this.blockTypes.includes(blockData.material.name) && stack.stats.level >= blockData.level && !stack.isBroken()) {
+        if (blockData && this.blockTypes.indexOf(blockData.material.name) !== -1 && stack.stats.level >= blockData.level && !stack.isBroken()) {
             stack.forEachModifiers(function (mod, level) {
                 mod.onDestroy(item, coords, block, player, level);
             });
@@ -4530,12 +4529,12 @@ var TconLumberaxe = /** @class */ (function (_super) {
         if (stack.isBroken()) {
             return true;
         }
-        if (TconLumberaxe.LOGS.includes(block.id)) {
+        if (TconLumberaxe.LOGS.indexOf(block.id) !== -1) {
             this.chopTree(stack, coords, player);
             return true;
         }
         var blockData = ToolAPI.getBlockData(block.id);
-        if (blockData && this.blockTypes.includes(blockData.material.name) && stack.stats.level >= blockData.level) {
+        if (blockData && this.blockTypes.indexOf(blockData.material.name) !== -1 && stack.stats.level >= blockData.level) {
             var region = WorldRegion.getForActor(player);
             var center = World.getRelativeCoords(coords.x, coords.y, coords.z, coords.side ^ 1);
             var block2_1;
@@ -4547,7 +4546,7 @@ var TconLumberaxe = /** @class */ (function (_super) {
                             return "continue";
                         block2_1 = region.getBlock(x, y, z);
                         blockData = ToolAPI.getBlockData(block2_1.id);
-                        if (blockData && this_1.blockTypes.includes(blockData.material.name) && stack.stats.level >= blockData.level) {
+                        if (blockData && this_1.blockTypes.indexOf(blockData.material.name) !== -1 && stack.stats.level >= blockData.level) {
                             region.destroyBlock(x, y, z, true, player);
                             stack.forEachModifiers(function (mod, level) {
                                 mod.onDestroy(item, { x: x, y: y, z: z, side: coords.side, relative: World.getRelativeCoords(x, y, z, coords.side) }, block2_1, player, level);
@@ -4574,61 +4573,75 @@ var TconLumberaxe = /** @class */ (function (_super) {
         return true;
     };
     TconLumberaxe.prototype.chopTree = function (toolStack, coords, player) {
-        var _a;
-        if ((_a = Threading.getThread("tcon_choptree")) === null || _a === void 0 ? void 0 : _a.isAlive()) {
-            Game.message("processing...");
-            return;
-        }
-        Threading.initThread("tcon_choptree", function () {
-            var array = [];
-            var visited = [];
-            var item;
-            var stack;
-            var pos;
-            var pos2;
-            var block;
-            var region;
-            array.push(coords);
-            while (array.length > 0) {
-                item = Entity.getCarriedItem(player);
-                if (toolStack.id !== item.id || !item.extra)
+        /*
+                if(Threading.getThread("tcon_choptree")?.isAlive()){
+                    Game.message("processing...");
                     return;
-                stack = new TconToolStack(item);
-                if (stack.isBroken() || toolStack.uniqueKey() !== stack.uniqueKey())
-                    return;
-                pos = array.shift();
-                if (visited.some(function (p) { return p.x === pos.x && p.y === pos.y && p.z === pos.z; }))
-                    continue;
-                visited.push(pos);
-                region = WorldRegion.getForActor(player);
-                block = region.getBlock(pos);
-                if (!TconLumberaxe.LOGS.includes(block.id) && (coords.x !== pos.x || coords.y !== pos.y || coords.z !== pos.z)) {
-                    continue;
                 }
-                for (var i = 2; i <= 5; i++) {
-                    pos2 = World.getRelativeCoords(pos.x, pos.y, pos.z, i);
-                    if (!visited.some(function (p) { return p.x === pos2.x && p.y === pos2.y && p.z === pos2.z; })) {
-                        array.push(pos2);
-                    }
-                }
-                for (var i = -1; i <= 1; i++) {
-                    for (var j = -1; j <= 1; j++) {
-                        pos2 = { x: pos.x + i, y: pos.y + 1, z: pos.z + j };
-                        if (!visited.some(function (p) { return p.x === pos2.x && p.y === pos2.y && p.z === pos2.z; })) {
-                            array.push(pos2);
+        
+                Threading.initThread("tcon_choptree", () => {
+        
+                    const array: Vector[] = [];
+                    const visited: Vector[] = [];
+                    
+                    let item: ItemInstance;
+                    let stack: TconToolStack;
+                    let pos: Vector;
+                    let pos2: Vector;
+                    let block: Tile;
+                    let region: WorldRegion;
+        
+                    array.push(coords);
+        
+                    while(array.length > 0){
+        
+                        item = Entity.getCarriedItem(player);
+                        if(toolStack.id !== item.id || !item.extra) return;
+        
+                        stack = new TconToolStack(item);
+                        if(stack.isBroken() || toolStack.uniqueKey() !== stack.uniqueKey()) return;
+        
+                        pos = array.shift();
+                        if(visited.some(p => p.x === pos.x && p.y === pos.y && p.z === pos.z)) continue;
+                        visited.push(pos);
+        
+                        region = WorldRegion.getForActor(player);
+        
+                        block = region.getBlock(pos);
+                        if(!TconLumberaxe.LOGS.indexOf(block.id) !== -1 && (coords.x !== pos.x || coords.y !== pos.y || coords.z !== pos.z)){
+                            continue;
                         }
+        
+                        for(let i = 2; i <= 5; i++){
+                            pos2 = World.getRelativeCoords(pos.x, pos.y, pos.z, i);
+                            if(!visited.some(p => p.x === pos2.x && p.y === pos2.y && p.z === pos2.z)){
+                                array.push(pos2);
+                            }
+                        }
+        
+                        for(let i = -1; i <= 1; i++){
+                        for(let j = -1; j <= 1; j++){
+                            pos2 = {x: pos.x + i, y: pos.y + 1, z: pos.z + j};
+                            if(!visited.some(p => p.x === pos2.x && p.y === pos2.y && p.z === pos2.z)){
+                                array.push(pos2);
+                            }
+                        }
+                        }
+        
+                        region.destroyBlock(pos, true, player);
+                        stack.forEachModifiers((mod, level) => {
+                            mod.onDestroy(item, {x: pos.x, y: pos.y, z: pos.z, side: EBlockSide.DOWN, relative: pos}, block, player, level);
+                        });
+                        stack.consumeDurability(1);
+                        stack.addXp(1);
+                        stack.applyToHand(player);
+        
+                        Thread.sleep(25);
+        
                     }
-                }
-                region.destroyBlock(pos, true, player);
-                stack.forEachModifiers(function (mod, level) {
-                    mod.onDestroy(item, { x: pos.x, y: pos.y, z: pos.z, side: EBlockSide.DOWN, relative: pos }, block, player, level);
+        
                 });
-                stack.consumeDurability(1);
-                stack.addXp(1);
-                stack.applyToHand(player);
-                Thread.sleep(25);
-            }
-        });
+        */
     };
     TconLumberaxe.LOGS = [
         VanillaTileID.log,
@@ -4654,6 +4667,13 @@ Callback.addCallback("LocalTick", () => {
 
 });
 */
+Callback.addCallback("ItemUseLocal", function (coords, item, block, player) {
+    // const itemModel = ItemModel.getFor(item.id, item.data);
+    // Game.message("name: " + itemModel.getUiTextureName());
+    // Debug.bitmap(itemModel.getIconBitmap(), "icon");
+    var models = ItemModel.getAllModels();
+    Game.message("count: " + models.size());
+});
 ItemRegistry.registerItem(new TconLumberaxe());
 ToolForgeHandler.addRecipe(ItemID.tcontool_lumberaxe, ["rod2", "broadaxe", "largeplate", "binding2"]);
 ToolForgeHandler.addLayout({

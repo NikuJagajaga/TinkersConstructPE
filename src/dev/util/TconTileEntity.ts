@@ -1,8 +1,8 @@
 abstract class TconTileEntity extends TileEntityBase {
 
-    data: this["defaultValues"];
+    override data: this["defaultValues"];
 
-    onInit(): void {
+    override onInit(): void {
         this.networkData.putInt("blockId", this.blockID);
         this.networkData.putInt("blockData", this.blockSource.getBlockData(this.x, this.y, this.z));
         this.putDefaultNetworkData();
@@ -13,11 +13,7 @@ abstract class TconTileEntity extends TileEntityBase {
     putDefaultNetworkData(): void {}
     setupContainer(): void {}
 
-    setUiScale(name: string, numerator: number, denominator: number): void {
-        this.container.setScale(name, denominator ? numerator / denominator : 0);
-    }
-
-    getScreenByName(screenName: string, container: ItemContainer): UI.IWindow {
+    override getScreenByName(screenName: string, container: ItemContainer): UI.IWindow {
         return null;
     }
 

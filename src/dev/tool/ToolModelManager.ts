@@ -4,7 +4,7 @@ class ToolModelManager {
 
     static getModel(item: ItemInstance): ItemModel {
 
-        if(!item.extra || Network.inRemoteWorld()){
+        if(!item.extra){
             return null;
         }
 
@@ -19,7 +19,10 @@ class ToolModelManager {
                 return this.models[uniqueKey][suffix];
             }
 
-            const mesh = [new RenderMesh(), new RenderMesh(), new RenderMesh(), new RenderMesh()];
+            const modelNormal = ItemModel.newStandalone();
+            const modelBroken = ItemModel.newStandalone();
+            const path = texture.getPath();
+            const mesh = [ItemModel.getEmptyMeshFromPool(), ItemModel.getEmptyMeshFromPool(), ItemModel.getEmptyMeshFromPool(), ItemModel.getEmptyMeshFromPool()];
             const coordsNormal: {x: number, y: number}[] = [];
             const coordsBroken: {x: number, y: number}[] = [];
             let index = 0;
@@ -45,7 +48,7 @@ class ToolModelManager {
                 for(let j = 0; j < coords.length; j++){
                     x = coords[j].x;
                     y = coords[j].y;
-                    z = i & 1 ? -0.001 * (coords.length - j) : 0.001 * (coords.length - j);
+                    z = (i & 1 ? j : (coords.length - j)) * 0.001;
                     m.setColor(1, 1, 1);
                     m.setNormal(1, 1, 0);
                     m.addVertex(0, 1, z, x, y);
@@ -62,24 +65,17 @@ class ToolModelManager {
                 }
             });
 
-            const data = {
-                normal: {hand: mesh[0], ui: mesh[1]},
-                broken: {hand: mesh[2], ui: mesh[3]}
-            };
-
-            const modelNormal = ItemModel.newStandalone();
-            const modelBroken = ItemModel.newStandalone();
-            const path = texture.getPath();
-
-            modelNormal.setModel(data.normal.hand, path);
-            modelNormal.setUiModel(data.normal.ui, path);
-            modelNormal.setSpriteUiRender(true);
-            modelBroken.setModel(data.broken.hand, path);
-            modelBroken.setUiModel(data.broken.ui, path);
-            modelBroken.setSpriteUiRender(true);
+            modelNormal.setModel(mesh[0], path)
+                       .setUiModel(mesh[1], path)
+                       .setSpriteUiRender(true)
+                       .setModUiSpriteName(stack.instance.icon.name, stack.instance.icon.meta);
+            modelBroken.setModel(mesh[2], path)
+                       .setUiModel(mesh[3], path)
+                       .setSpriteUiRender(true)
+                       .setModUiSpriteName(stack.instance.icon.name, stack.instance.icon.meta);
             
             this.models[uniqueKey] = {normal: modelNormal, broken: modelBroken};
-            //Game.message(uniqueKey);
+
             return this.models[uniqueKey][suffix];
 
         }
@@ -87,34 +83,6 @@ class ToolModelManager {
             alert("toolModel: " + e);
             return null;
         }
-
-    }
-
-
-    static getModelTest(): ItemModel {
-
-        const model = ItemModel.newStandalone();
-        const meshHand = new RenderMesh();
-        const meshUi = new RenderMesh();
-
-        const size = 1;
-        let x = 0;
-        let y = 0;
-
-        meshUi.setColor(1, 1, 1);
-        meshUi.setNormal(1, 1, 0);
-        meshUi.addVertex(0, 1, 0, x, y);
-        meshUi.addVertex(1, 1, 0, x + size, y);
-        meshUi.addVertex(0, 0, 0, x, y + size);
-        meshUi.addVertex(1, 1, 0, x + size, y);
-        meshUi.addVertex(0, 0, 0, x, y + size);
-        meshUi.addVertex(1, 0, 0, x + size, y + size);
-
-        model.setModel(meshHand, "items-opaque/tcon_silky_jewel");
-        model.setUiModel(meshUi, "items-opaque/tcon_silky_jewel");
-        model.setSpriteUiRender(true);
-
-        return model;
 
     }
 

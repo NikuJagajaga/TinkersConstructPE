@@ -14,7 +14,7 @@ class ToolTexture {
         return Bitmap.createBitmap(this.bitmap, (index & 15) << 4, (index >> 4) + (partNum << 1) << 4, 16, 16);//null, true
     }
 */
-    getCoords(partNum: number, index: number): {x: number, y: number} {
+    getCoords(partNum: number, index: number): {x: number, y: number} { // x, y: 0.0 - 1.0
         return {
             x: ((index & 15) << 4) / 256,
             y: ((index >> 4) + (partNum << 1) << 4) / 256
