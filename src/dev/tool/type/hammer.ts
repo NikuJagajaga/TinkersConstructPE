@@ -13,6 +13,7 @@ class TconHammer extends TconTool3x3 {
         this.repairParts = [1, 2, 3];
 
         this.setToolParams();
+        this.addToCreative(4);
 
     }
 

@@ -162,6 +162,7 @@ class ToolCrafterWindow extends CraftingWindow {
             count > 0 && items.push({id: find.id, count: count, data: 0});
 
             if(items.length > 0){
+
                 consume = slots.map(s => {
                     const i = items.findIndex(item => item.id === s.id && (item.data === -1 || item.data === s.data));
                     if(i === -1){
@@ -172,6 +173,7 @@ class ToolCrafterWindow extends CraftingWindow {
                     items[i].count <= 0 && items.splice(i, 1);
                     return min;
                 });
+                
                 consume[0] = 1;
 
                 const result = stack.clone();
@@ -179,11 +181,7 @@ class ToolCrafterWindow extends CraftingWindow {
                 result.extra.putInt("repair", stack.repairCount + 1);
                 result.extra.putString("modifiers", TinkersModifierHandler.encodeToString(modifiers));
                 this.container.setSlot("slotResult", result.id, result.count, result.data, result.extra);
-                // const extra = stack.extra.copy();
-                // extra.putInt("durability", newDur);
-                // extra.putInt("repair", stack.repairCount + 1);
-                // extra.putString("modifiers", TinkersModifierHandler.encodeToString(modifiers));
-                // this.container.setSlot("slotResult", stack.id, 1, Math.ceil(newDur / stack.stats.durability * stack.instance.maxDamage), extra);
+
             }
             else{
                 this.container.clearSlot("slotResult");
@@ -275,7 +273,7 @@ class ToolCrafterWindow extends CraftingWindow {
                 slot = this.container.getSlot("slotResult");
                 Player.setInventorySlot(index, slot.id, 1, slot.data, slot.extra);
                 this.isForge ?
-                    SoundManager.playSound("random.anvil_use", 1, 0.95 + 0.2 * Math.random()) :
+                    World.playSoundAtEntity(Player.get(), "random.anvil_use", 0.5, 0.95 + 0.2 * Math.random()) :
                     SoundManager.playSound("tcon.little_saw.ogg");
             }
             catch(e){

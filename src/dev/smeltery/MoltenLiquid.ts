@@ -57,6 +57,7 @@ class MoltenLiquid {
         LiquidRegistry.registerLiquid(key, name, ["liquid." + key]);
         
         const id = createItem("tcon_bucket_" + key, name + " Bucket");
+        Item.setCategory(id, EItemCategory.MATERIAL);
         Item.addCreativeGroup("tcon_bucket", "TCon Buckets", [id]);
         LiquidRegistry.registerItem(key, {id: VanillaItemID.bucket, data: 0}, {id: id, data: 0});
         this.register(key, temp);
@@ -67,17 +68,17 @@ class MoltenLiquid {
     }
 
     static getY(key: string): number {
-        return this.isExist(key) ? this.data[key].y : -1;
+        return this.data[key]?.y ?? -1;
     }
 
     static getTemp(key: string): number {
-        return this.isExist(key) ? this.data[key].temp : -1;
+        return this.data[key]?.temp ?? -1;
     }
 
 }
 
 
-MoltenLiquid.register("water", 532);
+MoltenLiquid.register("water", 320);
 MoltenLiquid.register("lava", 769);
 MoltenLiquid.register("milk", 320);
 MoltenLiquid.createAndRegister("molten_iron", "Molten Iron", 769, "#a81212");

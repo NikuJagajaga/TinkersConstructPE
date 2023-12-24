@@ -104,23 +104,28 @@ class SearedTank extends TileWithLiquidModel {
 
         if(Entity.getSneaking(playerUid)) return true;
 
+        const region = WorldRegion.getForActor(playerUid);
         const player = new PlayerEntity(playerUid);
         const stored = this.liquidStorage.getLiquidStored();
         const empty = LiquidItemRegistry.getEmptyItem(item.id, item.data);
+        let soundName = "";
 
         if(empty){
+            soundName = MoltenLiquid.getTemp(empty.liquid) < 50 ? "bucket.empty_water" : "bucket.empty_lava";
             if(stored === empty.liquid || !stored){
                 if(this.liquidStorage.getLimit(stored) - this.liquidStorage.getAmount(stored) >= empty.amount){
                     this.liquidStorage.addLiquid(empty.liquid, empty.amount);
                     item.count--;
                     player.setCarriedItem(item);
                     player.addItemToInventory(empty.id, 1, empty.data);
+                    region.playSound(coords, soundName);
                     this.preventClick();
                     return true;
                 }
                 if(item.count === 1 && empty.storage){
                     item.data += this.liquidStorage.addLiquid(empty.liquid, empty.amount);
                     player.setCarriedItem(item);
+                    region.playSound(coords, soundName);
                     this.preventClick();
                     return true;
                 }
@@ -129,6 +134,7 @@ class SearedTank extends TileWithLiquidModel {
 
         if(stored){
             const full = LiquidItemRegistry.getFullItem(item.id, item.data, stored);
+            soundName = MoltenLiquid.getTemp(stored) < 50 ? "bucket.fill_water" : "bucket.fill_lava";
             if(full){
                 const amount = this.liquidStorage.getAmount(stored);
                 if(full.amount <= amount){
@@ -141,11 +147,13 @@ class SearedTank extends TileWithLiquidModel {
                         player.setCarriedItem(item);
                         player.addItemToInventory(full.id, 1, full.data);
                     }
+                    region.playSound(coords, soundName);
                     this.preventClick();
                     return true;
                 }
                 if(item.count === 1 && full.storage){
                     player.setCarriedItem(full.id, 1, full.amount - this.liquidStorage.getLiquid(stored, full.amount));
+                    region.playSound(coords, soundName);
                     this.preventClick();
                     return true;
                 }
@@ -157,15 +165,13 @@ class SearedTank extends TileWithLiquidModel {
     }
 
     override destroyBlock(coords: Callback.ItemUseCoordinates, player: number): void {
-        const region = WorldRegion.getForActor(player);
         const stored = this.liquidStorage.getLiquidStored();
         let extra: ItemExtraData;
         if(stored){
-            extra = new ItemExtraData()
-                .putString("stored", stored)
-                .putInt("amount", this.liquidStorage.getAmount(stored));
+            extra = new ItemExtraData().putString("stored", stored)
+                                       .putInt("amount", this.liquidStorage.getAmount(stored));
         }
-        region.dropItem(this.x + 0.5, this.y, this.z + 0.5, this.blockID, 1, this.networkData.getInt("blockData"), extra);
+        this.region.dropAtBlock(coords, this.blockID, 1, 0, extra);
     }
 
 }

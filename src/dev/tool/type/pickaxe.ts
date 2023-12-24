@@ -8,6 +8,7 @@ class TconPickaxe extends TconTool {
         this.texture = new ToolTexture("model/tcontool_pickaxe", 3, 1);
 
         this.setToolParams();
+        this.addToCreative(3);
 
     }
 

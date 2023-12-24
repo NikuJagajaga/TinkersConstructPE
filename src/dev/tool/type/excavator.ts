@@ -13,6 +13,7 @@ class TconExcavator extends TconTool3x3 {
         this.repairParts = [1, 2];
 
         this.setToolParams();
+        this.addToCreative(4);
 
     }
 

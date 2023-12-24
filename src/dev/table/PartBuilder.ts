@@ -84,7 +84,7 @@ const PartBuilderWindow = new class extends CraftingWindow {
     constructor(){
 
         const elements: UI.ElementSet = {
-            slotPattern: {type: "slot", x: 8, y: 136 - 36, bitmap: "tcon.slot.pattern", size: 72, isValid: id => id === ItemID.tcon_pattern_blank},
+            slotPattern: {type: "slot", x: 8, y: 136 - 36, bitmap: "tcon.slot.pattern", size: 72, isValid: id => {alert(id + " - " + ItemID.tcon_pattern_blank);return id === ItemID.tcon_pattern_blank;}},
             slotMaterial: {type: "slot", x: 80, y: 136 - 36, size: 72},
             slotResult: {type: "slot", x: 440, y: 136 - 52, size: 104, visual: true, clicker: {onClick: () => this.onCraft()}},
             cursor: {type: "image", x: 0, y: 2000, z: 1, width: 64, height: 64, bitmap: "_selection"},
@@ -104,6 +104,7 @@ const PartBuilderWindow = new class extends CraftingWindow {
                 scale: 4,
                 clicker: {onClick: () => {
                     this.selectedPattern = i;
+                    World.playSoundAtEntity(Player.get(), "random.click", 0.5);
                 }}
             };
         }
@@ -219,6 +220,7 @@ const PartBuilderWindow = new class extends CraftingWindow {
             slotPattern.count--;
             slotMaterial.count -= cost;
             this.container.validateAll();
+            SoundManager.playSound("tcon.little_saw.ogg");
         }
 
     }

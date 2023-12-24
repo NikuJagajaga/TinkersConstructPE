@@ -21,6 +21,7 @@ class TconLumberaxe extends TconTool {
         this.repairParts = [1, 2];
 
         this.setToolParams();
+        this.addToCreative(4);
 
     }
 
@@ -49,7 +50,7 @@ class TconLumberaxe extends TconTool {
         }
 
         if(TconLumberaxe.LOGS.indexOf(block.id) !== -1){
-            this.chopTree(stack, coords, player);
+            this.treechop(coords, stack.uniqueKey(), player);
             return true;
         }
         
@@ -85,104 +86,116 @@ class TconLumberaxe extends TconTool {
         
     }
 
-    chopTree(toolStack: TconToolStack, coords: Vector, player: number): void {
-/*
-        if(Threading.getThread("tcon_choptree")?.isAlive()){
-            Game.message("processing...");
-            return;
+    treechop(coords: Vector, uniqueKey: string, player: number): void {
+
+        const updatableName = "tcon_treechop_" + player;
+
+        const updatables = Updatable.getAll();
+        const it = updatables.iterator();
+        let updatable: ChopTreeUpdatable;
+        while(it.hasNext()){
+            updatable = it.next();
+            if(updatable.name === updatableName){
+                Network.getClientForPlayer(player)?.sendMessage("Tree chopping in progress...");
+                return;
+            }
         }
 
-        Threading.initThread("tcon_choptree", () => {
+        Updatable.addUpdatable(new ChopTreeUpdatable(updatableName, coords, uniqueKey, player));
 
-            const array: Vector[] = [];
-            const visited: Vector[] = [];
-            
-            let item: ItemInstance;
-            let stack: TconToolStack;
-            let pos: Vector;
-            let pos2: Vector;
-            let block: Tile;
-            let region: WorldRegion;
-
-            array.push(coords);
-
-            while(array.length > 0){
-
-                item = Entity.getCarriedItem(player);
-                if(toolStack.id !== item.id || !item.extra) return;
-
-                stack = new TconToolStack(item);
-                if(stack.isBroken() || toolStack.uniqueKey() !== stack.uniqueKey()) return;
-
-                pos = array.shift();
-                if(visited.some(p => p.x === pos.x && p.y === pos.y && p.z === pos.z)) continue;
-                visited.push(pos);
-
-                region = WorldRegion.getForActor(player);
-
-                block = region.getBlock(pos);
-                if(!TconLumberaxe.LOGS.indexOf(block.id) !== -1 && (coords.x !== pos.x || coords.y !== pos.y || coords.z !== pos.z)){
-                    continue;
-                }
-
-                for(let i = 2; i <= 5; i++){
-                    pos2 = World.getRelativeCoords(pos.x, pos.y, pos.z, i);
-                    if(!visited.some(p => p.x === pos2.x && p.y === pos2.y && p.z === pos2.z)){
-                        array.push(pos2);
-                    }
-                }
-
-                for(let i = -1; i <= 1; i++){
-                for(let j = -1; j <= 1; j++){
-                    pos2 = {x: pos.x + i, y: pos.y + 1, z: pos.z + j};
-                    if(!visited.some(p => p.x === pos2.x && p.y === pos2.y && p.z === pos2.z)){
-                        array.push(pos2);
-                    }
-                }
-                }
-
-                region.destroyBlock(pos, true, player);
-                stack.forEachModifiers((mod, level) => {
-                    mod.onDestroy(item, {x: pos.x, y: pos.y, z: pos.z, side: EBlockSide.DOWN, relative: pos}, block, player, level);
-                });
-                stack.consumeDurability(1);
-                stack.addXp(1);
-                stack.applyToHand(player);
-
-                Thread.sleep(25);
-
-            }
-
-        });
-*/
     }
 
 }
 
 
-/*
-Callback.addCallback("LocalTick", () => {
+class ChopTreeUpdatable implements Updatable {
 
-    if(World.getThreadTime() % 20 === 0){
+    name: string;
+    player: number;
+    uniqueKey: string;
+    target: Vector[];
+    visited: Vector[];
+    remove: boolean;
+    update: () => void;
 
-        const player = Player.get();
-        const pointed = Player.getPointed();
-        const region = WorldRegion.getForActor(player);
+    constructor(updatableName: string, coords: Vector, uniqueKey: string, player: number){
 
-        region.destroyBlock(pointed.pos, true, player);
+        this.name = updatableName;
+        this.player = player;
+        this.uniqueKey = uniqueKey;
+        this.target = [];
+        this.visited = [];
+        this.remove = false;
+        this.update = () => {
+            this.remove = this.onTick();
+        };
+
+        this.addNearest(coords);
 
     }
 
-});
-*/
+    alreadyVisited(coords: Vector): boolean {
+        return this.visited.some(p => p.x === coords.x && p.y === coords.y && p.z === coords.z);
+    }
 
-Callback.addCallback("ItemUseLocal", (coords: Callback.ItemUseCoordinates, item: ItemInstance, block: Tile, player: number) => {
-    // const itemModel = ItemModel.getFor(item.id, item.data);
-    // Game.message("name: " + itemModel.getUiTextureName());
-    // Debug.bitmap(itemModel.getIconBitmap(), "icon");
-    const models = ItemModel.getAllModels();
-    Game.message("count: " + models.size());
-});
+    addTarget(coords: Vector): void {
+        if(!this.alreadyVisited(coords)){
+            this.target.push(coords);
+        }
+    }
+
+    addNearest(coords: Vector){
+        for(let i = 2; i <= 5; i++)
+            this.addTarget(World.getRelativeCoords(coords.x, coords.y, coords.z, i));
+        for(let i = -1; i <= 1; i++)
+            for(let j = -1; j <= 1; j++)
+                this.addTarget({x: coords.x + i, y: coords.y + 1, z: coords.z + j});
+    }
+
+    onTick(): boolean {
+
+        const carried = Entity.getCarriedItem(this.player);
+    
+        if(carried.id !== ItemID.tcontool_lumberaxe || !carried.extra) return true;
+
+        const stack = new TconToolStack(carried);
+
+        if(stack.isBroken() || stack.uniqueKey() !== this.uniqueKey) return true;
+
+        const region = WorldRegion.getForActor(this.player);
+        let coords: Vector;
+        let block: Tile;
+
+        while(this.target.length > 0){
+            coords = this.target.shift();
+            if(!this.alreadyVisited(coords)){
+                block = region.getBlock(coords);
+                if(TconLumberaxe.LOGS.indexOf(block.id) !== -1){
+                    break;
+                }
+                coords = null;
+            }
+        }
+
+        if(!coords) return true;
+
+        region.destroyBlock(coords, true, this.player);
+        stack.forEachModifiers((mod, level) => {
+            mod.onDestroy(carried, {x: coords.x, y: coords.y, z: coords.z, side: EBlockSide.DOWN, relative: coords}, block, this.player, level);
+        });
+        stack.consumeDurability(1);
+        stack.addXp(1);
+        stack.applyToHand(this.player);
+
+        this.visited.push(coords);
+        this.addNearest(coords);
+
+        return false;
+
+    }
+
+}
+
 
 ItemRegistry.registerItem(new TconLumberaxe());
 ToolForgeHandler.addRecipe(ItemID.tcontool_lumberaxe, ["rod2", "broadaxe", "largeplate", "binding2"]);

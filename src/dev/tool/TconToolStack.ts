@@ -15,9 +15,9 @@ class TconToolStack implements ItemInstance {
         this.id = item.id;
         this.count = item.count;
         this.data = item.data;
-        this.extra = item.extra || null;
+        this.extra = item.extra;
 
-        this.instance = ItemRegistry.getInstanceOf(this.id) as TconTool;
+        this.instance = ToolAPI.getToolData(this.id) as TconTool;
         this.materials = new String(this.extra.getString("materials")).split("_").map(mat => Material[mat]);
         this.modifiers = TinkersModifierHandler.decodeToObj(this.extra.getString("modifiers"));
         this.stats = this.getStats();

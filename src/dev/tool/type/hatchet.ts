@@ -20,6 +20,7 @@ class TconHatchet extends TconTool {
         this.damagePotential = 1.1;
 
         this.setToolParams();
+        this.addToCreative(3);
 
     }
 

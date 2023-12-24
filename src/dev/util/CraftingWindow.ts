@@ -8,15 +8,21 @@ abstract class CraftingWindow {
 
     constructor(window: UI.StandardWindow, fps: number = 20){
 
+        const windows = window.getAllWindows();
+        const it = windows.iterator();
+        while(it.hasNext()){
+            it.next().setAsGameOverlay(true);
+        }
+
         this.window = window;
         this.container = new UI.Container();
 
         this.window.getWindow("content").setEventListener({
-            onOpen: window => {
-                this.onOpen(window);
+            onOpen: win => {
+                this.onOpen(win);
             },
-            onClose: window => {
-                this.onClose(window);
+            onClose: win => {
+                this.onClose(win);
             }
         });
 

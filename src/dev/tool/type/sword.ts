@@ -11,6 +11,7 @@ class TconSword extends TconTool {
         this.isWeapon = true;
 
         this.setToolParams();
+        this.addToCreative(3);
 
     }
 

@@ -9,6 +9,7 @@ class TconShovel extends TconTool {
         this.damagePotential = 0.9;
 
         this.setToolParams();
+        this.addToCreative(3);
 
     }
 

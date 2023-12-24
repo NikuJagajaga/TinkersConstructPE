@@ -11,6 +11,7 @@ class TconMattock extends TconTool {
         this.repairParts = [1, 2];
 
         this.setToolParams();
+        this.addToCreative(3);
 
     }
 
@@ -20,7 +21,22 @@ class TconMattock extends TconTool {
         stats.attack += 3;
     }
 
+    index = 0;
     override onItemUse(coords: Callback.ItemUseCoordinates, item: ItemStack, block: Tile, player: number): void {
+        const sounds = [
+            "step.gravel",
+            "bucket.empty_water",
+            "bucket.empty_lava",
+            "bucket.fill_water",
+            "bucket.fill_lava",
+            "hit.wood",
+            "fall.wood"
+        ];
+        this.index = (this.index + 1) % sounds.length;
+        const region = WorldRegion.getForActor(player);
+        Game.message(sounds[this.index]);
+        region.playSound(coords.x, coords.y, coords.z, sounds[this.index]);
+        return;
         if(item.extra && (block.id === VanillaTileID.grass || block.id === VanillaTileID.dirt) && coords.side === EBlockSide.UP){
             const stack = new TconToolStack(item);
             if(!stack.isBroken()){
