@@ -309,14 +309,13 @@ var CraftingWindow = /** @class */ (function () {
     CraftingWindow.blocks = [];
     return CraftingWindow;
 }());
-Callback.addCallback("ItemUseLocal", function (coords, item, block, player) {
+Callback.addCallback("ItemUseLocal", function (coords, item, touchBlock, player) {
     if (Entity.getSneaking(player))
         return;
-    var block2;
-    for (var i = 0; i < CraftingWindow.blocks.length; i++) {
-        block2 = CraftingWindow.blocks[i].block;
-        if (block.id === block2.id && (block2.data === -1 || block.data === block2.data)) {
-            CraftingWindow.blocks[i].window.open();
+    for (var _i = 0, _a = CraftingWindow.blocks; _i < _a.length; _i++) {
+        var _b = _a[_i], block = _b.block, window = _b.window;
+        if (block.id === touchBlock.id && (block.data === -1 || block.data === touchBlock.data)) {
+            window.open();
             Game.prevent();
             return;
         }

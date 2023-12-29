@@ -1,3 +1,57 @@
+class CraftingWindow2 {
+
+    window: UI.StandardWindow;
+    private container: ItemContainer;
+
+    constructor(window: UI.StandardWindow){
+
+        this.window = window;
+        this.container = new ItemContainer();
+
+        const windows = this.window.getAllWindows();
+        const it = windows.iterator();
+        while(it.hasNext()){
+            it.next().setAsGameOverlay(true);
+        }
+
+        this.container.setParent(this);
+
+		if (!this.container.getClientContainerTypeName()) {
+			//this.setupContainer(container);
+		}
+
+		this.container.addServerCloseListener((container: ItemContainer, client: NetworkClient) => {
+			const player = client.getPlayerUid();
+			const {x, y, z} = Entity.getPosition(player);
+			container.dropAt(BlockSource.getDefaultForActor(player), x, y, z);
+		});
+
+		this.container.addServerOpenListener((container: ItemContainer, client: NetworkClient) => {
+
+		});
+		
+
+    }
+
+    openFor(player: number): void {
+        const client = Network.getClientForPlayer(player);
+		if(!client){
+			return;
+		}
+        this.container.openFor(client, "crop_analyser.ui");
+    }
+
+    private onUpdate(): void {
+
+    }
+
+}
+
+
+
+
+
+
 abstract class CraftingWindow {
 
     static blocks: {block: Tile, window: CraftingWindow}[] = [];
@@ -68,16 +122,13 @@ abstract class CraftingWindow {
 }
 
 
-Callback.addCallback("ItemUseLocal", (coords, item, block, player) => {
+Callback.addCallback("ItemUseLocal", (coords, item, touchBlock, player) => {
 
     if(Entity.getSneaking(player)) return;
 
-    let block2: Tile;
-
-    for(let i = 0; i < CraftingWindow.blocks.length; i++){
-        block2 = CraftingWindow.blocks[i].block;
-        if(block.id === block2.id && (block2.data === -1 || block.data === block2.data)){
-            CraftingWindow.blocks[i].window.open();
+    for(let {block, window} of CraftingWindow.blocks){
+        if(block.id === touchBlock.id && (block.data === -1 || block.data === touchBlock.data)){
+            window.open();
             Game.prevent();
             return;
         }

@@ -399,12 +399,12 @@ class SmelteryControler extends TconTileEntity implements ILiquidStorage {
             let height = 0;
             let max = 0;
             let y = 0;
-            for(let liq of data.liqArray){
-                height = liq.amount / data.capacity * sizeY;
+            for(let {liquid, amount} of data.liqArray){
+                height = amount / data.capacity * sizeY;
                 max = Math.max(sizeX, sizeZ, height);
                 parts.push({
                     type: "box",
-                    uv: {x: 0, y: MoltenLiquid.getY(liq.liquid) * max},
+                    uv: {x: 0, y: MoltenLiquid.getY(liquid) * max},
                     coords: {x: 0, y: y - height * 16 / 2, z: 0},
                     size: {x: sizeX * 16, y: height * 16, z: sizeZ * 16}
                 });
