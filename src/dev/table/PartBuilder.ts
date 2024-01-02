@@ -78,8 +78,7 @@ Recipes2.addShaped(BlockID.tcon_partbuilder5, "a:b", {a: ItemID.tcon_pattern_bla
 
 const PartBuilderWindow = new class extends CraftingWindow {
 
-    selectedPattern: number;
-    tutorialMessage: string;
+    selectedPattern = -1;
 
     constructor(){
 
@@ -104,6 +103,7 @@ const PartBuilderWindow = new class extends CraftingWindow {
                 scale: 4,
                 clicker: {onClick: () => {
                     this.selectedPattern = i;
+                    this.onUpdate();
                     World.playSoundAtEntity(Player.get(), "random.click", 0.5);
                 }}
             };
@@ -121,16 +121,31 @@ const PartBuilderWindow = new class extends CraftingWindow {
             elements: elements
         });
 
-        window.setCloseOnBackPressed(true);
-
-        super(window);
-        this.selectedPattern = -1;
-        this.tutorialMessage = addLineBreaks(18, "Here you can craft tool parts to fulfill your tinkering fantasies") + "\n\n" + addLineBreaks(18, "To craft a part simply put its pattern into the left slot. The two right slot hold the material you want to craft your part out of.");
+        super("tcon_partbuilder", window);
 
     }
 
-    override onUpdate(elements: java.util.HashMap<string, UI.Element>): void {
+    override isValidAddTransfer(slotName: string, id: number, amount: number, data: number, extra: ItemExtraData, player: number): boolean {
+        switch(slotName){
+            case "slotPattern":
+                if(id === ItemID.tcon_pattern_blank) return true;
+                break;
+            case "slotMaterial":
+                let item: Tile;
+                for(let key in Material){
+                    item = Material[key].getItem();
+                    if(id === item.id && (item.data === -1 || data === item.data)){
+                        return true;
+                    }
+                }
+                break;
+        }
+        return false;
+    }
 
+    override onUpdate(): void {
+
+        const elements = this.window.getElements();
         const patternData = PartRegistry.types[this.selectedPattern];
         const slotPattern = this.container.getSlot("slotPattern");
         const slotMaterial = this.container.getSlot("slotMaterial");
@@ -187,11 +202,12 @@ const PartBuilderWindow = new class extends CraftingWindow {
         elements.get("slotResult").setBinding("source", resultId === 0 ? {id: 0, count: 0, data: 0} : {id: resultId, count: 1, data: 0});
         this.container.setText("textCost", textCost);
         this.container.setText("textTitle", textTitle || "Part Builder");
-        this.container.setText("textStats", textStats || this.tutorialMessage);
+        this.container.setText("textStats", textStats || addLineBreaks(18, "Here you can craft tool parts to fulfill your tinkering fantasies") + "\n\n" + addLineBreaks(18, "To craft a part simply put its pattern into the left slot. The two right slot hold the material you want to craft your part out of."));
+        this.container.sendChanges();
 
     }
 
-    private onCraft(): void {
+    onCraft(): void {
 
         const patternData = PartRegistry.types[this.selectedPattern];
         const slotPattern = this.container.getSlot("slotPattern");
@@ -220,8 +236,11 @@ const PartBuilderWindow = new class extends CraftingWindow {
             slotPattern.count--;
             slotMaterial.count -= cost;
             this.container.validateAll();
+            this.container.sendChanges();
             SoundManager.playSound("tcon.little_saw.ogg");
         }
+
+        this.onUpdate();
 
     }
 

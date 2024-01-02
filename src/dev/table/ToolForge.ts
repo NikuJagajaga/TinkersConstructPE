@@ -1,3 +1,4 @@
+/*
 class ToolCrafterWindow extends CraftingWindow {
 
     consume: number[];
@@ -334,7 +335,7 @@ class ToolCrafterWindow extends CraftingWindow {
     }
 
 }
-
+*/
 
 createBlock("tcon_toolstation", [{name: "Tool Station"}], "wood");
 Recipes2.addShaped(BlockID.tcon_toolstation, "a:b", {a: ItemID.tcon_pattern_blank, b: "crafting_table"});
@@ -358,16 +359,16 @@ ToolForgeHandler.createForgeBlock("tcon_toolforge_alubrass", BlockID.blockAlubra
 
 (() => {
 
-    const winStation = new ToolCrafterWindow("Tool Station", false);
-    const winForge = new ToolCrafterWindow("Tool Forge", true);
+    // const winStation = new ToolCrafterWindow("Tool Station", false);
+    // const winForge = new ToolCrafterWindow("Tool Forge", true);
 
-    winStation.addTargetBlock(BlockID.tcon_toolstation);
-    winForge.addTargetBlock(BlockID.tcon_toolforge_iron);
-    winForge.addTargetBlock(BlockID.tcon_toolforge_gold);
-    winForge.addTargetBlock(BlockID.tcon_toolforge_cobalt);
-    winForge.addTargetBlock(BlockID.tcon_toolforge_ardite);
-    winForge.addTargetBlock(BlockID.tcon_toolforge_manyullyn);
-    winForge.addTargetBlock(BlockID.tcon_toolforge_pigiron);
-    winForge.addTargetBlock(BlockID.tcon_toolforge_alubrass);
+    // winStation.addTargetBlock(BlockID.tcon_toolstation);
+    // winForge.addTargetBlock(BlockID.tcon_toolforge_iron);
+    // winForge.addTargetBlock(BlockID.tcon_toolforge_gold);
+    // winForge.addTargetBlock(BlockID.tcon_toolforge_cobalt);
+    // winForge.addTargetBlock(BlockID.tcon_toolforge_ardite);
+    // winForge.addTargetBlock(BlockID.tcon_toolforge_manyullyn);
+    // winForge.addTargetBlock(BlockID.tcon_toolforge_pigiron);
+    // winForge.addTargetBlock(BlockID.tcon_toolforge_alubrass);
 
 })();

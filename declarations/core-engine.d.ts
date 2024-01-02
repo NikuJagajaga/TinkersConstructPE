@@ -6381,7 +6381,7 @@ declare class ItemContainer {
 
 	addServerCloseListener(listener: (container: ItemContainer, client: NetworkClient) => void): void;
 
-	static registerScreenFactory(name: string, screenFactory: (container: ItemContainer, name: string) => UI.Window): void;
+	static registerScreenFactory(name: string, screenFactory: (container: ItemContainer, name: string) => UI.IWindow): void;
 }
 
 declare class ItemContainerSlot {
