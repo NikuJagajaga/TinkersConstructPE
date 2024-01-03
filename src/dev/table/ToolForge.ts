@@ -1,4 +1,3 @@
-/*
 class ToolCrafterWindow extends CraftingWindow {
 
     consume: number[];
@@ -6,11 +5,11 @@ class ToolCrafterWindow extends CraftingWindow {
     isForge: boolean;
     winContent: UI.WindowContent;
 
-    constructor(name: string, isForge: boolean){
+    constructor(windowName: string, title: string, isForge: boolean){
 
         const window = new UI.StandardWindow({
             standard: {
-                header: {text: {text: name}, height: 60},
+                header: {text: {text: title}, height: 60},
                 inventory: {standard: true},
                 background: {standard: true}
             },
@@ -60,7 +59,7 @@ class ToolCrafterWindow extends CraftingWindow {
             }
         });
 
-        super(window);
+        super(windowName, window);
 
         this.page = 0;
         this.isForge = !!isForge;
@@ -71,17 +70,16 @@ class ToolCrafterWindow extends CraftingWindow {
 
     }
 
-    override onOpen(window: UI.Window): void {
-        super.onOpen(window);
+    override onOpen(): void {
         this.turnPage(0);
+        this.onUpdate();
     }
 
-    override onClose(window: UI.Window): void {
+    override onClose(): void {
         this.container.clearSlot("slotResult");
-        super.onClose(window);
     }
 
-    override onUpdate(elements: java.util.HashMap<string, UI.Element>): void {
+    override onUpdate(): void {
 
         let consume: number[] = [];
 
@@ -247,6 +245,7 @@ class ToolCrafterWindow extends CraftingWindow {
         }
 
         this.consume = consume;
+        this.container.sendChanges();
         
     }
 
@@ -276,6 +275,7 @@ class ToolCrafterWindow extends CraftingWindow {
                 this.isForge ?
                     World.playSoundAtEntity(Player.get(), "random.anvil_use", 0.5, 0.95 + 0.2 * Math.random()) :
                     SoundManager.playSound("tcon.little_saw.ogg");
+                this.onUpdate();
             }
             catch(e){
                 alert("craftError: " + e);
@@ -313,6 +313,8 @@ class ToolCrafterWindow extends CraftingWindow {
         this.container.setText("textStats", addLineBreaks(16, layout.intro));
         (this.winContent.elements.bgImage as UI.UIImageElement).bitmap = layout.background;
 
+        this.onUpdate();
+
     }
 
     private showInfo(item: ItemInstance): void {
@@ -335,7 +337,7 @@ class ToolCrafterWindow extends CraftingWindow {
     }
 
 }
-*/
+
 
 createBlock("tcon_toolstation", [{name: "Tool Station"}], "wood");
 Recipes2.addShaped(BlockID.tcon_toolstation, "a:b", {a: ItemID.tcon_pattern_blank, b: "crafting_table"});
@@ -359,16 +361,16 @@ ToolForgeHandler.createForgeBlock("tcon_toolforge_alubrass", BlockID.blockAlubra
 
 (() => {
 
-    // const winStation = new ToolCrafterWindow("Tool Station", false);
-    // const winForge = new ToolCrafterWindow("Tool Forge", true);
+    const winStation = new ToolCrafterWindow("tcon_toolstation", "Tool Station", false);
+    const winForge = new ToolCrafterWindow("tcon_toolforge", "Tool Forge", true);
 
-    // winStation.addTargetBlock(BlockID.tcon_toolstation);
-    // winForge.addTargetBlock(BlockID.tcon_toolforge_iron);
-    // winForge.addTargetBlock(BlockID.tcon_toolforge_gold);
-    // winForge.addTargetBlock(BlockID.tcon_toolforge_cobalt);
-    // winForge.addTargetBlock(BlockID.tcon_toolforge_ardite);
-    // winForge.addTargetBlock(BlockID.tcon_toolforge_manyullyn);
-    // winForge.addTargetBlock(BlockID.tcon_toolforge_pigiron);
-    // winForge.addTargetBlock(BlockID.tcon_toolforge_alubrass);
+    winStation.addTargetBlock(BlockID.tcon_toolstation);
+    winForge.addTargetBlock(BlockID.tcon_toolforge_iron);
+    winForge.addTargetBlock(BlockID.tcon_toolforge_gold);
+    winForge.addTargetBlock(BlockID.tcon_toolforge_cobalt);
+    winForge.addTargetBlock(BlockID.tcon_toolforge_ardite);
+    winForge.addTargetBlock(BlockID.tcon_toolforge_manyullyn);
+    winForge.addTargetBlock(BlockID.tcon_toolforge_pigiron);
+    winForge.addTargetBlock(BlockID.tcon_toolforge_alubrass);
 
 })();

@@ -73,11 +73,11 @@ abstract class CraftingWindow {
         this.onUpdate();
     }
 
-    abstract onUpdate(): void;
-
     onClose(): void {
 
     }
+
+    abstract onUpdate(): void;
 
     addTargetBlock(block: AnyID): void {
         CraftingWindow.blocks.push({block: getIDData(block, -1), window: this});
