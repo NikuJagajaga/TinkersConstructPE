@@ -265,24 +265,34 @@ var CraftingWindow = /** @class */ (function () {
         var _this = this;
         this.name = windowName;
         this.window = window;
-        this.container = new ItemContainer();
         var windows = this.window.getAllWindows();
         var it = windows.iterator();
         while (it.hasNext()) {
             it.next().setAsGameOverlay(true);
         }
         this.window.setCloseOnBackPressed(true);
+        ItemContainer.registerScreenFactory(this.name, function () { return _this.window; });
+    }
+    CraftingWindow.prototype.isValidAddTransfer = function (slotName, id, amount, data, extra, player) {
+        return true;
+    };
+    CraftingWindow.prototype.isValidGetTransfer = function (slotName, id, amount, data, extra, player) {
+        return true;
+    };
+    CraftingWindow.prototype.setupContainer = function () {
+        var _this = this;
         this.container.setParent(this);
         this.container.setClientContainerTypeName(this.name);
         this.container.addServerOpenListener(function (container, client) {
             _this.onOpen();
-            runOnMainThread(function () { return _this.onUpdate(); });
+            _this.onUpdate();
         });
         this.container.addServerCloseListener(function (container, client) {
             _this.onClose();
             var player = client.getPlayerUid();
             var _a = Entity.getPosition(player), x = _a.x, y = _a.y, z = _a.z;
-            container.dropAt(BlockSource.getDefaultForActor(player), x, y, z);
+            _this.container.dropAt(BlockSource.getDefaultForActor(player), x, y, z);
+            _this.container = null;
         });
         this.container.setGlobalAddTransferPolicy(function (container, slotName, id, amount, data, extra, player) {
             if (_this.isValidAddTransfer(slotName, id, amount, data, extra, player)) {
@@ -298,19 +308,14 @@ var CraftingWindow = /** @class */ (function () {
             }
             return 0;
         });
-        ItemContainer.registerScreenFactory(this.name, function () { return _this.window; });
-    }
-    CraftingWindow.prototype.isValidAddTransfer = function (slotName, id, amount, data, extra, player) {
-        return true;
-    };
-    CraftingWindow.prototype.isValidGetTransfer = function (slotName, id, amount, data, extra, player) {
-        return true;
     };
     CraftingWindow.prototype.openFor = function (player) {
         var client = Network.getClientForPlayer(player);
         if (!client) {
             return;
         }
+        this.container = new ItemContainer();
+        this.setupContainer();
         this.container.openFor(client, this.name);
     };
     CraftingWindow.prototype.onOpen = function () {
@@ -3412,6 +3417,7 @@ var PartBuilderWindow = new /** @class */ (function (_super) {
         return false;
     };
     class_1.prototype.onUpdate = function () {
+        var _a, _b, _c;
         var elements = this.window.getElements();
         var patternData = PartRegistry.types[this.selectedPattern];
         var slotPattern = this.container.getSlot("slotPattern");
@@ -3455,13 +3461,13 @@ var PartBuilderWindow = new /** @class */ (function (_super) {
             }
         }
         if (this.selectedPattern === -1) {
-            elements.get("cursor").setPosition(0, 2000);
+            (_a = elements.get("cursor")) === null || _a === void 0 ? void 0 : _a.setPosition(0, 2000);
         }
         else {
             var selectedElem = elements.get("btn" + this.selectedPattern);
-            elements.get("cursor").setPosition(selectedElem.x, selectedElem.y);
+            (_b = elements.get("cursor")) === null || _b === void 0 ? void 0 : _b.setPosition(selectedElem.x, selectedElem.y);
         }
-        elements.get("slotResult").setBinding("source", resultId === 0 ? { id: 0, count: 0, data: 0 } : { id: resultId, count: 1, data: 0 });
+        (_c = elements.get("slotResult")) === null || _c === void 0 ? void 0 : _c.setBinding("source", resultId === 0 ? { id: 0, count: 0, data: 0 } : { id: resultId, count: 1, data: 0 });
         this.container.setText("textCost", textCost);
         this.container.setText("textTitle", textTitle || "Part Builder");
         this.container.setText("textStats", textStats || addLineBreaks(18, "Here you can craft tool parts to fulfill your tinkering fantasies") + "\n\n" + addLineBreaks(18, "To craft a part simply put its pattern into the left slot. The two right slot hold the material you want to craft your part out of."));
@@ -3784,8 +3790,7 @@ var ToolCrafterWindow = /** @class */ (function (_super) {
                     partData ? materials.push(partData.material) : alert("part error: " + slot.id);
                     consume[i] = 1;
                 }
-                var extra = new ItemExtraData()
-                    .putInt("durability", 0)
+                var extra = new ItemExtraData().putInt("durability", 0)
                     .putInt("xp", 0)
                     .putInt("repair", 0)
                     .putString("materials", materials.join("_"))

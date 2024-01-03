@@ -216,12 +216,11 @@ class ToolCrafterWindow extends CraftingWindow {
                     partData ? materials.push(partData.material) : alert("part error: " + slot.id);
                     consume[i] = 1;
                 }
-                const extra = new ItemExtraData()
-                    .putInt("durability", 0)
-                    .putInt("xp", 0)
-                    .putInt("repair", 0)
-                    .putString("materials", materials.join("_"))
-                    .putString("modifiers", "");
+                const extra = new ItemExtraData().putInt("durability", 0)
+                                                 .putInt("xp", 0)
+                                                 .putInt("repair", 0)
+                                                 .putString("materials", materials.join("_"))
+                                                 .putString("modifiers", "");
                 this.container.setSlot("slotResult", result.result, 1, 0, extra);
             }
             else{

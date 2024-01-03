@@ -4,13 +4,12 @@ abstract class CraftingWindow {
 
     name: string;
     window: UI.StandardWindow;
-    container: ItemContainer;
+    container: Nullable<ItemContainer>;
 
     constructor(windowName: string, window: UI.StandardWindow){
 
         this.name = windowName;
         this.window = window;
-        this.container = new ItemContainer();
 
         const windows = this.window.getAllWindows();
         const it = windows.iterator();
@@ -18,6 +17,20 @@ abstract class CraftingWindow {
             it.next().setAsGameOverlay(true);
         }
         this.window.setCloseOnBackPressed(true);
+
+        ItemContainer.registerScreenFactory(this.name, () => this.window);
+
+    }
+
+    isValidAddTransfer(slotName: string, id: number, amount: number, data: number, extra: ItemExtraData, player: number): boolean {
+        return true;
+    }
+
+    isValidGetTransfer(slotName: string, id: number, amount: number, data: number, extra: ItemExtraData, player: number): boolean {
+        return true;
+    }
+
+    setupContainer(): void {
 
         this.container.setParent(this);
         this.container.setClientContainerTypeName(this.name);
@@ -31,7 +44,8 @@ abstract class CraftingWindow {
             this.onClose();
             const player = client.getPlayerUid();
             const {x, y, z} = Entity.getPosition(player);
-            container.dropAt(BlockSource.getDefaultForActor(player), x, y, z);
+            this.container.dropAt(BlockSource.getDefaultForActor(player), x, y, z);
+            this.container = null;
         });
 
         this.container.setGlobalAddTransferPolicy((container, slotName, id, amount, data, extra, player) => {
@@ -50,16 +64,6 @@ abstract class CraftingWindow {
             return 0;
         });
 
-        ItemContainer.registerScreenFactory(this.name, () => this.window);
-
-    }
-
-    isValidAddTransfer(slotName: string, id: number, amount: number, data: number, extra: ItemExtraData, player: number): boolean {
-        return true;
-    }
-
-    isValidGetTransfer(slotName: string, id: number, amount: number, data: number, extra: ItemExtraData, player: number): boolean {
-        return true;
     }
 
     openFor(player: number): void {
@@ -67,6 +71,8 @@ abstract class CraftingWindow {
         if(!client){
             return;
         }
+        this.container = new ItemContainer();
+        this.setupContainer();
         this.container.openFor(client, this.name);
     }
 
