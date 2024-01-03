@@ -276,6 +276,7 @@ var CraftingWindow = /** @class */ (function () {
         this.container.setClientContainerTypeName(this.name);
         this.container.addServerOpenListener(function (container, client) {
             _this.onOpen();
+            runOnMainThread(function () { return _this.onUpdate(); });
         });
         this.container.addServerCloseListener(function (container, client) {
             _this.onClose();
@@ -284,24 +285,26 @@ var CraftingWindow = /** @class */ (function () {
             container.dropAt(BlockSource.getDefaultForActor(player), x, y, z);
         });
         this.container.setGlobalAddTransferPolicy(function (container, slotName, id, amount, data, extra, player) {
-            var addAmount = _this.addTransferPolicy(slotName, id, amount, data, extra, player);
-            if (addAmount > 0)
+            if (_this.isValidAddTransfer(slotName, id, amount, data, extra, player)) {
                 runOnMainThread(function () { return _this.onUpdate(); });
-            return addAmount;
+                return amount;
+            }
+            return 0;
         });
         this.container.setGlobalGetTransferPolicy(function (container, slotName, id, amount, data, extra, player) {
-            var getAmount = _this.getTransferPolicy(slotName, id, amount, data, extra, player);
-            if (getAmount > 0)
+            if (_this.isValidGetTransfer(slotName, id, amount, data, extra, player)) {
                 runOnMainThread(function () { return _this.onUpdate(); });
-            return getAmount;
+                return amount;
+            }
+            return 0;
         });
-        ItemContainer.registerScreenFactory(this.name, function (container, name) { return _this.window; });
+        ItemContainer.registerScreenFactory(this.name, function () { return _this.window; });
     }
-    CraftingWindow.prototype.addTransferPolicy = function (slotName, id, amount, data, extra, player) {
-        return amount;
+    CraftingWindow.prototype.isValidAddTransfer = function (slotName, id, amount, data, extra, player) {
+        return true;
     };
-    CraftingWindow.prototype.getTransferPolicy = function (slotName, id, amount, data, extra, player) {
-        return amount;
+    CraftingWindow.prototype.isValidGetTransfer = function (slotName, id, amount, data, extra, player) {
+        return true;
     };
     CraftingWindow.prototype.openFor = function (player) {
         var client = Network.getClientForPlayer(player);
@@ -320,76 +323,6 @@ var CraftingWindow = /** @class */ (function () {
     CraftingWindow.blocks = [];
     return CraftingWindow;
 }());
-/*
-abstract class CraftingWindow {
-
-    static blocks: {block: Tile, window: CraftingWindow}[] = [];
-
-    container: UI.Container;
-    window: UI.StandardWindow;
-    sleepTime: number;
-
-    constructor(window: UI.StandardWindow, fps: number = 20){
-
-        const windows = window.getAllWindows();
-        const it = windows.iterator();
-        while(it.hasNext()){
-            it.next().setAsGameOverlay(true);
-        }
-
-        this.window = window;
-        this.container = new UI.Container();
-
-        this.window.getWindow("content").setEventListener({
-            onOpen: win => {
-                this.onOpen(win);
-            },
-            onClose: win => {
-                this.onClose(win);
-            }
-        });
-
-        this.sleepTime = 1000 / fps | 0;
-
-    }
-
-    addTargetBlock(block: AnyID): void {
-        CraftingWindow.blocks.push({block: getIDData(block, -1), window: this});
-    }
-
-    open(): void {
-        this.container.openAs(this.window);
-    }
-
-    abstract onUpdate(elements: java.util.HashMap<string, UI.Element>): void;
-
-    onOpen(window: UI.Window): void {
-
-        Threading.initThread("CraftingWindow", () => {
-
-            const elements = window.getElements();
-
-            while(window.isOpened()){
-                try{
-                    this.onUpdate(elements);
-                }
-                catch(e){
-                    alert("onUpdate: " + e);
-                }
-                Thread.sleep(this.sleepTime);
-            }
-
-        });
-
-    }
-
-    onClose(window: UI.Window): void {
-        const pos = Player.getPosition();
-        this.container.dropAt(pos.x, pos.y, pos.z);
-    }
-
-}
-*/
 Callback.addCallback("ItemUse", function (coords, item, touchBlock, isExternal, player) {
     if (Entity.getSneaking(player))
         return;
@@ -2173,7 +2106,8 @@ var SmelteryControler = /** @class */ (function (_super) {
                             }
                             if (count > 0) {
                                 slots[i].count -= count;
-                                this.container.validateSlot("slot" + i);
+                                slots[i].markDirty();
+                                slots[i].validate();
                                 this.liquidStorage.addLiquid(recipe.liquid, recipe.amount * count);
                                 this.data["heat" + i] = 0;
                             }
@@ -3459,7 +3393,23 @@ var PartBuilderWindow = new /** @class */ (function (_super) {
         _this.selectedPattern = -1;
         return _this;
     }
-    class_1.prototype.onOpen = function () {
+    class_1.prototype.isValidAddTransfer = function (slotName, id, amount, data, extra, player) {
+        switch (slotName) {
+            case "slotPattern":
+                if (id === ItemID.tcon_pattern_blank)
+                    return true;
+                break;
+            case "slotMaterial":
+                var item = void 0;
+                for (var key in Material) {
+                    item = Material[key].getItem();
+                    if (item && id === item.id && (item.data === -1 || data === item.data)) {
+                        return true;
+                    }
+                }
+                break;
+        }
+        return false;
     };
     class_1.prototype.onUpdate = function () {
         var elements = this.window.getElements();
@@ -3517,8 +3467,6 @@ var PartBuilderWindow = new /** @class */ (function (_super) {
         this.container.setText("textStats", textStats || addLineBreaks(18, "Here you can craft tool parts to fulfill your tinkering fantasies") + "\n\n" + addLineBreaks(18, "To craft a part simply put its pattern into the left slot. The two right slot hold the material you want to craft your part out of."));
         this.container.sendChanges();
     };
-    class_1.prototype.onClose = function () {
-    };
     class_1.prototype.onCraft = function () {
         var patternData = PartRegistry.types[this.selectedPattern];
         var slotPattern = this.container.getSlot("slotPattern");
@@ -3544,7 +3492,10 @@ var PartBuilderWindow = new /** @class */ (function (_super) {
             Player.addItemToInventory(resultId, 1, 0);
             slotPattern.count--;
             slotMaterial.count -= cost;
+            slotPattern.markDirty();
+            slotMaterial.markDirty();
             this.container.validateAll();
+            this.container.sendChanges();
             SoundManager.playSound("tcon.little_saw.ogg");
         }
         this.onUpdate();
@@ -3633,228 +3584,207 @@ ToolForgeHandler.addLayout({
         { x: 18, y: 20, bitmap: "tcon.slot.quartz" }
     ]
 });
-/*
-class ToolCrafterWindow extends CraftingWindow {
-
-    consume: number[];
-    page: number;
-    isForge: boolean;
-    winContent: UI.WindowContent;
-
-    constructor(name: string, isForge: boolean){
-
-        const window = new UI.StandardWindow({
+var ToolCrafterWindow = /** @class */ (function (_super) {
+    __extends(ToolCrafterWindow, _super);
+    function ToolCrafterWindow(windowName, title, isForge) {
+        var _this = this;
+        var window = new UI.StandardWindow({
             standard: {
-                header: {text: {text: name}, height: 60},
-                inventory: {standard: true},
-                background: {standard: true}
+                header: { text: { text: title }, height: 60 },
+                inventory: { standard: true },
+                background: { standard: true }
             },
             drawing: [
-                {type: "frame", x: 580, y: 0, width: 400, height: 240, bitmap: "tcon.frame", scale: 4},
-                {type: "frame", x: 580, y: 260, width: 400, height: 240, bitmap: "tcon.frame", scale: 4}
+                { type: "frame", x: 580, y: 0, width: 400, height: 240, bitmap: "tcon.frame", scale: 4 },
+                { type: "frame", x: 580, y: 260, width: 400, height: 240, bitmap: "tcon.frame", scale: 4 }
             ],
             elements: {
-                bgImage: {type: "image", x: 50, y: 95, bitmap: "tcon.icon.repair", scale: 18.75},
-                slot0: {type: "slot", x: 0, y: 0, z: 1, size: 80},
-                slot1: {type: "slot", x: 0, y: 0, z: 1, size: 80},
-                slot2: {type: "slot", x: 0, y: 0, z: 1, size: 80},
-                slot3: {type: "slot", x: 0, y: 0, z: 1, size: 80},
-                slot4: {type: "slot", x: 0, y: 0, z: 1, size: 80},
-                slot5: {type: "slot", x: 0, y: 0, z: 1, size: 80},
-                slotResult: {type: "slot", x: 420, y: 190, size: 120, visual: true, clicker: {
-                    onClick: () => this.onCraft()
-                }},
-                buttonPrev: {type: "button", x: 50, y: 452, bitmap: "_button_prev_48x24", bitmap2: "_button_prev_48x24p", scale: 2, clicker: {
-                    onClick: () => this.turnPage(-1)
-                }},
-                buttonNext: {type: "button", x: 254, y: 452, bitmap: "_button_next_48x24", bitmap2: "_button_next_48x24p", scale: 2, clicker: {
-                    onClick: () => this.turnPage(1)
-                }}
+                bgImage: { type: "image", x: 50, y: 95, bitmap: "tcon.icon.repair", scale: 18.75 },
+                slot0: { type: "slot", x: 0, y: 0, z: 1, size: 80 },
+                slot1: { type: "slot", x: 0, y: 0, z: 1, size: 80 },
+                slot2: { type: "slot", x: 0, y: 0, z: 1, size: 80 },
+                slot3: { type: "slot", x: 0, y: 0, z: 1, size: 80 },
+                slot4: { type: "slot", x: 0, y: 0, z: 1, size: 80 },
+                slot5: { type: "slot", x: 0, y: 0, z: 1, size: 80 },
+                slotResult: { type: "slot", x: 420, y: 190, size: 120, visual: true, clicker: {
+                        onClick: function () { return _this.onCraft(); }
+                    } },
+                buttonPrev: { type: "button", x: 50, y: 452, bitmap: "_button_prev_48x24", bitmap2: "_button_prev_48x24p", scale: 2, clicker: {
+                        onClick: function () { return _this.turnPage(-1); }
+                    } },
+                buttonNext: { type: "button", x: 254, y: 452, bitmap: "_button_next_48x24", bitmap2: "_button_next_48x24p", scale: 2, clicker: {
+                        onClick: function () { return _this.turnPage(1); }
+                    } }
             }
         });
-
         window.addWindow("stats", {
-            location: {x: 722, y: 90, width: 400 * 0.64 - 20, height: 240 * 0.64 - 20, scrollY: 250},
+            location: { x: 722, y: 90, width: 400 * 0.64 - 20, height: 240 * 0.64 - 20, scrollY: 250 },
             drawing: [
-                {type: "background", color: Color.TRANSPARENT}
+                { type: "background", color: Color.TRANSPARENT }
             ],
             elements: {
-                textTitle: {type: "text", x: 500, y: -30, font: {size: 80, color: Color.YELLOW, shadow: 0.5, alignment: UI.Font.ALIGN_CENTER, bold: true}},
-                textStats: {type: "text", x: 20, y: 120, font: {size: 72, color: Color.WHITE, shadow: 0.5}, multiline: true}
+                textTitle: { type: "text", x: 500, y: -30, font: { size: 80, color: Color.YELLOW, shadow: 0.5, alignment: UI.Font.ALIGN_CENTER, bold: true } },
+                textStats: { type: "text", x: 20, y: 120, font: { size: 72, color: Color.WHITE, shadow: 0.5 }, multiline: true }
             }
         });
-
         window.addWindow("modifiers", {
-            location: {x: 722, y: 257, width: 400 * 0.64 - 20, height: 240 * 0.64 - 20, scrollY: 250},
+            location: { x: 722, y: 257, width: 400 * 0.64 - 20, height: 240 * 0.64 - 20, scrollY: 250 },
             drawing: [
-                {type: "background", color: Color.TRANSPARENT},
-                {type: "text", x: 500, y: 50, font: {size: 80, color: Color.YELLOW, shadow: 0.5, alignment: UI.Font.ALIGN_CENTER, bold: true}, text: "Modifiers"}
+                { type: "background", color: Color.TRANSPARENT },
+                { type: "text", x: 500, y: 50, font: { size: 80, color: Color.YELLOW, shadow: 0.5, alignment: UI.Font.ALIGN_CENTER, bold: true }, text: "Modifiers" }
             ],
             elements: {
-                textModifiers: {type: "text", x: 20, y: 120, font: {size: 72, color: Color.WHITE, shadow: 0.5}, multiline: true}
+                textModifiers: { type: "text", x: 20, y: 120, font: { size: 72, color: Color.WHITE, shadow: 0.5 }, multiline: true }
             }
         });
-
-        super(window);
-
-        this.page = 0;
-        this.isForge = !!isForge;
-
+        _this = _super.call(this, windowName, window) || this;
+        _this.page = 0;
+        _this.isForge = !!isForge;
         //width 640
-        const windowMain = window.getWindow("content");
-        this.winContent = windowMain.getContent();
-
+        var windowMain = window.getWindow("content");
+        _this.winContent = windowMain.getContent();
+        return _this;
     }
-
-    override onOpen(window: UI.Window): void {
-        super.onOpen(window);
+    ToolCrafterWindow.prototype.onOpen = function () {
         this.turnPage(0);
-    }
-
-    override onClose(window: UI.Window): void {
+    };
+    ToolCrafterWindow.prototype.onClose = function () {
         this.container.clearSlot("slotResult");
-        super.onClose(window);
-    }
-
-    override onUpdate(elements: java.util.HashMap<string, UI.Element>): void {
-
-        let consume: number[] = [];
-
-        const slotTool = this.container.getSlot("slot0");
-
-        if(ToolForgeHandler.isTool(slotTool.id) && slotTool.extra){
-
-            const slots: ItemInstance[] = [];
-            const items: ItemInstance[] = [];
-            let slot: UI.Slot;
-            let find: ItemInstance;
-            for(let i = 1; i < 6; i++){
-                slot = this.container.getSlot("slot" + i);
-                slots[i] = {id: slot.id, count: slot.count, data: slot.data};
-                if(slot.id === 0){
+    };
+    ToolCrafterWindow.prototype.onUpdate = function () {
+        var _this = this;
+        var consume = [];
+        var slotTool = this.container.getSlot("slot0");
+        if (ToolForgeHandler.isTool(slotTool.id) && slotTool.extra) {
+            var slots = [];
+            var items_1 = [];
+            var slot_1;
+            var find = void 0;
+            for (var i = 1; i < 6; i++) {
+                slot_1 = this.container.getSlot("slot" + i);
+                slots[i] = { id: slot_1.id, count: slot_1.count, data: slot_1.data };
+                if (slot_1.id === 0) {
                     continue;
                 }
-                find = items.find(item => item.id === slot.id && item.data === slot.data);
-                find ? find.count += slot.count : items.push({id: slot.id, count: slot.count, data: slot.data});
+                find = items_1.find(function (item) { return item.id === slot_1.id && item.data === slot_1.data; });
+                find ? find.count += slot_1.count : items_1.push({ id: slot_1.id, count: slot_1.count, data: slot_1.data });
             }
-
-            const addMod: {[key: string]: number} = {};
-            let count = 0;
-            for(let key in Modifier){
-                count = Math.min(...Modifier[key].getRecipe().map(recipe => {
-                    const find2 = items.find(item => item.id === recipe.id && (recipe.data === -1 || item.data === recipe.data));
+            var addMod_1 = {};
+            var count = 0;
+            for (var key in Modifier) {
+                count = Math.min.apply(Math, Modifier[key].getRecipe().map(function (recipe) {
+                    var find2 = items_1.find(function (item) { return item.id === recipe.id && (recipe.data === -1 || item.data === recipe.data); });
                     return find2 ? find2.count : 0;
                 }));
-                if(count > 0){
-                    addMod[key] = count;
+                if (count > 0) {
+                    addMod_1[key] = count;
                 }
             }
-
-            const stack = new TconToolStack(slotTool);
-            const modifiers = TinkersModifierHandler.decodeToArray(stack.extra.getString("modifiers"));
-            let find3: {type: string, level: number};
-            for(let key in addMod){
-                find3 = modifiers.find(mod => mod.type === key);
-                if(find3 && find3.level < Modifier[key].max){
-                    addMod[key] = Math.min(addMod[key], Modifier[key].max - find3.level);
-                    find3.level += addMod[key];
-                    continue;
+            var stack_1 = new TconToolStack(slotTool);
+            var modifiers = TinkersModifierHandler.decodeToArray(stack_1.extra.getString("modifiers"));
+            var find3 = void 0;
+            var _loop_2 = function (key) {
+                find3 = modifiers.find(function (mod) { return mod.type === key; });
+                if (find3 && find3.level < Modifier[key].max) {
+                    addMod_1[key] = Math.min(addMod_1[key], Modifier[key].max - find3.level);
+                    find3.level += addMod_1[key];
+                    return "continue";
                 }
-                if(Modifier[key].canBeTogether(modifiers) && modifiers.length < Cfg.modifierSlots + ToolLeveling.getLevel(stack.xp, stack.instance.is3x3)){
-                    addMod[key] = Math.min(addMod[key], Modifier[key].max);
-                    modifiers.push({type: key, level: addMod[key]});
+                if (Modifier[key].canBeTogether(modifiers) && modifiers.length < Cfg.modifierSlots + ToolLeveling.getLevel(stack_1.xp, stack_1.instance.is3x3)) {
+                    addMod_1[key] = Math.min(addMod_1[key], Modifier[key].max);
+                    modifiers.push({ type: key, level: addMod_1[key] });
                 }
-                else{
-                    delete addMod[key];
+                else {
+                    delete addMod_1[key];
                 }
+            };
+            for (var key in addMod_1) {
+                _loop_2(key);
             }
-
-            const mat = stack.instance.repairParts.map(index => stack.materials[index].getItem());
-            const space = stack.durability;
-            let newDur = space;
-            let value = 0;
+            var mat_1 = stack_1.instance.repairParts.map(function (index) { return stack_1.materials[index].getItem(); });
+            var space = stack_1.durability;
+            var newDur = space;
+            var value = 0;
             find = null;
             count = 0;
-
-            for(let i = 0; i < mat.length; i++){
-                find = items.find(item => item.id === mat[i].id && (mat[i].data === -1 || item.data === mat[i].data));
-                if(find){
+            var _loop_3 = function (i) {
+                find = items_1.find(function (item) { return item.id === mat_1[i].id && (mat_1[i].data === -1 || item.data === mat_1[i].data); });
+                if (find) {
                     value = RepairHandler.calcRepairAmount(find);
-                    if(value > 0){
-                        value *= stack.instance.getRepairModifierForPart(i);
-                        while(count < find.count && RepairHandler.calcRepair(stack, value * count) < space){
+                    if (value > 0) {
+                        value *= stack_1.instance.getRepairModifierForPart(i);
+                        while (count < find.count && RepairHandler.calcRepair(stack_1, value * count) < space) {
                             count++;
                         }
-                        newDur = Math.max(0, space - (RepairHandler.calcRepair(stack, value * count) | 0));
-                        break;
+                        newDur = Math.max(0, space - (RepairHandler.calcRepair(stack_1, value * count) | 0));
+                        return "break";
                     }
                 }
+            };
+            for (var i = 0; i < mat_1.length; i++) {
+                var state_1 = _loop_3(i);
+                if (state_1 === "break")
+                    break;
             }
-
-            items.length = 0;
-            for(let key in addMod){
-                items.push(...Modifier[key].getRecipe().map(item => ({id: item.id, count: addMod[key], data: item.data})));
+            items_1.length = 0;
+            var _loop_4 = function (key) {
+                items_1.push.apply(items_1, Modifier[key].getRecipe().map(function (item) { return ({ id: item.id, count: addMod_1[key], data: item.data }); }));
+            };
+            for (var key in addMod_1) {
+                _loop_4(key);
             }
-            count > 0 && items.push({id: find.id, count: count, data: 0});
-
-            if(items.length > 0){
-
-                consume = slots.map(s => {
-                    const i = items.findIndex(item => item.id === s.id && (item.data === -1 || item.data === s.data));
-                    if(i === -1){
+            count > 0 && items_1.push({ id: find.id, count: count, data: 0 });
+            if (items_1.length > 0) {
+                consume = slots.map(function (s) {
+                    var i = items_1.findIndex(function (item) { return item.id === s.id && (item.data === -1 || item.data === s.data); });
+                    if (i === -1) {
                         return 0;
                     }
-                    const min = Math.min(s.count, items[i].count);
-                    items[i].count -= min;
-                    items[i].count <= 0 && items.splice(i, 1);
+                    var min = Math.min(s.count, items_1[i].count);
+                    items_1[i].count -= min;
+                    items_1[i].count <= 0 && items_1.splice(i, 1);
                     return min;
                 });
-                
                 consume[0] = 1;
-
-                const result = stack.clone();
+                var result = stack_1.clone();
                 result.durability = newDur;
-                result.extra.putInt("repair", stack.repairCount + 1);
+                result.extra.putInt("repair", stack_1.repairCount + 1);
                 result.extra.putString("modifiers", TinkersModifierHandler.encodeToString(modifiers));
                 this.container.setSlot("slotResult", result.id, result.count, result.data, result.extra);
-
             }
-            else{
+            else {
                 this.container.clearSlot("slotResult");
             }
-
         }
-        else{
-
-            const result = ToolForgeHandler.getRecipes(this.isForge).find(recipe => {
-                let slot: UI.Slot;
-                let partData: TinkersPartData;
-                for(let i = 0; i < 6; i++){
-                    slot = this.container.getSlot("slot" + i);
-                    if(recipe.pattern[i]){
+        else {
+            var result = ToolForgeHandler.getRecipes(this.isForge).find(function (recipe) {
+                var slot;
+                var partData;
+                for (var i = 0; i < 6; i++) {
+                    slot = _this.container.getSlot("slot" + i);
+                    if (recipe.pattern[i]) {
                         partData = PartRegistry.getPartData(slot.id);
-                        if(!partData || partData.type !== recipe.pattern[i]){
+                        if (!partData || partData.type !== recipe.pattern[i]) {
                             return false;
                         }
                     }
-                    else if(slot.id !== 0){
+                    else if (slot.id !== 0) {
                         return false;
                     }
                 }
                 return true;
             });
-
-            if(result){
-                const materials = [];
-                let slot: UI.Slot;
-                let partData: TinkersPartData;
-                for(let i = 0; i < result.pattern.length; i++){
+            if (result) {
+                var materials = [];
+                var slot = void 0;
+                var partData = void 0;
+                for (var i = 0; i < result.pattern.length; i++) {
                     slot = this.container.getSlot("slot" + i);
                     partData = PartRegistry.getPartData(slot.id);
                     partData ? materials.push(partData.material) : alert("part error: " + slot.id);
                     consume[i] = 1;
                 }
-                const extra = new ItemExtraData()
+                var extra = new ItemExtraData()
                     .putInt("durability", 0)
                     .putInt("xp", 0)
                     .putInt("repair", 0)
@@ -3862,115 +3792,97 @@ class ToolCrafterWindow extends CraftingWindow {
                     .putString("modifiers", "");
                 this.container.setSlot("slotResult", result.result, 1, 0, extra);
             }
-            else{
+            else {
                 this.container.clearSlot("slotResult");
             }
-
         }
-
-        const slotResult = this.container.getSlot("slotResult");
-        if(ToolForgeHandler.isTool(slotResult.id) && slotResult.extra){
+        var slotResult = this.container.getSlot("slotResult");
+        if (ToolForgeHandler.isTool(slotResult.id) && slotResult.extra) {
             this.showInfo(slotResult);
         }
-        else if(ToolForgeHandler.isTool(slotTool.id) && slotTool.extra){
+        else if (ToolForgeHandler.isTool(slotTool.id) && slotTool.extra) {
             this.showInfo(slotTool);
         }
-        else{
-            const layout = ToolForgeHandler.getLayoutList(this.isForge)[this.page];
+        else {
+            var layout = ToolForgeHandler.getLayoutList(this.isForge)[this.page];
             this.container.setText("textStats", addLineBreaks(16, layout.intro));
             this.container.setText("textModifiers", "       .\n     /( _________\n     |  >:=========`\n     )(  \n     \"\"");
         }
-
         this.consume = consume;
-        
-    }
-
-    private onCraft(): void {
-
-        if(this.container.getSlot("slotResult").id !== 0){
-            try{
-                let index = -1;
-                for(let i = 0; i < 36; i++){
-                    if(Player.getInventorySlot(i).id === 0){
+        this.container.sendChanges();
+    };
+    ToolCrafterWindow.prototype.onCraft = function () {
+        if (this.container.getSlot("slotResult").id !== 0) {
+            try {
+                var index = -1;
+                for (var i = 0; i < 36; i++) {
+                    if (Player.getInventorySlot(i).id === 0) {
                         index = i;
                         break;
                     }
                 }
-                if(index === -1){
+                if (index === -1) {
                     alert("no space");
                     return;
                 }
-                let slot: UI.Slot;
-                for(let i = 0; i < 6; i++){
+                var slot = void 0;
+                for (var i = 0; i < 6; i++) {
                     slot = this.container.getSlot("slot" + i);
                     slot.count -= this.consume[i] || 0;
-                    this.container.validateSlot("slot" + i);
+                    slot.markDirty();
+                    slot.validate();
                 }
                 slot = this.container.getSlot("slotResult");
                 Player.setInventorySlot(index, slot.id, 1, slot.data, slot.extra);
                 this.isForge ?
                     World.playSoundAtEntity(Player.get(), "random.anvil_use", 0.5, 0.95 + 0.2 * Math.random()) :
                     SoundManager.playSound("tcon.little_saw.ogg");
+                this.onUpdate();
             }
-            catch(e){
+            catch (e) {
                 alert("craftError: " + e);
             }
         }
-
-    }
-
-    private turnPage(page: -1 | 0 | 1): void {
-
-        const layouts = ToolForgeHandler.getLayoutList(this.isForge);
-
+    };
+    ToolCrafterWindow.prototype.turnPage = function (page) {
+        var layouts = ToolForgeHandler.getLayoutList(this.isForge);
         this.page += page;
         this.page = this.page < 0 ? layouts.length - 1 : this.page >= layouts.length ? 0 : this.page;
-
-        const centerX = 160;
-        const centerY = 210;
-        const scale = 5;
-        const layout = layouts[this.page];
-        let slot: UI.UISlotElement;
-
-        for(let i = 0; i < 6; i++){
-            slot = this.winContent.elements["slot" + i] as UI.UISlotElement;
-            if(layout.slots[i]){
+        var centerX = 160;
+        var centerY = 210;
+        var scale = 5;
+        var layout = layouts[this.page];
+        var slot;
+        for (var i = 0; i < 6; i++) {
+            slot = this.winContent.elements["slot" + i];
+            if (layout.slots[i]) {
                 slot.x = layout.slots[i].x * scale + centerX;
                 slot.y = layout.slots[i].y * scale + centerY;
                 slot.bitmap = layout.slots[i].bitmap;
             }
-            else{
+            else {
                 slot.y = 2000;
             }
         }
-
         this.container.setText("textTitle", layout.title);
         this.container.setText("textStats", addLineBreaks(16, layout.intro));
-        (this.winContent.elements.bgImage as UI.UIImageElement).bitmap = layout.background;
-
-    }
-
-    private showInfo(item: ItemInstance): void {
-
-        const stack = new TconToolStack(item);
-        const modifiers = TinkersModifierHandler.decodeToArray(item.extra.getString("modifiers"));
-
-        this.container.setText("textStats",
-            "Durability: " + (stack.stats.durability - item.extra.getInt("durability")) + "/" + stack.stats.durability + "\n" +
+        this.winContent.elements.bgImage.bitmap = layout.background;
+        this.onUpdate();
+    };
+    ToolCrafterWindow.prototype.showInfo = function (item) {
+        var stack = new TconToolStack(item);
+        var modifiers = TinkersModifierHandler.decodeToArray(item.extra.getString("modifiers"));
+        this.container.setText("textStats", "Durability: " + (stack.stats.durability - item.extra.getInt("durability")) + "/" + stack.stats.durability + "\n" +
             "Mining Level: " + TinkersMaterial.level[stack.stats.level] + "\n" +
             "Mining Speed: " + ((stack.stats.efficiency * 100 | 0) / 100) + "\n" +
             "Attack: " + ((stack.stats.damage * 100 | 0) / 100) + "\n" +
-            "Modifiers: " + (Cfg.modifierSlots + ToolLeveling.getLevel(stack.xp, stack.instance.is3x3) - modifiers.length)
-        );
-
-        this.container.setText("textModifiers", modifiers.map(mod => {
-            return `${Modifier[mod.type].getName()} (${mod.level}/${Modifier[mod.type].max})`;
+            "Modifiers: " + (Cfg.modifierSlots + ToolLeveling.getLevel(stack.xp, stack.instance.is3x3) - modifiers.length));
+        this.container.setText("textModifiers", modifiers.map(function (mod) {
+            return "".concat(Modifier[mod.type].getName(), " (").concat(mod.level, "/").concat(Modifier[mod.type].max, ")");
         }).join("\n"));
-
-    }
-
-}
-*/
+    };
+    return ToolCrafterWindow;
+}(CraftingWindow));
 createBlock("tcon_toolstation", [{ name: "Tool Station" }], "wood");
 Recipes2.addShaped(BlockID.tcon_toolstation, "a:b", { a: ItemID.tcon_pattern_blank, b: "crafting_table" });
 BlockModel.register(BlockID.tcon_toolstation, function (model, index) {
@@ -3989,16 +3901,16 @@ ToolForgeHandler.createForgeBlock("tcon_toolforge_manyullyn", BlockID.blockManyu
 ToolForgeHandler.createForgeBlock("tcon_toolforge_pigiron", BlockID.blockPigiron);
 ToolForgeHandler.createForgeBlock("tcon_toolforge_alubrass", BlockID.blockAlubrass);
 (function () {
-    // const winStation = new ToolCrafterWindow("Tool Station", false);
-    // const winForge = new ToolCrafterWindow("Tool Forge", true);
-    // winStation.addTargetBlock(BlockID.tcon_toolstation);
-    // winForge.addTargetBlock(BlockID.tcon_toolforge_iron);
-    // winForge.addTargetBlock(BlockID.tcon_toolforge_gold);
-    // winForge.addTargetBlock(BlockID.tcon_toolforge_cobalt);
-    // winForge.addTargetBlock(BlockID.tcon_toolforge_ardite);
-    // winForge.addTargetBlock(BlockID.tcon_toolforge_manyullyn);
-    // winForge.addTargetBlock(BlockID.tcon_toolforge_pigiron);
-    // winForge.addTargetBlock(BlockID.tcon_toolforge_alubrass);
+    var winStation = new ToolCrafterWindow("tcon_toolstation", "Tool Station", false);
+    var winForge = new ToolCrafterWindow("tcon_toolforge", "Tool Forge", true);
+    winStation.addTargetBlock(BlockID.tcon_toolstation);
+    winForge.addTargetBlock(BlockID.tcon_toolforge_iron);
+    winForge.addTargetBlock(BlockID.tcon_toolforge_gold);
+    winForge.addTargetBlock(BlockID.tcon_toolforge_cobalt);
+    winForge.addTargetBlock(BlockID.tcon_toolforge_ardite);
+    winForge.addTargetBlock(BlockID.tcon_toolforge_manyullyn);
+    winForge.addTargetBlock(BlockID.tcon_toolforge_pigiron);
+    winForge.addTargetBlock(BlockID.tcon_toolforge_alubrass);
 })();
 var Modifier = {
     haste: new ModHaste(),
@@ -4718,9 +4630,9 @@ var TconLumberaxe = /** @class */ (function (_super) {
             var center = World.getRelativeCoords(coords.x, coords.y, coords.z, coords.side ^ 1);
             var block2_1;
             var consume = 0;
-            var _loop_2 = function (x) {
-                var _loop_3 = function (y) {
-                    var _loop_4 = function (z) {
+            var _loop_5 = function (x) {
+                var _loop_6 = function (y) {
+                    var _loop_7 = function (z) {
                         if (x === coords.x && y === coords.y && z === coords.z)
                             return "continue";
                         block2_1 = region.getBlock(x, y, z);
@@ -4734,16 +4646,16 @@ var TconLumberaxe = /** @class */ (function (_super) {
                         }
                     };
                     for (var z = center.z - 1; z <= center.z + 1; z++) {
-                        _loop_4(z);
+                        _loop_7(z);
                     }
                 };
                 for (var y = center.y - 1; y <= center.y + 1; y++) {
-                    _loop_3(y);
+                    _loop_6(y);
                 }
             };
             var this_1 = this;
             for (var x = center.x - 1; x <= center.x + 1; x++) {
-                _loop_2(x);
+                _loop_5(x);
             }
             stack.consumeDurability(consume);
             stack.addXp(consume);

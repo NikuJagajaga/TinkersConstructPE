@@ -134,7 +134,7 @@ const PartBuilderWindow = new class extends CraftingWindow {
                 let item: Tile;
                 for(let key in Material){
                     item = Material[key].getItem();
-                    if(id === item.id && (item.data === -1 || data === item.data)){
+                    if(item && id === item.id && (item.data === -1 || data === item.data)){
                         return true;
                     }
                 }
@@ -192,14 +192,14 @@ const PartBuilderWindow = new class extends CraftingWindow {
         }
 
         if(this.selectedPattern === -1){
-            elements.get("cursor").setPosition(0, 2000);
+            elements.get("cursor")?.setPosition(0, 2000);
         }
         else{
             const selectedElem = elements.get("btn" + this.selectedPattern);
-            elements.get("cursor").setPosition(selectedElem.x, selectedElem.y);
+            elements.get("cursor")?.setPosition(selectedElem.x, selectedElem.y);
         }
 
-        elements.get("slotResult").setBinding("source", resultId === 0 ? {id: 0, count: 0, data: 0} : {id: resultId, count: 1, data: 0});
+        elements.get("slotResult")?.setBinding("source", resultId === 0 ? {id: 0, count: 0, data: 0} : {id: resultId, count: 1, data: 0});
         this.container.setText("textCost", textCost);
         this.container.setText("textTitle", textTitle || "Part Builder");
         this.container.setText("textStats", textStats || addLineBreaks(18, "Here you can craft tool parts to fulfill your tinkering fantasies") + "\n\n" + addLineBreaks(18, "To craft a part simply put its pattern into the left slot. The two right slot hold the material you want to craft your part out of."));
@@ -235,6 +235,8 @@ const PartBuilderWindow = new class extends CraftingWindow {
             Player.addItemToInventory(resultId, 1, 0);
             slotPattern.count--;
             slotMaterial.count -= cost;
+            slotPattern.markDirty();
+            slotMaterial.markDirty();
             this.container.validateAll();
             this.container.sendChanges();
             SoundManager.playSound("tcon.little_saw.ogg");

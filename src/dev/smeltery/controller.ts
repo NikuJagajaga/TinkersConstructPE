@@ -496,7 +496,7 @@ class SmelteryControler extends TconTileEntity implements ILiquidStorage {
 
         if(canSmelt){
             
-            const slots: UI.Slot[] = [
+            const slots: ItemContainerSlot[] = [
                 this.container.getSlot("slot0"),
                 this.container.getSlot("slot1"),
                 this.container.getSlot("slot2")
@@ -528,7 +528,8 @@ class SmelteryControler extends TconTileEntity implements ILiquidStorage {
                             }
                             if(count > 0){
                                 slots[i].count -= count;
-                                this.container.validateSlot("slot" + i);
+                                slots[i].markDirty();
+                                slots[i].validate();
                                 this.liquidStorage.addLiquid(recipe.liquid, recipe.amount * count);
                                 this.data["heat" + i] = 0;
                             }

@@ -72,7 +72,6 @@ class ToolCrafterWindow extends CraftingWindow {
 
     override onOpen(): void {
         this.turnPage(0);
-        this.onUpdate();
     }
 
     override onClose(): void {
@@ -89,7 +88,7 @@ class ToolCrafterWindow extends CraftingWindow {
 
             const slots: ItemInstance[] = [];
             const items: ItemInstance[] = [];
-            let slot: UI.Slot;
+            let slot: ItemContainerSlot;
             let find: ItemInstance;
             for(let i = 1; i < 6; i++){
                 slot = this.container.getSlot("slot" + i);
@@ -190,7 +189,7 @@ class ToolCrafterWindow extends CraftingWindow {
         else{
 
             const result = ToolForgeHandler.getRecipes(this.isForge).find(recipe => {
-                let slot: UI.Slot;
+                let slot: ItemContainerSlot;
                 let partData: TinkersPartData;
                 for(let i = 0; i < 6; i++){
                     slot = this.container.getSlot("slot" + i);
@@ -209,7 +208,7 @@ class ToolCrafterWindow extends CraftingWindow {
 
             if(result){
                 const materials = [];
-                let slot: UI.Slot;
+                let slot: ItemContainerSlot;
                 let partData: TinkersPartData;
                 for(let i = 0; i < result.pattern.length; i++){
                     slot = this.container.getSlot("slot" + i);
@@ -264,11 +263,12 @@ class ToolCrafterWindow extends CraftingWindow {
                     alert("no space");
                     return;
                 }
-                let slot: UI.Slot;
+                let slot: ItemContainerSlot;
                 for(let i = 0; i < 6; i++){
                     slot = this.container.getSlot("slot" + i);
                     slot.count -= this.consume[i] || 0;
-                    this.container.validateSlot("slot" + i);
+                    slot.markDirty();
+                    slot.validate();
                 }
                 slot = this.container.getSlot("slotResult");
                 Player.setInventorySlot(index, slot.id, 1, slot.data, slot.extra);

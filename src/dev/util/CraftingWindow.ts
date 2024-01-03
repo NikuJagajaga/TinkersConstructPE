@@ -24,6 +24,7 @@ abstract class CraftingWindow {
 
         this.container.addServerOpenListener((container: ItemContainer, client: NetworkClient) => {
             this.onOpen();
+            this.onUpdate();
         });
 
         this.container.addServerCloseListener((container: ItemContainer, client: NetworkClient) => {
@@ -49,7 +50,7 @@ abstract class CraftingWindow {
             return 0;
         });
 
-        ItemContainer.registerScreenFactory(this.name, (container, name) => this.window);
+        ItemContainer.registerScreenFactory(this.name, () => this.window);
 
     }
 
@@ -70,7 +71,7 @@ abstract class CraftingWindow {
     }
 
     onOpen(): void {
-        this.onUpdate();
+
     }
 
     onClose(): void {
