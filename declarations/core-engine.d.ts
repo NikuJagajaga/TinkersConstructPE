@@ -6244,6 +6244,10 @@ declare class ItemContainer {
 	 */
 	sendChanges(): void;
 
+    markAllSlotsDirty(): void;
+    sealAllSlots(): void;
+    runTransaction(func: () => void): void;
+
 	/**
 	 * Sends packet from client container copy to server.
 	 */
@@ -6381,7 +6385,10 @@ declare class ItemContainer {
 
 	addServerCloseListener(listener: (container: ItemContainer, client: NetworkClient) => void): void;
 
-	static registerScreenFactory(name: string, screenFactory: (container: ItemContainer, name: string) => UI.IWindow): void;
+	static registerScreenFactory(windowName: string, screenFactory: (container: ItemContainer, name: string) => UI.IWindow): void;
+    
+    static addClientEventListener(windowName: string, eventName: string, func: (container: ItemContainer, window: UI.IWindow, content: any, data: any) => void): void;
+
 }
 
 declare class ItemContainerSlot {

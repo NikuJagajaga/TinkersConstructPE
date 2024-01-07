@@ -142,6 +142,14 @@ var createItem = function (namedID, name, texture, params) {
     Item.createItem(namedID, name, texture, params);
     return id;
 };
+Network.addClientPacket("tcon.playSound", function (data) {
+    if (data.vanilla) {
+        World.playSoundAtEntity(Player.get(), data.name, data.volume, data.pitch);
+    }
+    else {
+        SoundManager.playSound(data.name, data.volume, data.pitch);
+    }
+});
 //戒
 // Array.prototype.includes = function(elem){
 //     return this.indexOf(elem) !== -1;
@@ -261,10 +269,13 @@ var TileWithLiquidModel = /** @class */ (function (_super) {
     return TileWithLiquidModel;
 }(TconTileEntity));
 var CraftingWindow = /** @class */ (function () {
+    //container: ItemContainer;
     function CraftingWindow(windowName, window) {
         var _this = this;
         this.name = windowName;
         this.window = window;
+        this.containerByEntity = {};
+        //this.container = new ItemContainer();
         var windows = this.window.getAllWindows();
         var it = windows.iterator();
         while (it.hasNext()) {
@@ -273,54 +284,69 @@ var CraftingWindow = /** @class */ (function () {
         this.window.setCloseOnBackPressed(true);
         ItemContainer.registerScreenFactory(this.name, function () { return _this.window; });
     }
-    CraftingWindow.prototype.isValidAddTransfer = function (slotName, id, amount, data, extra, player) {
-        return true;
-    };
-    CraftingWindow.prototype.isValidGetTransfer = function (slotName, id, amount, data, extra, player) {
-        return true;
-    };
-    CraftingWindow.prototype.setupContainer = function () {
+    CraftingWindow.prototype.setupContainer = function (container) {
         var _this = this;
-        this.container.setParent(this);
-        this.container.setClientContainerTypeName(this.name);
-        this.container.addServerOpenListener(function (container, client) {
-            _this.onOpen();
-            _this.onUpdate();
+        container.setParent(this);
+        container.setClientContainerTypeName(this.name);
+        container.addServerOpenListener(function (con, client) {
+            _this.onOpen(con);
+            _this.onUpdate(con);
         });
-        this.container.addServerCloseListener(function (container, client) {
-            _this.onClose();
-            var player = client.getPlayerUid();
-            var _a = Entity.getPosition(player), x = _a.x, y = _a.y, z = _a.z;
-            _this.container.dropAt(BlockSource.getDefaultForActor(player), x, y, z);
-            _this.container = null;
+        container.addServerCloseListener(function (con, client) {
+            _this.onClose(con);
+            var actor = new PlayerActor(client.getPlayerUid());
+            var slot;
+            for (var key in con.slots) {
+                slot = con.slots[key];
+                if (!slot.isEmpty()) {
+                    actor.addItemToInventory(slot.id, slot.count, slot.data, slot.extra, true);
+                    slot.clear();
+                }
+            }
+            con.sendChanges();
         });
-        this.container.setGlobalAddTransferPolicy(function (container, slotName, id, amount, data, extra, player) {
-            if (_this.isValidAddTransfer(slotName, id, amount, data, extra, player)) {
-                runOnMainThread(function () { return _this.onUpdate(); });
+        container.setGlobalAddTransferPolicy(function (con, slotName, id, amount, data, extra, player) {
+            if (_this.isValidAddTransfer(con, slotName, id, amount, data, extra, player)) {
+                runOnMainThread(function () { return _this.onUpdate(con); });
                 return amount;
             }
             return 0;
         });
-        this.container.setGlobalGetTransferPolicy(function (container, slotName, id, amount, data, extra, player) {
-            if (_this.isValidGetTransfer(slotName, id, amount, data, extra, player)) {
-                runOnMainThread(function () { return _this.onUpdate(); });
+        container.setGlobalGetTransferPolicy(function (con, slotName, id, amount, data, extra, player) {
+            if (_this.isValidGetTransfer(con, slotName, id, amount, data, extra, player)) {
+                runOnMainThread(function () { return _this.onUpdate(con); });
                 return amount;
             }
             return 0;
         });
+        this.addServerEvents(container);
+    };
+    CraftingWindow.prototype.getContainerFor = function (player) {
+        var container = this.containerByEntity[player];
+        if (!container) {
+            container = new ItemContainer();
+            this.setupContainer(container);
+            this.containerByEntity[player] = container;
+        }
+        return container;
+    };
+    CraftingWindow.prototype.isValidAddTransfer = function (container, slotName, id, amount, data, extra, player) {
+        return true;
+    };
+    CraftingWindow.prototype.isValidGetTransfer = function (container, slotName, id, amount, data, extra, player) {
+        return true;
     };
     CraftingWindow.prototype.openFor = function (player) {
         var client = Network.getClientForPlayer(player);
         if (!client) {
             return;
         }
-        this.container = new ItemContainer();
-        this.setupContainer();
-        this.container.openFor(client, this.name);
+        var container = this.getContainerFor(player);
+        container.openFor(client, "main");
     };
-    CraftingWindow.prototype.onOpen = function () {
+    CraftingWindow.prototype.onOpen = function (container) {
     };
-    CraftingWindow.prototype.onClose = function () {
+    CraftingWindow.prototype.onClose = function (container) {
     };
     CraftingWindow.prototype.addTargetBlock = function (block) {
         CraftingWindow.blocks.push({ block: getIDData(block, -1), window: this });
@@ -3247,36 +3273,6 @@ var ModWeb = /** @class */ (function (_super) {
     };
     return ModWeb;
 }(TinkersModifier));
-// namespace TableWindow {
-//     export const container = new UI.Container();
-//     export const window = new UI.TabbedWindow({
-//         isButtonHidden: true,
-//         location: {x: 0, y: 0, width: ScreenHeight * 1.5, height: ScreenHeight},
-//         elements: {}
-//     });
-//     const elemsPartBuilder: UI.ElementSet = {
-//     };
-//     for(let i = 0; i < 36; i++){
-//         elemsPartBuilder["inv" + i] = {
-//             type: "invSlot",
-//             x: 50 + (i % 9) * 100,
-//             y: i < 9 ? 620 : 200 + (i / 9 | 0) * 100,
-//             size: 100,
-//             index: i
-//         }
-//     }
-//     window.setTab(0, {}, {
-//         elements: elemsPartBuilder
-//     });
-//     window.setBlockingBackground(true);
-//     window.setCloseOnBackPressed(true);
-//     window.getWindowForTab(0).setInventoryNeeded(true);
-// }
-// Callback.addCallback("ItemUseLocal", (coords, item, block, player) => {
-//     if(block.id === BlockID.tcon_partbuilder){
-//         TableWindow.container.openAs(TableWindow.window);
-//     }
-// });
 Item.addCreativeGroup("tcon_partbuilder", "Part Builder", [
     createBlock("tcon_partbuilder0", [{ name: "Part Builder", texture: [0, 0, ["log_side", 0]] }], "wood"),
     createBlock("tcon_partbuilder1", [{ name: "Part Builder", texture: [0, 0, ["log_side", 1]] }], "wood"),
@@ -3356,9 +3352,9 @@ var PartBuilderWindow = new /** @class */ (function (_super) {
     function class_1() {
         var _this = this;
         var elements = {
-            slotPattern: { type: "slot", x: 8, y: 136 - 36, bitmap: "tcon.slot.pattern", size: 72, isValid: function (id) { alert(id + " - " + ItemID.tcon_pattern_blank); return id === ItemID.tcon_pattern_blank; } },
+            slotPattern: { type: "slot", x: 8, y: 136 - 36, bitmap: "tcon.slot.pattern", size: 72 },
             slotMaterial: { type: "slot", x: 80, y: 136 - 36, size: 72 },
-            slotResult: { type: "slot", x: 440, y: 136 - 52, size: 104, visual: true, clicker: { onClick: function () { return _this.onCraft(); } } },
+            slotResult: { type: "slot", x: 440, y: 136 - 52, size: 104, visual: true, clicker: { onClick: function (_, container) { return container.sendEvent("craft", {}); } } },
             cursor: { type: "image", x: 0, y: 2000, z: 1, width: 64, height: 64, bitmap: "_selection" },
             textCost: { type: "text", x: 288, y: 300, font: { size: 24, color: Color.GRAY, alignment: UI.Font.ALIGN_CENTER } },
             textTitle: { type: "text", x: 780, y: 4, font: { size: 32, color: Color.YELLOW, bold: true, alignment: UI.Font.ALIGN_CENTER }, text: "Title" },
@@ -3373,10 +3369,8 @@ var PartBuilderWindow = new /** @class */ (function (_super) {
                 y: (i / 4 | 0) * 64 + 8,
                 bitmap: "tcon.pattern." + PartRegistry.types[i].key,
                 scale: 4,
-                clicker: { onClick: function () {
-                        _this.selectedPattern = i;
-                        _this.onUpdate();
-                        World.playSoundAtEntity(Player.get(), "random.click", 0.5);
+                clicker: { onClick: function (_, container) {
+                        container.sendEvent("select", { index: i });
                     } }
             };
         };
@@ -3396,9 +3390,47 @@ var PartBuilderWindow = new /** @class */ (function (_super) {
         });
         _this = _super.call(this, "tcon_partbuilder", window) || this;
         _this.selectedPattern = -1;
+        ItemContainer.addClientEventListener(_this.name, "refresh", function (container, win, content, data) {
+            var _a, _b;
+            var elems = window.getElements();
+            elems.get("slotResult").setBinding("source", data.result === 0 ? { id: 0, count: 0, data: 0 } : { id: Network.serverToLocalId(data.result), count: 1, data: 0 });
+            if (data.index === -1) {
+                (_a = elems.get("cursor")) === null || _a === void 0 ? void 0 : _a.setPosition(0, 2000);
+            }
+            else {
+                var selectedElem = elems.get("btn" + data.index);
+                (_b = elems.get("cursor")) === null || _b === void 0 ? void 0 : _b.setPosition(selectedElem.x, selectedElem.y);
+            }
+        });
         return _this;
     }
-    class_1.prototype.isValidAddTransfer = function (slotName, id, amount, data, extra, player) {
+    class_1.prototype.addServerEvents = function (container) {
+        var _this = this;
+        container.addServerEventListener("select", function (con, client, data) {
+            _this.selectedPattern = data.index;
+            _this.onUpdate(con);
+            World.playSoundAtEntity(client.getPlayerUid(), "random.click", 0.5);
+        });
+        container.addServerEventListener("craft", function (con, client, data) { return _this.onCraft(con, client); });
+    };
+    class_1.prototype.autoSetPattern = function (container, player) {
+        var slotPattern = container.getSlot("slotPattern");
+        if (slotPattern.isEmpty()) {
+            var actor = new PlayerActor(player);
+            var inv = void 0;
+            for (var i = 0; i < 36; i++) {
+                inv = actor.getInventorySlot(i);
+                if (inv.id === ItemID.tcon_pattern_blank) {
+                    slotPattern.set(inv.id, inv.count, inv.data, inv.extra);
+                    slotPattern.markDirty();
+                    container.sendChanges();
+                    actor.setInventorySlot(i, 0, 0, 0, null);
+                    break;
+                }
+            }
+        }
+    };
+    class_1.prototype.isValidAddTransfer = function (container, slotName, id, amount, data, extra, player) {
         switch (slotName) {
             case "slotPattern":
                 if (id === ItemID.tcon_pattern_blank)
@@ -3409,6 +3441,7 @@ var PartBuilderWindow = new /** @class */ (function (_super) {
                 for (var key in Material) {
                     item = Material[key].getItem();
                     if (item && id === item.id && (item.data === -1 || data === item.data)) {
+                        this.autoSetPattern(container, player);
                         return true;
                     }
                 }
@@ -3416,12 +3449,15 @@ var PartBuilderWindow = new /** @class */ (function (_super) {
         }
         return false;
     };
-    class_1.prototype.onUpdate = function () {
-        var _a, _b, _c;
-        var elements = this.window.getElements();
+    class_1.prototype.isValidGetTransfer = function (container, slotName, id, amount, data, extra, player) {
+        if (slotName === "slotResult")
+            return false;
+        return true;
+    };
+    class_1.prototype.onUpdate = function (container) {
         var patternData = PartRegistry.types[this.selectedPattern];
-        var slotPattern = this.container.getSlot("slotPattern");
-        var slotMaterial = this.container.getSlot("slotMaterial");
+        var slotPattern = container.getSlot("slotPattern");
+        var slotMaterial = container.getSlot("slotMaterial");
         var item;
         var statsHead;
         var statsHandle;
@@ -3460,23 +3496,16 @@ var PartBuilderWindow = new /** @class */ (function (_super) {
                 }
             }
         }
-        if (this.selectedPattern === -1) {
-            (_a = elements.get("cursor")) === null || _a === void 0 ? void 0 : _a.setPosition(0, 2000);
-        }
-        else {
-            var selectedElem = elements.get("btn" + this.selectedPattern);
-            (_b = elements.get("cursor")) === null || _b === void 0 ? void 0 : _b.setPosition(selectedElem.x, selectedElem.y);
-        }
-        (_c = elements.get("slotResult")) === null || _c === void 0 ? void 0 : _c.setBinding("source", resultId === 0 ? { id: 0, count: 0, data: 0 } : { id: resultId, count: 1, data: 0 });
-        this.container.setText("textCost", textCost);
-        this.container.setText("textTitle", textTitle || "Part Builder");
-        this.container.setText("textStats", textStats || addLineBreaks(18, "Here you can craft tool parts to fulfill your tinkering fantasies") + "\n\n" + addLineBreaks(18, "To craft a part simply put its pattern into the left slot. The two right slot hold the material you want to craft your part out of."));
-        this.container.sendChanges();
+        container.setText("textCost", textCost);
+        container.setText("textTitle", textTitle || "Part Builder");
+        container.setText("textStats", textStats || addLineBreaks(18, "Here you can craft tool parts to fulfill your tinkering fantasies") + "\n\n" + addLineBreaks(18, "To craft a part simply put its pattern into the left slot. The two right slot hold the material you want to craft your part out of."));
+        container.sendChanges();
+        container.sendEvent("refresh", { result: resultId, index: this.selectedPattern });
     };
-    class_1.prototype.onCraft = function () {
+    class_1.prototype.onCraft = function (container, client) {
         var patternData = PartRegistry.types[this.selectedPattern];
-        var slotPattern = this.container.getSlot("slotPattern");
-        var slotMaterial = this.container.getSlot("slotMaterial");
+        var slotPattern = container.getSlot("slotPattern");
+        var slotMaterial = container.getSlot("slotMaterial");
         var item;
         var cost = 0;
         var resultId = 0;
@@ -3495,16 +3524,16 @@ var PartBuilderWindow = new /** @class */ (function (_super) {
             }
         }
         if (resultId !== 0) {
-            Player.addItemToInventory(resultId, 1, 0);
+            var actor = new PlayerActor(client.getPlayerUid());
+            actor.addItemToInventory(resultId, 1, 0, null, true);
             slotPattern.count--;
             slotMaterial.count -= cost;
-            slotPattern.markDirty();
-            slotMaterial.markDirty();
-            this.container.validateAll();
-            this.container.sendChanges();
-            SoundManager.playSound("tcon.little_saw.ogg");
+            container.markAllSlotsDirty();
+            container.validateAll();
+            container.sendChanges();
+            client.send("tcon.playSound", { name: "tcon.little_saw.ogg" });
         }
-        this.onUpdate();
+        this.onUpdate(container);
     };
     return class_1;
 }(CraftingWindow));
@@ -3592,6 +3621,7 @@ ToolForgeHandler.addLayout({
 });
 var ToolCrafterWindow = /** @class */ (function (_super) {
     __extends(ToolCrafterWindow, _super);
+    //winContent: UI.WindowContent;
     function ToolCrafterWindow(windowName, title, isForge) {
         var _this = this;
         var window = new UI.StandardWindow({
@@ -3613,13 +3643,13 @@ var ToolCrafterWindow = /** @class */ (function (_super) {
                 slot4: { type: "slot", x: 0, y: 0, z: 1, size: 80 },
                 slot5: { type: "slot", x: 0, y: 0, z: 1, size: 80 },
                 slotResult: { type: "slot", x: 420, y: 190, size: 120, visual: true, clicker: {
-                        onClick: function () { return _this.onCraft(); }
+                        onClick: function (_, container) { return container.sendEvent("craft", {}); }
                     } },
                 buttonPrev: { type: "button", x: 50, y: 452, bitmap: "_button_prev_48x24", bitmap2: "_button_prev_48x24p", scale: 2, clicker: {
-                        onClick: function () { return _this.turnPage(-1); }
+                        onClick: function (_, container) { return container.sendEvent("page", { page: -1 }); }
                     } },
                 buttonNext: { type: "button", x: 254, y: 452, bitmap: "_button_next_48x24", bitmap2: "_button_next_48x24p", scale: 2, clicker: {
-                        onClick: function () { return _this.turnPage(1); }
+                        onClick: function (_, container) { return container.sendEvent("page", { page: 1 }); }
                     } }
             }
         });
@@ -3647,27 +3677,53 @@ var ToolCrafterWindow = /** @class */ (function (_super) {
         _this.page = 0;
         _this.isForge = !!isForge;
         //width 640
-        var windowMain = window.getWindow("content");
-        _this.winContent = windowMain.getContent();
+        //const windowMain = window.getWindow("content");
+        //this.winContent = windowMain.getContent();
+        ItemContainer.addClientEventListener(_this.name, "changeLayout", function (container, win, content, data) {
+            //const windowMain = window.getWindow("content");
+            //const winContent = windowMain.getContent();
+            var layouts = ToolForgeHandler.getLayoutList(data.isForge);
+            var layout = layouts[data.page];
+            var centerX = 160;
+            var centerY = 210;
+            var scale = 5;
+            var slot;
+            for (var i = 0; i < 6; i++) {
+                slot = content.elements["slot" + i];
+                if (layout.slots[i]) {
+                    slot.x = layout.slots[i].x * scale + centerX;
+                    slot.y = layout.slots[i].y * scale + centerY;
+                    slot.bitmap = layout.slots[i].bitmap;
+                }
+                else {
+                    slot.y = 2000;
+                }
+            }
+            content.elements.bgImage.bitmap = layout.background;
+        });
         return _this;
     }
-    ToolCrafterWindow.prototype.onOpen = function () {
-        this.turnPage(0);
-    };
-    ToolCrafterWindow.prototype.onClose = function () {
-        this.container.clearSlot("slotResult");
-    };
-    ToolCrafterWindow.prototype.onUpdate = function () {
+    ToolCrafterWindow.prototype.addServerEvents = function (container) {
         var _this = this;
+        container.addServerEventListener("page", function (con, client, data) { return _this.turnPage(con, data.page); });
+        container.addServerEventListener("craft", function (con, client, data) { return _this.onCraft(con, client); });
+    };
+    ToolCrafterWindow.prototype.onOpen = function (container) {
+        this.turnPage(container, 0);
+    };
+    ToolCrafterWindow.prototype.onClose = function (container) {
+        container.clearSlot("slotResult");
+    };
+    ToolCrafterWindow.prototype.onUpdate = function (container) {
         var consume = [];
-        var slotTool = this.container.getSlot("slot0");
+        var slotTool = container.getSlot("slot0");
         if (ToolForgeHandler.isTool(slotTool.id) && slotTool.extra) {
             var slots = [];
             var items_1 = [];
             var slot_1;
             var find = void 0;
             for (var i = 1; i < 6; i++) {
-                slot_1 = this.container.getSlot("slot" + i);
+                slot_1 = container.getSlot("slot" + i);
                 slots[i] = { id: slot_1.id, count: slot_1.count, data: slot_1.data };
                 if (slot_1.id === 0) {
                     continue;
@@ -3756,10 +3812,10 @@ var ToolCrafterWindow = /** @class */ (function (_super) {
                 result.durability = newDur;
                 result.extra.putInt("repair", stack_1.repairCount + 1);
                 result.extra.putString("modifiers", TinkersModifierHandler.encodeToString(modifiers));
-                this.container.setSlot("slotResult", result.id, result.count, result.data, result.extra);
+                container.setSlot("slotResult", result.id, result.count, result.data, result.extra);
             }
             else {
-                this.container.clearSlot("slotResult");
+                container.clearSlot("slotResult");
             }
         }
         else {
@@ -3767,7 +3823,7 @@ var ToolCrafterWindow = /** @class */ (function (_super) {
                 var slot;
                 var partData;
                 for (var i = 0; i < 6; i++) {
-                    slot = _this.container.getSlot("slot" + i);
+                    slot = container.getSlot("slot" + i);
                     if (recipe.pattern[i]) {
                         partData = PartRegistry.getPartData(slot.id);
                         if (!partData || partData.type !== recipe.pattern[i]) {
@@ -3785,7 +3841,7 @@ var ToolCrafterWindow = /** @class */ (function (_super) {
                 var slot = void 0;
                 var partData = void 0;
                 for (var i = 0; i < result.pattern.length; i++) {
-                    slot = this.container.getSlot("slot" + i);
+                    slot = container.getSlot("slot" + i);
                     partData = PartRegistry.getPartData(slot.id);
                     partData ? materials.push(partData.material) : alert("part error: " + slot.id);
                     consume[i] = 1;
@@ -3795,94 +3851,64 @@ var ToolCrafterWindow = /** @class */ (function (_super) {
                     .putInt("repair", 0)
                     .putString("materials", materials.join("_"))
                     .putString("modifiers", "");
-                this.container.setSlot("slotResult", result.result, 1, 0, extra);
+                container.setSlot("slotResult", result.result, 1, 0, extra);
             }
             else {
-                this.container.clearSlot("slotResult");
+                container.clearSlot("slotResult");
             }
         }
-        var slotResult = this.container.getSlot("slotResult");
+        var slotResult = container.getSlot("slotResult");
         if (ToolForgeHandler.isTool(slotResult.id) && slotResult.extra) {
-            this.showInfo(slotResult);
+            this.showInfo(container, slotResult);
         }
         else if (ToolForgeHandler.isTool(slotTool.id) && slotTool.extra) {
-            this.showInfo(slotTool);
+            this.showInfo(container, slotTool);
         }
         else {
             var layout = ToolForgeHandler.getLayoutList(this.isForge)[this.page];
-            this.container.setText("textStats", addLineBreaks(16, layout.intro));
-            this.container.setText("textModifiers", "       .\n     /( _________\n     |  >:=========`\n     )(  \n     \"\"");
+            container.setText("textStats", addLineBreaks(16, layout.intro));
+            container.setText("textModifiers", "       .\n     /( _________\n     |  >:=========`\n     )(  \n     \"\"");
         }
         this.consume = consume;
-        this.container.sendChanges();
+        container.sendChanges();
     };
-    ToolCrafterWindow.prototype.onCraft = function () {
-        if (this.container.getSlot("slotResult").id !== 0) {
-            try {
-                var index = -1;
-                for (var i = 0; i < 36; i++) {
-                    if (Player.getInventorySlot(i).id === 0) {
-                        index = i;
-                        break;
-                    }
-                }
-                if (index === -1) {
-                    alert("no space");
-                    return;
-                }
-                var slot = void 0;
-                for (var i = 0; i < 6; i++) {
-                    slot = this.container.getSlot("slot" + i);
-                    slot.count -= this.consume[i] || 0;
-                    slot.markDirty();
-                    slot.validate();
-                }
-                slot = this.container.getSlot("slotResult");
-                Player.setInventorySlot(index, slot.id, 1, slot.data, slot.extra);
-                this.isForge ?
-                    World.playSoundAtEntity(Player.get(), "random.anvil_use", 0.5, 0.95 + 0.2 * Math.random()) :
-                    SoundManager.playSound("tcon.little_saw.ogg");
-                this.onUpdate();
+    ToolCrafterWindow.prototype.onCraft = function (container, client) {
+        var slotResult = container.getSlot("slotResult");
+        if (slotResult.id !== 0) {
+            var actor = new PlayerActor(client.getPlayerUid());
+            var slot = void 0;
+            for (var i = 0; i < 6; i++) {
+                slot = container.getSlot("slot" + i);
+                slot.count -= this.consume[i] || 0;
+                slot.markDirty();
+                slot.validate();
             }
-            catch (e) {
-                alert("craftError: " + e);
-            }
+            actor.addItemToInventory(slotResult.id, slotResult.count, slotResult.data, slotResult.extra, true);
+            this.isForge ?
+                World.playSoundAtEntity(Player.get(), "random.anvil_use", 0.5, 0.95 + 0.2 * Math.random()) :
+                SoundManager.playSound("tcon.little_saw.ogg");
+            this.onUpdate(container);
         }
     };
-    ToolCrafterWindow.prototype.turnPage = function (page) {
+    ToolCrafterWindow.prototype.turnPage = function (container, page) {
         var layouts = ToolForgeHandler.getLayoutList(this.isForge);
         this.page += page;
         this.page = this.page < 0 ? layouts.length - 1 : this.page >= layouts.length ? 0 : this.page;
-        var centerX = 160;
-        var centerY = 210;
-        var scale = 5;
         var layout = layouts[this.page];
-        var slot;
-        for (var i = 0; i < 6; i++) {
-            slot = this.winContent.elements["slot" + i];
-            if (layout.slots[i]) {
-                slot.x = layout.slots[i].x * scale + centerX;
-                slot.y = layout.slots[i].y * scale + centerY;
-                slot.bitmap = layout.slots[i].bitmap;
-            }
-            else {
-                slot.y = 2000;
-            }
-        }
-        this.container.setText("textTitle", layout.title);
-        this.container.setText("textStats", addLineBreaks(16, layout.intro));
-        this.winContent.elements.bgImage.bitmap = layout.background;
-        this.onUpdate();
+        container.setText("textTitle", layout.title);
+        container.setText("textStats", addLineBreaks(16, layout.intro));
+        container.sendEvent("changeLayout", { isForge: this.isForge, page: this.page });
+        this.onUpdate(container);
     };
-    ToolCrafterWindow.prototype.showInfo = function (item) {
+    ToolCrafterWindow.prototype.showInfo = function (container, item) {
         var stack = new TconToolStack(item);
         var modifiers = TinkersModifierHandler.decodeToArray(item.extra.getString("modifiers"));
-        this.container.setText("textStats", "Durability: " + (stack.stats.durability - item.extra.getInt("durability")) + "/" + stack.stats.durability + "\n" +
+        container.setText("textStats", "Durability: " + (stack.stats.durability - item.extra.getInt("durability")) + "/" + stack.stats.durability + "\n" +
             "Mining Level: " + TinkersMaterial.level[stack.stats.level] + "\n" +
             "Mining Speed: " + ((stack.stats.efficiency * 100 | 0) / 100) + "\n" +
             "Attack: " + ((stack.stats.damage * 100 | 0) / 100) + "\n" +
             "Modifiers: " + (Cfg.modifierSlots + ToolLeveling.getLevel(stack.xp, stack.instance.is3x3) - modifiers.length));
-        this.container.setText("textModifiers", modifiers.map(function (mod) {
+        container.setText("textModifiers", modifiers.map(function (mod) {
             return "".concat(Modifier[mod.type].getName(), " (").concat(mod.level, "/").concat(Modifier[mod.type].max, ")");
         }).join("\n"));
     };

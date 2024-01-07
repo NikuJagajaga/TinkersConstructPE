@@ -114,6 +114,16 @@ const createItem = (namedID: string, name: string, texture: Item.TextureData = {
 };
 
 
+Network.addClientPacket("tcon.playSound", (data: {name: string, volume?: number, pitch?: number, vanilla?: boolean}) => {
+    if(data.vanilla){
+        World.playSoundAtEntity(Player.get(), data.name, data.volume, data.pitch);
+    }
+    else{
+        SoundManager.playSound(data.name, data.volume, data.pitch);
+    }
+});
+
+
 //戒
 // Array.prototype.includes = function(elem){
 //     return this.indexOf(elem) !== -1;

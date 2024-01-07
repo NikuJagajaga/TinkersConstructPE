@@ -63,7 +63,6 @@
         "tool/modifier/shulking.ts",
         "tool/modifier/web.ts",
 
-        "table/TableWindow.ts",
         "table/PartBuilder.ts",
         "table/ToolForgeHandler.ts",
         "table/ToolForge.ts",

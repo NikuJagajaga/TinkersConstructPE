@@ -4,12 +4,15 @@ abstract class CraftingWindow {
 
     name: string;
     window: UI.StandardWindow;
-    container: Nullable<ItemContainer>;
+    containerByEntity: {[ent: number]: ItemContainer};
+    //container: ItemContainer;
 
     constructor(windowName: string, window: UI.StandardWindow){
 
         this.name = windowName;
         this.window = window;
+        this.containerByEntity = {};
+        //this.container = new ItemContainer();
 
         const windows = this.window.getAllWindows();
         const it = windows.iterator();
@@ -22,48 +25,68 @@ abstract class CraftingWindow {
 
     }
 
-    isValidAddTransfer(slotName: string, id: number, amount: number, data: number, extra: ItemExtraData, player: number): boolean {
-        return true;
-    }
+    setupContainer(container: ItemContainer): void {
 
-    isValidGetTransfer(slotName: string, id: number, amount: number, data: number, extra: ItemExtraData, player: number): boolean {
-        return true;
-    }
+        container.setParent(this);
+        container.setClientContainerTypeName(this.name);
 
-    setupContainer(): void {
-
-        this.container.setParent(this);
-        this.container.setClientContainerTypeName(this.name);
-
-        this.container.addServerOpenListener((container: ItemContainer, client: NetworkClient) => {
-            this.onOpen();
-            this.onUpdate();
+        container.addServerOpenListener((con: ItemContainer, client: NetworkClient) => {
+            this.onOpen(con);
+            this.onUpdate(con);
         });
 
-        this.container.addServerCloseListener((container: ItemContainer, client: NetworkClient) => {
-            this.onClose();
-            const player = client.getPlayerUid();
-            const {x, y, z} = Entity.getPosition(player);
-            this.container.dropAt(BlockSource.getDefaultForActor(player), x, y, z);
-            this.container = null;
+        container.addServerCloseListener((con: ItemContainer, client: NetworkClient) => {
+            this.onClose(con);
+            const actor = new PlayerActor(client.getPlayerUid());
+            let slot: ItemContainerSlot;
+            for(let key in con.slots){
+                slot = con.slots[key];
+                if(!slot.isEmpty()){
+                    actor.addItemToInventory(slot.id, slot.count, slot.data, slot.extra, true);
+                    slot.clear();
+                }
+            }
+            con.sendChanges();
         });
 
-        this.container.setGlobalAddTransferPolicy((container, slotName, id, amount, data, extra, player) => {
-            if(this.isValidAddTransfer(slotName, id, amount, data, extra, player)){
-                runOnMainThread(() => this.onUpdate());
+        container.setGlobalAddTransferPolicy((con, slotName, id, amount, data, extra, player) => {
+            if(this.isValidAddTransfer(con, slotName, id, amount, data, extra, player)){
+                runOnMainThread(() => this.onUpdate(con));
                 return amount;
             }
             return 0;
         });
 
-        this.container.setGlobalGetTransferPolicy((container, slotName, id, amount, data, extra, player) => {
-            if(this.isValidGetTransfer(slotName, id, amount, data, extra, player)){
-                runOnMainThread(() => this.onUpdate());
+        container.setGlobalGetTransferPolicy((con, slotName, id, amount, data, extra, player) => {
+            if(this.isValidGetTransfer(con, slotName, id, amount, data, extra, player)){
+                runOnMainThread(() => this.onUpdate(con));
                 return amount;
             }
             return 0;
         });
 
+        this.addServerEvents(container);
+
+    }
+
+    getContainerFor(player: number): ItemContainer {
+        let container = this.containerByEntity[player];
+        if(!container){
+            container = new ItemContainer();
+            this.setupContainer(container);
+            this.containerByEntity[player] = container;
+        }
+        return container;
+    }
+
+    abstract addServerEvents(container: ItemContainer): void;
+
+    isValidAddTransfer(container: ItemContainer, slotName: string, id: number, amount: number, data: number, extra: ItemExtraData, player: number): boolean {
+        return true;
+    }
+
+    isValidGetTransfer(container: ItemContainer, slotName: string, id: number, amount: number, data: number, extra: ItemExtraData, player: number): boolean {
+        return true;
     }
 
     openFor(player: number): void {
@@ -71,20 +94,19 @@ abstract class CraftingWindow {
         if(!client){
             return;
         }
-        this.container = new ItemContainer();
-        this.setupContainer();
-        this.container.openFor(client, this.name);
+        const container = this.getContainerFor(player);
+        container.openFor(client, "main");
     }
 
-    onOpen(): void {
-
-    }
-
-    onClose(): void {
+    onOpen(container: ItemContainer): void {
 
     }
 
-    abstract onUpdate(): void;
+    onClose(container: ItemContainer): void {
+
+    }
+
+    abstract onUpdate(container: ItemContainer): void;
 
     addTargetBlock(block: AnyID): void {
         CraftingWindow.blocks.push({block: getIDData(block, -1), window: this});

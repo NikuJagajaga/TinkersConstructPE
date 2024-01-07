@@ -83,9 +83,9 @@ const PartBuilderWindow = new class extends CraftingWindow {
     constructor(){
 
         const elements: UI.ElementSet = {
-            slotPattern: {type: "slot", x: 8, y: 136 - 36, bitmap: "tcon.slot.pattern", size: 72, isValid: id => {alert(id + " - " + ItemID.tcon_pattern_blank);return id === ItemID.tcon_pattern_blank;}},
+            slotPattern: {type: "slot", x: 8, y: 136 - 36, bitmap: "tcon.slot.pattern", size: 72},
             slotMaterial: {type: "slot", x: 80, y: 136 - 36, size: 72},
-            slotResult: {type: "slot", x: 440, y: 136 - 52, size: 104, visual: true, clicker: {onClick: () => this.onCraft()}},
+            slotResult: {type: "slot", x: 440, y: 136 - 52, size: 104, visual: true, clicker: {onClick: (_, container: ItemContainer) => container.sendEvent("craft", {})}},
             cursor: {type: "image", x: 0, y: 2000, z: 1, width: 64, height: 64, bitmap: "_selection"},
             textCost: {type: "text", x: 288, y: 300, font: {size: 24, color: Color.GRAY, alignment: UI.Font.ALIGN_CENTER}},
             textTitle: {type: "text", x: 780, y: 4, font: {size: 32, color: Color.YELLOW, bold: true, alignment: UI.Font.ALIGN_CENTER}, text: "Title"},
@@ -101,10 +101,8 @@ const PartBuilderWindow = new class extends CraftingWindow {
                 y: (i / 4 | 0) * 64 + 8,
                 bitmap: "tcon.pattern." + PartRegistry.types[i].key,
                 scale: 4,
-                clicker: {onClick: () => {
-                    this.selectedPattern = i;
-                    this.onUpdate();
-                    World.playSoundAtEntity(Player.get(), "random.click", 0.5);
+                clicker: {onClick: (_, container: ItemContainer) => {
+                    container.sendEvent("select", {index: i});
                 }}
             };
         }
@@ -123,9 +121,51 @@ const PartBuilderWindow = new class extends CraftingWindow {
 
         super("tcon_partbuilder", window);
 
+        ItemContainer.addClientEventListener(this.name, "refresh", (container, win, content, data: {result: number, index: number}) => {
+            const elems = window.getElements();
+            elems.get("slotResult").setBinding("source", data.result === 0 ? {id: 0, count: 0, data: 0} : {id: Network.serverToLocalId(data.result), count: 1, data: 0});
+            if(data.index === -1){
+                elems.get("cursor")?.setPosition(0, 2000);
+            }
+            else{
+                const selectedElem = elems.get("btn" + data.index);
+                elems.get("cursor")?.setPosition(selectedElem.x, selectedElem.y);
+            }
+        });
+
     }
 
-    override isValidAddTransfer(slotName: string, id: number, amount: number, data: number, extra: ItemExtraData, player: number): boolean {
+    override addServerEvents(container: ItemContainer): void {
+
+        container.addServerEventListener("select", (con, client, data: {index: number}) => {
+            this.selectedPattern = data.index;
+            this.onUpdate(con);
+            World.playSoundAtEntity(client.getPlayerUid(), "random.click", 0.5);
+        });
+
+        container.addServerEventListener("craft", (con, client, data) => this.onCraft(con, client));
+
+    }
+
+    autoSetPattern(container: ItemContainer, player: number): void {
+        const slotPattern = container.getSlot("slotPattern");
+        if(slotPattern.isEmpty()){
+            const actor = new PlayerActor(player);
+            let inv: ItemInstance;
+            for(let i = 0; i < 36; i++){
+                inv = actor.getInventorySlot(i);
+                if(inv.id === ItemID.tcon_pattern_blank){
+                    slotPattern.set(inv.id, inv.count, inv.data, inv.extra);
+                    slotPattern.markDirty();
+                    container.sendChanges();
+                    actor.setInventorySlot(i, 0, 0, 0, null);
+                    break;
+                }
+            }
+        }
+    }
+
+    override isValidAddTransfer(container: ItemContainer, slotName: string, id: number, amount: number, data: number, extra: ItemExtraData, player: number): boolean {
         switch(slotName){
             case "slotPattern":
                 if(id === ItemID.tcon_pattern_blank) return true;
@@ -135,6 +175,7 @@ const PartBuilderWindow = new class extends CraftingWindow {
                 for(let key in Material){
                     item = Material[key].getItem();
                     if(item && id === item.id && (item.data === -1 || data === item.data)){
+                        this.autoSetPattern(container, player);
                         return true;
                     }
                 }
@@ -143,12 +184,16 @@ const PartBuilderWindow = new class extends CraftingWindow {
         return false;
     }
 
-    override onUpdate(): void {
+    override isValidGetTransfer(container: ItemContainer, slotName: string, id: number, amount: number, data: number, extra: ItemExtraData, player: number): boolean {
+        if(slotName === "slotResult") return false;
+        return true;
+    }
 
-        const elements = this.window.getElements();
+    override onUpdate(container: ItemContainer): void {
+
         const patternData = PartRegistry.types[this.selectedPattern];
-        const slotPattern = this.container.getSlot("slotPattern");
-        const slotMaterial = this.container.getSlot("slotMaterial");
+        const slotPattern = container.getSlot("slotPattern");
+        const slotMaterial = container.getSlot("slotMaterial");
         let item: Tile;
         let statsHead: HeadStats;
         let statsHandle: HandleStats;
@@ -191,27 +236,19 @@ const PartBuilderWindow = new class extends CraftingWindow {
 
         }
 
-        if(this.selectedPattern === -1){
-            elements.get("cursor")?.setPosition(0, 2000);
-        }
-        else{
-            const selectedElem = elements.get("btn" + this.selectedPattern);
-            elements.get("cursor")?.setPosition(selectedElem.x, selectedElem.y);
-        }
-
-        elements.get("slotResult")?.setBinding("source", resultId === 0 ? {id: 0, count: 0, data: 0} : {id: resultId, count: 1, data: 0});
-        this.container.setText("textCost", textCost);
-        this.container.setText("textTitle", textTitle || "Part Builder");
-        this.container.setText("textStats", textStats || addLineBreaks(18, "Here you can craft tool parts to fulfill your tinkering fantasies") + "\n\n" + addLineBreaks(18, "To craft a part simply put its pattern into the left slot. The two right slot hold the material you want to craft your part out of."));
-        this.container.sendChanges();
+        container.setText("textCost", textCost);
+        container.setText("textTitle", textTitle || "Part Builder");
+        container.setText("textStats", textStats || addLineBreaks(18, "Here you can craft tool parts to fulfill your tinkering fantasies") + "\n\n" + addLineBreaks(18, "To craft a part simply put its pattern into the left slot. The two right slot hold the material you want to craft your part out of."));
+        container.sendChanges();
+        container.sendEvent("refresh", {result: resultId, index: this.selectedPattern});
 
     }
 
-    onCraft(): void {
+    onCraft(container: ItemContainer, client: NetworkClient): void {
 
         const patternData = PartRegistry.types[this.selectedPattern];
-        const slotPattern = this.container.getSlot("slotPattern");
-        const slotMaterial = this.container.getSlot("slotMaterial");
+        const slotPattern = container.getSlot("slotPattern");
+        const slotMaterial = container.getSlot("slotMaterial");
         let item: Tile;
         let cost = 0;
         let resultId = 0;
@@ -232,17 +269,17 @@ const PartBuilderWindow = new class extends CraftingWindow {
         }
 
         if(resultId !== 0){
-            Player.addItemToInventory(resultId, 1, 0);
+            const actor = new PlayerActor(client.getPlayerUid());
+            actor.addItemToInventory(resultId, 1, 0, null, true);
             slotPattern.count--;
             slotMaterial.count -= cost;
-            slotPattern.markDirty();
-            slotMaterial.markDirty();
-            this.container.validateAll();
-            this.container.sendChanges();
-            SoundManager.playSound("tcon.little_saw.ogg");
+            container.markAllSlotsDirty();
+            container.validateAll();
+            container.sendChanges();
+            client.send("tcon.playSound", {name: "tcon.little_saw.ogg"});
         }
 
-        this.onUpdate();
+        this.onUpdate(container);
 
     }
 
