@@ -89,14 +89,15 @@ class TconToolStack implements ItemInstance {
         
     }
 
-    addXp(val: number): void {
+    addXp(val: number, player: number): void {
         const xp = this.xp;
         const oldLv = ToolLeveling.getLevel(xp, this.instance.is3x3);
         const newLv = ToolLeveling.getLevel(xp + val, this.instance.is3x3);
         this.extra.putInt("xp", xp + val);
         if(oldLv < newLv){
-            Game.message("§3" + ToolLeveling.getLevelupMessage(newLv, Item.getName(this.id, this.data)));
-            SoundManager.playSound("tcon.levelup.ogg");
+            const client = Network.getClientForPlayer(player);
+            BlockEngine.sendMessage(client, "§3" + ToolLeveling.getLevelupMessage(newLv, Item.getName(this.id, this.data)));
+            client.send("tcon.playSound", {name: "tcon.levelup.ogg"});
         }
     }
 

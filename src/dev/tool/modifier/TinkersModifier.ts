@@ -28,7 +28,7 @@ abstract class TinkersModifier {
         return this.texIndex;
     }
 
-    getRecipe(): {id: number, data: number}[] {
+    getRecipe(): Tile[] {
         return this.recipe;
     }
 

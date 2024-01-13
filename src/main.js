@@ -42,10 +42,10 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
 IMPORT("BlockEngine");
 IMPORT("TileRender");
 IMPORT("StorageInterface");
+IMPORT("VanillaSlots");
 IMPORT("SoundLib");
 IMPORT("EnhancedRecipes");
 IMPORT("ConnectedTexture");
-IMPORT("WindowMaker");
 var Color = android.graphics.Color;
 var Thread = java.lang.Thread;
 var ClientSide = BlockEngine.Decorators.ClientSide;
@@ -54,6 +54,7 @@ var ContainerEvent = BlockEngine.Decorators.ContainerEvent;
 var ScreenHeight = UI.getScreenHeight();
 var SCALE = 5; //GUI Scale
 __config__.checkAndRestore({
+    SlotsLikeVanilla: true,
     toolLeveling: {
         baseXp: 500,
         multiplier: 2
@@ -68,6 +69,7 @@ __config__.checkAndRestore({
     checkInsideSmeltery: true
 });
 var Cfg = {
+    SlotsLikeVanilla: __config__.getBool("SlotsLikeVanilla"),
     toolLeveling: {
         baseXp: __config__.getNumber("toolLeveling.baseXp").intValue(),
         multiplier: __config__.getNumber("toolLeveling.multiplier").intValue()
@@ -142,18 +144,7 @@ var createItem = function (namedID, name, texture, params) {
     Item.createItem(namedID, name, texture, params);
     return id;
 };
-Network.addClientPacket("tcon.playSound", function (data) {
-    if (data.vanilla) {
-        World.playSoundAtEntity(Player.get(), data.name, data.volume, data.pitch);
-    }
-    else {
-        SoundManager.playSound(data.name, data.volume, data.pitch);
-    }
-});
-//戒
-// Array.prototype.includes = function(elem){
-//     return this.indexOf(elem) !== -1;
-// };
+Network.addClientPacket("tcon.playSound", function (data) { return SoundManager.playSound(data.name, data.volume, data.pitch); });
 var TconTileEntity = /** @class */ (function (_super) {
     __extends(TconTileEntity, _super);
     function TconTileEntity() {
@@ -269,13 +260,11 @@ var TileWithLiquidModel = /** @class */ (function (_super) {
     return TileWithLiquidModel;
 }(TconTileEntity));
 var CraftingWindow = /** @class */ (function () {
-    //container: ItemContainer;
     function CraftingWindow(windowName, window) {
         var _this = this;
         this.name = windowName;
         this.window = window;
         this.containerByEntity = {};
-        //this.container = new ItemContainer();
         var windows = this.window.getAllWindows();
         var it = windows.iterator();
         while (it.hasNext()) {
@@ -283,6 +272,9 @@ var CraftingWindow = /** @class */ (function () {
         }
         this.window.setCloseOnBackPressed(true);
         ItemContainer.registerScreenFactory(this.name, function () { return _this.window; });
+        if (Cfg.SlotsLikeVanilla) {
+            VanillaSlots.registerForWindow(window);
+        }
     }
     CraftingWindow.prototype.setupContainer = function (container) {
         var _this = this;
@@ -320,6 +312,9 @@ var CraftingWindow = /** @class */ (function () {
             return 0;
         });
         this.addServerEvents(container);
+        if (Cfg.SlotsLikeVanilla) {
+            VanillaSlots.registerServerEventsForContainer(container);
+        }
     };
     CraftingWindow.prototype.getContainerFor = function (player) {
         var container = this.containerByEntity[player];
@@ -520,6 +515,7 @@ var ToolLeveling = /** @class */ (function () {
 }());
 SoundManager.init(16);
 SoundManager.setResourcePath(__dir__ + "res/sounds/");
+SoundManager.registerSound("tcon.anvil_use.ogg", "anvil_use.ogg");
 SoundManager.registerSound("tcon.little_saw.ogg", "little_saw.ogg");
 SoundManager.registerSound("tcon.levelup.ogg", "levelup.ogg");
 var MoltenLiquid = /** @class */ (function () {
@@ -2614,14 +2610,15 @@ var TconToolStack = /** @class */ (function () {
         }
         this.durability += consume;
     };
-    TconToolStack.prototype.addXp = function (val) {
+    TconToolStack.prototype.addXp = function (val, player) {
         var xp = this.xp;
         var oldLv = ToolLeveling.getLevel(xp, this.instance.is3x3);
         var newLv = ToolLeveling.getLevel(xp + val, this.instance.is3x3);
         this.extra.putInt("xp", xp + val);
         if (oldLv < newLv) {
-            Game.message("§3" + ToolLeveling.getLevelupMessage(newLv, Item.getName(this.id, this.data)));
-            SoundManager.playSound("tcon.levelup.ogg");
+            var client = Network.getClientForPlayer(player);
+            BlockEngine.sendMessage(client, "§3" + ToolLeveling.getLevelupMessage(newLv, Item.getName(this.id, this.data)));
+            client.send("tcon.playSound", { name: "tcon.levelup.ogg" });
         }
     };
     TconToolStack.prototype.uniqueKey = function () {
@@ -3217,7 +3214,7 @@ var ModKnockback = /** @class */ (function (_super) {
     ModKnockback.prototype.onAttack = function (item, victim, player, level) {
         var vec = Entity.getLookVector(player);
         var speed = 1 + level * 0.1;
-        Entity.setVelocity(victim, vec.x * speed, vec.y, vec.z * speed);
+        Entity.setVelocity(victim, vec.x * speed, 0.1, vec.z * speed);
         return 0;
     };
     return ModKnockback;
@@ -3409,7 +3406,6 @@ var PartBuilderWindow = new /** @class */ (function (_super) {
         container.addServerEventListener("select", function (con, client, data) {
             _this.selectedPattern = data.index;
             _this.onUpdate(con);
-            World.playSoundAtEntity(client.getPlayerUid(), "random.click", 0.5);
         });
         container.addServerEventListener("craft", function (con, client, data) { return _this.onCraft(con, client); });
     };
@@ -3621,7 +3617,6 @@ ToolForgeHandler.addLayout({
 });
 var ToolCrafterWindow = /** @class */ (function (_super) {
     __extends(ToolCrafterWindow, _super);
-    //winContent: UI.WindowContent;
     function ToolCrafterWindow(windowName, title, isForge) {
         var _this = this;
         var window = new UI.StandardWindow({
@@ -3676,30 +3671,23 @@ var ToolCrafterWindow = /** @class */ (function (_super) {
         _this = _super.call(this, windowName, window) || this;
         _this.page = 0;
         _this.isForge = !!isForge;
-        //width 640
-        //const windowMain = window.getWindow("content");
-        //this.winContent = windowMain.getContent();
         ItemContainer.addClientEventListener(_this.name, "changeLayout", function (container, win, content, data) {
-            //const windowMain = window.getWindow("content");
-            //const winContent = windowMain.getContent();
-            var layouts = ToolForgeHandler.getLayoutList(data.isForge);
-            var layout = layouts[data.page];
             var centerX = 160;
             var centerY = 210;
             var scale = 5;
             var slot;
             for (var i = 0; i < 6; i++) {
                 slot = content.elements["slot" + i];
-                if (layout.slots[i]) {
-                    slot.x = layout.slots[i].x * scale + centerX;
-                    slot.y = layout.slots[i].y * scale + centerY;
-                    slot.bitmap = layout.slots[i].bitmap;
+                if (data.slots[i]) {
+                    slot.x = data.slots[i].x * scale + centerX;
+                    slot.y = data.slots[i].y * scale + centerY;
+                    slot.bitmap = data.slots[i].bitmap;
                 }
                 else {
                     slot.y = 2000;
                 }
             }
-            content.elements.bgImage.bitmap = layout.background;
+            content.elements.bgImage.bitmap = data.bg;
         });
         return _this;
     }
@@ -3885,8 +3873,8 @@ var ToolCrafterWindow = /** @class */ (function (_super) {
             }
             actor.addItemToInventory(slotResult.id, slotResult.count, slotResult.data, slotResult.extra, true);
             this.isForge ?
-                World.playSoundAtEntity(Player.get(), "random.anvil_use", 0.5, 0.95 + 0.2 * Math.random()) :
-                SoundManager.playSound("tcon.little_saw.ogg");
+                client.send("tcon.playSound", { name: "tcon.anvil_use.ogg", volume: 0.5, pitch: 0.95 + 0.2 * Math.random() }) :
+                client.send("tcon.playSound", { name: "tcon.little_saw.ogg" });
             this.onUpdate(container);
         }
     };
@@ -3897,7 +3885,7 @@ var ToolCrafterWindow = /** @class */ (function (_super) {
         var layout = layouts[this.page];
         container.setText("textTitle", layout.title);
         container.setText("textStats", addLineBreaks(16, layout.intro));
-        container.sendEvent("changeLayout", { isForge: this.isForge, page: this.page });
+        container.sendEvent("changeLayout", { bg: layout.background, slots: layout.slots });
         this.onUpdate(container);
     };
     ToolCrafterWindow.prototype.showInfo = function (container, item) {
@@ -4064,7 +4052,7 @@ var TconTool = /** @class */ (function (_super) {
             }
             else {
                 stack.consumeDurability(1);
-                stack.addXp(1);
+                stack.addXp(1, player);
             }
             item.data = stack.data; //setCarriedItem in ToolAPI.destroyBlockHook
         }
@@ -4082,7 +4070,7 @@ var TconTool = /** @class */ (function (_super) {
         this.toolMaterial.damage = stack.stats.damage + bonus;
         if (this.isWeapon) {
             stack.consumeDurability(1);
-            stack.addXp(1);
+            stack.addXp(1, player);
         }
         else {
             stack.consumeDurability(2);
@@ -4185,7 +4173,7 @@ var TconTool3x3 = /** @class */ (function (_super) {
             });
         }
         stack.consumeDurability(consume);
-        stack.addXp(consume);
+        stack.addXp(consume, player);
         item.data = stack.data;
         return true;
     };
@@ -4216,6 +4204,7 @@ var ToolModelManager = /** @class */ (function () {
     function ToolModelManager() {
     }
     ToolModelManager.getModel = function (item) {
+        var _a;
         if (!item.extra) {
             return null;
         }
@@ -4225,6 +4214,9 @@ var ToolModelManager = /** @class */ (function () {
         var uniqueKey = stack.uniqueKey();
         if (this.models[uniqueKey]) {
             return this.models[uniqueKey][suffix];
+        }
+        if ((_a = Threading.getThread("tcon_toolmodel")) === null || _a === void 0 ? void 0 : _a.isAlive()) {
+            return null;
         }
         var modelNormal = ItemModel.newStandalone();
         var modelBroken = ItemModel.newStandalone();
@@ -4243,32 +4235,33 @@ var ToolModelManager = /** @class */ (function () {
             coordsNormal.push(texture.getModCoords(index));
             coordsBroken.push(texture.getModCoords(index));
         }
-        Threading.initThread("tcon_" + uniqueKey, function () {
-            mesh.forEach(function (m, i) {
-                var coords = i >> 1 ? coordsBroken : coordsNormal;
-                var size = 1 / 16;
-                var x = 0;
-                var y = 0;
-                var z = 0;
+        Threading.initThread("tcon_toolmodel", function () {
+            var size = 1 / 16;
+            var coords;
+            var x = 0;
+            var y = 0;
+            var z = 0;
+            for (var i = 0; i < 4; i++) {
+                coords = i >> 1 ? coordsBroken : coordsNormal;
                 for (var j = 0; j < coords.length; j++) {
                     x = coords[j].x;
                     y = coords[j].y;
                     z = (i & 1 ? j : (coords.length - j)) * 0.001;
-                    m.setColor(1, 1, 1);
-                    m.setNormal(1, 1, 0);
-                    m.addVertex(0, 1, z, x, y);
-                    m.addVertex(1, 1, z, x + size, y);
-                    m.addVertex(0, 0, z, x, y + size);
-                    m.addVertex(1, 1, z, x + size, y);
-                    m.addVertex(0, 0, z, x, y + size);
-                    m.addVertex(1, 0, z, x + size, y + size);
+                    mesh[i].setColor(1, 1, 1);
+                    mesh[i].setNormal(1, 1, 0);
+                    mesh[i].addVertex(0, 1, z, x, y);
+                    mesh[i].addVertex(1, 1, z, x + size, y);
+                    mesh[i].addVertex(0, 0, z, x, y + size);
+                    mesh[i].addVertex(1, 1, z, x + size, y);
+                    mesh[i].addVertex(0, 0, z, x, y + size);
+                    mesh[i].addVertex(1, 0, z, x + size, y + size);
                 }
                 if ((i & 1) === 0) { //hand
-                    m.translate(0.4, -0.1, 0.2);
-                    m.rotate(0.5, 0.5, 0.5, 0, -2.1, 0.4);
-                    m.scale(2, 2, 2);
+                    mesh[i].translate(0.4, -0.1, 0.2);
+                    mesh[i].rotate(0.5, 0.5, 0.5, 0, -2.1, 0.4);
+                    mesh[i].scale(2, 2, 2);
                 }
-            });
+            }
             modelNormal.setModel(mesh[0], path)
                 .setUiModel(mesh[1], path)
                 .setSpriteUiRender(true)
@@ -4337,7 +4330,7 @@ var TconShovel = /** @class */ (function (_super) {
                 region.setBlock(coords, VanillaTileID.grass_path, 0);
                 region.playSound(coords.x, coords.y, coords.z, "step.grass");
                 stack.consumeDurability(1);
-                stack.addXp(1);
+                stack.addXp(1, player);
                 stack.applyToHand(player);
             }
         }
@@ -4390,7 +4383,7 @@ var TconHatchet = /** @class */ (function (_super) {
                 }
                 else {
                     stack.consumeDurability(1);
-                    stack.addXp(1);
+                    stack.addXp(1, player);
                 }
                 item.data = stack.data;
             }
@@ -4416,7 +4409,7 @@ var TconHatchet = /** @class */ (function (_super) {
                 }
                 region.playSound(coords.x, coords.y, coords.z, log.isStem ? "step.stem" : "step.wood");
                 stack.consumeDurability(1);
-                stack.addXp(1);
+                stack.addXp(1, player);
                 stack.applyToHand(player);
             }
         }
@@ -4465,28 +4458,14 @@ var TconMattock = /** @class */ (function (_super) {
         stats.attack += 3;
     };
     TconMattock.prototype.onItemUse = function (coords, item, block, player) {
-        var sounds = [
-            "step.gravel",
-            "bucket.empty_water",
-            "bucket.empty_lava",
-            "bucket.fill_water",
-            "bucket.fill_lava",
-            "hit.wood",
-            "fall.wood"
-        ];
-        this.index = (this.index + 1) % sounds.length;
-        var region = WorldRegion.getForActor(player);
-        Game.message(sounds[this.index]);
-        region.playSound(coords.x, coords.y, coords.z, sounds[this.index]);
-        return;
         if (item.extra && (block.id === VanillaTileID.grass || block.id === VanillaTileID.dirt) && coords.side === EBlockSide.UP) {
             var stack = new TconToolStack(item);
             if (!stack.isBroken()) {
-                var region_1 = WorldRegion.getForActor(player);
-                region_1.setBlock(coords, VanillaTileID.farmland, 0);
-                region_1.playSound(coords.x, coords.y, coords.z, "step.gravel");
+                var region = WorldRegion.getForActor(player);
+                region.setBlock(coords, VanillaTileID.farmland, 0);
+                region.playSound(coords.x, coords.y, coords.z, "step.gravel");
                 stack.consumeDurability(1);
-                stack.addXp(1);
+                stack.addXp(1, player);
                 stack.applyToHand(player);
             }
         }
@@ -4689,7 +4668,7 @@ var TconLumberaxe = /** @class */ (function (_super) {
                 _loop_5(x);
             }
             stack.consumeDurability(consume);
-            stack.addXp(consume);
+            stack.addXp(consume, player);
             item.data = stack.data;
         }
         return true;
@@ -4775,7 +4754,7 @@ var ChopTreeUpdatable = /** @class */ (function () {
             mod.onDestroy(carried, { x: coords.x, y: coords.y, z: coords.z, side: EBlockSide.DOWN, relative: coords }, block, _this.player, level);
         });
         stack.consumeDurability(1);
-        stack.addXp(1);
+        stack.addXp(1, this.player);
         stack.applyToHand(this.player);
         this.visited.push(coords);
         this.addNearest(coords);
@@ -4879,9 +4858,8 @@ ModAPI.addAPICallback("ICore", function (api) {
     //ToolForgeHandler.addVariation("block_lead", BlockID.blockLead);
     //ToolForgeHandler.addVariation("block_silver", BlockID.blockSilver);
     //ToolForgeHandler.addVariation("block_steel", BlockID.blockSteel);
-    //TinkersLumberaxe.logs[BlockID.rubberTreeLog] = true;
-    //TinkersLumberaxe.logs[BlockID.rubberTreeLogLatex] = true;
-    //TinkersLumberaxe.leaves[BlockID.rubberTreeLeaves] = true;
+    TconLumberaxe.LOGS.push(BlockID.rubberTreeLog);
+    TconLumberaxe.LOGS.push(BlockID.rubberTreeLogLatex);
 });
 ModAPI.addAPICallback("RedCore", function (api) {
     CastingRecipe.addMakeCastRecipes(ItemID.ingotCopper, "ingot");

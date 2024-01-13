@@ -148,7 +148,7 @@ class TconTool extends ItemCommon implements ItemBehavior, ToolAPI.ToolParams {
             }
             else{
                 stack.consumeDurability(1);
-                stack.addXp(1);
+                stack.addXp(1, player);
             }
             item.data = stack.data; //setCarriedItem in ToolAPI.destroyBlockHook
         }
@@ -167,7 +167,7 @@ class TconTool extends ItemCommon implements ItemBehavior, ToolAPI.ToolParams {
         this.toolMaterial.damage = stack.stats.damage + bonus;
         if(this.isWeapon){
             stack.consumeDurability(1);
-            stack.addXp(1);
+            stack.addXp(1, player);
         }
         else{
             stack.consumeDurability(2);
@@ -281,7 +281,7 @@ class TconTool3x3 extends TconTool {
         }
 
         stack.consumeDurability(consume);
-        stack.addXp(consume);
+        stack.addXp(consume, player);
         item.data = stack.data;
 
         return true;

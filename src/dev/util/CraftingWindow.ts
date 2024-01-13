@@ -5,14 +5,12 @@ abstract class CraftingWindow {
     name: string;
     window: UI.StandardWindow;
     containerByEntity: {[ent: number]: ItemContainer};
-    //container: ItemContainer;
 
     constructor(windowName: string, window: UI.StandardWindow){
 
         this.name = windowName;
         this.window = window;
         this.containerByEntity = {};
-        //this.container = new ItemContainer();
 
         const windows = this.window.getAllWindows();
         const it = windows.iterator();
@@ -22,6 +20,10 @@ abstract class CraftingWindow {
         this.window.setCloseOnBackPressed(true);
 
         ItemContainer.registerScreenFactory(this.name, () => this.window);
+
+        if(Cfg.SlotsLikeVanilla){
+            VanillaSlots.registerForWindow(window);
+        }
 
     }
 
@@ -66,6 +68,10 @@ abstract class CraftingWindow {
         });
 
         this.addServerEvents(container);
+
+        if(Cfg.SlotsLikeVanilla){
+            VanillaSlots.registerServerEventsForContainer(container);
+        }
 
     }
 

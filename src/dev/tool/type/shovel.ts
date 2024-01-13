@@ -27,7 +27,7 @@ class TconShovel extends TconTool {
                 region.setBlock(coords, VanillaTileID.grass_path, 0);
                 region.playSound(coords.x, coords.y, coords.z, "step.grass");
                 stack.consumeDurability(1);
-                stack.addXp(1);
+                stack.addXp(1, player);
                 stack.applyToHand(player);
             }
         }

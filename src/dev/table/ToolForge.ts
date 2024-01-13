@@ -3,7 +3,6 @@ class ToolCrafterWindow extends CraftingWindow {
     consume: number[];
     page: number;
     isForge: boolean;
-    //winContent: UI.WindowContent;
 
     constructor(windowName: string, title: string, isForge: boolean){
 
@@ -64,10 +63,7 @@ class ToolCrafterWindow extends CraftingWindow {
         this.page = 0;
         this.isForge = !!isForge;
 
-        ItemContainer.addClientEventListener(this.name, "changeLayout", (container, win, content, data: {isForge: boolean, page: number}) => {
-
-            const layouts = ToolForgeHandler.getLayoutList(data.isForge);
-            const layout = layouts[data.page];
+        ItemContainer.addClientEventListener(this.name, "changeLayout", (container, win, content, data: {bg: string, slots: {x: number, y: number, bitmap: string}[]}) => {
 
             const centerX = 160;
             const centerY = 210;
@@ -76,17 +72,17 @@ class ToolCrafterWindow extends CraftingWindow {
     
             for(let i = 0; i < 6; i++){
                 slot = content.elements["slot" + i] as UI.UISlotElement;
-                if(layout.slots[i]){
-                    slot.x = layout.slots[i].x * scale + centerX;
-                    slot.y = layout.slots[i].y * scale + centerY;
-                    slot.bitmap = layout.slots[i].bitmap;
+                if(data.slots[i]){
+                    slot.x = data.slots[i].x * scale + centerX;
+                    slot.y = data.slots[i].y * scale + centerY;
+                    slot.bitmap = data.slots[i].bitmap;
                 }
                 else{
                     slot.y = 2000;
                 }
             }
             
-            content.elements.bgImage.bitmap = layout.background;
+            content.elements.bgImage.bitmap = data.bg;
 
         });
 
@@ -292,8 +288,8 @@ class ToolCrafterWindow extends CraftingWindow {
             }
             actor.addItemToInventory(slotResult.id, slotResult.count, slotResult.data, slotResult.extra, true);
             this.isForge ?
-                World.playSoundAtEntity(Player.get(), "random.anvil_use", 0.5, 0.95 + 0.2 * Math.random()) :
-                SoundManager.playSound("tcon.little_saw.ogg");
+                client.send("tcon.playSound", {name: "tcon.anvil_use.ogg", volume: 0.5, pitch: 0.95 + 0.2 * Math.random()}) :
+                client.send("tcon.playSound", {name: "tcon.little_saw.ogg"});
             this.onUpdate(container);
         }
 
@@ -310,7 +306,7 @@ class ToolCrafterWindow extends CraftingWindow {
 
         container.setText("textTitle", layout.title);
         container.setText("textStats", addLineBreaks(16, layout.intro));
-        container.sendEvent("changeLayout", {isForge: this.isForge, page: this.page});
+        container.sendEvent("changeLayout", {bg: layout.background, slots: layout.slots});
 
         this.onUpdate(container);
 

@@ -1,5 +1,6 @@
 {
     "enabled": true,
+    "SlotsLikeVanilla": true,
     "toolLeveling": {
         "baseXp": 500,
         "multiplier": 2

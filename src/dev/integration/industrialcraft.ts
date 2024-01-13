@@ -101,9 +101,8 @@ ModAPI.addAPICallback("ICore", (api: any) => {
     //ToolForgeHandler.addVariation("block_steel", BlockID.blockSteel);
 
 
-    //TinkersLumberaxe.logs[BlockID.rubberTreeLog] = true;
-    //TinkersLumberaxe.logs[BlockID.rubberTreeLogLatex] = true;
-    //TinkersLumberaxe.leaves[BlockID.rubberTreeLeaves] = true;
+    TconLumberaxe.LOGS.push(BlockID.rubberTreeLog);
+    TconLumberaxe.LOGS.push(BlockID.rubberTreeLogLatex);
 
 
 });

@@ -48,7 +48,7 @@ class TconHatchet extends TconTool {
                 }
                 else{
                     stack.consumeDurability(1);
-                    stack.addXp(1);
+                    stack.addXp(1, player);
                 }
                 item.data = stack.data;
             }
@@ -75,7 +75,7 @@ class TconHatchet extends TconTool {
                 }
                 region.playSound(coords.x, coords.y, coords.z, log.isStem ? "step.stem" : "step.wood");
                 stack.consumeDurability(1);
-                stack.addXp(1);
+                stack.addXp(1, player);
                 stack.applyToHand(player);
             }
         }

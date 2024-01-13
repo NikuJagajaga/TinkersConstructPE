@@ -94,10 +94,10 @@
         "../../declarations/BlockEngine.d.ts",
         "../../declarations/TileRender.d.ts",
         "../../declarations/StorageInterface.d.ts",
+        "../../declarations/VanillaSlots.d.ts",
         "../../declarations/SoundLib.d.ts",
         "../../declarations/RecipeViewer.d.ts",
         "../../declarations/ConnectedTexture.d.ts",
-        "../../declarations/EnhancedRecipes.d.ts",
-        "../../declarations/WindowMaker.d.ts"
+        "../../declarations/EnhancedRecipes.d.ts"
     ]
 }

@@ -140,7 +140,6 @@ const PartBuilderWindow = new class extends CraftingWindow {
         container.addServerEventListener("select", (con, client, data: {index: number}) => {
             this.selectedPattern = data.index;
             this.onUpdate(con);
-            World.playSoundAtEntity(client.getPlayerUid(), "random.click", 0.5);
         });
 
         container.addServerEventListener("craft", (con, client, data) => this.onCraft(con, client));

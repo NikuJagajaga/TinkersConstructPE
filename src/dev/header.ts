@@ -1,10 +1,10 @@
 IMPORT("BlockEngine");
 IMPORT("TileRender");
 IMPORT("StorageInterface");
+IMPORT("VanillaSlots");
 IMPORT("SoundLib");
 IMPORT("EnhancedRecipes");
 IMPORT("ConnectedTexture");
-IMPORT("WindowMaker");
 
 const Color = android.graphics.Color;
 const Thread = java.lang.Thread;
@@ -17,6 +17,7 @@ const ScreenHeight = UI.getScreenHeight();
 const SCALE = 5; //GUI Scale
 
 __config__.checkAndRestore({
+    SlotsLikeVanilla: true,
     toolLeveling: {
         baseXp: 500,
         multiplier: 2
@@ -32,6 +33,7 @@ __config__.checkAndRestore({
 });
 
 const Cfg = {
+    SlotsLikeVanilla: __config__.getBool("SlotsLikeVanilla"),
     toolLeveling: {
         baseXp: __config__.getNumber("toolLeveling.baseXp").intValue(),
         multiplier: __config__.getNumber("toolLeveling.multiplier").intValue()
@@ -114,17 +116,4 @@ const createItem = (namedID: string, name: string, texture: Item.TextureData = {
 };
 
 
-Network.addClientPacket("tcon.playSound", (data: {name: string, volume?: number, pitch?: number, vanilla?: boolean}) => {
-    if(data.vanilla){
-        World.playSoundAtEntity(Player.get(), data.name, data.volume, data.pitch);
-    }
-    else{
-        SoundManager.playSound(data.name, data.volume, data.pitch);
-    }
-});
-
-
-//戒
-// Array.prototype.includes = function(elem){
-//     return this.indexOf(elem) !== -1;
-// };
+Network.addClientPacket("tcon.playSound", (data: {name: string, volume?: number, pitch?: number}) => SoundManager.playSound(data.name, data.volume, data.pitch));
