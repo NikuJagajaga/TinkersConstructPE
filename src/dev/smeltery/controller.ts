@@ -20,13 +20,12 @@ class SmelteryHandler {
 
     private static elements: UI.ElementSet = {
         imageOvl: {type: "image", x: 93 * SCALE, y: 11 * SCALE, z: 1001, bitmap: "tcon.smeltery_ovl", scale: SCALE},
-        slot0: {type: "slot", x: 24 * SCALE, y: 10 * SCALE, size: 18 * SCALE/*, isValid: (id, count, data) => MeltingRecipe.isExist(id, data)*/},
-        slot1: {type: "slot", x: 24 * SCALE, y: 28 * SCALE, size: 18 * SCALE/*, isValid: (id, count, data) => MeltingRecipe.isExist(id, data)*/},
-        slot2: {type: "slot", x: 24 * SCALE, y: 46 * SCALE, size: 18 * SCALE/*, isValid: (id, count, data) => MeltingRecipe.isExist(id, data)*/},
+        slot0: {type: "slot", x: 24 * SCALE, y: 10 * SCALE, size: 18 * SCALE},
+        slot1: {type: "slot", x: 24 * SCALE, y: 28 * SCALE, size: 18 * SCALE},
+        slot2: {type: "slot", x: 24 * SCALE, y: 46 * SCALE, size: 18 * SCALE},
         gauge0: {type: "scale", x: 21 * SCALE, y: 11 * SCALE, bitmap: "tcon.heat_gauge_0", scale: SCALE, direction: 1},
         gauge1: {type: "scale", x: 21 * SCALE, y: 29 * SCALE, bitmap: "tcon.heat_gauge_0", scale: SCALE, direction: 1},
         gauge2: {type: "scale", x: 21 * SCALE, y: 47 * SCALE, bitmap: "tcon.heat_gauge_0", scale: SCALE, direction: 1},
-        //scaleLava: {type: "scale", x: 161 * SCALE, y: 11 * SCALE, width: 12 * SCALE, height: 52 * SCALE, bitmap: "_liquid_lava_texture_0", direction: 1},
         textFuel: {type: "text", x: 67 * SCALE, y: 50 * SCALE, font: {size: 30, color: Color.WHITE, shadow: 0.5, align: UI.Font.ALIGN_CENTER}},
         textLiquid: {type: "text", x: 92 * SCALE, y: 65 * SCALE, z: 1002, font: {size: 30, color: Color.WHITE, shadow: 0.5}, multiline: true},
         buttonDump: {type: "button", x: 92 * SCALE, y: 80 * SCALE, z: 1002, bitmap: "_craft_button_up", bitmap2: "_craft_button_down", scale: SCALE / 2, clicker: {
@@ -40,7 +39,9 @@ class SmelteryHandler {
             }
         }},
         textDump: {type: "text", x: 104 * SCALE, y: 78 * SCALE, z: 1003, text: "Dump", font: {size: 30, color: Color.WHITE, shadow: 0.5, alignment: 1}},
-        iconSelect: {type: "image", x: 131.6 * SCALE, y: 81.6 * SCALE, z: 1003, bitmap: "mod_browser_update_icon", scale: SCALE * 0.8}
+        iconSelect: {type: "image", x: 131.6 * SCALE, y: 81.6 * SCALE, z: 1003, bitmap: "mod_browser_update_icon", scale: SCALE * 0.8},
+        btnR: {type: "button", x: 698, y: 13, bitmap: "classic_button_up", bitmap2: "classic_button_down", scale: 2, clicker: {onClick: () => RV?.RecipeTypeRegistry.openRecipePage(["tcon_melting", "tcon_alloying"])}},
+        textR: {type: "text", x: 698 + 14, y: 13 - 6, z: 1, text: "R", font: {color: Color.WHITE, size: 20, shadow: 0.5, align: UI.Font.ALIGN_CENTER}}
     };
 
     private static window: UI.StandardWindow;
@@ -84,6 +85,10 @@ class SmelteryHandler {
             ],
             elements: SmelteryHandler.elements
         });
+
+        if(Cfg.SlotsLikeVanilla){
+            VanillaSlots.registerForWindow(this.window);
+        }
 
     }
 
@@ -167,8 +172,21 @@ class SmelteryControler extends TconTileEntity implements ILiquidStorage {
         return SmelteryHandler.getWindow();
     }
 
-    putDefaultNetworkData(): void {
+    override putDefaultNetworkData(): void {
         this.networkData.putBoolean("active", false);
+    }
+
+    override setupContainer(): void {
+        this.container.setGlobalAddTransferPolicy((container, slotName, id, count, data, extra, player) => {
+            if((slotName === "slot0" || slotName === "slot1" || slotName === "slot2") && MeltingRecipe.isExist(id, data)){
+                let amount = 0;
+                for(let i = 0; i < 3; i++){
+                    amount += container.getSlot("slot" + i).count;
+                }
+                return Math.max(0, Math.min(count, container.parent.getItemCapacity() - amount));
+            }
+            return 0;
+        });
     }
 
     setActive(): void {
@@ -218,6 +236,10 @@ class SmelteryControler extends TconTileEntity implements ILiquidStorage {
         };
 
         this.data.isActive = this.checkStructure();
+
+        if(Cfg.SlotsLikeVanilla){
+            VanillaSlots.registerServerEventsForContainer(this.container);
+        }
         
     }
 
@@ -613,6 +635,7 @@ class SmelteryControler extends TconTileEntity implements ILiquidStorage {
         let y = (11 + 52) * SCALE;
         for(let i = 0; i < SmelteryHandler.liquidCount; i++){
             elem = elements.get("liquid" + i);
+            if(!elem) continue;
             if(i < data.liqArray.length){
                 y -= data.liqArray[i].amount / data.capacity * 52 * SCALE;
                 elem.setPosition(elem.x, y);

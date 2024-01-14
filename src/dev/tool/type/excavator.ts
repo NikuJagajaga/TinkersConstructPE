@@ -6,7 +6,7 @@ class TconExcavator extends TconTool3x3 {
 
         super("tcontool_excavator", "Excavator");
 
-        this.blockTypes = ["stone"];
+        this.blockTypes = ["dirt"];
         this.texture = new ToolTexture("model/tcontool_excavator", 4, 0);
         this.miningSpeedModifier = 0.28;
         this.damagePotential = 1.25;

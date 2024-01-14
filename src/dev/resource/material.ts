@@ -64,21 +64,25 @@ Recipes2.addShapeless(ItemID.tcon_slimeball_blue, ["slime_ball", {id: "blue_dye"
 Recipes2.addShapeless(ItemID.tcon_slimeball_purple, [ItemID.tcon_slimeball_blue, {id: "redstone", count: 2}]);
 MeltingRecipe.addRecipe(ItemID.tcon_slimeball_purple, "purpleslime", MatValue.SLIME_BALL);
 
-createBlock("tcon_slimymud_green", [{name: "Slimy Mud"}]);
-createBlock("tcon_slimymud_blue", [{name: "Blue Slimy Mud"}]);
-createBlock("tcon_slimymud_magma", [{name: "Magma Slimy Mud"}]);
-Recipes2.addShapeless(BlockID.tcon_slimymud_green, [{id: "slime_ball", count: 4}, "sand", "dirt"]);
-Recipes2.addShapeless(BlockID.tcon_slimymud_green, [{id: ItemID.tcon_slimeball_blue, count: 4}, "sand", "dirt"]);
-Recipes2.addShapeless(BlockID.tcon_slimymud_green, [{id: "magma_cream", count: 4}, "soul_sand", "netherrack"]);
-Item.addCreativeGroup("tcon_slimymud", "Slimy Mud", [BlockID.tcon_slimymud_green, BlockID.tcon_slimymud_blue, BlockID.tcon_slimymud_magma]);
 
-createItem("tcon_slimecrystal_green", "Slime Crystal");
-createItem("tcon_slimecrystal_blue", "Blue Slime Crystal");
-createItem("tcon_slimecrystal_magma", "Magma Slime Crystal");
+Item.addCreativeGroup("tcon_slimymud", "Slimy Mud", [
+    createBlock("tcon_slimymud_green", [{name: "Slimy Mud"}]),
+    createBlock("tcon_slimymud_blue", [{name: "Blue Slimy Mud"}]),
+    createBlock("tcon_slimymud_magma", [{name: "Magma Slimy Mud"}])
+]);
+Recipes2.addShapeless(BlockID.tcon_slimymud_green, [{id: "slime_ball", count: 4}, "sand", "dirt"]);
+Recipes2.addShapeless(BlockID.tcon_slimymud_blue, [{id: ItemID.tcon_slimeball_blue, count: 4}, "sand", "dirt"]);
+Recipes2.addShapeless(BlockID.tcon_slimymud_magma, [{id: "magma_cream", count: 4}, "soul_sand", "netherrack"]);
+
+
+Item.addCreativeGroup("tcon_slimycrystal", "Slime Crystal", [
+    createItem("tcon_slimecrystal_green", "Slime Crystal"),
+    createItem("tcon_slimecrystal_blue", "Blue Slime Crystal"),
+    createItem("tcon_slimecrystal_magma", "Magma Slime Crystal")
+]);
 Recipes.addFurnace(BlockID.tcon_slimymud_green, ItemID.tcon_slimecrystal_green);
 Recipes.addFurnace(BlockID.tcon_slimymud_blue, ItemID.tcon_slimecrystal_blue);
 Recipes.addFurnace(BlockID.tcon_slimymud_magma, ItemID.tcon_slimecrystal_magma);
-Item.addCreativeGroup("tcon_slimycrystal", "Slime Crystal", [ItemID.tcon_slimecrystal_green, ItemID.tcon_slimecrystal_blue, ItemID.tcon_slimecrystal_magma]);
 
 
 createBlock("tcon_clear_glass", [{name: "Clear Glass"}]);

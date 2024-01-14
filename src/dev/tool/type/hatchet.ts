@@ -44,10 +44,10 @@ class TconHatchet extends TconTool {
             });
             if(blockData.material.name !== "plant"){
                 if(this.isWeapon){
-                    stack.consumeDurability(2);
+                    stack.consumeDurability(2, player);
                 }
                 else{
-                    stack.consumeDurability(1);
+                    stack.consumeDurability(1, player);
                     stack.addXp(1, player);
                 }
                 item.data = stack.data;
@@ -74,7 +74,7 @@ class TconHatchet extends TconTool {
                     region.setBlock(coords, log.stripped, 0);
                 }
                 region.playSound(coords.x, coords.y, coords.z, log.isStem ? "step.stem" : "step.wood");
-                stack.consumeDurability(1);
+                stack.consumeDurability(1, player);
                 stack.addXp(1, player);
                 stack.applyToHand(player);
             }

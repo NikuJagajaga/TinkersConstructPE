@@ -104,7 +104,6 @@ class SearedTank extends TileWithLiquidModel {
 
         if(Entity.getSneaking(playerUid)) return true;
 
-        const region = WorldRegion.getForActor(playerUid);
         const player = new PlayerEntity(playerUid);
         const stored = this.liquidStorage.getLiquidStored();
         const empty = LiquidItemRegistry.getEmptyItem(item.id, item.data);
@@ -118,14 +117,14 @@ class SearedTank extends TileWithLiquidModel {
                     item.count--;
                     player.setCarriedItem(item);
                     player.addItemToInventory(empty.id, 1, empty.data);
-                    region.playSound(coords, soundName);
+                    this.region.playSound(coords, soundName);
                     this.preventClick();
                     return true;
                 }
                 if(item.count === 1 && empty.storage){
                     item.data += this.liquidStorage.addLiquid(empty.liquid, empty.amount);
                     player.setCarriedItem(item);
-                    region.playSound(coords, soundName);
+                    this.region.playSound(coords, soundName);
                     this.preventClick();
                     return true;
                 }
@@ -147,13 +146,13 @@ class SearedTank extends TileWithLiquidModel {
                         player.setCarriedItem(item);
                         player.addItemToInventory(full.id, 1, full.data);
                     }
-                    region.playSound(coords, soundName);
+                    this.region.playSound(coords, soundName);
                     this.preventClick();
                     return true;
                 }
                 if(item.count === 1 && full.storage){
                     player.setCarriedItem(full.id, 1, full.amount - this.liquidStorage.getLiquid(stored, full.amount));
-                    region.playSound(coords, soundName);
+                    this.region.playSound(coords, soundName);
                     this.preventClick();
                     return true;
                 }

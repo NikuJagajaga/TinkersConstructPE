@@ -36,8 +36,11 @@ class ToolCrafterWindow extends CraftingWindow {
             }
         });
 
+        const loc = window.getWindow("content").getLocation();
+        
         window.addWindow("stats", {
-            location: {x: 722, y: 90, width: 400 * 0.64 - 20, height: 240 * 0.64 - 20, scrollY: 250},
+            //-14 is mistery
+            location: {x: loc.x + loc.windowToGlobal(580 + 20) - 14, y: loc.y + loc.windowToGlobal(0 + 20), width: loc.windowToGlobal(400 - 40), height: loc.windowToGlobal(240 - 40), scrollY: 250},
             drawing: [
                 {type: "background", color: Color.TRANSPARENT}
             ],
@@ -48,7 +51,7 @@ class ToolCrafterWindow extends CraftingWindow {
         });
 
         window.addWindow("modifiers", {
-            location: {x: 722, y: 257, width: 400 * 0.64 - 20, height: 240 * 0.64 - 20, scrollY: 250},
+            location: {x: loc.x + loc.windowToGlobal(580 + 20) - 14, y: loc.y + loc.windowToGlobal(260 + 20), width: loc.windowToGlobal(400 - 40), height: loc.windowToGlobal(240 - 40), scrollY: 250},
             drawing: [
                 {type: "background", color: Color.TRANSPARENT},
                 {type: "text", x: 500, y: 50, font: {size: 80, color: Color.YELLOW, shadow: 0.5, alignment: UI.Font.ALIGN_CENTER, bold: true}, text: "Modifiers"}
@@ -287,9 +290,13 @@ class ToolCrafterWindow extends CraftingWindow {
                 slot.validate();
             }
             actor.addItemToInventory(slotResult.id, slotResult.count, slotResult.data, slotResult.extra, true);
-            this.isForge ?
-                client.send("tcon.playSound", {name: "tcon.anvil_use.ogg", volume: 0.5, pitch: 0.95 + 0.2 * Math.random()}) :
+            if(this.isForge){
+                client.send("tcon.playSound", {name: "tcon.anvil_use.ogg", volume: 0.5, pitch: 0.95 + 0.2 * Math.random()});
+            }
+            else{
                 client.send("tcon.playSound", {name: "tcon.little_saw.ogg"});
+            }
+                
             this.onUpdate(container);
         }
 

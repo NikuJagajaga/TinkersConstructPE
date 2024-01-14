@@ -49,6 +49,14 @@ class TconTool extends ItemCommon implements ItemBehavior, ToolAPI.ToolParams {
             ItemModel.getFor(this.id, i).setModelOverrideCallback(item => ToolModelManager.getModel(item));
         }
 
+        // KEX.ItemsModule.addTooltip(this.id, (item, text, level) => {
+        //     text.add("hello tooltips!");
+        // });
+
+        KEX.ItemsModule.setExplodable(this.id, true);
+        KEX.ItemsModule.setFireResistant(this.id, true);
+        KEX.ItemsModule.setShouldDespawn(this.id, false);
+
     }
 
     addToCreative(partsCount: number): void {
@@ -120,7 +128,7 @@ class TconTool extends ItemCommon implements ItemBehavior, ToolAPI.ToolParams {
         const stack = new TconToolStack(item);
         const blockData = ToolAPI.getBlockData(block.id);
         let devider = 1;
-        if(this.blockTypes.indexOf(blockData.material.name) !== -1 && stack.stats.level >= blockData.level && !stack.isBroken()){
+        if(blockData?.material && this.blockTypes.indexOf(blockData.material.name) !== -1 && stack.stats.level >= blockData.level && !stack.isBroken()){
             devider = stack.stats.efficiency;
             if(blockData.isNative){
                 devider *= blockData.material.multiplier;
@@ -139,15 +147,16 @@ class TconTool extends ItemCommon implements ItemBehavior, ToolAPI.ToolParams {
         }
         const stack = new TconToolStack(item);
         const blockData = ToolAPI.getBlockData(block.id);
-        if(blockData && this.blockTypes.indexOf(blockData.material.name) !== -1 && stack.stats.level >= blockData.level && !stack.isBroken()){
+        //KEX compatibility (ToolAPI.getBlockData will NOT be null)
+        if(blockData?.material && this.blockTypes.indexOf(blockData.material.name) !== -1 && stack.stats.level >= blockData.level && !stack.isBroken()){
             stack.forEachModifiers((mod, level) => {
                 mod.onDestroy(item, coords, block, player, level);
             });
             if(this.isWeapon){
-                stack.consumeDurability(2);
+                stack.consumeDurability(2, player);
             }
             else{
-                stack.consumeDurability(1);
+                stack.consumeDurability(1, player);
                 stack.addXp(1, player);
             }
             item.data = stack.data; //setCarriedItem in ToolAPI.destroyBlockHook
@@ -166,11 +175,11 @@ class TconTool extends ItemCommon implements ItemBehavior, ToolAPI.ToolParams {
         });
         this.toolMaterial.damage = stack.stats.damage + bonus;
         if(this.isWeapon){
-            stack.consumeDurability(1);
+            stack.consumeDurability(1, player);
             stack.addXp(1, player);
         }
         else{
-            stack.consumeDurability(2);
+            stack.consumeDurability(2, player);
         }
         item.data = stack.data; //setCarriedItem in ToolAPI.playerAttackHook
         return true;
@@ -260,7 +269,7 @@ class TconTool3x3 extends TconTool {
             pos.add(x, y, z);
             block2 = region.getBlock(pos);
             blockData = ToolAPI.getBlockData(block2.id);
-            if(blockData && this.blockTypes.indexOf(blockData.material.name) !== -1 && stack.stats.level >= blockData.level){
+            if(blockData?.material && this.blockTypes.indexOf(blockData.material.name) !== -1 && stack.stats.level >= blockData.level){
                 region.destroyBlock(pos, true, player);
                 consume++;
                 stack.forEachModifiers((mod, level) => {
@@ -273,14 +282,14 @@ class TconTool3x3 extends TconTool {
 
         blockData = ToolAPI.getBlockData(block.id);
 
-        if(blockData && this.blockTypes.indexOf(blockData.material.name) !== -1 && stack.stats.level >= blockData.level){
+        if(blockData?.material && this.blockTypes.indexOf(blockData.material.name) !== -1 && stack.stats.level >= blockData.level){
             consume++;
             stack.forEachModifiers((mod, level) => {
                 mod.onDestroy(item, coords, block, player, level);
             });
         }
 
-        stack.consumeDurability(consume);
+        stack.consumeDurability(consume, player);
         stack.addXp(consume, player);
         item.data = stack.data;
 

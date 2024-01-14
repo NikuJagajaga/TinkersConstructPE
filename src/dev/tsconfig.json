@@ -44,6 +44,7 @@
         "resource/ore.ts",
         "resource/material.ts",
         "resource/cast.ts",
+        "resource/misc.ts",
 
         "tool/modifier/TinkersModifier.ts",
         "tool/modifier/haste.ts",
@@ -91,6 +92,7 @@
         "../../declarations/android-declarations.d.ts",
         "../../declarations/android.d.ts",
         "../../declarations/core-engine.d.ts",
+        "../../declarations/kex.d.ts",
         "../../declarations/BlockEngine.d.ts",
         "../../declarations/TileRender.d.ts",
         "../../declarations/StorageInterface.d.ts",

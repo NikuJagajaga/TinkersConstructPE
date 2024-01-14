@@ -116,4 +116,6 @@ const createItem = (namedID: string, name: string, texture: Item.TextureData = {
 };
 
 
+ItemModel.setCurrentCacheGroup("tcon", "2.2.0");
+
 Network.addClientPacket("tcon.playSound", (data: {name: string, volume?: number, pitch?: number}) => SoundManager.playSound(data.name, data.volume, data.pitch));

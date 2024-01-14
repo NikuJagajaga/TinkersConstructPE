@@ -6,11 +6,34 @@ Recipes2.addShaped(BlockID.tcon_drain, "a_a:a_a:a_a", {a: ItemID.tcon_brick});
 
 class SearedDrain extends TconTileEntity {
 
-    controller: SmelteryControler;
+    controller?: SmelteryControler;
 
-    override onItemUse(coords: Callback.ItemUseCoordinates, item: ItemStack, player: number): boolean {
+    override onItemUse(coords: Callback.ItemUseCoordinates, item: ItemStack, playerUid: number): boolean {
+        
+        if(Entity.getSneaking(playerUid) && !this.controller) return true;
 
+        const empty = LiquidItemRegistry.getEmptyItem(item.id, item.data);
 
+        if(empty){
+            const player = new PlayerEntity(playerUid);
+            const soundName = MoltenLiquid.getTemp(empty.liquid) < 50 ? "bucket.empty_water" : "bucket.empty_lava";
+            if(this.controller.totalLiquidAmount() + empty.amount <= this.controller.getLiquidCapacity()){
+                this.controller.addLiquid(empty.liquid, empty.amount);
+                item.count--;
+                player.setCarriedItem(item);
+                player.addItemToInventory(empty.id, 1, empty.data);
+                this.region.playSound(coords, soundName);
+                this.preventClick();
+                return true;
+            }
+            if(item.count === 1 && empty.storage){
+                item.data += this.controller.addLiquid(empty.liquid, empty.amount);
+                player.setCarriedItem(item);
+                this.region.playSound(coords, soundName);
+                this.preventClick();
+                return true;
+            }
+        }
 
         return false;
 

@@ -1,7 +1,7 @@
 class ModKnockback extends TinkersModifier {
 
     constructor(){
-        super("knockback", "Knockback", 12, ["piston"], 10, true);
+        super("knockback", "Knockback", 12, [VanillaBlockID.piston], 10, true);
     }
 
     override onAttack(item: ItemInstance, victim: number, player: number, level: number): number {

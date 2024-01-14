@@ -77,7 +77,7 @@ class TconLumberaxe extends TconTool {
             }
             }
             }
-            stack.consumeDurability(consume);
+            stack.consumeDurability(consume, player);
             stack.addXp(consume, player);
             item.data = stack.data;
         }
@@ -183,7 +183,7 @@ class ChopTreeUpdatable implements Updatable {
         stack.forEachModifiers((mod, level) => {
             mod.onDestroy(carried, {x: coords.x, y: coords.y, z: coords.z, side: EBlockSide.DOWN, relative: coords}, block, this.player, level);
         });
-        stack.consumeDurability(1);
+        stack.consumeDurability(1, this.player);
         stack.addXp(1, this.player);
         stack.applyToHand(this.player);
 

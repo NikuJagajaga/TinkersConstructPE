@@ -72,7 +72,7 @@ class TconToolStack implements ItemInstance {
         return this.durability >= this.stats.durability;
     }
 
-    consumeDurability(value: number): void {
+    consumeDurability(value: number, player: number): void {
 
         let cancel = false;
         let consume = 0;
@@ -85,7 +85,13 @@ class TconToolStack implements ItemInstance {
             if(!cancel) consume++;
         }
 
+        let isBroken = this.isBroken();
+
         this.durability += consume;
+
+        if(!isBroken && this.isBroken()){
+            World.playSoundAtEntity(player, "random.break", 0.5);
+        }
         
     }
 

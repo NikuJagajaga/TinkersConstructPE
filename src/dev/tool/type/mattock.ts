@@ -29,7 +29,7 @@ class TconMattock extends TconTool {
                 const region = WorldRegion.getForActor(player);
                 region.setBlock(coords, VanillaTileID.farmland, 0);
                 region.playSound(coords.x, coords.y, coords.z, "step.gravel");
-                stack.consumeDurability(1);
+                stack.consumeDurability(1, player);
                 stack.addXp(1, player);
                 stack.applyToHand(player);
             }
