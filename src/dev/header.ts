@@ -6,6 +6,8 @@ IMPORT("SoundLib");
 IMPORT("EnhancedRecipes");
 IMPORT("ConnectedTexture");
 
+const Bitmap = android.graphics.Bitmap;
+const Canvas = android.graphics.Canvas;
 const Color = android.graphics.Color;
 const Thread = java.lang.Thread;
 const ClientSide = BlockEngine.Decorators.ClientSide;

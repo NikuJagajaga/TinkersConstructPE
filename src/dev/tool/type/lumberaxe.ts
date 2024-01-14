@@ -15,7 +15,7 @@ class TconLumberaxe extends TconTool {
 
         this.is3x3 = true;
         this.blockTypes = ["wood"];
-        this.texture = new ToolTexture("model/tcontool_lumberaxe", 3, 1);
+        this.texture = new ToolTexture("lumberaxe", 3, 1);
         this.miningSpeedModifier = 0.35;
         this.damagePotential = 1.2;
         this.repairParts = [1, 2];

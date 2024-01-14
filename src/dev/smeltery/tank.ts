@@ -83,11 +83,13 @@ BlockModel.register(BlockID.tcon_tank_ingot, (model, index) => {
 
 class SearedTank extends TileWithLiquidModel {
 
+    private tankCapacity: number;
     animPos: Vector;
     animScale: Vector;
 
-    constructor(private tankCapacity: number){
+    constructor(tankCapacity: number){
         super();
+        this.tankCapacity = tankCapacity;
     }
 
     override clientLoad(): void {

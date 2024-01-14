@@ -57,7 +57,7 @@ class SearedFaucet extends TconTileEntity {
 
         this.render = new Render();
         this.anim = new Animation.Base(this.x + 0.5, this.y - 1, this.z + 0.5);
-        this.anim.describe({render: this.render.getId(), skin: "model/tcon_liquids.png"});
+        this.anim.describe({render: this.render.getId(), skin: MoltenLiquid.PATH});
         this.anim.load();
         this.anim.setSkylightMode();
 

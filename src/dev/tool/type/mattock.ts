@@ -5,7 +5,7 @@ class TconMattock extends TconTool {
         super("tcontool_mattock", "Mattock");
 
         this.blockTypes = ["wood", "dirt"];
-        this.texture = new ToolTexture("model/tcontool_mattock", 3, 1);
+        this.texture = new ToolTexture("mattock", 3, 1);
         this.miningSpeedModifier = 0.95;
         this.damagePotential = 0.9;
         this.repairParts = [1, 2];

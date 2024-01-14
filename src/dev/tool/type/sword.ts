@@ -7,7 +7,7 @@ class TconSword extends TconTool {
         super("tcontool_sword", "Broad Sword");
 
         this.blockTypes = ["fibre"];
-        this.texture = new ToolTexture("model/tcontool_sword", 3, 1);
+        this.texture = new ToolTexture("sword", 3, 1);
         this.isWeapon = true;
 
         this.setToolParams();

@@ -7,7 +7,7 @@ class TconHammer extends TconTool3x3 {
         super("tcontool_hammer", "Hammer");
 
         this.blockTypes = ["stone"];
-        this.texture = new ToolTexture("model/tcontool_hammer", 4, 0);
+        this.texture = new ToolTexture("hammer", 4, 0);
         this.miningSpeedModifier = 0.4;
         this.damagePotential = 1.2;
         this.repairParts = [1, 2, 3];

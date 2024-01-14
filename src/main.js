@@ -46,6 +46,8 @@ IMPORT("VanillaSlots");
 IMPORT("SoundLib");
 IMPORT("EnhancedRecipes");
 IMPORT("ConnectedTexture");
+var Bitmap = android.graphics.Bitmap;
+var Canvas = android.graphics.Canvas;
 var Color = android.graphics.Color;
 var Thread = java.lang.Thread;
 var ClientSide = BlockEngine.Decorators.ClientSide;
@@ -177,7 +179,7 @@ var TileWithLiquidModel = /** @class */ (function (_super) {
     TileWithLiquidModel.prototype.clientLoad = function () {
         this.render = new Render();
         this.anim = new Animation.Base(this.x + this.animPos.x, this.y + this.animPos.y - 1.5, this.z + this.animPos.z);
-        this.anim.describe({ render: this.render.getId(), skin: "model/tcon_liquids.png" });
+        this.anim.describe({ render: this.render.getId(), skin: MoltenLiquid.PATH });
         this.anim.load();
         this.anim.setSkylightMode();
         var amount = this.networkData.getFloat("liquidRelativeAmount");
@@ -199,32 +201,6 @@ var TileWithLiquidModel = /** @class */ (function (_super) {
     TileWithLiquidModel.prototype.clientTick = function () {
         var amount = this.networkData.getFloat("liquidRelativeAmount");
         var diff = amount - this.animHeight;
-        var parts = [];
-        var needRefresh = false;
-        if (amount > 0) {
-            this.animHeight += diff * 0.2;
-            this.animHeight = Math.round(this.animHeight * 100) / 100;
-            if (Math.abs(diff) > 0.01) {
-                parts.push({
-                    uv: { x: 0, y: MoltenLiquid.getY(this.networkData.getString("liquidStored")) },
-                    coords: { x: 0, y: -this.animHeight * 16 * this.animScale.y / 2, z: 0 },
-                    size: { x: 16 * this.animScale.x, y: 16 * this.animScale.y * this.animHeight, z: 16 * this.animScale.z }
-                });
-                needRefresh = true;
-            }
-        }
-        else if (this.animHeight !== 0) {
-            this.animHeight = 0;
-            needRefresh = true;
-        }
-        if (needRefresh) {
-            this.render.setPart("head", parts, MoltenLiquid.getTexScale());
-            this.anim.refresh();
-        }
-    };
-    TileWithLiquidModel.prototype.clientTickNew = function () {
-        var amount = this.networkData.getFloat("liquidRelativeAmount");
-        var diff = amount - this.animHeight;
         if (amount > 0) {
             if (diff !== 0) {
                 if (Math.abs(diff) > 0.01) {
@@ -238,7 +214,6 @@ var TileWithLiquidModel = /** @class */ (function (_super) {
                         coords: { x: 0, y: -this.animHeight * 16 * this.animScale.y / 2, z: 0 },
                         size: { x: 16 * this.animScale.x, y: 16 * this.animScale.y * this.animHeight, z: 16 * this.animScale.z }
                     }], MoltenLiquid.getTexScale());
-                this.render.setPart("head", [], MoltenLiquid.getTexScale());
                 this.anim.refresh();
             }
         }
@@ -582,6 +557,7 @@ var MoltenLiquid = /** @class */ (function () {
         var _a, _b;
         return (_b = (_a = this.data[key]) === null || _a === void 0 ? void 0 : _a.temp) !== null && _b !== void 0 ? _b : -1;
     };
+    MoltenLiquid.PATH = "model/tcon_liquids.png";
     /*
     private static readonly baseTex = {
         metal: FileTools.ReadImage(__dir__ + "texture-source/liquid/molten_metal.png"),
@@ -1335,7 +1311,7 @@ var SearedFaucet = /** @class */ (function (_super) {
         var _this = this;
         this.render = new Render();
         this.anim = new Animation.Base(this.x + 0.5, this.y - 1, this.z + 0.5);
-        this.anim.describe({ render: this.render.getId(), skin: "model/tcon_liquids.png" });
+        this.anim.describe({ render: this.render.getId(), skin: MoltenLiquid.PATH });
         this.anim.load();
         this.anim.setSkylightMode();
         this.renderLiquidModel();
@@ -1869,7 +1845,7 @@ var SmelteryControler = /** @class */ (function (_super) {
         var _this = this;
         this.render = new Render();
         this.anim = new Animation.Base(this.x, this.y, this.z);
-        this.anim.describe({ render: this.render.getId(), skin: "model/tcon_liquids.png" });
+        this.anim.describe({ render: this.render.getId(), skin: MoltenLiquid.PATH });
         this.anim.load();
         this.anim.setSkylightMode();
         this.renderModel();
@@ -2766,30 +2742,40 @@ Callback.addCallback("PreLoaded", function () {
         PartRegistry.registerRecipes(key, Material[key]);
     }
 });
+Callback.addCallback("ItemUseLocal", function () {
+    KEX.ItemsModule.addTooltip(VanillaItemID.bucket, function (stack, text, level) {
+        alert("tooltips!");
+        text.add(new java.lang.String("hello"));
+    });
+    Game.message("set");
+});
 var ToolTexture = /** @class */ (function () {
-    //private bitmap: android.graphics.Bitmap;
-    function ToolTexture(path, partsCount, brokenIndex) {
-        this.path = path;
+    function ToolTexture(key, partsCount, brokenIndex) {
+        this.path = "model/tcontool_" + key;
+        this.bitmap = UI.TextureSource.get("tcon.toolbmp." + key);
+        this.resolution = 256;
         this.partsCount = partsCount;
         this.brokenIndex = brokenIndex;
-        //this.bitmap = FileTools.ReadImage(__dir__ + "res/" + path);
     }
     ToolTexture.prototype.getPath = function () {
         return this.path;
     };
-    /*
-        getBitmap(partNum: number, index: number): android.graphics.Bitmap {
-            return Bitmap.createBitmap(this.bitmap, (index & 15) << 4, (index >> 4) + (partNum << 1) << 4, 16, 16);//null, true
-        }
-    */
-    ToolTexture.prototype.getCoords = function (partNum, index) {
+    ToolTexture.prototype.getBitmap = function (coords) {
+        return Bitmap.createBitmap(this.bitmap, coords.x, coords.y, 16, 16);
+    };
+    //partNum: head, handle..., index: material
+    ToolTexture.prototype.getCoords = function (partNum, index, isBroken) {
+        var part = isBroken && partNum === this.brokenIndex ? this.partsCount : partNum;
         return {
-            x: ((index & 15) << 4) / 256,
-            y: ((index >> 4) + (partNum << 1) << 4) / 256
+            x: (index & 15) << 4, //(index % 16) * 16
+            y: (part << 5) + (index >> 4) // part * 32 + (index / 16 | 0)
         };
     };
     ToolTexture.prototype.getModCoords = function (index) {
-        return { x: (index << 4) / 256, y: 240 / 256 };
+        return {
+            x: (index & 15) << 4,
+            y: 224 + (index >> 4)
+        };
     };
     return ToolTexture;
 }());
@@ -3161,7 +3147,9 @@ var ModDiamond = /** @class */ (function (_super) {
     }
     ModDiamond.prototype.applyStats = function (stats, level) {
         stats.durability += 500;
-        stats.level = Math.min(stats.level + 1, TinkersMaterial.OBSIDIAN);
+        if (stats.level < TinkersMaterial.OBSIDIAN) {
+            stats.level++;
+        }
         stats.speed += 0.5;
         stats.attack++;
     };
@@ -3174,7 +3162,9 @@ var ModEmerald = /** @class */ (function (_super) {
     }
     ModEmerald.prototype.applyStats = function (stats, level) {
         stats.durability += stats.durability >> 1;
-        stats.level = Math.min(stats.level + 1, TinkersMaterial.DIAMOND);
+        if (stats.level < TinkersMaterial.DIAMOND) {
+            stats.level++;
+        }
     };
     return ModEmerald;
 }(TinkersModifier));
@@ -3716,13 +3706,13 @@ var ToolCrafterWindow = /** @class */ (function (_super) {
                 { type: "frame", x: 580, y: 260, width: 400, height: 240, bitmap: "tcon.frame", scale: 4 }
             ],
             elements: {
-                bgImage: { type: "image", x: 50, y: 95, bitmap: "tcon.icon.repair", scale: 18.75 },
-                slot0: { type: "slot", x: 0, y: 0, z: 1, size: 80 },
-                slot1: { type: "slot", x: 0, y: 0, z: 1, size: 80 },
-                slot2: { type: "slot", x: 0, y: 0, z: 1, size: 80 },
-                slot3: { type: "slot", x: 0, y: 0, z: 1, size: 80 },
-                slot4: { type: "slot", x: 0, y: 0, z: 1, size: 80 },
-                slot5: { type: "slot", x: 0, y: 0, z: 1, size: 80 },
+                imageBg: { type: "image", x: 50, y: 95, bitmap: "tcon.icon.repair", scale: 18.75 },
+                slot0: { type: "slot", x: 0, y: 2000, z: 1, size: 80 },
+                slot1: { type: "slot", x: 0, y: 2000, z: 1, size: 80 },
+                slot2: { type: "slot", x: 0, y: 2000, z: 1, size: 80 },
+                slot3: { type: "slot", x: 0, y: 2000, z: 1, size: 80 },
+                slot4: { type: "slot", x: 0, y: 2000, z: 1, size: 80 },
+                slot5: { type: "slot", x: 0, y: 2000, z: 1, size: 80 },
                 slotResult: { type: "slot", x: 420, y: 190, size: 120, visual: true, clicker: {
                         onClick: function (_, container) { return container.sendEvent("craft", {}); }
                     } },
@@ -3775,7 +3765,7 @@ var ToolCrafterWindow = /** @class */ (function (_super) {
                     slot.y = 2000;
                 }
             }
-            content.elements.bgImage.bitmap = data.bg;
+            content.elements.imageBg.bitmap = data.bg;
         });
         return _this;
     }
@@ -4325,8 +4315,8 @@ var ToolModelManager = /** @class */ (function () {
         var index = 0;
         for (var i = 0; i < texture.partsCount; i++) {
             index = stack.materials[i].getTexIndex();
-            coordsNormal.push(texture.getCoords(i, index));
-            coordsBroken.push(texture.getCoords(i === texture.brokenIndex ? texture.partsCount : i, index));
+            coordsNormal.push(texture.getCoords(i, index, false));
+            coordsBroken.push(texture.getCoords(i, index, true));
         }
         for (var key in stack.modifiers) {
             index = Modifier[key].getTexIndex();
@@ -4342,8 +4332,8 @@ var ToolModelManager = /** @class */ (function () {
             for (var i = 0; i < 4; i++) {
                 coords = i >> 1 ? coordsBroken : coordsNormal;
                 for (var j = 0; j < coords.length; j++) {
-                    x = coords[j].x;
-                    y = coords[j].y;
+                    x = coords[j].x / texture.resolution;
+                    y = coords[j].y / texture.resolution;
                     z = (i & 1 ? j : (coords.length - j)) * 0.001;
                     mesh[i].setColor(1, 1, 1);
                     mesh[i].setNormal(1, 1, 0);
@@ -4360,14 +4350,31 @@ var ToolModelManager = /** @class */ (function () {
                     mesh[i].scale(2, 2, 2);
                 }
             }
+            var bmpNormal = Bitmap.createBitmap(16, 16, Bitmap.Config.ARGB_8888);
+            var bmpBroken = Bitmap.createBitmap(16, 16, Bitmap.Config.ARGB_8888);
+            var cvsNormal = new Canvas(bmpNormal);
+            var cvsBroken = new Canvas(bmpBroken);
+            var bmp;
+            for (var i = 0; i < coordsNormal.length; i++) {
+                bmp = texture.getBitmap(coordsNormal[i]);
+                cvsNormal.drawBitmap(bmp, 0, 0, null);
+                bmp.recycle();
+            }
+            for (var i = 0; i < coordsBroken.length; i++) {
+                bmp = texture.getBitmap(coordsBroken[i]);
+                cvsBroken.drawBitmap(bmp, 0, 0, null);
+                bmp.recycle();
+            }
             modelNormal.setModel(mesh[0], path)
                 .setUiModel(mesh[1], path)
                 .setSpriteUiRender(true)
-                .setModUiSpriteName(stack.instance.icon.name, stack.instance.icon.meta);
+                .setModUiSpriteBitmap(bmpNormal);
             modelBroken.setModel(mesh[2], path)
                 .setUiModel(mesh[3], path)
                 .setSpriteUiRender(true)
-                .setModUiSpriteName(stack.instance.icon.name, stack.instance.icon.meta);
+                .setModUiSpriteBitmap(bmpBroken);
+            bmpNormal.recycle();
+            bmpBroken.recycle();
         });
         this.models[uniqueKey] = { normal: modelNormal, broken: modelBroken };
         return this.models[uniqueKey][suffix];
@@ -4380,7 +4387,7 @@ var TconPickaxe = /** @class */ (function (_super) {
     function TconPickaxe() {
         var _this = _super.call(this, "tcontool_pickaxe", "Pickaxe") || this;
         _this.blockTypes = ["stone"];
-        _this.texture = new ToolTexture("model/tcontool_pickaxe", 3, 1);
+        _this.texture = new ToolTexture("pickaxe", 3, 1);
         _this.setToolParams();
         _this.addToCreative(3);
         return _this;
@@ -4409,7 +4416,7 @@ var TconShovel = /** @class */ (function (_super) {
     function TconShovel() {
         var _this = _super.call(this, "tcontool_shovel", "Shovel") || this;
         _this.blockTypes = ["dirt"];
-        _this.texture = new ToolTexture("model/tcontool_shovel", 3, 1);
+        _this.texture = new ToolTexture("shovel", 3, 1);
         _this.damagePotential = 0.9;
         _this.setToolParams();
         _this.addToCreative(3);
@@ -4452,7 +4459,7 @@ var TconHatchet = /** @class */ (function (_super) {
     function TconHatchet() {
         var _this = _super.call(this, "tcontool_hatchet", "Hatchet") || this;
         _this.blockTypes = ["wood", "plant"];
-        _this.texture = new ToolTexture("model/tcontool_hatchet", 3, 1);
+        _this.texture = new ToolTexture("hatchet", 3, 1);
         _this.damagePotential = 1.1;
         _this.setToolParams();
         _this.addToCreative(3);
@@ -4542,7 +4549,7 @@ var TconMattock = /** @class */ (function (_super) {
         var _this = _super.call(this, "tcontool_mattock", "Mattock") || this;
         _this.index = 0;
         _this.blockTypes = ["wood", "dirt"];
-        _this.texture = new ToolTexture("model/tcontool_mattock", 3, 1);
+        _this.texture = new ToolTexture("mattock", 3, 1);
         _this.miningSpeedModifier = 0.95;
         _this.damagePotential = 0.9;
         _this.repairParts = [1, 2];
@@ -4587,7 +4594,7 @@ var TconSword = /** @class */ (function (_super) {
     function TconSword() {
         var _this = _super.call(this, "tcontool_sword", "Broad Sword") || this;
         _this.blockTypes = ["fibre"];
-        _this.texture = new ToolTexture("model/tcontool_sword", 3, 1);
+        _this.texture = new ToolTexture("sword", 3, 1);
         _this.isWeapon = true;
         _this.setToolParams();
         _this.addToCreative(3);
@@ -4623,7 +4630,7 @@ var TconHammer = /** @class */ (function (_super) {
     function TconHammer() {
         var _this = _super.call(this, "tcontool_hammer", "Hammer") || this;
         _this.blockTypes = ["stone"];
-        _this.texture = new ToolTexture("model/tcontool_hammer", 4, 0);
+        _this.texture = new ToolTexture("hammer", 4, 0);
         _this.miningSpeedModifier = 0.4;
         _this.damagePotential = 1.2;
         _this.repairParts = [1, 2, 3];
@@ -4662,7 +4669,7 @@ var TconExcavator = /** @class */ (function (_super) {
     function TconExcavator() {
         var _this = _super.call(this, "tcontool_excavator", "Excavator") || this;
         _this.blockTypes = ["dirt"];
-        _this.texture = new ToolTexture("model/tcontool_excavator", 4, 0);
+        _this.texture = new ToolTexture("excavator", 4, 0);
         _this.miningSpeedModifier = 0.28;
         _this.damagePotential = 1.25;
         _this.repairParts = [1, 2];
@@ -4702,7 +4709,7 @@ var TconLumberaxe = /** @class */ (function (_super) {
         var _this = _super.call(this, "tcontool_lumberaxe", "Lumber Axe") || this;
         _this.is3x3 = true;
         _this.blockTypes = ["wood"];
-        _this.texture = new ToolTexture("model/tcontool_lumberaxe", 3, 1);
+        _this.texture = new ToolTexture("lumberaxe", 3, 1);
         _this.miningSpeedModifier = 0.35;
         _this.damagePotential = 1.2;
         _this.repairParts = [1, 2];

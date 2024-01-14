@@ -210,7 +210,7 @@ class SmelteryControler extends TconTileEntity implements ILiquidStorage {
 
         this.render = new Render();
         this.anim = new Animation.Base(this.x, this.y, this.z);
-        this.anim.describe({render: this.render.getId(), skin: "model/tcon_liquids.png"});
+        this.anim.describe({render: this.render.getId(), skin: MoltenLiquid.PATH});
         this.anim.load();
         this.anim.setSkylightMode();
 

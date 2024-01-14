@@ -1,5 +1,7 @@
 class MoltenLiquid {
 
+    static readonly PATH = "model/tcon_liquids.png";
+
     /*
     private static readonly baseTex = {
         metal: FileTools.ReadImage(__dir__ + "texture-source/liquid/molten_metal.png"),

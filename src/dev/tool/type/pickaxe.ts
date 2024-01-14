@@ -5,7 +5,7 @@ class TconPickaxe extends TconTool {
         super("tcontool_pickaxe", "Pickaxe");
 
         this.blockTypes = ["stone"];
-        this.texture = new ToolTexture("model/tcontool_pickaxe", 3, 1);
+        this.texture = new ToolTexture("pickaxe", 3, 1);
 
         this.setToolParams();
         this.addToCreative(3);

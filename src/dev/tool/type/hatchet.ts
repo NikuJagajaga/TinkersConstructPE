@@ -16,7 +16,7 @@ class TconHatchet extends TconTool {
         super("tcontool_hatchet", "Hatchet");
 
         this.blockTypes = ["wood", "plant"];
-        this.texture = new ToolTexture("model/tcontool_hatchet", 3, 1);
+        this.texture = new ToolTexture("hatchet", 3, 1);
         this.damagePotential = 1.1;
 
         this.setToolParams();

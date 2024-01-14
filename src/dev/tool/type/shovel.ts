@@ -5,7 +5,7 @@ class TconShovel extends TconTool {
         super("tcontool_shovel", "Shovel");
 
         this.blockTypes = ["dirt"];
-        this.texture = new ToolTexture("model/tcontool_shovel", 3, 1);
+        this.texture = new ToolTexture("shovel", 3, 1);
         this.damagePotential = 0.9;
 
         this.setToolParams();

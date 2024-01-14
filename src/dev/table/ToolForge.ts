@@ -17,13 +17,13 @@ class ToolCrafterWindow extends CraftingWindow {
                 {type: "frame", x: 580, y: 260, width: 400, height: 240, bitmap: "tcon.frame", scale: 4}
             ],
             elements: {
-                bgImage: {type: "image", x: 50, y: 95, bitmap: "tcon.icon.repair", scale: 18.75},
-                slot0: {type: "slot", x: 0, y: 0, z: 1, size: 80},
-                slot1: {type: "slot", x: 0, y: 0, z: 1, size: 80},
-                slot2: {type: "slot", x: 0, y: 0, z: 1, size: 80},
-                slot3: {type: "slot", x: 0, y: 0, z: 1, size: 80},
-                slot4: {type: "slot", x: 0, y: 0, z: 1, size: 80},
-                slot5: {type: "slot", x: 0, y: 0, z: 1, size: 80},
+                imageBg: {type: "image", x: 50, y: 95, bitmap: "tcon.icon.repair", scale: 18.75},
+                slot0: {type: "slot", x: 0, y: 2000, z: 1, size: 80},
+                slot1: {type: "slot", x: 0, y: 2000, z: 1, size: 80},
+                slot2: {type: "slot", x: 0, y: 2000, z: 1, size: 80},
+                slot3: {type: "slot", x: 0, y: 2000, z: 1, size: 80},
+                slot4: {type: "slot", x: 0, y: 2000, z: 1, size: 80},
+                slot5: {type: "slot", x: 0, y: 2000, z: 1, size: 80},
                 slotResult: {type: "slot", x: 420, y: 190, size: 120, visual: true, clicker: {
                     onClick: (_, container: ItemContainer) => container.sendEvent("craft", {})
                 }},
@@ -85,7 +85,7 @@ class ToolCrafterWindow extends CraftingWindow {
                 }
             }
             
-            content.elements.bgImage.bitmap = data.bg;
+            content.elements.imageBg.bitmap = data.bg;
 
         });
 
