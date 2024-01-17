@@ -1,0 +1,32 @@
+{
+	"compilerOptions": {
+		"target": "ES5",
+		"lib": [
+			"ESNext"
+		],
+		"strict": false,
+    	"skipLibCheck": true,
+		"outFile": "../preloader.js",
+		"newLine": "LF"
+	},
+	"include": [
+		"header.ts",
+		"colorfilter/ColorFilter.ts",
+		"colorfilter/SingleColorFilter.ts",
+		"colorfilter/MultiColorFilter.ts",
+		"colorfilter/InverseColorFilter.ts",
+		"colorfilter/MetalColorFilter.ts",
+		"colorfilter/MetalTexFilter.ts",
+		"colorfilter/TexColorFilter.ts",
+		"colorfilter/PatternFilter.ts",
+		"colorfilter/CastFilter.ts",
+		"parts.ts",
+		"tools.ts",
+		"ores.ts"
+  	],
+	"files": [
+		"../../../_MODULE_/android-declarations.d.ts",
+		"../../../_MODULE_/android.d.ts",
+		"../../../_MODULE_/core-engine.d.ts"
+	]
+}

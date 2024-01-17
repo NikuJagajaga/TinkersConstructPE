@@ -85,9 +85,28 @@ var Cfg = {
     showItemOnTable: __config__.getBool("showItemOnTable"),
     checkInsideSmeltery: __config__.getBool("checkInsideSmeltery")
 };
-var MatValue = /** @class */ (function () {
-    function MatValue() {
-    }
+var EPartCategory = {
+    HEAD: 1 << 0,
+    HANDLE: 1 << 1,
+    EXTRA: 1 << 2
+};
+var PartCategory = {
+    pickaxe: EPartCategory.HEAD,
+    shovel: EPartCategory.HEAD,
+    axe: EPartCategory.HEAD,
+    broadaxe: EPartCategory.HEAD,
+    sword: EPartCategory.HEAD,
+    hammer: EPartCategory.HEAD,
+    excavator: EPartCategory.HEAD,
+    rod: EPartCategory.HANDLE,
+    rod2: EPartCategory.HANDLE | EPartCategory.EXTRA,
+    binding: EPartCategory.EXTRA,
+    binding2: EPartCategory.EXTRA,
+    guard: EPartCategory.EXTRA,
+    largeplate: EPartCategory.HEAD | EPartCategory.EXTRA
+};
+var MatValue;
+(function (MatValue) {
     MatValue.INGOT = 144;
     MatValue.NUGGET = MatValue.INGOT / 9;
     MatValue.FRAGMENT = MatValue.INGOT / 4;
@@ -100,8 +119,8 @@ var MatValue = /** @class */ (function () {
     MatValue.BRICK_BLOCK = MatValue.INGOT * 4;
     MatValue.SLIME_BALL = 250;
     MatValue.ORE = MatValue.INGOT * Cfg.oreToIngotRatio;
-    return MatValue;
-}());
+})(MatValue || (MatValue = {}));
+EArmorType;
 var addLineBreaks = function (length, text) {
     var array = [];
     var words = text.split(" ");
@@ -2280,9 +2299,6 @@ StorageInterface.createInterface(BlockID.tcon_smeltery, {
         return this.tileEntity;
     }
 });
-;
-;
-;
 var TinkersMaterial = /** @class */ (function () {
     function TinkersMaterial(name, texIndex, moltenLiquid, isMetal) {
         this.name = name;
@@ -2334,7 +2350,7 @@ var TinkersMaterial = /** @class */ (function () {
     TinkersMaterial.DIAMOND = 3;
     TinkersMaterial.OBSIDIAN = 4;
     TinkersMaterial.COBALT = 5;
-    TinkersMaterial.level = {
+    TinkersMaterial.LEVEL_NAME = {
         1: "Stone",
         2: "Iron",
         3: "Diamond",
@@ -2664,9 +2680,10 @@ var PartRegistry = /** @class */ (function () {
     PartRegistry.createParts = function (key, material) {
         var name = material.getName();
         var id = 0;
-        for (var _i = 0, _a = this.types; _i < _a.length; _i++) {
-            var type = _a[_i];
+        for (var _i = 0, _b = this.types; _i < _b.length; _i++) {
+            var type = _b[_i];
             id = createItem("tconpart_".concat(type.key, "_").concat(key), "".concat(name, " ").concat(type.name));
+            Item.registerNameOverrideFunction(id, this.nameOverrideFunc);
             Item.addCreativeGroup("tconpart_" + type.key, type.name, [id]);
             this.data[id] = { type: type.key, material: key };
         }
@@ -2675,8 +2692,8 @@ var PartRegistry = /** @class */ (function () {
     PartRegistry.registerRecipes = function (key, material) {
         var id = 0;
         var liquid = "";
-        for (var _i = 0, _a = this.types; _i < _a.length; _i++) {
-            var type = _a[_i];
+        for (var _i = 0, _b = this.types; _i < _b.length; _i++) {
+            var type = _b[_i];
             id = ItemID["tconpart_".concat(type.key, "_").concat(key)];
             liquid = material.getMoltenLiquid();
             if (liquid) {
@@ -2702,8 +2719,8 @@ var PartRegistry = /** @class */ (function () {
         var list = [];
         for (var key in Material) {
             if (!Material[key].isMetal) {
-                for (var _i = 0, _a = this.types; _i < _a.length; _i++) {
-                    var type = _a[_i];
+                for (var _i = 0, _b = this.types; _i < _b.length; _i++) {
+                    var type = _b[_i];
                     list.push({
                         input: [{ id: ItemID.tcon_pattern_blank, count: 1, data: 0 }, __assign(__assign({}, Material[key].getItem()), { count: type.cost })],
                         output: [{ id: this.getIDFromData(type.key, key), count: 1, data: 0 }],
@@ -2714,6 +2731,8 @@ var PartRegistry = /** @class */ (function () {
         }
         return list;
     };
+    var _a;
+    _a = PartRegistry;
     PartRegistry.data = {};
     PartRegistry.types = [
         { key: "pickaxe", name: "Pickaxe Head", cost: 2 },
@@ -2730,6 +2749,37 @@ var PartRegistry = /** @class */ (function () {
         { key: "guard", name: "Wide Guard", cost: 1 },
         { key: "largeplate", name: "Large Plate", cost: 8 }
     ];
+    PartRegistry.nameOverrideFunc = function (item, translation, name) {
+        var tooltips = [];
+        var partData = _a.getPartData(item.id);
+        if (partData) {
+            var matData = Material[partData.material];
+            if (matData) {
+                var mask = PartCategory[partData.type];
+                if (mask & EPartCategory.HEAD) {
+                    var head = matData.getHeadStats();
+                    EColor;
+                    tooltips.push("", "§fHead");
+                    tooltips.push("§7Durability: " + head.durability);
+                    tooltips.push("Mining Level: " + TinkersMaterial.LEVEL_NAME[head.level]);
+                    tooltips.push("Mining Speed: " + head.speed);
+                    tooltips.push("Attack: " + head.attack);
+                }
+                if (mask & EPartCategory.HANDLE) {
+                    var handle = matData.getHandleStats();
+                    tooltips.push("", "§fHandle");
+                    tooltips.push("§7Modifier: " + handle.modifier);
+                    tooltips.push("Durability: " + handle.durability);
+                }
+                if (mask & EPartCategory.EXTRA) {
+                    var extra = matData.getExtraStats();
+                    tooltips.push("", "§fExtra");
+                    tooltips.push("§7Durability: " + extra.durability);
+                }
+            }
+        }
+        return name + "\n" + tooltips.join("\n");
+    };
     return PartRegistry;
 }());
 (function () {
@@ -2741,13 +2791,6 @@ Callback.addCallback("PreLoaded", function () {
     for (var key in Material) {
         PartRegistry.registerRecipes(key, Material[key]);
     }
-});
-Callback.addCallback("ItemUseLocal", function () {
-    KEX.ItemsModule.addTooltip(VanillaItemID.bucket, function (stack, text, level) {
-        alert("tooltips!");
-        text.add(new java.lang.String("hello"));
-    });
-    Game.message("set");
 });
 var ToolTexture = /** @class */ (function () {
     function ToolTexture(key, partsCount, brokenIndex) {
@@ -2768,7 +2811,7 @@ var ToolTexture = /** @class */ (function () {
         var part = isBroken && partNum === this.brokenIndex ? this.partsCount : partNum;
         return {
             x: (index & 15) << 4, //(index % 16) * 16
-            y: (part << 5) + (index >> 4) // part * 32 + (index / 16 | 0)
+            y: (part << 1) + (index >> 4) << 4 // (part * 2 + (index / 16 | 0)) * 16
         };
     };
     ToolTexture.prototype.getModCoords = function (index) {
@@ -3263,12 +3306,12 @@ var ModNecrotic = /** @class */ (function (_super) {
     };
     return ModNecrotic;
 }(TinkersModifier));
-KEX.LootModule.addOnDropCallbackFor("entities/wither_skeleton", function (drops, context) {
-    var player = context.getKillerPlayer();
-    if (Math.random() < (player ? 0.1 : 0.05)) {
-        drops.addItem(ItemID.tcon_necrotic_bone, 1, 0);
-    }
-});
+// KEX.LootModule.addOnDropCallbackFor("entities/wither_skeleton", (drops, context) => {
+//     const player = context.getKillerPlayer();
+//     if(Math.random() < (player ? 0.1 : 0.05)){
+//         drops.addItem(ItemID.tcon_necrotic_bone, 1, 0);
+//     }
+// });
 // KEX.LootModule.createLootTableModifier("entities/wither_skeleton")
 //     .createNewPool()
 //         .addEntry()
@@ -3548,7 +3591,7 @@ var PartBuilderWindow = new /** @class */ (function (_super) {
                     textTitle = Material[key].getName();
                     textStats = "Head\n" +
                         "Durability: " + statsHead.durability + "\n" +
-                        "Mining Level: " + TinkersMaterial.level[statsHead.level] + "\n" +
+                        "Mining Level: " + TinkersMaterial.LEVEL_NAME[statsHead.level] + "\n" +
                         "Mining Speed: " + statsHead.speed + "\n" +
                         "Attack" + statsHead.attack + "\n" +
                         "\n" +
@@ -3973,7 +4016,7 @@ var ToolCrafterWindow = /** @class */ (function (_super) {
         var stack = new TconToolStack(item);
         var modifiers = TinkersModifierHandler.decodeToArray(item.extra.getString("modifiers"));
         container.setText("textStats", "Durability: " + (stack.stats.durability - item.extra.getInt("durability")) + "/" + stack.stats.durability + "\n" +
-            "Mining Level: " + TinkersMaterial.level[stack.stats.level] + "\n" +
+            "Mining Level: " + TinkersMaterial.LEVEL_NAME[stack.stats.level] + "\n" +
             "Mining Speed: " + ((stack.stats.efficiency * 100 | 0) / 100) + "\n" +
             "Attack: " + ((stack.stats.damage * 100 | 0) / 100) + "\n" +
             "Modifiers: " + (Cfg.modifierSlots + ToolLeveling.getLevel(stack.xp, stack.instance.is3x3) - modifiers.length));
@@ -4047,13 +4090,12 @@ var TconTool = /** @class */ (function (_super) {
         for (var i = 0; i <= _this.maxDamage; i++) {
             ItemModel.getFor(_this.id, i).setModelOverrideCallback(function (item) { return ToolModelManager.getModel(item); });
         }
+        return _this;
         // KEX.ItemsModule.addTooltip(this.id, (item, text, level) => {
         //     text.add("hello tooltips!");
         // });
-        KEX.ItemsModule.setExplodable(_this.id, true);
-        KEX.ItemsModule.setFireResistant(_this.id, true);
-        KEX.ItemsModule.setShouldDespawn(_this.id, false);
-        return _this;
+        //KEX.ItemsModule.setExplodable(this.id, true);
+        //KEX.ItemsModule.setFireResistant(this.id, true);
     }
     TconTool.prototype.addToCreative = function (partsCount) {
         var materials;

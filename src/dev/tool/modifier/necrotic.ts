@@ -16,12 +16,12 @@ class ModNecrotic extends TinkersModifier {
     
 }
 
-KEX.LootModule.addOnDropCallbackFor("entities/wither_skeleton", (drops, context) => {
-    const player = context.getKillerPlayer();
-    if(Math.random() < (player ? 0.1 : 0.05)){
-        drops.addItem(ItemID.tcon_necrotic_bone, 1, 0);
-    }
-});
+// KEX.LootModule.addOnDropCallbackFor("entities/wither_skeleton", (drops, context) => {
+//     const player = context.getKillerPlayer();
+//     if(Math.random() < (player ? 0.1 : 0.05)){
+//         drops.addItem(ItemID.tcon_necrotic_bone, 1, 0);
+//     }
+// });
 
 // KEX.LootModule.createLootTableModifier("entities/wither_skeleton")
 //     .createNewPool()

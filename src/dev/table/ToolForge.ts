@@ -326,7 +326,7 @@ class ToolCrafterWindow extends CraftingWindow {
 
         container.setText("textStats",
             "Durability: " + (stack.stats.durability - item.extra.getInt("durability")) + "/" + stack.stats.durability + "\n" +
-            "Mining Level: " + TinkersMaterial.level[stack.stats.level] + "\n" +
+            "Mining Level: " + TinkersMaterial.LEVEL_NAME[stack.stats.level] + "\n" +
             "Mining Speed: " + ((stack.stats.efficiency * 100 | 0) / 100) + "\n" +
             "Attack: " + ((stack.stats.damage * 100 | 0) / 100) + "\n" +
             "Modifiers: " + (Cfg.modifierSlots + ToolLeveling.getLevel(stack.xp, stack.instance.is3x3) - modifiers.length)

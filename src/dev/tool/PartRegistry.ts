@@ -23,11 +23,44 @@ class PartRegistry {
         {key: "largeplate", name: "Large Plate", cost: 8}
     ];
 
+    private static nameOverrideFunc: Callback.ItemNameOverrideFunction = (item, translation, name): string => {
+        const tooltips: string[] = [];
+        const partData = this.getPartData(item.id);
+        if(partData){
+            const matData = Material[partData.material];
+            if(matData){
+                const mask = PartCategory[partData.type];
+                if(mask & EPartCategory.HEAD){
+                    const head = matData.getHeadStats();
+                    EColor
+                    tooltips.push("", "§fHead");
+                    tooltips.push("§7Durability: " + head.durability);
+                    tooltips.push("Mining Level: " + TinkersMaterial.LEVEL_NAME[head.level]);
+                    tooltips.push("Mining Speed: " + head.speed);
+                    tooltips.push("Attack: " + head.attack);
+                }
+                if(mask & EPartCategory.HANDLE){
+                    const handle = matData.getHandleStats();
+                    tooltips.push("", "§fHandle");
+                    tooltips.push("§7Modifier: " + handle.modifier);
+                    tooltips.push("Durability: " + handle.durability);
+                }
+                if(mask & EPartCategory.EXTRA){
+                    const extra = matData.getExtraStats();
+                    tooltips.push("", "§fExtra");
+                    tooltips.push("§7Durability: " + extra.durability);
+                }
+            }
+        }
+        return name + "\n" + tooltips.join("\n");
+    }
+
     static createParts(key: string, material: TinkersMaterial): void {
         const name = material.getName();
         let id = 0;
         for(let type of this.types){
             id = createItem(`tconpart_${type.key}_${key}`, `${name} ${type.name}`);
+            Item.registerNameOverrideFunction(id, this.nameOverrideFunc);
             Item.addCreativeGroup("tconpart_" + type.key, type.name, [id]);
             this.data[id] = {type: type.key, material: key};
         };

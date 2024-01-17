@@ -27,7 +27,7 @@ class ToolTexture {
         const part = isBroken && partNum === this.brokenIndex ? this.partsCount : partNum;
         return {
             x: (index & 15) << 4, //(index % 16) * 16
-            y: (part << 5) + (index >> 4) // part * 32 + (index / 16 | 0)
+            y: (part << 1) + (index >> 4) << 4 // (part * 2 + (index / 16 | 0)) * 16
         };
     }
 

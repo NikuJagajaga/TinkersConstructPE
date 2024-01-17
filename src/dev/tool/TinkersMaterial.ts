@@ -1,6 +1,6 @@
-interface HeadStats {durability: number, speed: number, attack: number, level: number};
-interface HandleStats {modifier: number, durability: number};
-interface ExtraStats {durability: number};
+interface HeadStats {durability: number, speed: number, attack: number, level: number}
+interface HandleStats {modifier: number, durability: number}
+interface ExtraStats {durability: number}
 
 
 class TinkersMaterial {
@@ -11,7 +11,7 @@ class TinkersMaterial {
     static readonly OBSIDIAN = 4;
     static readonly COBALT = 5;
 
-    static readonly level = {
+    static readonly LEVEL_NAME = {
         1: "Stone",
         2: "Iron",
         3: "Diamond",
@@ -24,7 +24,7 @@ class TinkersMaterial {
     private handleStats: HandleStats;
     private extraStats: ExtraStats;
 
-    constructor(private name: string, private texIndex: number, private moltenLiquid?: string, public isMetal?: boolean){
+    constructor(private name: string, private texIndex: number, private moltenLiquid?: string, public readonly isMetal?: boolean){
 
     }
 
@@ -52,17 +52,17 @@ class TinkersMaterial {
     }
 
     setHeadStats(durability: number, speed: number, attack: number, level: number): this {
-        this.headStats = {durability: durability, speed: speed, attack: attack, level: level};
+        this.headStats = {durability, speed, attack, level};
         return this;
     }
 
     setHandleStats(modifier: number, durability: number): this {
-        this.handleStats = {modifier: modifier, durability: durability};
+        this.handleStats = {modifier, durability};
         return this;
     }
 
     setExtraStats(durability: number): this {
-        this.extraStats = {durability: durability};
+        this.extraStats = {durability};
         return this;
     }
 

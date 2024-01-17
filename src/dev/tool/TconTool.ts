@@ -53,9 +53,8 @@ class TconTool extends ItemCommon implements ItemBehavior, ToolAPI.ToolParams {
         //     text.add("hello tooltips!");
         // });
 
-        KEX.ItemsModule.setExplodable(this.id, true);
-        KEX.ItemsModule.setFireResistant(this.id, true);
-        KEX.ItemsModule.setShouldDespawn(this.id, false);
+        //KEX.ItemsModule.setExplodable(this.id, true);
+        //KEX.ItemsModule.setFireResistant(this.id, true);
 
     }
 
