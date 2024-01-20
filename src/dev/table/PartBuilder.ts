@@ -213,7 +213,7 @@ const PartBuilderWindow = new class extends CraftingWindow {
                     textTitle = Material[key].getName();
                     textStats = "Head\n" +
                                 "Durability: " + statsHead.durability + "\n" +
-                                "Mining Level: " + TinkersMaterial.LEVEL_NAME[statsHead.level] + "\n" +
+                                "Mining Level: " + MiningLvName[statsHead.level] + "\n" +
                                 "Mining Speed: " + statsHead.speed + "\n" +
                                 "Attack" + statsHead.attack + "\n" +
                                 "\n" +

@@ -6,7 +6,7 @@ class ModEmerald extends TinkersModifier {
 
     override applyStats(stats: ToolStats, level: number): void {
         stats.durability += stats.durability >> 1;
-        if(stats.level < TinkersMaterial.DIAMOND){
+        if(stats.level < MiningLv.DIAMOND){
             stats.level++;
         }
     }

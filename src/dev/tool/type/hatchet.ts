@@ -11,16 +11,16 @@ class TconHatchet extends TconTool {
         {id: VanillaTileID.crimson_stem, data: -1, stripped: VanillaTileID.stripped_crimson_stem, isStem: true}
     ];
 
-    constructor(){
+    constructor(miningLevel: number){
 
-        super("tcontool_hatchet", "Hatchet");
+        super("tcontool_hatchet_lv" + miningLevel, "Hatchet", "tcontool_hatchet");
 
+        this.tconToolType = "hatchet";
         this.blockTypes = ["wood", "plant"];
-        this.texture = new ToolTexture("hatchet", 3, 1);
+        this.texture = new ToolTexture(this.tconToolType, 3, 1);
         this.damagePotential = 1.1;
 
-        this.setToolParams();
-        this.addToCreative(3);
+        this.setToolParams(miningLevel);
 
     }
 
@@ -84,8 +84,15 @@ class TconHatchet extends TconTool {
 }
 
 
-ItemRegistry.registerItem(new TconHatchet());
-ToolForgeHandler.addRecipe(ItemID.tcontool_hatchet, ["rod", "axe", "binding"]);
+ItemRegistry.registerItem(new TconHatchet(MiningLv.STONE));
+ItemRegistry.registerItem(new TconHatchet(MiningLv.IRON));
+ItemRegistry.registerItem(new TconHatchet(MiningLv.DIAMOND));
+ItemRegistry.registerItem(new TconHatchet(MiningLv.OBSIDIAN));
+ItemRegistry.registerItem(new TconHatchet(MiningLv.COBALT));
+
+TconToolFactory.addToCreative("hatchet", "Hatchet", 3);
+ToolForgeHandler.addRecipe("hatchet", ["rod", "axe", "binding"]);
+
 ToolForgeHandler.addLayout({
     title: "Hatchet",
     background: "tcon.icon.hatchet",

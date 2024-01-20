@@ -113,7 +113,7 @@ class ToolCrafterWindow extends CraftingWindow {
 
         const slotTool = container.getSlot("slot0");
 
-        if(ToolForgeHandler.isTool(slotTool.id) && slotTool.extra){
+        if(TconToolFactory.isTool(slotTool.id) && slotTool.extra){
 
             const slots: ItemInstance[] = [];
             const items: ItemInstance[] = [];
@@ -203,12 +203,12 @@ class ToolCrafterWindow extends CraftingWindow {
                 
                 consume[0] = 1;
 
-                const result = stack.clone();
+                let result = stack.clone();
                 result.durability = newDur;
                 result.extra.putInt("repair", stack.repairCount + 1);
                 result.extra.putString("modifiers", TinkersModifierHandler.encodeToString(modifiers));
+                result = new TconToolStack(result);
                 container.setSlot("slotResult", result.id, result.count, result.data, result.extra);
-
             }
             else{
                 container.clearSlot("slotResult");
@@ -245,12 +245,8 @@ class ToolCrafterWindow extends CraftingWindow {
                     partData ? materials.push(partData.material) : alert("part error: " + slot.id);
                     consume[i] = 1;
                 }
-                const extra = new ItemExtraData().putInt("durability", 0)
-                                                 .putInt("xp", 0)
-                                                 .putInt("repair", 0)
-                                                 .putString("materials", materials.join("_"))
-                                                 .putString("modifiers", "");
-                container.setSlot("slotResult", result.result, 1, 0, extra);
+                const stack = TconToolFactory.createToolStack(result.result, materials);
+                container.setSlot("slotResult", stack.id, stack.count, stack.data, stack.extra);
             }
             else{
                 container.clearSlot("slotResult");
@@ -259,10 +255,10 @@ class ToolCrafterWindow extends CraftingWindow {
         }
 
         const slotResult = container.getSlot("slotResult");
-        if(ToolForgeHandler.isTool(slotResult.id) && slotResult.extra){
+        if(TconToolFactory.isTool(slotResult.id) && slotResult.extra){
             this.showInfo(container, slotResult);
         }
-        else if(ToolForgeHandler.isTool(slotTool.id) && slotTool.extra){
+        else if(TconToolFactory.isTool(slotTool.id) && slotTool.extra){
             this.showInfo(container, slotTool);
         }
         else{
@@ -326,7 +322,7 @@ class ToolCrafterWindow extends CraftingWindow {
 
         container.setText("textStats",
             "Durability: " + (stack.stats.durability - item.extra.getInt("durability")) + "/" + stack.stats.durability + "\n" +
-            "Mining Level: " + TinkersMaterial.LEVEL_NAME[stack.stats.level] + "\n" +
+            "Mining Level: " + MiningLvName[stack.stats.level] + "\n" +
             "Mining Speed: " + ((stack.stats.efficiency * 100 | 0) / 100) + "\n" +
             "Attack: " + ((stack.stats.damage * 100 | 0) / 100) + "\n" +
             "Modifiers: " + (Cfg.modifierSlots + ToolLeveling.getLevel(stack.xp, stack.instance.is3x3) - modifiers.length)

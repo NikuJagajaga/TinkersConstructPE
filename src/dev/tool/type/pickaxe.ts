@@ -1,14 +1,14 @@
 class TconPickaxe extends TconTool {
 
-    constructor(){
+    constructor(miningLevel: number){
 
-        super("tcontool_pickaxe", "Pickaxe");
+        super("tcontool_pickaxe_lv" + miningLevel, "Pickaxe" + miningLevel, "tcontool_pickaxe");
 
+        this.tconToolType = "pickaxe";
         this.blockTypes = ["stone"];
-        this.texture = new ToolTexture("pickaxe", 3, 1);
+        this.texture = new ToolTexture(this.tconToolType, 3, 1);
 
-        this.setToolParams();
-        this.addToCreative(3);
+        this.setToolParams(miningLevel);
 
     }
 
@@ -21,8 +21,15 @@ class TconPickaxe extends TconTool {
 }
 
 
-ItemRegistry.registerItem(new TconPickaxe());
-ToolForgeHandler.addRecipe(ItemID.tcontool_pickaxe, ["rod", "pickaxe", "binding"]);
+ItemRegistry.registerItem(new TconPickaxe(MiningLv.STONE));
+ItemRegistry.registerItem(new TconPickaxe(MiningLv.IRON));
+ItemRegistry.registerItem(new TconPickaxe(MiningLv.DIAMOND));
+ItemRegistry.registerItem(new TconPickaxe(MiningLv.OBSIDIAN));
+ItemRegistry.registerItem(new TconPickaxe(MiningLv.COBALT));
+
+TconToolFactory.addToCreative("pickaxe", "Pickaxe", 3);
+ToolForgeHandler.addRecipe("pickaxe", ["rod", "pickaxe", "binding"]);
+
 ToolForgeHandler.addLayout({
     title: "Pickaxe",
     background: "tcon.icon.pickaxe",

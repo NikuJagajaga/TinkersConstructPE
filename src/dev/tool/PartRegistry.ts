@@ -35,7 +35,7 @@ class PartRegistry {
                     EColor
                     tooltips.push("", "§fHead");
                     tooltips.push("§7Durability: " + head.durability);
-                    tooltips.push("Mining Level: " + TinkersMaterial.LEVEL_NAME[head.level]);
+                    tooltips.push("Mining Level: " + MiningLvName[head.level]);
                     tooltips.push("Mining Speed: " + head.speed);
                     tooltips.push("Attack: " + head.attack);
                 }

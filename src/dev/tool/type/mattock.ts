@@ -1,17 +1,17 @@
 class TconMattock extends TconTool {
 
-    constructor(){
+    constructor(miningLevel: number){
 
-        super("tcontool_mattock", "Mattock");
+        super("tcontool_mattock_lv" + miningLevel, "Mattock", "tcontool_mattock");
 
+        this.tconToolType = "mattock";
         this.blockTypes = ["wood", "dirt"];
-        this.texture = new ToolTexture("mattock", 3, 1);
+        this.texture = new ToolTexture(this.tconToolType, 3, 1);
         this.miningSpeedModifier = 0.95;
         this.damagePotential = 0.9;
         this.repairParts = [1, 2];
 
-        this.setToolParams();
-        this.addToCreative(3);
+        this.setToolParams(miningLevel);
 
     }
 
@@ -39,8 +39,15 @@ class TconMattock extends TconTool {
 }
 
 
-ItemRegistry.registerItem(new TconMattock());
-ToolForgeHandler.addRecipe(ItemID.tcontool_mattock, ["rod", "axe", "shovel"]);
+ItemRegistry.registerItem(new TconMattock(MiningLv.STONE));
+ItemRegistry.registerItem(new TconMattock(MiningLv.IRON));
+ItemRegistry.registerItem(new TconMattock(MiningLv.DIAMOND));
+ItemRegistry.registerItem(new TconMattock(MiningLv.OBSIDIAN));
+ItemRegistry.registerItem(new TconMattock(MiningLv.COBALT));
+
+TconToolFactory.addToCreative("mattock", "Mattock", 3);
+ToolForgeHandler.addRecipe("mattock", ["rod", "axe", "shovel"]);
+
 ToolForgeHandler.addLayout({
     title: "Mattock",
     background: "tcon.icon.mattock",

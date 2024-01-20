@@ -85,42 +85,6 @@ var Cfg = {
     showItemOnTable: __config__.getBool("showItemOnTable"),
     checkInsideSmeltery: __config__.getBool("checkInsideSmeltery")
 };
-var EPartCategory = {
-    HEAD: 1 << 0,
-    HANDLE: 1 << 1,
-    EXTRA: 1 << 2
-};
-var PartCategory = {
-    pickaxe: EPartCategory.HEAD,
-    shovel: EPartCategory.HEAD,
-    axe: EPartCategory.HEAD,
-    broadaxe: EPartCategory.HEAD,
-    sword: EPartCategory.HEAD,
-    hammer: EPartCategory.HEAD,
-    excavator: EPartCategory.HEAD,
-    rod: EPartCategory.HANDLE,
-    rod2: EPartCategory.HANDLE | EPartCategory.EXTRA,
-    binding: EPartCategory.EXTRA,
-    binding2: EPartCategory.EXTRA,
-    guard: EPartCategory.EXTRA,
-    largeplate: EPartCategory.HEAD | EPartCategory.EXTRA
-};
-var MatValue;
-(function (MatValue) {
-    MatValue.INGOT = 144;
-    MatValue.NUGGET = MatValue.INGOT / 9;
-    MatValue.FRAGMENT = MatValue.INGOT / 4;
-    MatValue.SHARD = MatValue.INGOT / 2;
-    MatValue.GEM = 666;
-    MatValue.BLOCK = MatValue.INGOT * 9;
-    MatValue.SEARED_BLOCK = MatValue.INGOT * 2;
-    MatValue.SEARED_MATERIAL = MatValue.INGOT / 2;
-    MatValue.GLASS = 1000;
-    MatValue.BRICK_BLOCK = MatValue.INGOT * 4;
-    MatValue.SLIME_BALL = 250;
-    MatValue.ORE = MatValue.INGOT * Cfg.oreToIngotRatio;
-})(MatValue || (MatValue = {}));
-EArmorType;
 var addLineBreaks = function (length, text) {
     var array = [];
     var words = text.split(" ");
@@ -167,6 +131,55 @@ var createItem = function (namedID, name, texture, params) {
 };
 ItemModel.setCurrentCacheGroup("tcon", "2.2.0");
 Network.addClientPacket("tcon.playSound", function (data) { return SoundManager.playSound(data.name, data.volume, data.pitch); });
+var EPartCategory = {
+    HEAD: 1 << 0,
+    HANDLE: 1 << 1,
+    EXTRA: 1 << 2
+};
+var PartCategory = {
+    pickaxe: EPartCategory.HEAD,
+    shovel: EPartCategory.HEAD,
+    axe: EPartCategory.HEAD,
+    broadaxe: EPartCategory.HEAD,
+    sword: EPartCategory.HEAD,
+    hammer: EPartCategory.HEAD,
+    excavator: EPartCategory.HEAD,
+    rod: EPartCategory.HANDLE,
+    rod2: EPartCategory.HANDLE | EPartCategory.EXTRA,
+    binding: EPartCategory.EXTRA,
+    binding2: EPartCategory.EXTRA,
+    guard: EPartCategory.EXTRA,
+    largeplate: EPartCategory.HEAD | EPartCategory.EXTRA
+};
+var MatValue;
+(function (MatValue) {
+    MatValue.INGOT = 144;
+    MatValue.NUGGET = MatValue.INGOT / 9;
+    MatValue.FRAGMENT = MatValue.INGOT / 4;
+    MatValue.SHARD = MatValue.INGOT / 2;
+    MatValue.GEM = 666;
+    MatValue.BLOCK = MatValue.INGOT * 9;
+    MatValue.SEARED_BLOCK = MatValue.INGOT * 2;
+    MatValue.SEARED_MATERIAL = MatValue.INGOT / 2;
+    MatValue.GLASS = 1000;
+    MatValue.BRICK_BLOCK = MatValue.INGOT * 4;
+    MatValue.SLIME_BALL = 250;
+    MatValue.ORE = MatValue.INGOT * Cfg.oreToIngotRatio;
+})(MatValue || (MatValue = {}));
+var MiningLv = {
+    STONE: 1,
+    IRON: 2,
+    DIAMOND: 3,
+    OBSIDIAN: 4,
+    COBALT: 5
+};
+var MiningLvName = {
+    1: "Stone",
+    2: "Iron",
+    3: "Diamond",
+    4: "Obsidian",
+    5: "Cobalt"
+};
 var TconTileEntity = /** @class */ (function (_super) {
     __extends(TconTileEntity, _super);
     function TconTileEntity() {
@@ -2345,154 +2358,142 @@ var TinkersMaterial = /** @class */ (function () {
     TinkersMaterial.prototype.getExtraStats = function () {
         return this.extraStats;
     };
-    TinkersMaterial.STONE = 1;
-    TinkersMaterial.IRON = 2;
-    TinkersMaterial.DIAMOND = 3;
-    TinkersMaterial.OBSIDIAN = 4;
-    TinkersMaterial.COBALT = 5;
-    TinkersMaterial.LEVEL_NAME = {
-        1: "Stone",
-        2: "Iron",
-        3: "Diamond",
-        4: "Obsidian",
-        5: "Cobalt"
-    };
     return TinkersMaterial;
 }());
 var Material = {
     wood: new TinkersMaterial("Wooden", 0)
         .setItem("planks")
-        .setHeadStats(35, 2, 2, TinkersMaterial.STONE)
+        .setHeadStats(35, 2, 2, MiningLv.STONE)
         .setHandleStats(1, 25)
         .setExtraStats(15),
     stone: new TinkersMaterial("Stone", 1)
         .setItem("cobblestone")
-        .setHeadStats(120, 4, 3, TinkersMaterial.IRON)
+        .setHeadStats(120, 4, 3, MiningLv.IRON)
         .setHandleStats(0.5, -50)
         .setExtraStats(20),
     flint: new TinkersMaterial("Flint", 2)
         .setItem("flint")
-        .setHeadStats(150, 5, 2.9, TinkersMaterial.IRON)
+        .setHeadStats(150, 5, 2.9, MiningLv.IRON)
         .setHandleStats(0.6, -60)
         .setExtraStats(40),
     cactus: new TinkersMaterial("Cactus", 3)
         .setItem("cactus")
-        .setHeadStats(210, 4, 3.4, TinkersMaterial.IRON)
+        .setHeadStats(210, 4, 3.4, MiningLv.IRON)
         .setHandleStats(0.85, 20)
         .setExtraStats(50),
     obsidian: new TinkersMaterial("Obsidian", 4, "molten_obsidian")
         .setItem("obsidian")
-        .setHeadStats(139, 7.07, 4.2, TinkersMaterial.COBALT)
+        .setHeadStats(139, 7.07, 4.2, MiningLv.COBALT)
         .setHandleStats(0.9, -100)
         .setExtraStats(90),
     prismarine: new TinkersMaterial("Prismarine", 5)
         .setItem("prismarine")
-        .setHeadStats(430, 5.5, 6.2, TinkersMaterial.IRON)
+        .setHeadStats(430, 5.5, 6.2, MiningLv.IRON)
         .setHandleStats(0.6, -150)
         .setExtraStats(100),
     netherrack: new TinkersMaterial("Netherrack", 6)
         .setItem("netherrack")
-        .setHeadStats(270, 4.5, 3, TinkersMaterial.IRON)
+        .setHeadStats(270, 4.5, 3, MiningLv.IRON)
         .setHandleStats(0.85, -150)
         .setExtraStats(75),
     endstone: new TinkersMaterial("End", 7)
         .setItem("end_stone")
-        .setHeadStats(420, 3.23, 3.23, TinkersMaterial.OBSIDIAN)
+        .setHeadStats(420, 3.23, 3.23, MiningLv.OBSIDIAN)
         .setHandleStats(0.85, 0)
         .setExtraStats(42),
     bone: new TinkersMaterial("Bone", 8)
         .setItem("bone")
-        .setHeadStats(200, 5.09, 2.5, TinkersMaterial.IRON)
+        .setHeadStats(200, 5.09, 2.5, MiningLv.IRON)
         .setHandleStats(1.1, 50)
         .setExtraStats(65),
     paper: new TinkersMaterial("Paper", 9)
         .setItem(ItemID.tcon_paperstack)
-        .setHeadStats(12, 0.51, 0.05, TinkersMaterial.STONE)
+        .setHeadStats(12, 0.51, 0.05, MiningLv.STONE)
         .setHandleStats(0.1, 5)
         .setExtraStats(15),
     sponge: new TinkersMaterial("Sponge", 10)
         .setItem("sponge")
-        .setHeadStats(1050, 3.02, 0, TinkersMaterial.STONE)
+        .setHeadStats(1050, 3.02, 0, MiningLv.STONE)
         .setHandleStats(1.2, 250)
         .setExtraStats(250),
     firewood: new TinkersMaterial("Firewood", 11)
         .setItem(BlockID.tcon_firewood)
-        .setHeadStats(550, 6, 5.5, TinkersMaterial.STONE)
+        .setHeadStats(550, 6, 5.5, MiningLv.STONE)
         .setHandleStats(1, -200)
         .setExtraStats(150),
     slime: new TinkersMaterial("Slime", 12)
         .setItem(ItemID.tcon_slimecrystal_green)
-        .setHeadStats(1000, 4.24, 1.8, TinkersMaterial.STONE)
+        .setHeadStats(1000, 4.24, 1.8, MiningLv.STONE)
         .setHandleStats(0.7, 0)
         .setExtraStats(350),
     blueslime: new TinkersMaterial("Blue Slime", 13)
         .setItem(ItemID.tcon_slimecrystal_blue)
-        .setHeadStats(780, 4.03, 1.8, TinkersMaterial.STONE)
+        .setHeadStats(780, 4.03, 1.8, MiningLv.STONE)
         .setHandleStats(1.3, -50)
         .setExtraStats(200),
     magmaslime: new TinkersMaterial("Magma Slime", 14)
         .setItem(ItemID.tcon_slimecrystal_magma)
-        .setHeadStats(600, 2.1, 7, TinkersMaterial.STONE)
+        .setHeadStats(600, 2.1, 7, MiningLv.STONE)
         .setHandleStats(0.85, -200)
         .setExtraStats(150),
     knightslime: new TinkersMaterial("Knightslime", 15, "molten_knightslime", true)
         .setItem(ItemID.ingotKnightslime)
-        .setHeadStats(850, 5.8, 5.1, TinkersMaterial.OBSIDIAN)
+        .setHeadStats(850, 5.8, 5.1, MiningLv.OBSIDIAN)
         .setHandleStats(0.5, 500)
         .setExtraStats(125),
     iron: new TinkersMaterial("Iron", 16, "molten_iron", true)
         .setItem("iron_ingot")
-        .setHeadStats(204, 6, 5.5, TinkersMaterial.DIAMOND)
+        .setHeadStats(204, 6, 5.5, MiningLv.DIAMOND)
         .setHandleStats(0.85, 60)
         .setExtraStats(50),
     pigiron: new TinkersMaterial("Pig Iron", 17, "molten_pigiron", true)
         .setItem(ItemID.ingotPigiron)
-        .setHeadStats(380, 6.2, 4.5, TinkersMaterial.DIAMOND)
+        .setHeadStats(380, 6.2, 4.5, MiningLv.DIAMOND)
         .setHandleStats(1.2, 0)
         .setExtraStats(170),
     cobalt: new TinkersMaterial("Cobalt", 18, "molten_cobalt", true)
         .setItem(ItemID.ingotCobalt)
-        .setHeadStats(780, 12, 4.1, TinkersMaterial.COBALT)
+        .setHeadStats(780, 12, 4.1, MiningLv.COBALT)
         .setHandleStats(0.9, 100)
         .setExtraStats(300),
     ardite: new TinkersMaterial("Ardite", 19, "molten_ardite", true)
         .setItem(ItemID.ingotArdite)
-        .setHeadStats(990, 3.5, 3.6, TinkersMaterial.COBALT)
+        .setHeadStats(990, 3.5, 3.6, MiningLv.COBALT)
         .setHandleStats(1.4, -200)
         .setExtraStats(450),
     manyullyn: new TinkersMaterial("Manyullyn", 20, "molten_manyullyn", true)
         .setItem(ItemID.ingotManyullyn)
-        .setHeadStats(820, 7.02, 8.72, TinkersMaterial.COBALT)
+        .setHeadStats(820, 7.02, 8.72, MiningLv.COBALT)
         .setHandleStats(0.5, 250)
         .setExtraStats(50),
     copper: new TinkersMaterial("Copper", 21, "molten_copper", true)
         .setItem(ItemID.ingotCopper)
-        .setHeadStats(210, 5.3, 3, TinkersMaterial.IRON)
+        .setHeadStats(210, 5.3, 3, MiningLv.IRON)
         .setHandleStats(1.05, 30)
         .setExtraStats(100),
     bronze: new TinkersMaterial("Bronze", 22, "molten_bronze", true)
         .setItem(ItemID.ingotBronze)
-        .setHeadStats(430, 6.8, 3.5, TinkersMaterial.DIAMOND)
+        .setHeadStats(430, 6.8, 3.5, MiningLv.DIAMOND)
         .setHandleStats(1.1, 70)
         .setExtraStats(80),
     lead: new TinkersMaterial("Lead", 23, "molten_lead", true)
         .setItem(ItemID.ingotLead)
-        .setHeadStats(434, 5.25, 3.5, TinkersMaterial.IRON)
+        .setHeadStats(434, 5.25, 3.5, MiningLv.IRON)
         .setHandleStats(0.7, -50)
         .setExtraStats(100),
     silver: new TinkersMaterial("Silver", 24, "molten_silver", true)
         .setItem(ItemID.ingotSilver)
-        .setHeadStats(250, 5, 5, TinkersMaterial.IRON)
+        .setHeadStats(250, 5, 5, MiningLv.IRON)
         .setHandleStats(0.95, 50)
         .setExtraStats(150),
     electrum: new TinkersMaterial("Electrum", 25, "molten_electrum", true)
         .setItem(ItemID.ingotElectrum)
-        .setHeadStats(50, 12, 3, TinkersMaterial.IRON)
+        .setHeadStats(50, 12, 3, MiningLv.IRON)
         .setHandleStats(1.1, -25)
         .setExtraStats(250),
     steel: new TinkersMaterial("Steel", 26, "molten_steel", true)
         .setItem(ItemID.ingotSteel)
-        .setHeadStats(540, 7, 6, TinkersMaterial.OBSIDIAN)
+        .setHeadStats(540, 7, 6, MiningLv.OBSIDIAN)
         .setHandleStats(0.9, 150)
         .setExtraStats(25)
 };
@@ -2570,6 +2571,74 @@ var ToolStats = /** @class */ (function () {
     };
     return ToolStats;
 }());
+var TconToolFactory = /** @class */ (function () {
+    function TconToolFactory() {
+    }
+    TconToolFactory.registerToolId = function (toolId, type, miningLevel) {
+        var _a;
+        var _b;
+        (_a = (_b = this.tools)[type]) !== null && _a !== void 0 ? _a : (_b[type] = {});
+        this.tools[type][miningLevel] = toolId;
+    };
+    TconToolFactory.getToolId = function (type, miningLevel) {
+        if (this.tools[type]) {
+            return this.tools[type][miningLevel] || -1;
+        }
+        return -1;
+    };
+    TconToolFactory.createToolStack = function (type, materials) {
+        var id = 0;
+        if (!this.tools[type]) {
+            return null;
+        }
+        for (var lv in this.tools[type]) {
+            id = this.tools[type][lv];
+            break;
+        }
+        if (id === 0) {
+            return null;
+        }
+        return new TconToolStack({
+            id: id,
+            count: 1, data: 0,
+            extra: new ItemExtraData()
+                .putInt("durability", 0)
+                .putInt("xp", 0)
+                .putInt("repair", 0)
+                .putString("materials", materials.join("_"))
+                .putString("modifiers", "")
+        });
+    };
+    TconToolFactory.isTool = function (id) {
+        for (var type in this.tools) {
+            for (var lv in this.tools[type]) {
+                if (id === this.tools[type][lv]) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    };
+    TconToolFactory.addToCreative = function (type, name, partsCount) {
+        var materials = [];
+        var stack;
+        for (var key in Material) {
+            materials.length = 0;
+            for (var i = 0; i < partsCount; i++) {
+                materials.push(key);
+            }
+            stack = this.createToolStack(type, materials);
+            if (stack && stack.id !== -1) {
+                Item.addToCreative(stack.id, stack.count, stack.data, stack.extra);
+            }
+        }
+        for (var lv in this.tools[type]) {
+            Item.addCreativeGroup("tcontool_" + type, name, [this.tools[type][lv]]);
+        }
+    };
+    TconToolFactory.tools = {};
+    return TconToolFactory;
+}());
 var TconToolStack = /** @class */ (function () {
     function TconToolStack(item) {
         this.id = item.id;
@@ -2622,7 +2691,9 @@ var TconToolStack = /** @class */ (function () {
         this.forEachModifiers(function (mod, level) {
             mod.applyStats(stats, level);
         });
-        return stats.getToolMaterial();
+        var toolMaterial = stats.getToolMaterial();
+        this.id = TconToolFactory.getToolId(this.instance.tconToolType, toolMaterial.level);
+        return toolMaterial;
     };
     TconToolStack.prototype.forEachModifiers = function (func) {
         for (var key in this.modifiers) {
@@ -2667,7 +2738,7 @@ var TconToolStack = /** @class */ (function () {
         for (var key in this.modifiers) {
             mask |= 1 << Modifier[key].getTexIndex();
         }
-        return this.id + ":" + hash.toString(16) + ":" + mask.toString(16);
+        return this.instance.tconToolType + ":" + hash.toString(16) + ":" + mask.toString(16);
     };
     TconToolStack.prototype.clone = function () {
         return new TconToolStack({ id: this.id, count: this.count, data: this.data, extra: this.extra.copy() });
@@ -2761,7 +2832,7 @@ var PartRegistry = /** @class */ (function () {
                     EColor;
                     tooltips.push("", "§fHead");
                     tooltips.push("§7Durability: " + head.durability);
-                    tooltips.push("Mining Level: " + TinkersMaterial.LEVEL_NAME[head.level]);
+                    tooltips.push("Mining Level: " + MiningLvName[head.level]);
                     tooltips.push("Mining Speed: " + head.speed);
                     tooltips.push("Attack: " + head.attack);
                 }
@@ -2824,12 +2895,12 @@ var ToolTexture = /** @class */ (function () {
 }());
 IDRegistry.genBlockID("oreCobalt");
 Block.createBlock("oreCobalt", [{ name: "Cobalt Ore", texture: [["tcon_ore_cobalt", 0]], inCreative: true }]);
-ToolAPI.registerBlockMaterial(BlockID.oreCobalt, "stone", TinkersMaterial.COBALT, true);
-Block.setDestroyLevel(BlockID.oreCobalt, TinkersMaterial.COBALT);
+ToolAPI.registerBlockMaterial(BlockID.oreCobalt, "stone", MiningLv.COBALT, true);
+Block.setDestroyLevel(BlockID.oreCobalt, MiningLv.COBALT);
 IDRegistry.genBlockID("oreArdite");
 Block.createBlock("oreArdite", [{ name: "Ardite Ore", texture: [["tcon_ore_ardite", 0]], inCreative: true }]);
-ToolAPI.registerBlockMaterial(BlockID.oreArdite, "stone", TinkersMaterial.COBALT, true);
-Block.setDestroyLevel(BlockID.oreArdite, TinkersMaterial.COBALT);
+ToolAPI.registerBlockMaterial(BlockID.oreArdite, "stone", MiningLv.COBALT, true);
+Block.setDestroyLevel(BlockID.oreArdite, MiningLv.COBALT);
 Item.addCreativeGroup("ores", Translation.translate("Ores"), [BlockID.oreCobalt, BlockID.oreArdite]);
 MeltingRecipe.addRecipe(BlockID.oreCobalt, "molten_cobalt", MatValue.ORE);
 MeltingRecipe.addRecipe(BlockID.oreArdite, "molten_ardite", MatValue.ORE);
@@ -3190,7 +3261,7 @@ var ModDiamond = /** @class */ (function (_super) {
     }
     ModDiamond.prototype.applyStats = function (stats, level) {
         stats.durability += 500;
-        if (stats.level < TinkersMaterial.OBSIDIAN) {
+        if (stats.level < MiningLv.OBSIDIAN) {
             stats.level++;
         }
         stats.speed += 0.5;
@@ -3205,7 +3276,7 @@ var ModEmerald = /** @class */ (function (_super) {
     }
     ModEmerald.prototype.applyStats = function (stats, level) {
         stats.durability += stats.durability >> 1;
-        if (stats.level < TinkersMaterial.DIAMOND) {
+        if (stats.level < MiningLv.DIAMOND) {
             stats.level++;
         }
     };
@@ -3389,6 +3460,24 @@ var ModWeb = /** @class */ (function (_super) {
     };
     return ModWeb;
 }(TinkersModifier));
+var Modifier = {
+    haste: new ModHaste(),
+    luck: new ModLuck(),
+    sharp: new ModSharp(),
+    diamond: new ModDiamond(),
+    emerald: new ModEmerald(),
+    silk: new ModSilk(),
+    reinforced: new ModReinforced(),
+    beheading: new ModBeheading(),
+    smite: new ModSmite(),
+    spider: new ModSpider(),
+    fiery: new ModFiery(),
+    necrotic: new ModNecrotic(),
+    knockback: new ModKnockback(),
+    mending: new ModMending(),
+    shuling: new ModShulking(),
+    web: new ModWeb()
+};
 Item.addCreativeGroup("tcon_partbuilder", "Part Builder", [
     createBlock("tcon_partbuilder0", [{ name: "Part Builder", texture: [0, 0, ["log_side", 0]] }], "wood"),
     createBlock("tcon_partbuilder1", [{ name: "Part Builder", texture: [0, 0, ["log_side", 1]] }], "wood"),
@@ -3591,7 +3680,7 @@ var PartBuilderWindow = new /** @class */ (function (_super) {
                     textTitle = Material[key].getName();
                     textStats = "Head\n" +
                         "Durability: " + statsHead.durability + "\n" +
-                        "Mining Level: " + TinkersMaterial.LEVEL_NAME[statsHead.level] + "\n" +
+                        "Mining Level: " + MiningLvName[statsHead.level] + "\n" +
                         "Mining Speed: " + statsHead.speed + "\n" +
                         "Attack" + statsHead.attack + "\n" +
                         "\n" +
@@ -3667,14 +3756,11 @@ var ToolForgeHandler = /** @class */ (function () {
     ToolForgeHandler.getLayoutList = function (isForge) {
         return this.layouts.filter(function (layout) { return isForge || !layout.forgeOnly; });
     };
-    ToolForgeHandler.addRecipe = function (result, pattern) {
-        this.recipes.push({ result: result, pattern: pattern });
+    ToolForgeHandler.addRecipe = function (resultType, pattern) {
+        this.recipes.push({ result: resultType, pattern: pattern });
     };
     ToolForgeHandler.getRecipes = function (isForge) {
         return this.recipes.filter(function (recipe) { return isForge || recipe.pattern.length <= 3; });
-    };
-    ToolForgeHandler.isTool = function (id) {
-        return this.recipes.some(function (recipe) { return recipe.result === id; });
     };
     ToolForgeHandler.createForgeBlock = function (namedID, block) {
         var id = createBlock(namedID, [{ name: "Tool Forge", texture: [["tcon_toolforge", 0]] }]);
@@ -3826,7 +3912,7 @@ var ToolCrafterWindow = /** @class */ (function (_super) {
     ToolCrafterWindow.prototype.onUpdate = function (container) {
         var consume = [];
         var slotTool = container.getSlot("slot0");
-        if (ToolForgeHandler.isTool(slotTool.id) && slotTool.extra) {
+        if (TconToolFactory.isTool(slotTool.id) && slotTool.extra) {
             var slots = [];
             var items_1 = [];
             var slot_1;
@@ -3921,6 +4007,7 @@ var ToolCrafterWindow = /** @class */ (function (_super) {
                 result.durability = newDur;
                 result.extra.putInt("repair", stack_1.repairCount + 1);
                 result.extra.putString("modifiers", TinkersModifierHandler.encodeToString(modifiers));
+                result = new TconToolStack(result);
                 container.setSlot("slotResult", result.id, result.count, result.data, result.extra);
             }
             else {
@@ -3955,22 +4042,18 @@ var ToolCrafterWindow = /** @class */ (function (_super) {
                     partData ? materials.push(partData.material) : alert("part error: " + slot.id);
                     consume[i] = 1;
                 }
-                var extra = new ItemExtraData().putInt("durability", 0)
-                    .putInt("xp", 0)
-                    .putInt("repair", 0)
-                    .putString("materials", materials.join("_"))
-                    .putString("modifiers", "");
-                container.setSlot("slotResult", result.result, 1, 0, extra);
+                var stack = TconToolFactory.createToolStack(result.result, materials);
+                container.setSlot("slotResult", stack.id, stack.count, stack.data, stack.extra);
             }
             else {
                 container.clearSlot("slotResult");
             }
         }
         var slotResult = container.getSlot("slotResult");
-        if (ToolForgeHandler.isTool(slotResult.id) && slotResult.extra) {
+        if (TconToolFactory.isTool(slotResult.id) && slotResult.extra) {
             this.showInfo(container, slotResult);
         }
-        else if (ToolForgeHandler.isTool(slotTool.id) && slotTool.extra) {
+        else if (TconToolFactory.isTool(slotTool.id) && slotTool.extra) {
             this.showInfo(container, slotTool);
         }
         else {
@@ -4016,7 +4099,7 @@ var ToolCrafterWindow = /** @class */ (function (_super) {
         var stack = new TconToolStack(item);
         var modifiers = TinkersModifierHandler.decodeToArray(item.extra.getString("modifiers"));
         container.setText("textStats", "Durability: " + (stack.stats.durability - item.extra.getInt("durability")) + "/" + stack.stats.durability + "\n" +
-            "Mining Level: " + TinkersMaterial.LEVEL_NAME[stack.stats.level] + "\n" +
+            "Mining Level: " + MiningLvName[stack.stats.level] + "\n" +
             "Mining Speed: " + ((stack.stats.efficiency * 100 | 0) / 100) + "\n" +
             "Attack: " + ((stack.stats.damage * 100 | 0) / 100) + "\n" +
             "Modifiers: " + (Cfg.modifierSlots + ToolLeveling.getLevel(stack.xp, stack.instance.is3x3) - modifiers.length));
@@ -4055,29 +4138,11 @@ ToolForgeHandler.createForgeBlock("tcon_toolforge_alubrass", BlockID.blockAlubra
     winForge.addTargetBlock(BlockID.tcon_toolforge_pigiron);
     winForge.addTargetBlock(BlockID.tcon_toolforge_alubrass);
 })();
-var Modifier = {
-    haste: new ModHaste(),
-    luck: new ModLuck(),
-    sharp: new ModSharp(),
-    diamond: new ModDiamond(),
-    emerald: new ModEmerald(),
-    silk: new ModSilk(),
-    reinforced: new ModReinforced(),
-    beheading: new ModBeheading(),
-    smite: new ModSmite(),
-    spider: new ModSpider(),
-    fiery: new ModFiery(),
-    necrotic: new ModNecrotic(),
-    knockback: new ModKnockback(),
-    mending: new ModMending(),
-    shuling: new ModShulking(),
-    web: new ModWeb()
-};
 var TconTool = /** @class */ (function (_super) {
     __extends(TconTool, _super);
     function TconTool(stringID, name, icon) {
-        if (icon === void 0) { icon = stringID; }
         var _this = _super.call(this, stringID, name, icon, false) || this;
+        _this.tconToolType = stringID;
         _this.isWeapon = false;
         _this.is3x3 = false;
         _this.miningSpeedModifier = 1.0;
@@ -4098,9 +4163,12 @@ var TconTool = /** @class */ (function (_super) {
         //KEX.ItemsModule.setFireResistant(this.id, true);
     }
     TconTool.prototype.addToCreative = function (partsCount) {
-        var materials;
+        var materials = [];
         for (var key in Material) {
-            materials = [];
+            if (Material[key].getHeadStats().level !== ToolAPI.getToolLevel(this.id)) {
+                continue;
+            }
+            materials.length = 0;
             for (var i = 0; i < partsCount; i++) {
                 materials.push(key);
             }
@@ -4113,8 +4181,9 @@ var TconTool = /** @class */ (function (_super) {
         }
         Item.addCreativeGroup(this.stringID, this.name, [this.id]);
     };
-    TconTool.prototype.setToolParams = function () {
-        ToolAPI.registerTool(this.id, { durability: this.maxDamage }, this.blockTypes || [], this);
+    TconTool.prototype.setToolParams = function (miningLevel) {
+        ToolAPI.registerTool(this.id, { level: miningLevel, durability: this.maxDamage }, this.blockTypes || [], this);
+        TconToolFactory.registerToolId(this.id, this.tconToolType, miningLevel);
     };
     TconTool.prototype.buildStats = function (stats, materials) {
     };
@@ -4159,10 +4228,6 @@ var TconTool = /** @class */ (function (_super) {
             if (blockData.isNative) {
                 devider *= blockData.material.multiplier;
             }
-            this.toolMaterial.level = stack.stats.level;
-        }
-        else {
-            this.toolMaterial.level = 0;
         }
         return time.base / devider / time.modifier;
     };
@@ -4426,12 +4491,12 @@ var ToolModelManager = /** @class */ (function () {
 }());
 var TconPickaxe = /** @class */ (function (_super) {
     __extends(TconPickaxe, _super);
-    function TconPickaxe() {
-        var _this = _super.call(this, "tcontool_pickaxe", "Pickaxe") || this;
+    function TconPickaxe(miningLevel) {
+        var _this = _super.call(this, "tcontool_pickaxe_lv" + miningLevel, "Pickaxe" + miningLevel, "tcontool_pickaxe") || this;
+        _this.tconToolType = "pickaxe";
         _this.blockTypes = ["stone"];
-        _this.texture = new ToolTexture("pickaxe", 3, 1);
-        _this.setToolParams();
-        _this.addToCreative(3);
+        _this.texture = new ToolTexture(_this.tconToolType, 3, 1);
+        _this.setToolParams(miningLevel);
         return _this;
     }
     TconPickaxe.prototype.buildStats = function (stats, materials) {
@@ -4441,8 +4506,13 @@ var TconPickaxe = /** @class */ (function (_super) {
     };
     return TconPickaxe;
 }(TconTool));
-ItemRegistry.registerItem(new TconPickaxe());
-ToolForgeHandler.addRecipe(ItemID.tcontool_pickaxe, ["rod", "pickaxe", "binding"]);
+ItemRegistry.registerItem(new TconPickaxe(MiningLv.STONE));
+ItemRegistry.registerItem(new TconPickaxe(MiningLv.IRON));
+ItemRegistry.registerItem(new TconPickaxe(MiningLv.DIAMOND));
+ItemRegistry.registerItem(new TconPickaxe(MiningLv.OBSIDIAN));
+ItemRegistry.registerItem(new TconPickaxe(MiningLv.COBALT));
+TconToolFactory.addToCreative("pickaxe", "Pickaxe", 3);
+ToolForgeHandler.addRecipe("pickaxe", ["rod", "pickaxe", "binding"]);
 ToolForgeHandler.addLayout({
     title: "Pickaxe",
     background: "tcon.icon.pickaxe",
@@ -4455,13 +4525,13 @@ ToolForgeHandler.addLayout({
 });
 var TconShovel = /** @class */ (function (_super) {
     __extends(TconShovel, _super);
-    function TconShovel() {
-        var _this = _super.call(this, "tcontool_shovel", "Shovel") || this;
+    function TconShovel(miningLevel) {
+        var _this = _super.call(this, "tcontool_shovel_lv" + miningLevel, "Shovel", "tcontool_shovel") || this;
+        _this.tconToolType = "shovel";
         _this.blockTypes = ["dirt"];
-        _this.texture = new ToolTexture("shovel", 3, 1);
+        _this.texture = new ToolTexture(_this.tconToolType, 3, 1);
         _this.damagePotential = 0.9;
-        _this.setToolParams();
-        _this.addToCreative(3);
+        _this.setToolParams(miningLevel);
         return _this;
     }
     TconShovel.prototype.buildStats = function (stats, materials) {
@@ -4484,8 +4554,13 @@ var TconShovel = /** @class */ (function (_super) {
     };
     return TconShovel;
 }(TconTool));
-ItemRegistry.registerItem(new TconShovel());
-ToolForgeHandler.addRecipe(ItemID.tcontool_shovel, ["rod", "shovel", "binding"]);
+ItemRegistry.registerItem(new TconShovel(MiningLv.STONE));
+ItemRegistry.registerItem(new TconShovel(MiningLv.IRON));
+ItemRegistry.registerItem(new TconShovel(MiningLv.DIAMOND));
+ItemRegistry.registerItem(new TconShovel(MiningLv.OBSIDIAN));
+ItemRegistry.registerItem(new TconShovel(MiningLv.COBALT));
+TconToolFactory.addToCreative("shovel", "Shovel", 3);
+ToolForgeHandler.addRecipe("shovel", ["rod", "shovel", "binding"]);
 ToolForgeHandler.addLayout({
     title: "Shovel",
     background: "tcon.icon.shovel",
@@ -4498,13 +4573,13 @@ ToolForgeHandler.addLayout({
 });
 var TconHatchet = /** @class */ (function (_super) {
     __extends(TconHatchet, _super);
-    function TconHatchet() {
-        var _this = _super.call(this, "tcontool_hatchet", "Hatchet") || this;
+    function TconHatchet(miningLevel) {
+        var _this = _super.call(this, "tcontool_hatchet_lv" + miningLevel, "Hatchet", "tcontool_hatchet") || this;
+        _this.tconToolType = "hatchet";
         _this.blockTypes = ["wood", "plant"];
-        _this.texture = new ToolTexture("hatchet", 3, 1);
+        _this.texture = new ToolTexture(_this.tconToolType, 3, 1);
         _this.damagePotential = 1.1;
-        _this.setToolParams();
-        _this.addToCreative(3);
+        _this.setToolParams(miningLevel);
         return _this;
     }
     TconHatchet.prototype.buildStats = function (stats, materials) {
@@ -4573,8 +4648,13 @@ var TconHatchet = /** @class */ (function (_super) {
     ];
     return TconHatchet;
 }(TconTool));
-ItemRegistry.registerItem(new TconHatchet());
-ToolForgeHandler.addRecipe(ItemID.tcontool_hatchet, ["rod", "axe", "binding"]);
+ItemRegistry.registerItem(new TconHatchet(MiningLv.STONE));
+ItemRegistry.registerItem(new TconHatchet(MiningLv.IRON));
+ItemRegistry.registerItem(new TconHatchet(MiningLv.DIAMOND));
+ItemRegistry.registerItem(new TconHatchet(MiningLv.OBSIDIAN));
+ItemRegistry.registerItem(new TconHatchet(MiningLv.COBALT));
+TconToolFactory.addToCreative("hatchet", "Hatchet", 3);
+ToolForgeHandler.addRecipe("hatchet", ["rod", "axe", "binding"]);
 ToolForgeHandler.addLayout({
     title: "Hatchet",
     background: "tcon.icon.hatchet",
@@ -4587,16 +4667,16 @@ ToolForgeHandler.addLayout({
 });
 var TconMattock = /** @class */ (function (_super) {
     __extends(TconMattock, _super);
-    function TconMattock() {
-        var _this = _super.call(this, "tcontool_mattock", "Mattock") || this;
+    function TconMattock(miningLevel) {
+        var _this = _super.call(this, "tcontool_mattock_lv" + miningLevel, "Mattock", "tcontool_mattock") || this;
         _this.index = 0;
+        _this.tconToolType = "mattock";
         _this.blockTypes = ["wood", "dirt"];
-        _this.texture = new ToolTexture("mattock", 3, 1);
+        _this.texture = new ToolTexture(_this.tconToolType, 3, 1);
         _this.miningSpeedModifier = 0.95;
         _this.damagePotential = 0.9;
         _this.repairParts = [1, 2];
-        _this.setToolParams();
-        _this.addToCreative(3);
+        _this.setToolParams(miningLevel);
         return _this;
     }
     TconMattock.prototype.buildStats = function (stats, materials) {
@@ -4619,8 +4699,13 @@ var TconMattock = /** @class */ (function (_super) {
     };
     return TconMattock;
 }(TconTool));
-ItemRegistry.registerItem(new TconMattock());
-ToolForgeHandler.addRecipe(ItemID.tcontool_mattock, ["rod", "axe", "shovel"]);
+ItemRegistry.registerItem(new TconMattock(MiningLv.STONE));
+ItemRegistry.registerItem(new TconMattock(MiningLv.IRON));
+ItemRegistry.registerItem(new TconMattock(MiningLv.DIAMOND));
+ItemRegistry.registerItem(new TconMattock(MiningLv.OBSIDIAN));
+ItemRegistry.registerItem(new TconMattock(MiningLv.COBALT));
+TconToolFactory.addToCreative("mattock", "Mattock", 3);
+ToolForgeHandler.addRecipe("mattock", ["rod", "axe", "shovel"]);
 ToolForgeHandler.addLayout({
     title: "Mattock",
     background: "tcon.icon.mattock",
@@ -4633,13 +4718,13 @@ ToolForgeHandler.addLayout({
 });
 var TconSword = /** @class */ (function (_super) {
     __extends(TconSword, _super);
-    function TconSword() {
-        var _this = _super.call(this, "tcontool_sword", "Broad Sword") || this;
+    function TconSword(miningLevel) {
+        var _this = _super.call(this, "tcontool_sword_lv" + miningLevel, "Broad Sword", "tcontool_sword") || this;
+        _this.tconToolType = "sword";
         _this.blockTypes = ["fibre"];
-        _this.texture = new ToolTexture("sword", 3, 1);
+        _this.texture = new ToolTexture(_this.tconToolType, 3, 1);
         _this.isWeapon = true;
-        _this.setToolParams();
-        _this.addToCreative(3);
+        _this.setToolParams(miningLevel);
         return _this;
     }
     TconSword.prototype.buildStats = function (stats, materials) {
@@ -4655,8 +4740,13 @@ var TconSword = /** @class */ (function (_super) {
     TconSword.DURABILITY_MODIFIER = 1.1;
     return TconSword;
 }(TconTool));
-ItemRegistry.registerItem(new TconSword());
-ToolForgeHandler.addRecipe(ItemID.tcontool_sword, ["rod", "sword", "guard"]);
+ItemRegistry.registerItem(new TconSword(MiningLv.STONE));
+ItemRegistry.registerItem(new TconSword(MiningLv.IRON));
+ItemRegistry.registerItem(new TconSword(MiningLv.DIAMOND));
+ItemRegistry.registerItem(new TconSword(MiningLv.OBSIDIAN));
+ItemRegistry.registerItem(new TconSword(MiningLv.COBALT));
+TconToolFactory.addToCreative("sword", "Broad Sword", 3);
+ToolForgeHandler.addRecipe("sword", ["rod", "sword", "guard"]);
 ToolForgeHandler.addLayout({
     title: "Broad Sword",
     background: "tcon.icon.sword",
@@ -4669,15 +4759,15 @@ ToolForgeHandler.addLayout({
 });
 var TconHammer = /** @class */ (function (_super) {
     __extends(TconHammer, _super);
-    function TconHammer() {
-        var _this = _super.call(this, "tcontool_hammer", "Hammer") || this;
+    function TconHammer(miningLevel) {
+        var _this = _super.call(this, "tcontool_hammer_lv" + miningLevel, "Hammer", "tcontool_hammer") || this;
+        _this.tconToolType = "hammer";
         _this.blockTypes = ["stone"];
-        _this.texture = new ToolTexture("hammer", 4, 0);
+        _this.texture = new ToolTexture(_this.tconToolType, 4, 0);
         _this.miningSpeedModifier = 0.4;
         _this.damagePotential = 1.2;
         _this.repairParts = [1, 2, 3];
-        _this.setToolParams();
-        _this.addToCreative(4);
+        _this.setToolParams(miningLevel);
         return _this;
     }
     TconHammer.prototype.buildStats = function (stats, materials) {
@@ -4692,8 +4782,13 @@ var TconHammer = /** @class */ (function (_super) {
     TconHammer.DURABILITY_MODIFIER = 2.5;
     return TconHammer;
 }(TconTool3x3));
-ItemRegistry.registerItem(new TconHammer());
-ToolForgeHandler.addRecipe(ItemID.tcontool_hammer, ["rod2", "hammer", "largeplate", "largeplate"]);
+ItemRegistry.registerItem(new TconHammer(MiningLv.STONE));
+ItemRegistry.registerItem(new TconHammer(MiningLv.IRON));
+ItemRegistry.registerItem(new TconHammer(MiningLv.DIAMOND));
+ItemRegistry.registerItem(new TconHammer(MiningLv.OBSIDIAN));
+ItemRegistry.registerItem(new TconHammer(MiningLv.COBALT));
+TconToolFactory.addToCreative("hammer", "Hammer", 4);
+ToolForgeHandler.addRecipe("hammer", ["rod2", "hammer", "largeplate", "largeplate"]);
 ToolForgeHandler.addLayout({
     title: "Hammer",
     background: "tcon.icon.hammer",
@@ -4708,15 +4803,15 @@ ToolForgeHandler.addLayout({
 });
 var TconExcavator = /** @class */ (function (_super) {
     __extends(TconExcavator, _super);
-    function TconExcavator() {
-        var _this = _super.call(this, "tcontool_excavator", "Excavator") || this;
+    function TconExcavator(miningLevel) {
+        var _this = _super.call(this, "tcontool_excavator_lv" + miningLevel, "Excavator", "tcontool_excavator") || this;
+        _this.tconToolType = "excavator";
         _this.blockTypes = ["dirt"];
-        _this.texture = new ToolTexture("excavator", 4, 0);
+        _this.texture = new ToolTexture(_this.tconToolType, 4, 0);
         _this.miningSpeedModifier = 0.28;
         _this.damagePotential = 1.25;
         _this.repairParts = [1, 2];
-        _this.setToolParams();
-        _this.addToCreative(4);
+        _this.setToolParams(miningLevel);
         return _this;
     }
     TconExcavator.prototype.buildStats = function (stats, materials) {
@@ -4731,8 +4826,13 @@ var TconExcavator = /** @class */ (function (_super) {
     TconExcavator.DURABILITY_MODIFIER = 1.75;
     return TconExcavator;
 }(TconTool3x3));
-ItemRegistry.registerItem(new TconExcavator());
-ToolForgeHandler.addRecipe(ItemID.tcontool_excavator, ["rod2", "excavator", "largeplate", "binding2"]);
+ItemRegistry.registerItem(new TconExcavator(MiningLv.STONE));
+ItemRegistry.registerItem(new TconExcavator(MiningLv.IRON));
+ItemRegistry.registerItem(new TconExcavator(MiningLv.DIAMOND));
+ItemRegistry.registerItem(new TconExcavator(MiningLv.OBSIDIAN));
+ItemRegistry.registerItem(new TconExcavator(MiningLv.COBALT));
+TconToolFactory.addToCreative("excavator", "Excavator", 4);
+ToolForgeHandler.addRecipe("excavator", ["rod2", "excavator", "largeplate", "binding2"]);
 ToolForgeHandler.addLayout({
     title: "Excavator",
     background: "tcon.icon.excavator",
@@ -4747,16 +4847,16 @@ ToolForgeHandler.addLayout({
 });
 var TconLumberaxe = /** @class */ (function (_super) {
     __extends(TconLumberaxe, _super);
-    function TconLumberaxe() {
-        var _this = _super.call(this, "tcontool_lumberaxe", "Lumber Axe") || this;
+    function TconLumberaxe(miningLevel) {
+        var _this = _super.call(this, "tcontool_lumberaxe_lv" + miningLevel, "Lumber Axe", "tcontool_lumberaxe") || this;
+        _this.tconToolType = "lumberaxe";
         _this.is3x3 = true;
         _this.blockTypes = ["wood"];
-        _this.texture = new ToolTexture("lumberaxe", 3, 1);
+        _this.texture = new ToolTexture(_this.tconToolType, 3, 1);
         _this.miningSpeedModifier = 0.35;
         _this.damagePotential = 1.2;
         _this.repairParts = [1, 2];
-        _this.setToolParams();
-        _this.addToCreative(4);
+        _this.setToolParams(miningLevel);
         return _this;
     }
     TconLumberaxe.prototype.buildStats = function (stats, materials) {
@@ -4909,8 +5009,13 @@ var ChopTreeUpdatable = /** @class */ (function () {
     };
     return ChopTreeUpdatable;
 }());
-ItemRegistry.registerItem(new TconLumberaxe());
-ToolForgeHandler.addRecipe(ItemID.tcontool_lumberaxe, ["rod2", "broadaxe", "largeplate", "binding2"]);
+ItemRegistry.registerItem(new TconLumberaxe(MiningLv.STONE));
+ItemRegistry.registerItem(new TconLumberaxe(MiningLv.IRON));
+ItemRegistry.registerItem(new TconLumberaxe(MiningLv.DIAMOND));
+ItemRegistry.registerItem(new TconLumberaxe(MiningLv.OBSIDIAN));
+ItemRegistry.registerItem(new TconLumberaxe(MiningLv.COBALT));
+TconToolFactory.addToCreative("lumberaxe", "Lumber Axe", 4);
+ToolForgeHandler.addRecipe("lumberaxe", ["rod2", "broadaxe", "largeplate", "binding2"]);
 ToolForgeHandler.addLayout({
     title: "Lumber Axe",
     background: "tcon.icon.lumberaxe",

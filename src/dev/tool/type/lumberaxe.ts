@@ -9,19 +9,19 @@ class TconLumberaxe extends TconTool {
 
     private static readonly DURABILITY_MODIFIER = 2;
 
-    constructor(){
+    constructor(miningLevel: number){
 
-        super("tcontool_lumberaxe", "Lumber Axe");
+        super("tcontool_lumberaxe_lv" + miningLevel, "Lumber Axe", "tcontool_lumberaxe");
 
+        this.tconToolType = "lumberaxe";
         this.is3x3 = true;
         this.blockTypes = ["wood"];
-        this.texture = new ToolTexture("lumberaxe", 3, 1);
+        this.texture = new ToolTexture(this.tconToolType, 3, 1);
         this.miningSpeedModifier = 0.35;
         this.damagePotential = 1.2;
         this.repairParts = [1, 2];
 
-        this.setToolParams();
-        this.addToCreative(4);
+        this.setToolParams(miningLevel);
 
     }
 
@@ -197,8 +197,15 @@ class ChopTreeUpdatable implements Updatable {
 }
 
 
-ItemRegistry.registerItem(new TconLumberaxe());
-ToolForgeHandler.addRecipe(ItemID.tcontool_lumberaxe, ["rod2", "broadaxe", "largeplate", "binding2"]);
+ItemRegistry.registerItem(new TconLumberaxe(MiningLv.STONE));
+ItemRegistry.registerItem(new TconLumberaxe(MiningLv.IRON));
+ItemRegistry.registerItem(new TconLumberaxe(MiningLv.DIAMOND));
+ItemRegistry.registerItem(new TconLumberaxe(MiningLv.OBSIDIAN));
+ItemRegistry.registerItem(new TconLumberaxe(MiningLv.COBALT));
+
+TconToolFactory.addToCreative("lumberaxe", "Lumber Axe", 4);
+ToolForgeHandler.addRecipe("lumberaxe", ["rod2", "broadaxe", "largeplate", "binding2"]);
+
 ToolForgeHandler.addLayout({
     title: "Lumber Axe",
     background: "tcon.icon.lumberaxe",

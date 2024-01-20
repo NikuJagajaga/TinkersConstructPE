@@ -1,15 +1,15 @@
 class TconShovel extends TconTool {
 
-    constructor(){
+    constructor(miningLevel: number){
 
-        super("tcontool_shovel", "Shovel");
+        super("tcontool_shovel_lv" + miningLevel, "Shovel", "tcontool_shovel");
 
+        this.tconToolType = "shovel";
         this.blockTypes = ["dirt"];
-        this.texture = new ToolTexture("shovel", 3, 1);
+        this.texture = new ToolTexture(this.tconToolType, 3, 1);
         this.damagePotential = 0.9;
 
-        this.setToolParams();
-        this.addToCreative(3);
+        this.setToolParams(miningLevel);
 
     }
 
@@ -36,8 +36,15 @@ class TconShovel extends TconTool {
 }
 
 
-ItemRegistry.registerItem(new TconShovel());
-ToolForgeHandler.addRecipe(ItemID.tcontool_shovel, ["rod", "shovel", "binding"]);
+ItemRegistry.registerItem(new TconShovel(MiningLv.STONE));
+ItemRegistry.registerItem(new TconShovel(MiningLv.IRON));
+ItemRegistry.registerItem(new TconShovel(MiningLv.DIAMOND));
+ItemRegistry.registerItem(new TconShovel(MiningLv.OBSIDIAN));
+ItemRegistry.registerItem(new TconShovel(MiningLv.COBALT));
+
+TconToolFactory.addToCreative("shovel", "Shovel", 3);
+ToolForgeHandler.addRecipe("shovel", ["rod", "shovel", "binding"]);
+
 ToolForgeHandler.addLayout({
     title: "Shovel",
     background: "tcon.icon.shovel",

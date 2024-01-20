@@ -1,12 +1,12 @@
 IDRegistry.genBlockID("oreCobalt");
 Block.createBlock("oreCobalt", [{name: "Cobalt Ore", texture: [["tcon_ore_cobalt", 0]], inCreative: true}]);
-ToolAPI.registerBlockMaterial(BlockID.oreCobalt, "stone", TinkersMaterial.COBALT, true);
-Block.setDestroyLevel(BlockID.oreCobalt, TinkersMaterial.COBALT);
+ToolAPI.registerBlockMaterial(BlockID.oreCobalt, "stone", MiningLv.COBALT, true);
+Block.setDestroyLevel(BlockID.oreCobalt, MiningLv.COBALT);
 
 IDRegistry.genBlockID("oreArdite");
 Block.createBlock("oreArdite", [{name: "Ardite Ore", texture: [["tcon_ore_ardite", 0]], inCreative: true}]);
-ToolAPI.registerBlockMaterial(BlockID.oreArdite, "stone", TinkersMaterial.COBALT, true);
-Block.setDestroyLevel(BlockID.oreArdite, TinkersMaterial.COBALT);
+ToolAPI.registerBlockMaterial(BlockID.oreArdite, "stone", MiningLv.COBALT, true);
+Block.setDestroyLevel(BlockID.oreArdite, MiningLv.COBALT);
 
 Item.addCreativeGroup("ores", Translation.translate("Ores"), [BlockID.oreCobalt, BlockID.oreArdite]);
 

@@ -6,7 +6,7 @@ class ModDiamond extends TinkersModifier {
 
     override applyStats(stats: ToolStats, level: number): void {
         stats.durability += 500;
-        if(stats.level < TinkersMaterial.OBSIDIAN){
+        if(stats.level < MiningLv.OBSIDIAN){
             stats.level++;
         }
         stats.speed += 0.5;

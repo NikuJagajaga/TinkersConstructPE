@@ -59,7 +59,9 @@ class TconToolStack implements ItemInstance {
         this.forEachModifiers((mod, level) => {
             mod.applyStats(stats, level);
         });
-        return stats.getToolMaterial();
+        const toolMaterial = stats.getToolMaterial();
+        this.id = TconToolFactory.getToolId(this.instance.tconToolType, toolMaterial.level);
+        return toolMaterial;
     }
 
     forEachModifiers(func: (mod: TinkersModifier, level: number) => void): void {
@@ -113,7 +115,7 @@ class TconToolStack implements ItemInstance {
         for(let key in this.modifiers){
             mask |= 1 << Modifier[key].getTexIndex();
         }
-        return this.id + ":" + hash.toString(16) + ":" + mask.toString(16);
+        return this.instance.tconToolType + ":" + hash.toString(16) + ":" + mask.toString(16);
     }
 
     clone(): TconToolStack {

@@ -2,18 +2,18 @@ class TconHammer extends TconTool3x3 {
 
     private static readonly DURABILITY_MODIFIER = 2.5;
 
-    constructor(){
+    constructor(miningLevel: number){
 
-        super("tcontool_hammer", "Hammer");
+        super("tcontool_hammer_lv" + miningLevel, "Hammer", "tcontool_hammer");
 
+        this.tconToolType = "hammer";
         this.blockTypes = ["stone"];
-        this.texture = new ToolTexture("hammer", 4, 0);
+        this.texture = new ToolTexture(this.tconToolType, 4, 0);
         this.miningSpeedModifier = 0.4;
         this.damagePotential = 1.2;
         this.repairParts = [1, 2, 3];
 
-        this.setToolParams();
-        this.addToCreative(4);
+        this.setToolParams(miningLevel);
 
     }
 
@@ -31,8 +31,15 @@ class TconHammer extends TconTool3x3 {
 }
 
 
-ItemRegistry.registerItem(new TconHammer());
-ToolForgeHandler.addRecipe(ItemID.tcontool_hammer, ["rod2", "hammer", "largeplate", "largeplate"]);
+ItemRegistry.registerItem(new TconHammer(MiningLv.STONE));
+ItemRegistry.registerItem(new TconHammer(MiningLv.IRON));
+ItemRegistry.registerItem(new TconHammer(MiningLv.DIAMOND));
+ItemRegistry.registerItem(new TconHammer(MiningLv.OBSIDIAN));
+ItemRegistry.registerItem(new TconHammer(MiningLv.COBALT));
+
+TconToolFactory.addToCreative("hammer", "Hammer", 4);
+ToolForgeHandler.addRecipe("hammer", ["rod2", "hammer", "largeplate", "largeplate"]);
+
 ToolForgeHandler.addLayout({
     title: "Hammer",
     background: "tcon.icon.hammer",

@@ -2,18 +2,18 @@ class TconExcavator extends TconTool3x3 {
 
     private static readonly DURABILITY_MODIFIER = 1.75;
 
-    constructor(){
+    constructor(miningLevel: number){
 
-        super("tcontool_excavator", "Excavator");
+        super("tcontool_excavator_lv" + miningLevel, "Excavator", "tcontool_excavator");
 
+        this.tconToolType = "excavator";
         this.blockTypes = ["dirt"];
-        this.texture = new ToolTexture("excavator", 4, 0);
+        this.texture = new ToolTexture(this.tconToolType, 4, 0);
         this.miningSpeedModifier = 0.28;
         this.damagePotential = 1.25;
         this.repairParts = [1, 2];
 
-        this.setToolParams();
-        this.addToCreative(4);
+        this.setToolParams(miningLevel);
 
     }
 
@@ -31,8 +31,15 @@ class TconExcavator extends TconTool3x3 {
 }
 
 
-ItemRegistry.registerItem(new TconExcavator());
-ToolForgeHandler.addRecipe(ItemID.tcontool_excavator, ["rod2", "excavator", "largeplate", "binding2"]);
+ItemRegistry.registerItem(new TconExcavator(MiningLv.STONE));
+ItemRegistry.registerItem(new TconExcavator(MiningLv.IRON));
+ItemRegistry.registerItem(new TconExcavator(MiningLv.DIAMOND));
+ItemRegistry.registerItem(new TconExcavator(MiningLv.OBSIDIAN));
+ItemRegistry.registerItem(new TconExcavator(MiningLv.COBALT));
+
+TconToolFactory.addToCreative("excavator", "Excavator", 4);
+ToolForgeHandler.addRecipe("excavator", ["rod2", "excavator", "largeplate", "binding2"]);
+
 ToolForgeHandler.addLayout({
     title: "Excavator",
     background: "tcon.icon.excavator",

@@ -10,7 +10,7 @@ interface ForgeLayout {
 class ToolForgeHandler {
 
     private static layouts: ForgeLayout[] = [];
-    private static recipes: {result: number, pattern: EPartType[]}[] = [];
+    private static recipes: {result: string, pattern: EPartType[]}[] = [];
 
     static addLayout(layout: ForgeLayout): void {
         this.layouts.push(layout);
@@ -20,16 +20,12 @@ class ToolForgeHandler {
         return this.layouts.filter(layout => isForge || !layout.forgeOnly);
     }
 
-    static addRecipe(result: number, pattern: EPartType[]): void {
-        this.recipes.push({result: result, pattern: pattern});
+    static addRecipe(resultType: string, pattern: EPartType[]): void {
+        this.recipes.push({result: resultType, pattern: pattern});
     }
 
-    static getRecipes(isForge: boolean): {result: number, pattern: EPartType[]}[] {
+    static getRecipes(isForge: boolean): typeof this.recipes {
         return this.recipes.filter(recipe => isForge || recipe.pattern.length <= 3);
-    }
-
-    static isTool(id: number): boolean {
-        return this.recipes.some(recipe => recipe.result === id);
     }
 
     static createForgeBlock(namedID: string, block: AnyID): number {

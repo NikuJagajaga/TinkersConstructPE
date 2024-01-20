@@ -1,25 +1,6 @@
-const Modifier: {[key: string]: TinkersModifier} = {
-    haste: new ModHaste(),
-    luck: new ModLuck(),
-    sharp: new ModSharp(),
-    diamond: new ModDiamond(),
-    emerald: new ModEmerald(),
-    silk: new ModSilk(),
-    reinforced: new ModReinforced(),
-    beheading: new ModBeheading(),
-    smite: new ModSmite(),
-    spider: new ModSpider(),
-    fiery: new ModFiery(),
-    necrotic: new ModNecrotic(),
-    knockback: new ModKnockback(),
-    mending: new ModMending(),
-    shuling: new ModShulking(),
-    web: new ModWeb()
-};
-
-
 class TconTool extends ItemCommon implements ItemBehavior, ToolAPI.ToolParams {
 
+    tconToolType: string;
     blockTypes: string[];
     isWeapon: boolean;
     is3x3: boolean;
@@ -30,10 +11,11 @@ class TconTool extends ItemCommon implements ItemBehavior, ToolAPI.ToolParams {
 
     toolMaterial: ToolAPI.ToolMaterial;
 
-    constructor(stringID: string, name: string, icon: string = stringID){
+    constructor(stringID: string, name: string, icon: string){
 
         super(stringID, name, icon, false);
 
+        this.tconToolType = stringID;
         this.isWeapon = false;
         this.is3x3 = false;
         this.miningSpeedModifier = 1.0;
@@ -60,10 +42,13 @@ class TconTool extends ItemCommon implements ItemBehavior, ToolAPI.ToolParams {
 
     addToCreative(partsCount: number): void {
 
-        let materials: string[];
+        const materials: string[] = [];
 
         for(let key in Material){
-            materials = [];
+            if(Material[key].getHeadStats().level !== ToolAPI.getToolLevel(this.id)){
+                continue;
+            }
+            materials.length = 0;
             for(let i = 0; i < partsCount; i++){
                 materials.push(key);
             }
@@ -80,8 +65,9 @@ class TconTool extends ItemCommon implements ItemBehavior, ToolAPI.ToolParams {
 
     }
 
-    setToolParams(): void {
-        ToolAPI.registerTool(this.id, {durability: this.maxDamage}, this.blockTypes || [], this);
+    setToolParams(miningLevel: number): void {
+        ToolAPI.registerTool(this.id, {level: miningLevel, durability: this.maxDamage}, this.blockTypes || [], this);
+        TconToolFactory.registerToolId(this.id, this.tconToolType, miningLevel);
     }
 
     buildStats(stats: ToolStats, materials: TinkersMaterial[]): void {
@@ -132,10 +118,6 @@ class TconTool extends ItemCommon implements ItemBehavior, ToolAPI.ToolParams {
             if(blockData.isNative){
                 devider *= blockData.material.multiplier;
             }
-            this.toolMaterial.level = stack.stats.level;
-        }
-        else{
-            this.toolMaterial.level = 0;
         }
         return time.base / devider / time.modifier;
     }
@@ -229,7 +211,7 @@ class TconTool extends ItemCommon implements ItemBehavior, ToolAPI.ToolParams {
 
 class TconTool3x3 extends TconTool {
 
-    constructor(stringID: string, name: string, icon?: string){
+    constructor(stringID: string, name: string, icon: string){
         super(stringID, name, icon);
         this.is3x3 = true;
     }

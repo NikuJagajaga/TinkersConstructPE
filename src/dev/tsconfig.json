@@ -13,6 +13,7 @@
     "include": [
 
         "header.ts",
+        "enum.ts",
 
         "util/TconTileEntity.ts",
         "util/TileWithLiquidModel.ts",
@@ -37,6 +38,7 @@
 
         "tool/TinkersMaterial.ts",
         "tool/ToolStats.ts",
+        "tool/TconToolFactory.ts",
         "tool/TconToolStack.ts",
         "tool/PartRegistry.ts",
         "tool/ToolTexture.ts",
@@ -63,6 +65,7 @@
         "tool/modifier/mending.ts",
         "tool/modifier/shulking.ts",
         "tool/modifier/web.ts",
+        "tool/modifier/_define.ts",
 
         "table/PartBuilder.ts",
         "table/ToolForgeHandler.ts",

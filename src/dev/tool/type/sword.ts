@@ -2,16 +2,16 @@ class TconSword extends TconTool {
 
     private static DURABILITY_MODIFIER = 1.1;
 
-    constructor(){
+    constructor(miningLevel: number){
 
-        super("tcontool_sword", "Broad Sword");
+        super("tcontool_sword_lv" + miningLevel, "Broad Sword", "tcontool_sword");
 
+        this.tconToolType = "sword";
         this.blockTypes = ["fibre"];
-        this.texture = new ToolTexture("sword", 3, 1);
+        this.texture = new ToolTexture(this.tconToolType, 3, 1);
         this.isWeapon = true;
 
-        this.setToolParams();
-        this.addToCreative(3);
+        this.setToolParams(miningLevel);
 
     }
 
@@ -30,8 +30,15 @@ class TconSword extends TconTool {
 }
 
 
-ItemRegistry.registerItem(new TconSword());
-ToolForgeHandler.addRecipe(ItemID.tcontool_sword, ["rod", "sword", "guard"]);
+ItemRegistry.registerItem(new TconSword(MiningLv.STONE));
+ItemRegistry.registerItem(new TconSword(MiningLv.IRON));
+ItemRegistry.registerItem(new TconSword(MiningLv.DIAMOND));
+ItemRegistry.registerItem(new TconSword(MiningLv.OBSIDIAN));
+ItemRegistry.registerItem(new TconSword(MiningLv.COBALT));
+
+TconToolFactory.addToCreative("sword", "Broad Sword", 3);
+ToolForgeHandler.addRecipe("sword", ["rod", "sword", "guard"]);
+
 ToolForgeHandler.addLayout({
     title: "Broad Sword",
     background: "tcon.icon.sword",
