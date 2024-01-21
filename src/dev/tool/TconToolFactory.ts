@@ -54,6 +54,18 @@ class TconToolFactory {
     }
 
 
+    static getType(id: number): string {
+        for(let type in this.tools){
+            for(let lv in this.tools[type]){
+                if(id === this.tools[type][lv]){
+                    return type;
+                }
+            }
+        }
+        return "";
+    }
+
+
     static addToCreative(type: string, name: string, partsCount: number): void {
 
         const materials: string[] = [];
@@ -66,7 +78,7 @@ class TconToolFactory {
             }
             stack = this.createToolStack(type, materials);
             if(stack && stack.id !== -1){
-                Item.addToCreative(stack.id, stack.count, stack.data, stack.extra);
+                Item.addToCreative(stack.id, stack.count, stack.data, stack.extra.putInt("xp", 2e9));
             }
         }
         for(let lv in this.tools[type]){

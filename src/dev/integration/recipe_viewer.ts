@@ -27,7 +27,7 @@ ModAPI.addAPICallback("RecipeViewer", (api: RecipeViewerAPI) => {
         }
 
         onOpen(elements: java.util.HashMap<string, UI.Element>, recipe: RecipePattern): void {
-            elements.get("imagePattern").setBinding("texture", "tcon.pattern." + recipe.pattern);
+            elements.get("imagePattern").setBinding("texture", recipe.pattern ? "tcon.pattern." + recipe.pattern : "_default_slot_empty");
         }
 
     });

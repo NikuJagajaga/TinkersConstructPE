@@ -93,7 +93,8 @@ class TinkersModifierHandler {
     static decodeToObj(code: string): {[key: string]: number} {
         const mods: {[key: string]: number} = {};
         for(let mod of this.decodeToArray(code)){
-            mods[mod.type] = mod.level;
+            mods[mod.type] ??= 0;
+            mods[mod.type] += mod.level;
         }
         return mods;
     }

@@ -156,7 +156,7 @@ class ChopTreeUpdatable implements Updatable {
 
         const carried = Entity.getCarriedItem(this.player);
     
-        if(carried.id !== ItemID.tcontool_lumberaxe || !carried.extra) return true;
+        if(TconToolFactory.getType(carried.id) !== "lumberaxe" || !carried.extra) return true;
 
         const stack = new TconToolStack(carried);
 

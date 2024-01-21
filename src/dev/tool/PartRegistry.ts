@@ -32,7 +32,6 @@ class PartRegistry {
                 const mask = PartCategory[partData.type];
                 if(mask & EPartCategory.HEAD){
                     const head = matData.getHeadStats();
-                    EColor
                     tooltips.push("", "§fHead");
                     tooltips.push("§7Durability: " + head.durability);
                     tooltips.push("Mining Level: " + MiningLvName[head.level]);

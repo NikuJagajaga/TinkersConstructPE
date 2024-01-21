@@ -6,10 +6,9 @@ class ModBeheading extends TinkersModifier {
 
     override onKillEntity(victim: number, player: number, damageType: number, level: number): void {
         const headMeta = EntityHelper.getHeadMeta(victim);
-        if(headMeta !== -1 && Math.random() * 10 < level){
+        if(headMeta !== -1 && Math.random() < 0.1 * level){
             const region = WorldRegion.getForActor(player);
-            const pos = Entity.getPosition(victim);
-            region.dropItem(pos, VanillaBlockID.skull, 1, headMeta);
+            region.dropItem(Entity.getPosition(victim), VanillaBlockID.skull, 1, headMeta);
         }
     }
     

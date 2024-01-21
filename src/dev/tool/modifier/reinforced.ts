@@ -9,7 +9,7 @@ class ModReinforced extends TinkersModifier {
     }
 
     override onConsume(level: number): boolean {
-        return level >= 5 ? true : level * 0.2 < Math.random();
+        return level >= 5 ? true : Math.random() < level * 0.2;
     }
     
 }

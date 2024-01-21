@@ -2619,6 +2619,16 @@ var TconToolFactory = /** @class */ (function () {
         }
         return false;
     };
+    TconToolFactory.getType = function (id) {
+        for (var type in this.tools) {
+            for (var lv in this.tools[type]) {
+                if (id === this.tools[type][lv]) {
+                    return type;
+                }
+            }
+        }
+        return "";
+    };
     TconToolFactory.addToCreative = function (type, name, partsCount) {
         var materials = [];
         var stack;
@@ -2629,7 +2639,7 @@ var TconToolFactory = /** @class */ (function () {
             }
             stack = this.createToolStack(type, materials);
             if (stack && stack.id !== -1) {
-                Item.addToCreative(stack.id, stack.count, stack.data, stack.extra);
+                Item.addToCreative(stack.id, stack.count, stack.data, stack.extra.putInt("xp", 2e9));
             }
         }
         for (var lv in this.tools[type]) {
@@ -2829,7 +2839,6 @@ var PartRegistry = /** @class */ (function () {
                 var mask = PartCategory[partData.type];
                 if (mask & EPartCategory.HEAD) {
                     var head = matData.getHeadStats();
-                    EColor;
                     tooltips.push("", "§fHead");
                     tooltips.push("§7Durability: " + head.durability);
                     tooltips.push("Mining Level: " + MiningLvName[head.level]);
@@ -3207,10 +3216,13 @@ var TinkersModifierHandler = /** @class */ (function () {
         });
     };
     TinkersModifierHandler.decodeToObj = function (code) {
+        var _a;
+        var _b;
         var mods = {};
-        for (var _i = 0, _a = this.decodeToArray(code); _i < _a.length; _i++) {
-            var mod = _a[_i];
-            mods[mod.type] = mod.level;
+        for (var _i = 0, _c = this.decodeToArray(code); _i < _c.length; _i++) {
+            var mod = _c[_i];
+            (_a = mods[_b = mod.type]) !== null && _a !== void 0 ? _a : (mods[_b] = 0);
+            mods[mod.type] += mod.level;
         }
         return mods;
     };
@@ -3309,7 +3321,7 @@ var ModReinforced = /** @class */ (function (_super) {
         return _super.call(this, "reinforced", "Reinforced", 6, [ItemID.tcon_reinforcement], 1, true) || this;
     }
     ModReinforced.prototype.onConsume = function (level) {
-        return level >= 5 ? true : level * 0.2 < Math.random();
+        return level >= 5 ? true : Math.random() < level * 0.2;
     };
     return ModReinforced;
 }(TinkersModifier));
@@ -3320,10 +3332,9 @@ var ModBeheading = /** @class */ (function (_super) {
     }
     ModBeheading.prototype.onKillEntity = function (victim, player, damageType, level) {
         var headMeta = EntityHelper.getHeadMeta(victim);
-        if (headMeta !== -1 && Math.random() * 10 < level) {
+        if (headMeta !== -1 && Math.random() < 0.1 * level) {
             var region = WorldRegion.getForActor(player);
-            var pos = Entity.getPosition(victim);
-            region.dropItem(pos, VanillaBlockID.skull, 1, headMeta);
+            region.dropItem(Entity.getPosition(victim), VanillaBlockID.skull, 1, headMeta);
         }
     };
     return ModBeheading;
@@ -3377,6 +3388,14 @@ var ModNecrotic = /** @class */ (function (_super) {
     };
     return ModNecrotic;
 }(TinkersModifier));
+Callback.addCallback("EntityDeath", function (entity, attacker, damageType) {
+    if (Entity.getType(entity) === EEntityType.WHITHER_SKELETON) {
+        if (Math.random() < (EntityHelper.isPlayer(Entity.getType(attacker)) ? 0.1 : 0.05)) {
+            var region = WorldRegion.getForDimension(Entity.getDimension(entity));
+            region.dropItem(Entity.getPosition(entity), ItemID.tcon_necrotic_bone, 1, 0);
+        }
+    }
+});
 // KEX.LootModule.addOnDropCallbackFor("entities/wither_skeleton", (drops, context) => {
 //     const player = context.getKillerPlayer();
 //     if(Math.random() < (player ? 0.1 : 0.05)){
@@ -4492,7 +4511,7 @@ var ToolModelManager = /** @class */ (function () {
 var TconPickaxe = /** @class */ (function (_super) {
     __extends(TconPickaxe, _super);
     function TconPickaxe(miningLevel) {
-        var _this = _super.call(this, "tcontool_pickaxe_lv" + miningLevel, "Pickaxe" + miningLevel, "tcontool_pickaxe") || this;
+        var _this = _super.call(this, "tcontool_pickaxe_lv" + miningLevel, "Pickaxe", "tcontool_pickaxe") || this;
         _this.tconToolType = "pickaxe";
         _this.blockTypes = ["stone"];
         _this.texture = new ToolTexture(_this.tconToolType, 3, 1);
@@ -4976,7 +4995,7 @@ var ChopTreeUpdatable = /** @class */ (function () {
     ChopTreeUpdatable.prototype.onTick = function () {
         var _this = this;
         var carried = Entity.getCarriedItem(this.player);
-        if (carried.id !== ItemID.tcontool_lumberaxe || !carried.extra)
+        if (TconToolFactory.getType(carried.id) !== "lumberaxe" || !carried.extra)
             return true;
         var stack = new TconToolStack(carried);
         if (stack.isBroken() || stack.uniqueKey() !== this.uniqueKey)
@@ -5196,7 +5215,7 @@ ModAPI.addAPICallback("RecipeViewer", function (api) {
             return PartRegistry.getAllPartBuildRecipeForRV();
         };
         class_2.prototype.onOpen = function (elements, recipe) {
-            elements.get("imagePattern").setBinding("texture", "tcon.pattern." + recipe.pattern);
+            elements.get("imagePattern").setBinding("texture", recipe.pattern ? "tcon.pattern." + recipe.pattern : "_default_slot_empty");
         };
         return class_2;
     }(api.RecipeType)));
@@ -5314,10 +5333,8 @@ ModAPI.addAPICallback("RecipeViewer", function (api) {
 });
 ModAPI.registerAPI("TConAPI", {
     MatValue: MatValue,
-    MoltenLiquid: MoltenLiquid,
     SmelteryFuel: SmelteryFuel,
     MeltingRecipe: MeltingRecipe,
     AlloyRecipe: AlloyRecipe,
-    CastingRecipe: CastingRecipe,
-    BlockModel: BlockModel
+    CastingRecipe: CastingRecipe
 });

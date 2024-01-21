@@ -2,7 +2,7 @@ class TconPickaxe extends TconTool {
 
     constructor(miningLevel: number){
 
-        super("tcontool_pickaxe_lv" + miningLevel, "Pickaxe" + miningLevel, "tcontool_pickaxe");
+        super("tcontool_pickaxe_lv" + miningLevel, "Pickaxe", "tcontool_pickaxe");
 
         this.tconToolType = "pickaxe";
         this.blockTypes = ["stone"];
