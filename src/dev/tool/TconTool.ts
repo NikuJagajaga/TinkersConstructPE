@@ -1,4 +1,4 @@
-class TconTool extends ItemCommon implements ItemBehavior, ToolAPI.ToolParams {
+class TconTool extends ItemCommon implements ItemBehavior, Item.ExtendedToolParams {
 
     tconToolType: string;
     blockTypes: string[];
@@ -154,7 +154,7 @@ class TconTool extends ItemCommon implements ItemBehavior, ToolAPI.ToolParams {
         stack.forEachModifiers((mod, level) => {
             bonus += mod.onAttack(item, victim, player, level);
         });
-        this.toolMaterial.damage = stack.stats.damage + bonus;
+        //this.toolMaterial.damage = stack.stats.damage + bonus;
         if(this.isWeapon){
             stack.consumeDurability(1, player);
             stack.addXp(1, player);
@@ -164,6 +164,20 @@ class TconTool extends ItemCommon implements ItemBehavior, ToolAPI.ToolParams {
         }
         item.data = stack.data; //setCarriedItem in ToolAPI.playerAttackHook
         return true;
+    }
+
+    getAttackDamageBonus(item: ItemInstance, attacker: number, victim: number): number {
+        if(!item.extra){
+            return 0;
+        }
+        const stack = new TconToolStack(item);
+        let bonus = 0;
+        if(attacker !== 0 && victim !== 0){
+            stack.forEachModifiers((mod, level) => {
+                bonus += mod.onAttack(item, victim, attacker, level);
+            });
+        }
+        return stack.stats.damage + bonus;
     }
 
     onDealDamage(item: ItemInstance, victim: number, player: number, damageValue: number, damageType: number): void {

@@ -4064,7 +4064,7 @@ declare namespace Item {
          * calculated depending on the given [[ItemInstance]].
          * @since 1.0
          */
-        getAttackDamageBonus?: (item: ItemInstance) => number;
+        getAttackDamageBonus?: (item: ItemInstance, attacker: number, victim: number) => number;
 
     }
 

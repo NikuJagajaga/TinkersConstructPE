@@ -402,7 +402,7 @@ class SmelteryControler extends TconTileEntity implements ILiquidStorage {
             return false;
         }
 
-        BlockEngine.sendMessage(Network.getClientForPlayer(player), "Invalid Structure");
+        Network.getClientForPlayer(player)?.sendMessage("Invalid Structure");
         return true;
 
     }

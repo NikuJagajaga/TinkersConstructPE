@@ -3141,7 +3141,14 @@ ItemRegistry.registerItem(new class extends ItemThrowable {
     }
 
 });
-*/ 
+*/
+IDRegistry.genItemID("aaaa");
+Item.createItem("aaaa", "Test", { name: "stick" });
+Callback.addCallback("ItemTooltip", function (item, text, level) {
+    if (item.id == ItemID.aaaa) {
+        text.add("hello tooltip");
+    }
+});
 var TinkersModifier = /** @class */ (function () {
     function TinkersModifier(key, name, texIndex, recipe, max, multi, hate) {
         this.key = key;
@@ -4281,7 +4288,7 @@ var TconTool = /** @class */ (function (_super) {
         stack.forEachModifiers(function (mod, level) {
             bonus += mod.onAttack(item, victim, player, level);
         });
-        this.toolMaterial.damage = stack.stats.damage + bonus;
+        //this.toolMaterial.damage = stack.stats.damage + bonus;
         if (this.isWeapon) {
             stack.consumeDurability(1, player);
             stack.addXp(1, player);
@@ -4291,6 +4298,19 @@ var TconTool = /** @class */ (function (_super) {
         }
         item.data = stack.data; //setCarriedItem in ToolAPI.playerAttackHook
         return true;
+    };
+    TconTool.prototype.getAttackDamageBonus = function (item, attacker, victim) {
+        if (!item.extra) {
+            return 0;
+        }
+        var stack = new TconToolStack(item);
+        var bonus = 0;
+        if (attacker !== 0 && victim !== 0) {
+            stack.forEachModifiers(function (mod, level) {
+                bonus += mod.onAttack(item, victim, attacker, level);
+            });
+        }
+        return stack.stats.damage + bonus;
     };
     TconTool.prototype.onDealDamage = function (item, victim, player, damageValue, damageType) {
         if (!item.extra) {

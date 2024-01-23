@@ -68,7 +68,7 @@ BlockModel.register(BlockID.tcon_partbuilder5, (model, index) => {
     return model;
 });
 
-Recipes2.addShaped(BlockID.tcon_partbuilder0, "a:b", {a: ItemID.tcon_pattern_blank, b: {id: "log", data: 1}});
+Recipes2.addShaped(BlockID.tcon_partbuilder0, "a:b", {a: ItemID.tcon_pattern_blank, b: {id: "log", data: 0}});
 Recipes2.addShaped(BlockID.tcon_partbuilder1, "a:b", {a: ItemID.tcon_pattern_blank, b: {id: "log", data: 1}});
 Recipes2.addShaped(BlockID.tcon_partbuilder2, "a:b", {a: ItemID.tcon_pattern_blank, b: {id: "log", data: 2}});
 Recipes2.addShaped(BlockID.tcon_partbuilder3, "a:b", {a: ItemID.tcon_pattern_blank, b: {id: "log", data: 3}});
