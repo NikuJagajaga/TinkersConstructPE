@@ -25,10 +25,12 @@ class CastingTable extends TileWithLiquidModel {
     };
 
     override putDefaultNetworkData(): void {
-        this.networkData.putInt("inputId", 0);
-        this.networkData.putInt("inputData", 0);
-        this.networkData.putInt("outputId", 0);
-        this.networkData.putInt("outputData", 0);
+        const input = this.container.getSlot("slotInput");
+        const output = this.container.getSlot("slotOutput");
+        this.networkData.putInt("inputId", input.id);
+        this.networkData.putInt("inputData", input.data);
+        this.networkData.putInt("outputId", output.id);
+        this.networkData.putInt("outputData", output.data);
     }
 
     override clientLoad(): void {
@@ -39,18 +41,18 @@ class CastingTable extends TileWithLiquidModel {
 
     @ClientSide
     setupAnimPosScale(): void {
-        this.animPos = {x: 0.5, y: 29/32, z: 0.5};
+        this.animPos = {x: 0.5, y: 60/64, z: 0.5};
         this.animScale = {x: 14/16, y: 1/16, z: 14/16};
     }
 
     @ClientSide
     setupAnimItem(): void {
 
-        this.animInput = new Animation.Item(this.x + 9/16, this.y + 31/32, this.z + 9/16);
+        this.animInput = new Animation.Item(this.x + 9/16, this.y + 61/64, this.z + 9/16);
         this.animInput.load();
         this.animInput.setSkylightMode();
 
-        this.animOutput = new Animation.Item(this.x + 9/16, this.y + 31/32, this.z + 9/16);
+        this.animOutput = new Animation.Item(this.x + 9/16, this.y + 61/64, this.z + 9/16);
         this.animOutput.load();
         this.animOutput.setSkylightMode();
 
@@ -77,8 +79,6 @@ class CastingTable extends TileWithLiquidModel {
         const inputData = this.networkData.getInt("inputData");
         const outputId = this.networkData.getInt("outputId");
         const outputData = this.networkData.getInt("outputData");
-        //const input = this.container.getSlot("slotInput");
-        //const output = this.container.getSlot("slotOutput");
         const empty = {id: 0, count: 0, data: 0};
         this.animInput?.describeItem(inputId === 0 ? empty : {id: Network.serverToLocalId(inputId), count: 1, data: inputData, size: 14/16, rotation: [Math.PI/2, 0, 0]});
         this.animOutput?.describeItem(outputId === 0 ? empty : {id: Network.serverToLocalId(outputId), count: 1, data: outputData, size: 14/16, rotation: [Math.PI/2, 0, 0]});
@@ -89,6 +89,9 @@ class CastingTable extends TileWithLiquidModel {
     }
 
     isValidCast(id: number): boolean {
+        if(IDRegistry.isVanilla(id)){
+            return id >= 256;
+        }
         return ItemRegistry.isItem(id);
     }
 
@@ -99,7 +102,7 @@ class CastingTable extends TileWithLiquidModel {
     override onItemUse(coords: Callback.ItemUseCoordinates, item: ItemStack, playerUid: number): boolean {
 
         if(this.liquidStorage.getLiquidStored()){
-            return false;
+            return true;
         }
 
         const player = new PlayerEntity(playerUid);
@@ -125,11 +128,18 @@ class CastingTable extends TileWithLiquidModel {
             player.decreaseCarriedItem();
         }
         else{
-            return false;
+            return true;
         }
 
-        this.updateLiquidLimits();
+        this.networkData.putInt("inputId", input.id);
+        this.networkData.putInt("inputData", input.data);
+        this.networkData.putInt("outputId", output.id);
+        this.networkData.putInt("outputData", output.data);
+        this.networkData.sendChanges();
+
         this.container.sendChanges();
+        this.updateLiquidLimits();
+        this.preventClick();
         return true;
 
     }
@@ -139,6 +149,8 @@ class CastingTable extends TileWithLiquidModel {
         super.onTick();
 
         const stored = this.liquidStorage.getLiquidStored();
+        const slotInput = this.container.getSlot("slotInput");
+        const slotOutput = this.container.getSlot("slotOutput");
 
         if(stored && this.liquidStorage.isFull(stored)){
             if(++this.data.progress < CastingRecipe.calcCooldownTime(stored, this.liquidStorage.getAmount(stored))){
@@ -149,8 +161,8 @@ class CastingTable extends TileWithLiquidModel {
             else{
                 const result = this.getRecipe(stored);
                 if(result){
-                    this.container.setSlot("slotOutput", result.id, 1, result.data);
-                    result.consume && this.container.clearSlot("slotInput");
+                    slotOutput.setSlot(result.id, 1, result.data);
+                    result.consume && slotInput.clear();
                     this.sendPacket("spawnParticle", {});
                 }
                 this.data.progress = 0;
@@ -158,20 +170,16 @@ class CastingTable extends TileWithLiquidModel {
                 for(let key in this.liquidStorage.liquidAmounts){
                     delete this.liquidStorage.liquidAmounts[key];
                 }
+                this.networkData.putInt("inputId", slotInput.id);
+                this.networkData.putInt("inputData", slotInput.data);
+                this.networkData.putInt("outputId", slotOutput.id);
+                this.networkData.putInt("outputData", slotOutput.data);
+                this.networkData.sendChanges();
             }
         }
 
         StorageInterface.checkHoppers(this);
         this.container.sendChanges();
-
-        const slotInput = this.container.getSlot("slotInput");
-        const slotOutput = this.container.getSlot("slotOutput");
-
-        this.networkData.putInt("inputId", slotInput.id);
-        this.networkData.putInt("inputData", slotInput.data);
-        this.networkData.putInt("outputId", slotOutput.id);
-        this.networkData.putInt("outputData", slotOutput.data);
-        this.networkData.sendChanges();
         
     }
 
@@ -198,8 +206,10 @@ StorageInterface.createInterface(BlockID.tcon_itemcast, {
     },
 
     canReceiveLiquid(liquid: string, side: number): boolean {
+        const input = this.container.getSlot("slotInput");
+        const output = this.container.getSlot("slotOutput");
         const stored = this.tileEntity.liquidStorage.getLiquidStored();
-        return (!stored || stored === liquid) && CastingRecipe.isValidLiquidForTable(this.tileEntity.container.getSlot("slotInput").id, liquid);
+        return (!stored || stored === liquid) && CastingRecipe.isValidLiquidForTable(input.id, liquid) && output.isEmpty();
     }
 
 });

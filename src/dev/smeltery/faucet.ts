@@ -75,7 +75,8 @@ class SearedFaucet extends TconTileEntity {
     override onItemUse(coords: Callback.ItemUseCoordinates, item: ItemStack, player: number): boolean {
         if(Entity.getSneaking(player)) return true;
         this.data.isActive = this.turnOn();
-        return false;
+        this.preventClick();
+        return true;
     }
 
     override onRedstoneUpdate(signal: number): void {

@@ -1359,7 +1359,8 @@ var SearedFaucet = /** @class */ (function (_super) {
         if (Entity.getSneaking(player))
             return true;
         this.data.isActive = this.turnOn();
-        return false;
+        this.preventClick();
+        return true;
     };
     SearedFaucet.prototype.onRedstoneUpdate = function (signal) {
         if (this.data.signal < signal) {
@@ -1456,10 +1457,12 @@ var CastingTable = /** @class */ (function (_super) {
         return _this;
     }
     CastingTable.prototype.putDefaultNetworkData = function () {
-        this.networkData.putInt("inputId", 0);
-        this.networkData.putInt("inputData", 0);
-        this.networkData.putInt("outputId", 0);
-        this.networkData.putInt("outputData", 0);
+        var input = this.container.getSlot("slotInput");
+        var output = this.container.getSlot("slotOutput");
+        this.networkData.putInt("inputId", input.id);
+        this.networkData.putInt("inputData", input.data);
+        this.networkData.putInt("outputId", output.id);
+        this.networkData.putInt("outputData", output.data);
     };
     CastingTable.prototype.clientLoad = function () {
         this.setupAnimPosScale();
@@ -1467,15 +1470,15 @@ var CastingTable = /** @class */ (function (_super) {
         this.setupAnimItem();
     };
     CastingTable.prototype.setupAnimPosScale = function () {
-        this.animPos = { x: 0.5, y: 29 / 32, z: 0.5 };
+        this.animPos = { x: 0.5, y: 60 / 64, z: 0.5 };
         this.animScale = { x: 14 / 16, y: 1 / 16, z: 14 / 16 };
     };
     CastingTable.prototype.setupAnimItem = function () {
         var _this = this;
-        this.animInput = new Animation.Item(this.x + 9 / 16, this.y + 31 / 32, this.z + 9 / 16);
+        this.animInput = new Animation.Item(this.x + 9 / 16, this.y + 61 / 64, this.z + 9 / 16);
         this.animInput.load();
         this.animInput.setSkylightMode();
-        this.animOutput = new Animation.Item(this.x + 9 / 16, this.y + 31 / 32, this.z + 9 / 16);
+        this.animOutput = new Animation.Item(this.x + 9 / 16, this.y + 61 / 64, this.z + 9 / 16);
         this.animOutput.load();
         this.animOutput.setSkylightMode();
         this.updateAnimItem();
@@ -1498,8 +1501,6 @@ var CastingTable = /** @class */ (function (_super) {
         var inputData = this.networkData.getInt("inputData");
         var outputId = this.networkData.getInt("outputId");
         var outputData = this.networkData.getInt("outputData");
-        //const input = this.container.getSlot("slotInput");
-        //const output = this.container.getSlot("slotOutput");
         var empty = { id: 0, count: 0, data: 0 };
         (_a = this.animInput) === null || _a === void 0 ? void 0 : _a.describeItem(inputId === 0 ? empty : { id: Network.serverToLocalId(inputId), count: 1, data: inputData, size: 14 / 16, rotation: [Math.PI / 2, 0, 0] });
         (_b = this.animOutput) === null || _b === void 0 ? void 0 : _b.describeItem(outputId === 0 ? empty : { id: Network.serverToLocalId(outputId), count: 1, data: outputData, size: 14 / 16, rotation: [Math.PI / 2, 0, 0] });
@@ -1508,6 +1509,9 @@ var CastingTable = /** @class */ (function (_super) {
         this.liquidStorage.liquidLimits = CastingRecipe.getTableLimits(this.container.getSlot("slotInput").id);
     };
     CastingTable.prototype.isValidCast = function (id) {
+        if (IDRegistry.isVanilla(id)) {
+            return id >= 256;
+        }
         return ItemRegistry.isItem(id);
     };
     CastingTable.prototype.getRecipe = function (stored) {
@@ -1515,7 +1519,7 @@ var CastingTable = /** @class */ (function (_super) {
     };
     CastingTable.prototype.onItemUse = function (coords, item, playerUid) {
         if (this.liquidStorage.getLiquidStored()) {
-            return false;
+            return true;
         }
         var player = new PlayerEntity(playerUid);
         var input = this.container.getSlot("slotInput");
@@ -1539,15 +1543,23 @@ var CastingTable = /** @class */ (function (_super) {
             player.decreaseCarriedItem();
         }
         else {
-            return false;
+            return true;
         }
-        this.updateLiquidLimits();
+        this.networkData.putInt("inputId", input.id);
+        this.networkData.putInt("inputData", input.data);
+        this.networkData.putInt("outputId", output.id);
+        this.networkData.putInt("outputData", output.data);
+        this.networkData.sendChanges();
         this.container.sendChanges();
+        this.updateLiquidLimits();
+        this.preventClick();
         return true;
     };
     CastingTable.prototype.onTick = function () {
         _super.prototype.onTick.call(this);
         var stored = this.liquidStorage.getLiquidStored();
+        var slotInput = this.container.getSlot("slotInput");
+        var slotOutput = this.container.getSlot("slotOutput");
         if (stored && this.liquidStorage.isFull(stored)) {
             if (++this.data.progress < CastingRecipe.calcCooldownTime(stored, this.liquidStorage.getAmount(stored))) {
                 if ((World.getThreadTime() & 15) === 0) {
@@ -1557,8 +1569,8 @@ var CastingTable = /** @class */ (function (_super) {
             else {
                 var result = this.getRecipe(stored);
                 if (result) {
-                    this.container.setSlot("slotOutput", result.id, 1, result.data);
-                    result.consume && this.container.clearSlot("slotInput");
+                    slotOutput.setSlot(result.id, 1, result.data);
+                    result.consume && slotInput.clear();
                     this.sendPacket("spawnParticle", {});
                 }
                 this.data.progress = 0;
@@ -1566,17 +1578,15 @@ var CastingTable = /** @class */ (function (_super) {
                 for (var key in this.liquidStorage.liquidAmounts) {
                     delete this.liquidStorage.liquidAmounts[key];
                 }
+                this.networkData.putInt("inputId", slotInput.id);
+                this.networkData.putInt("inputData", slotInput.data);
+                this.networkData.putInt("outputId", slotOutput.id);
+                this.networkData.putInt("outputData", slotOutput.data);
+                this.networkData.sendChanges();
             }
         }
         StorageInterface.checkHoppers(this);
         this.container.sendChanges();
-        var slotInput = this.container.getSlot("slotInput");
-        var slotOutput = this.container.getSlot("slotOutput");
-        this.networkData.putInt("inputId", slotInput.id);
-        this.networkData.putInt("inputData", slotInput.data);
-        this.networkData.putInt("outputId", slotOutput.id);
-        this.networkData.putInt("outputData", slotOutput.data);
-        this.networkData.sendChanges();
     };
     CastingTable.prototype.spawnParticle = function (data) {
         for (var i = 0; i < 4; i++) {
@@ -1604,8 +1614,10 @@ StorageInterface.createInterface(BlockID.tcon_itemcast, {
         slotOutput: { output: true }
     },
     canReceiveLiquid: function (liquid, side) {
+        var input = this.container.getSlot("slotInput");
+        var output = this.container.getSlot("slotOutput");
         var stored = this.tileEntity.liquidStorage.getLiquidStored();
-        return (!stored || stored === liquid) && CastingRecipe.isValidLiquidForTable(this.tileEntity.container.getSlot("slotInput").id, liquid);
+        return (!stored || stored === liquid) && CastingRecipe.isValidLiquidForTable(input.id, liquid) && output.isEmpty();
     }
 });
 createBlock("tcon_blockcast", [{ name: "Casting Basin", texture: [0, 1, 2] }]);
@@ -1662,6 +1674,9 @@ var CastingBasin = /** @class */ (function (_super) {
         this.liquidStorage.liquidLimits = CastingRecipe.getBasinLimits(this.container.getSlot("slotInput").id);
     };
     CastingBasin.prototype.isValidCast = function (id) {
+        if (IDRegistry.isVanilla(id)) {
+            return id < 256;
+        }
         return ItemRegistry.isBlock(id);
     };
     CastingBasin.prototype.getRecipe = function (stored) {
@@ -1685,8 +1700,10 @@ StorageInterface.createInterface(BlockID.tcon_blockcast, {
         slotOutput: { output: true }
     },
     canReceiveLiquid: function (liquid, side) {
+        var input = this.container.getSlot("slotInput");
+        var output = this.container.getSlot("slotOutput");
         var stored = this.tileEntity.liquidStorage.getLiquidStored();
-        return (!stored || stored === liquid) && CastingRecipe.isValidLiquidForBasin(this.tileEntity.container.getSlot("slotInput").id, liquid);
+        return (!stored || stored === liquid) && CastingRecipe.isValidLiquidForBasin(input.id, liquid) && output.isEmpty();
     }
 });
 var _a;
@@ -2047,11 +2064,12 @@ var SmelteryControler = /** @class */ (function (_super) {
         return null;
     };
     SmelteryControler.prototype.onItemUse = function (coords, item, player) {
+        var _a;
         this.data.isActive = this.checkStructure();
         if (this.data.isActive) {
             return false;
         }
-        BlockEngine.sendMessage(Network.getClientForPlayer(player), "Invalid Structure");
+        (_a = Network.getClientForPlayer(player)) === null || _a === void 0 ? void 0 : _a.sendMessage("Invalid Structure");
         return true;
     };
     SmelteryControler.prototype.setAnim = function (data) {
@@ -2360,6 +2378,7 @@ var TinkersMaterial = /** @class */ (function () {
     };
     return TinkersMaterial;
 }());
+//params source: slimeknights.tconstruct.tools.TinkerMaterials.java
 var Material = {
     wood: new TinkersMaterial("Wooden", 0)
         .setItem("planks")
@@ -2755,66 +2774,9 @@ var TconToolStack = /** @class */ (function () {
     };
     return TconToolStack;
 }());
-var PartRegistry = /** @class */ (function () {
-    function PartRegistry() {
-    }
-    PartRegistry.createParts = function (key, material) {
-        var name = material.getName();
-        var id = 0;
-        for (var _i = 0, _b = this.types; _i < _b.length; _i++) {
-            var type = _b[_i];
-            id = createItem("tconpart_".concat(type.key, "_").concat(key), "".concat(name, " ").concat(type.name));
-            Item.registerNameOverrideFunction(id, this.nameOverrideFunc);
-            Item.addCreativeGroup("tconpart_" + type.key, type.name, [id]);
-            this.data[id] = { type: type.key, material: key };
-        }
-        ;
-    };
-    PartRegistry.registerRecipes = function (key, material) {
-        var id = 0;
-        var liquid = "";
-        for (var _i = 0, _b = this.types; _i < _b.length; _i++) {
-            var type = _b[_i];
-            id = ItemID["tconpart_".concat(type.key, "_").concat(key)];
-            liquid = material.getMoltenLiquid();
-            if (liquid) {
-                MeltingRecipe.addRecipe(id, liquid, MatValue.INGOT * type.cost);
-                CastingRecipe.addTableRecipeForAll(type.key, liquid, id);
-            }
-            CastingRecipe.addMakeCastRecipes(id, type.key);
-        }
-        ;
-    };
-    PartRegistry.getPartData = function (id) {
-        return this.data[id];
-    };
-    PartRegistry.getIDFromData = function (type, material) {
-        for (var id in this.data) {
-            if (this.data[id].type === type && this.data[id].material === material) {
-                return parseInt(id);
-            }
-        }
-        return 0;
-    };
-    PartRegistry.getAllPartBuildRecipeForRV = function () {
-        var list = [];
-        for (var key in Material) {
-            if (!Material[key].isMetal) {
-                for (var _i = 0, _b = this.types; _i < _b.length; _i++) {
-                    var type = _b[_i];
-                    list.push({
-                        input: [{ id: ItemID.tcon_pattern_blank, count: 1, data: 0 }, __assign(__assign({}, Material[key].getItem()), { count: type.cost })],
-                        output: [{ id: this.getIDFromData(type.key, key), count: 1, data: 0 }],
-                        pattern: type.key
-                    });
-                }
-            }
-        }
-        return list;
-    };
-    var _a;
-    _a = PartRegistry;
-    PartRegistry.data = {};
+var PartRegistry;
+(function (PartRegistry) {
+    var data = {};
     PartRegistry.types = [
         { key: "pickaxe", name: "Pickaxe Head", cost: 2 },
         { key: "shovel", name: "Shovel Head", cost: 2 },
@@ -2830,9 +2792,70 @@ var PartRegistry = /** @class */ (function () {
         { key: "guard", name: "Wide Guard", cost: 1 },
         { key: "largeplate", name: "Large Plate", cost: 8 }
     ];
-    PartRegistry.nameOverrideFunc = function (item, translation, name) {
+    var nameOverrideFunc = function (item, translation, name) { return name + "\n" + getTooltips(item.id).join("\n"); };
+    function createParts(key, material) {
+        var name = material.getName();
+        var id = 0;
+        for (var _i = 0, types_1 = PartRegistry.types; _i < types_1.length; _i++) {
+            var type = types_1[_i];
+            id = createItem("tconpart_".concat(type.key, "_").concat(key), "".concat(name, " ").concat(type.name));
+            Item.registerNameOverrideFunction(id, nameOverrideFunc);
+            Item.addCreativeGroup("tconpart_" + type.key, type.name, [id]);
+            data[id] = { type: type.key, material: key };
+        }
+    }
+    PartRegistry.createParts = createParts;
+    for (var key in Material) {
+        PartRegistry.createParts(key, Material[key]);
+    }
+    function registerRecipes(key, material) {
+        var id = 0;
+        var liquid = "";
+        for (var _i = 0, types_2 = PartRegistry.types; _i < types_2.length; _i++) {
+            var type = types_2[_i];
+            id = ItemID["tconpart_".concat(type.key, "_").concat(key)];
+            liquid = material.getMoltenLiquid();
+            if (liquid) {
+                MeltingRecipe.addRecipe(id, liquid, MatValue.INGOT * type.cost);
+                CastingRecipe.addTableRecipeForAll(type.key, liquid, id);
+            }
+            CastingRecipe.addMakeCastRecipes(id, type.key);
+        }
+    }
+    PartRegistry.registerRecipes = registerRecipes;
+    function getPartData(id) {
+        return data[id];
+    }
+    PartRegistry.getPartData = getPartData;
+    function getIDFromData(type, material) {
+        for (var id in data) {
+            if (data[id].type === type && data[id].material === material) {
+                return parseInt(id);
+            }
+        }
+        return 0;
+    }
+    PartRegistry.getIDFromData = getIDFromData;
+    function getAllPartBuildRecipeForRV() {
+        var list = [];
+        for (var key in Material) {
+            if (!Material[key].isMetal) {
+                for (var _i = 0, types_3 = PartRegistry.types; _i < types_3.length; _i++) {
+                    var type = types_3[_i];
+                    list.push({
+                        input: [{ id: ItemID.tcon_pattern_blank, count: 1, data: 0 }, __assign(__assign({}, Material[key].getItem()), { count: type.cost })],
+                        output: [{ id: getIDFromData(type.key, key), count: 1, data: 0 }],
+                        pattern: type.key
+                    });
+                }
+            }
+        }
+        return list;
+    }
+    PartRegistry.getAllPartBuildRecipeForRV = getAllPartBuildRecipeForRV;
+    function getTooltips(id) {
         var tooltips = [];
-        var partData = _a.getPartData(item.id);
+        var partData = getPartData(id);
         if (partData) {
             var matData = Material[partData.material];
             if (matData) {
@@ -2858,18 +2881,32 @@ var PartRegistry = /** @class */ (function () {
                 }
             }
         }
-        return name + "\n" + tooltips.join("\n");
-    };
-    return PartRegistry;
-}());
-(function () {
-    for (var key in Material) {
-        PartRegistry.createParts(key, Material[key]);
+        return tooltips;
     }
-})();
+    PartRegistry.getTooltips = getTooltips;
+    var onTooltipFunc = function (item, text, level) {
+        var tooltips = getTooltips(item.id);
+        for (var _i = 0, tooltips_1 = tooltips; _i < tooltips_1.length; _i++) {
+            var line = tooltips_1[_i];
+            text.add(line);
+        }
+    };
+    function replaceTooltipsWithKEX(api) {
+        for (var id in data) {
+            delete Item.nameOverrideFunctions[id];
+            api.ItemsModule.addTooltip(+id, onTooltipFunc);
+        }
+    }
+    PartRegistry.replaceTooltipsWithKEX = replaceTooltipsWithKEX;
+})(PartRegistry || (PartRegistry = {}));
 Callback.addCallback("PreLoaded", function () {
     for (var key in Material) {
         PartRegistry.registerRecipes(key, Material[key]);
+    }
+});
+ModAPI.addAPICallback("KernelExtension", function (api) {
+    if (typeof api.getKEXVersionCode === "function" && api.getKEXVersionCode() >= 300) {
+        PartRegistry.replaceTooltipsWithKEX(api);
     }
 });
 var ToolTexture = /** @class */ (function () {
@@ -3141,14 +3178,7 @@ ItemRegistry.registerItem(new class extends ItemThrowable {
     }
 
 });
-*/
-IDRegistry.genItemID("aaaa");
-Item.createItem("aaaa", "Test", { name: "stick" });
-Callback.addCallback("ItemTooltip", function (item, text, level) {
-    if (item.id == ItemID.aaaa) {
-        text.add("hello tooltip");
-    }
-});
+*/ 
 var TinkersModifier = /** @class */ (function () {
     function TinkersModifier(key, name, texIndex, recipe, max, multi, hate) {
         this.key = key;
@@ -3572,7 +3602,7 @@ BlockModel.register(BlockID.tcon_partbuilder5, function (model, index) {
     model.addBox(0 / 16, 0 / 16, 12 / 16, 4 / 16, 12 / 16, 16 / 16, tex, meta);
     return model;
 });
-Recipes2.addShaped(BlockID.tcon_partbuilder0, "a:b", { a: ItemID.tcon_pattern_blank, b: { id: "log", data: 1 } });
+Recipes2.addShaped(BlockID.tcon_partbuilder0, "a:b", { a: ItemID.tcon_pattern_blank, b: { id: "log", data: 0 } });
 Recipes2.addShaped(BlockID.tcon_partbuilder1, "a:b", { a: ItemID.tcon_pattern_blank, b: { id: "log", data: 1 } });
 Recipes2.addShaped(BlockID.tcon_partbuilder2, "a:b", { a: ItemID.tcon_pattern_blank, b: { id: "log", data: 2 } });
 Recipes2.addShaped(BlockID.tcon_partbuilder3, "a:b", { a: ItemID.tcon_pattern_blank, b: { id: "log", data: 3 } });
@@ -4181,12 +4211,13 @@ var TconTool = /** @class */ (function (_super) {
         for (var i = 0; i <= _this.maxDamage; i++) {
             ItemModel.getFor(_this.id, i).setModelOverrideCallback(function (item) { return ToolModelManager.getModel(item); });
         }
+        ModAPI.addAPICallback("KernelExtension", function (api) {
+            if (typeof api.getKEXVersionCode === "function" && api.getKEXVersionCode() >= 300) {
+                api.ItemsModule.setExplodable(_this.id, true);
+                api.ItemsModule.setFireResistant(_this.id, true);
+            }
+        });
         return _this;
-        // KEX.ItemsModule.addTooltip(this.id, (item, text, level) => {
-        //     text.add("hello tooltips!");
-        // });
-        //KEX.ItemsModule.setExplodable(this.id, true);
-        //KEX.ItemsModule.setFireResistant(this.id, true);
     }
     TconTool.prototype.addToCreative = function (partsCount) {
         var materials = [];
@@ -4288,7 +4319,7 @@ var TconTool = /** @class */ (function (_super) {
         stack.forEachModifiers(function (mod, level) {
             bonus += mod.onAttack(item, victim, player, level);
         });
-        //this.toolMaterial.damage = stack.stats.damage + bonus;
+        this.toolMaterial.damage = stack.stats.damage + bonus;
         if (this.isWeapon) {
             stack.consumeDurability(1, player);
             stack.addXp(1, player);
@@ -4299,6 +4330,7 @@ var TconTool = /** @class */ (function (_super) {
         item.data = stack.data; //setCarriedItem in ToolAPI.playerAttackHook
         return true;
     };
+    //KEX compatibility
     TconTool.prototype.getAttackDamageBonus = function (item, attacker, victim) {
         if (!item.extra) {
             return 0;
@@ -4331,6 +4363,18 @@ var TconTool = /** @class */ (function (_super) {
         });
     };
     TconTool.prototype.onItemUse = function (coords, item, block, player) {
+        var tier = KEX.ToolsModule.getTierByName("wood");
+        Game.message("[wood] speed: ".concat(tier.getSpeed(), ", uses: ").concat(tier.getUses(), ", damage: ").concat(tier.getAttackDamageBonus()));
+        tier = KEX.ToolsModule.getTierByName("stone");
+        Game.message("[stone] speed: ".concat(tier.getSpeed(), ", uses: ").concat(tier.getUses(), ", damage: ").concat(tier.getAttackDamageBonus()));
+        tier = KEX.ToolsModule.getTierByName("iron");
+        Game.message("[iron] speed: ".concat(tier.getSpeed(), ", uses: ").concat(tier.getUses(), ", damage: ").concat(tier.getAttackDamageBonus()));
+        tier = KEX.ToolsModule.getTierByName("diamond");
+        Game.message("[diamond] speed: ".concat(tier.getSpeed(), ", uses: ").concat(tier.getUses(), ", damage: ").concat(tier.getAttackDamageBonus()));
+        tier = KEX.ToolsModule.getTierByName("gold");
+        Game.message("[gold] speed: ".concat(tier.getSpeed(), ", uses: ").concat(tier.getUses(), ", damage: ").concat(tier.getAttackDamageBonus()));
+        tier = KEX.ToolsModule.getTierByName("netherite");
+        Game.message("[netherite] speed: ".concat(tier.getSpeed(), ", uses: ").concat(tier.getUses(), ", damage: ").concat(tier.getAttackDamageBonus()));
     };
     TconTool.prototype.onMending = function (item, player) {
         if (!item.extra) {
@@ -5350,6 +5394,14 @@ ModAPI.addAPICallback("RecipeViewer", function (api) {
     }(api.RecipeType));
     api.RecipeTypeRegistry.register("tcon_itemcast", new CastingRV("Item Casting", BlockID.tcon_itemcast, "tcon.rv.table", "table"));
     api.RecipeTypeRegistry.register("tcon_blockcast", new CastingRV("Block Casting", BlockID.tcon_blockcast, "tcon.rv.basin", "basin"));
+});
+//@ts-ignore
+var KEX;
+ModAPI.addAPICallback("KernelExtension", function (api) {
+    if (typeof api.getKEXVersionCode === "function" && api.getKEXVersionCode() >= 300) {
+        //@ts-ignore
+        KEX = api;
+    }
 });
 ModAPI.registerAPI("TConAPI", {
     MatValue: MatValue,

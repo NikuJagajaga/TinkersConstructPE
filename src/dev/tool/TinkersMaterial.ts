@@ -67,6 +67,7 @@ class TinkersMaterial {
 }
 
 
+//params source: slimeknights.tconstruct.tools.TinkerMaterials.java
 const Material: {[key: string]: TinkersMaterial} = {
 
     wood: new TinkersMaterial("Wooden", 0)

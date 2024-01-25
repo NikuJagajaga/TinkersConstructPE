@@ -87,6 +87,7 @@
         "integration/redpower.ts",
         "integration/forestry.ts",
         "integration/recipe_viewer.ts",
+        "integration/kex.ts",
 
         "footer.ts"
 

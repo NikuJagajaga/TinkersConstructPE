@@ -1,5 +1,4 @@
 import math
-import colorsys
 
 
 def mult_color(c1: int, c2: int) -> int:

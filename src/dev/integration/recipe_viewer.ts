@@ -1,4 +1,4 @@
-var RV: RecipeViewerAPI;
+let RV: RecipeViewerAPI;
 
 ModAPI.addAPICallback("RecipeViewer", (api: RecipeViewerAPI) => {
 

@@ -61,6 +61,9 @@ class CastingBasin extends CastingTable {
     }
 
     override isValidCast(id: number): boolean {
+        if(IDRegistry.isVanilla(id)){
+            return id < 256;
+        }
         return ItemRegistry.isBlock(id);
     }
 
@@ -82,8 +85,10 @@ StorageInterface.createInterface(BlockID.tcon_blockcast, {
     },
 
     canReceiveLiquid(liquid: string, side: number): boolean {
+        const input = this.container.getSlot("slotInput");
+        const output = this.container.getSlot("slotOutput");
         const stored = this.tileEntity.liquidStorage.getLiquidStored();
-        return (!stored || stored === liquid) && CastingRecipe.isValidLiquidForBasin(this.tileEntity.container.getSlot("slotInput").id, liquid);
+        return (!stored || stored === liquid) && CastingRecipe.isValidLiquidForBasin(input.id, liquid) && output.isEmpty();
     }
 
 });

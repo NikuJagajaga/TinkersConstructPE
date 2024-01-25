@@ -6076,6 +6076,7 @@ declare namespace Item {
      * string to be used as new item name
      */
     function registerNameOverrideFunction(nameID: string | number, func: Callback.ItemNameOverrideFunction): void;
+    var nameOverrideFunctions: {[id: number]: Callback.ItemNameOverrideFunction};
 
     /**
      * Registers function to be called when player uses item in the air (not on
@@ -6411,7 +6412,7 @@ declare class ItemContainerSlot {
 	 */
 	setSlot(id: number, count: number, data: number, extra?: ItemExtraData): boolean;
 
-	set(id: number, count: number, data: number, extra: ItemExtraData): boolean;
+	set(id: number, count: number, data: number, extra?: ItemExtraData): boolean;
 
 	/**
 	 * Drops slot's content in world at specified coords

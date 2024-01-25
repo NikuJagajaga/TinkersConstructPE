@@ -1,4 +1,4 @@
-class TconTool extends ItemCommon implements ItemBehavior, Item.ExtendedToolParams {
+class TconTool extends ItemCommon implements ItemBehavior, ToolAPI.ToolParams {
 
     tconToolType: string;
     blockTypes: string[];
@@ -31,12 +31,12 @@ class TconTool extends ItemCommon implements ItemBehavior, Item.ExtendedToolPara
             ItemModel.getFor(this.id, i).setModelOverrideCallback(item => ToolModelManager.getModel(item));
         }
 
-        // KEX.ItemsModule.addTooltip(this.id, (item, text, level) => {
-        //     text.add("hello tooltips!");
-        // });
-
-        //KEX.ItemsModule.setExplodable(this.id, true);
-        //KEX.ItemsModule.setFireResistant(this.id, true);
+        ModAPI.addAPICallback("KernelExtension", (api: typeof KEX) => {
+            if(typeof api.getKEXVersionCode === "function" && api.getKEXVersionCode() >= 300){
+                api.ItemsModule.setExplodable(this.id, true);
+                api.ItemsModule.setFireResistant(this.id, true);
+            }
+        });
 
     }
 
@@ -154,7 +154,7 @@ class TconTool extends ItemCommon implements ItemBehavior, Item.ExtendedToolPara
         stack.forEachModifiers((mod, level) => {
             bonus += mod.onAttack(item, victim, player, level);
         });
-        //this.toolMaterial.damage = stack.stats.damage + bonus;
+        this.toolMaterial.damage = stack.stats.damage + bonus;
         if(this.isWeapon){
             stack.consumeDurability(1, player);
             stack.addXp(1, player);
@@ -166,6 +166,7 @@ class TconTool extends ItemCommon implements ItemBehavior, Item.ExtendedToolPara
         return true;
     }
 
+    //KEX compatibility
     getAttackDamageBonus(item: ItemInstance, attacker: number, victim: number): number {
         if(!item.extra){
             return 0;
