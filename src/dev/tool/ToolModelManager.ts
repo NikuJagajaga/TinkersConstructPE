@@ -101,6 +101,8 @@ class ToolModelManager {
             bmpNormal.recycle();
             bmpBroken.recycle();
 
+            Thread.sleep(50);
+
         });
         
         this.models[uniqueKey] = {normal: modelNormal, broken: modelBroken};

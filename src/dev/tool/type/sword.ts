@@ -30,15 +30,7 @@ class TconSword extends TconTool {
 }
 
 
-ItemRegistry.registerItem(new TconSword(MiningLv.STONE));
-ItemRegistry.registerItem(new TconSword(MiningLv.IRON));
-ItemRegistry.registerItem(new TconSword(MiningLv.DIAMOND));
-ItemRegistry.registerItem(new TconSword(MiningLv.OBSIDIAN));
-ItemRegistry.registerItem(new TconSword(MiningLv.COBALT));
-
-TconToolFactory.addToCreative("sword", "Broad Sword", 3);
 ToolForgeHandler.addRecipe("sword", ["rod", "sword", "guard"]);
-
 ToolForgeHandler.addLayout({
     title: "Broad Sword",
     background: "tcon.icon.sword",

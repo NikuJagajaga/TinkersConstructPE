@@ -11,12 +11,6 @@
             "group": "build"
         },
         {
-            "label": "Push All",
-            "type": "shell",
-            "command": "adb push src/. '/storage/emulated/0/games/horizon/packs/Inner_Core/innercore/mods/${workspaceFolderBasename}'",
-            "group": "build"
-        },
-        {
             "label": "Push Codes",
             "type": "shell",
             "command": [
@@ -34,6 +28,14 @@
                 "adb push src/launcher.js '/storage/emulated/0/games/horizon/packs/Inner_Core/innercore/mods/${workspaceFolderBasename}';",
                 "adb push src/lib/. '/storage/emulated/0/games/horizon/packs/Inner_Core/innercore/mods/${workspaceFolderBasename}/lib'"
             ],
+            "group": "build",
+            "dependsOrder": "sequence",
+            "dependsOn": ["Compile"]
+        },
+        {
+            "label": "Compile & Push All",
+            "type": "shell",
+            "command": "adb push src/. '/storage/emulated/0/games/horizon/packs/Inner_Core/innercore/mods/${workspaceFolderBasename}'",
             "group": "build",
             "dependsOrder": "sequence",
             "dependsOn": ["Compile"]

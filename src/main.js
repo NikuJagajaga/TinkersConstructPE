@@ -82,7 +82,6 @@ var Cfg = {
     },
     oreToIngotRatio: __config__.getNumber("oreToIngotRatio").intValue(),
     modifierSlots: __config__.getNumber("modifierSlots").intValue(),
-    showItemOnTable: __config__.getBool("showItemOnTable"),
     checkInsideSmeltery: __config__.getBool("checkInsideSmeltery")
 };
 var addLineBreaks = function (length, text) {
@@ -1194,11 +1193,18 @@ var SearedTank = /** @class */ (function (_super) {
         return null;
     };
     var dropFunc = function () { return []; };
-    var nameFunc = function (item, name) {
+    var getTooltips = function (item) {
         if (item.extra) {
             var liquid = LiquidRegistry.getLiquidName(item.extra.getString("stored"));
             var amount = item.extra.getInt("amount");
-            return name + "\n§7" + liquid + ": " + amount + " mB";
+            return ["§7" + liquid + ": " + amount + " mB"];
+        }
+        return [];
+    };
+    var nameFunc = function (item, translation, name) {
+        var tooltips = getTooltips(item);
+        if (tooltips.length > 0) {
+            return name + "\n" + tooltips.join("\n");
         }
         return name;
     };
@@ -1227,14 +1233,33 @@ var SearedTank = /** @class */ (function (_super) {
     Block.registerDropFunction(BlockID.tcon_gauge_fuel, dropFunc);
     Block.registerDropFunction(BlockID.tcon_tank_ingot, dropFunc);
     Block.registerDropFunction(BlockID.tcon_gauge_ingot, dropFunc);
-    Item.registerNameOverrideFunction(BlockID.tcon_tank_fuel, nameFunc);
-    Item.registerNameOverrideFunction(BlockID.tcon_gauge_fuel, nameFunc);
-    Item.registerNameOverrideFunction(BlockID.tcon_tank_ingot, nameFunc);
-    Item.registerNameOverrideFunction(BlockID.tcon_gauge_ingot, nameFunc);
     Block.registerPlaceFunction(BlockID.tcon_tank_fuel, placeFunc);
     Block.registerPlaceFunction(BlockID.tcon_gauge_fuel, placeFunc);
     Block.registerPlaceFunction(BlockID.tcon_tank_ingot, placeFunc);
     Block.registerPlaceFunction(BlockID.tcon_gauge_ingot, placeFunc);
+    Item.registerNameOverrideFunction(BlockID.tcon_tank_fuel, nameFunc);
+    Item.registerNameOverrideFunction(BlockID.tcon_gauge_fuel, nameFunc);
+    Item.registerNameOverrideFunction(BlockID.tcon_tank_ingot, nameFunc);
+    Item.registerNameOverrideFunction(BlockID.tcon_gauge_ingot, nameFunc);
+    var onTooltipFunc = function (item, text, level) {
+        var tooltips = getTooltips(item);
+        for (var _i = 0, tooltips_1 = tooltips; _i < tooltips_1.length; _i++) {
+            var line = tooltips_1[_i];
+            text.add(line);
+        }
+    };
+    ModAPI.addAPICallback("KernelExtension", function (api) {
+        if (typeof api.getKEXVersionCode === "function" && api.getKEXVersionCode() >= 300) {
+            delete Item.nameOverrideFunctions[BlockID.tcon_tank_fuel];
+            delete Item.nameOverrideFunctions[BlockID.tcon_gauge_fuel];
+            delete Item.nameOverrideFunctions[BlockID.tcon_tank_ingot];
+            delete Item.nameOverrideFunctions[BlockID.tcon_gauge_ingot];
+            api.ItemsModule.addTooltip(BlockID.tcon_tank_fuel, onTooltipFunc);
+            api.ItemsModule.addTooltip(BlockID.tcon_gauge_fuel, onTooltipFunc);
+            api.ItemsModule.addTooltip(BlockID.tcon_tank_ingot, onTooltipFunc);
+            api.ItemsModule.addTooltip(BlockID.tcon_gauge_ingot, onTooltipFunc);
+        }
+    });
 })();
 createBlock("tcon_drain", [{ name: "Seared Drain", texture: [0, 0, 1, 0, 0, 0] }]);
 TileRenderer.setStandardModelWithRotation(BlockID.tcon_drain, 2, [0, 0, 1, 0, 0, 0].map(function (meta) { return ["tcon_drain", meta]; }));
@@ -1829,7 +1854,7 @@ var SmelteryControler = /** @class */ (function (_super) {
         return capacity - otherTotal;
     };
     SmelteryControler.prototype.getAmount = function (liquid) {
-        return this.liquidStorage.getAmount(liquid) || 0;
+        return Math.round(this.liquidStorage.getAmount(liquid));
     };
     SmelteryControler.prototype.getRelativeAmount = function (liquid) {
         var capacity = this.getLiquidCapacity();
@@ -1838,7 +1863,7 @@ var SmelteryControler = /** @class */ (function (_super) {
     SmelteryControler.prototype.getLiquid = function (liquid, amount) {
         var got = Math.min(this.getAmount(liquid), amount);
         this.liquidStorage.liquidAmounts[liquid] -= got;
-        if (this.liquidStorage.liquidAmounts[liquid] <= 0) {
+        if (this.liquidStorage.liquidAmounts[liquid] < 1) {
             delete this.liquidStorage.liquidAmounts[liquid];
         }
         return got;
@@ -1856,7 +1881,7 @@ var SmelteryControler = /** @class */ (function (_super) {
         return this.totalLiquidAmount() > this.getLiquidCapacity();
     };
     SmelteryControler.prototype.isEmpty = function (liquid) {
-        return this.totalLiquidAmount() <= 0;
+        return this.totalLiquidAmount() < 1;
     };
     SmelteryControler.prototype.getScreenByName = function (screenName, container) {
         return SmelteryHandler.getWindow();
@@ -2020,7 +2045,7 @@ var SmelteryControler = /** @class */ (function (_super) {
         var liquids = this.liquidStorage.liquidAmounts;
         var amount = 0;
         for (var key in liquids) {
-            if (liquids[key] <= 0) {
+            if (liquids[key] < 1) {
                 delete liquids[key];
                 continue;
             }
@@ -2064,12 +2089,12 @@ var SmelteryControler = /** @class */ (function (_super) {
         return null;
     };
     SmelteryControler.prototype.onItemUse = function (coords, item, player) {
-        var _a;
         this.data.isActive = this.checkStructure();
         if (this.data.isActive) {
             return false;
         }
-        (_a = Network.getClientForPlayer(player)) === null || _a === void 0 ? void 0 : _a.sendMessage("Invalid Structure");
+        var client = Network.getClientForPlayer(player);
+        BlockEngine.sendMessage(client, "Invalid Structure");
         return true;
     };
     SmelteryControler.prototype.setAnim = function (data) {
@@ -2590,28 +2615,68 @@ var ToolStats = /** @class */ (function () {
     };
     return ToolStats;
 }());
-var TconToolFactory = /** @class */ (function () {
-    function TconToolFactory() {
-    }
-    TconToolFactory.registerToolId = function (toolId, type, miningLevel) {
-        var _a;
-        var _b;
-        (_a = (_b = this.tools)[type]) !== null && _a !== void 0 ? _a : (_b[type] = {});
-        this.tools[type][miningLevel] = toolId;
+var TconToolFactory;
+(function (TconToolFactory) {
+    var tools = {};
+    var nameOverrideFunc = function (item, translation, name) {
+        if (item.extra) {
+            var stack = new TconToolStack(item);
+            var tooltips = stack.getTooltips();
+            return stack.getName() + "\n" + tooltips.join("\n");
+        }
+        return name;
     };
-    TconToolFactory.getToolId = function (type, miningLevel) {
-        if (this.tools[type]) {
-            return this.tools[type][miningLevel] || -1;
+    var nameOverrideFuncWithoutTooltips = function (item, translation, name) {
+        if (item.extra) {
+            var stack = new TconToolStack(item);
+            return stack.getName();
+        }
+        return name;
+    };
+    var onTooltipFunc = function (item, text, level) {
+        if (item.extra) {
+            var stack = new TconToolStack(item);
+            var tooltips = stack.getTooltips();
+            for (var _i = 0, tooltips_2 = tooltips; _i < tooltips_2.length; _i++) {
+                var line = tooltips_2[_i];
+                text.add(line);
+            }
+        }
+    };
+    function registerTool(toolId, type, miningLevel) {
+        var _a;
+        (_a = tools[type]) !== null && _a !== void 0 ? _a : (tools[type] = {});
+        tools[type][miningLevel] = toolId;
+        Item.registerNameOverrideFunction(toolId, nameOverrideFunc);
+    }
+    TconToolFactory.registerTool = registerTool;
+    function addKEXFeature(api) {
+        var id = 0;
+        for (var type in tools) {
+            for (var lv in tools[type]) {
+                id = tools[type][lv];
+                Item.registerNameOverrideFunction(id, nameOverrideFuncWithoutTooltips);
+                api.ItemsModule.addTooltip(id, onTooltipFunc);
+                api.ItemsModule.setExplodable(id, true);
+                api.ItemsModule.setFireResistant(id, true);
+            }
+        }
+    }
+    TconToolFactory.addKEXFeature = addKEXFeature;
+    function getToolId(type, miningLevel) {
+        if (tools[type]) {
+            return tools[type][miningLevel] || -1;
         }
         return -1;
-    };
-    TconToolFactory.createToolStack = function (type, materials) {
+    }
+    TconToolFactory.getToolId = getToolId;
+    function createToolStack(type, materials) {
         var id = 0;
-        if (!this.tools[type]) {
+        if (!tools[type]) {
             return null;
         }
-        for (var lv in this.tools[type]) {
-            id = this.tools[type][lv];
+        for (var lv in tools[type]) {
+            id = tools[type][lv];
             break;
         }
         if (id === 0) {
@@ -2627,28 +2692,31 @@ var TconToolFactory = /** @class */ (function () {
                 .putString("materials", materials.join("_"))
                 .putString("modifiers", "")
         });
-    };
-    TconToolFactory.isTool = function (id) {
-        for (var type in this.tools) {
-            for (var lv in this.tools[type]) {
-                if (id === this.tools[type][lv]) {
+    }
+    TconToolFactory.createToolStack = createToolStack;
+    function isTool(id) {
+        for (var type in tools) {
+            for (var lv in tools[type]) {
+                if (id === tools[type][lv]) {
                     return true;
                 }
             }
         }
         return false;
-    };
-    TconToolFactory.getType = function (id) {
-        for (var type in this.tools) {
-            for (var lv in this.tools[type]) {
-                if (id === this.tools[type][lv]) {
+    }
+    TconToolFactory.isTool = isTool;
+    function getType(id) {
+        for (var type in tools) {
+            for (var lv in tools[type]) {
+                if (id === tools[type][lv]) {
                     return type;
                 }
             }
         }
         return "";
-    };
-    TconToolFactory.addToCreative = function (type, name, partsCount) {
+    }
+    TconToolFactory.getType = getType;
+    function addToCreative(type, name, partsCount) {
         var materials = [];
         var stack;
         for (var key in Material) {
@@ -2656,18 +2724,17 @@ var TconToolFactory = /** @class */ (function () {
             for (var i = 0; i < partsCount; i++) {
                 materials.push(key);
             }
-            stack = this.createToolStack(type, materials);
+            stack = TconToolFactory.createToolStack(type, materials);
             if (stack && stack.id !== -1) {
                 Item.addToCreative(stack.id, stack.count, stack.data, stack.extra.putInt("xp", 2e9));
             }
         }
-        for (var lv in this.tools[type]) {
-            Item.addCreativeGroup("tcontool_" + type, name, [this.tools[type][lv]]);
+        for (var lv in tools[type]) {
+            Item.addCreativeGroup("tcontool_" + type, name, [tools[type][lv]]);
         }
-    };
-    TconToolFactory.tools = {};
-    return TconToolFactory;
-}());
+    }
+    TconToolFactory.addToCreative = addToCreative;
+})(TconToolFactory || (TconToolFactory = {}));
 var TconToolStack = /** @class */ (function () {
     function TconToolStack(item) {
         this.id = item.id;
@@ -2769,6 +2836,26 @@ var TconToolStack = /** @class */ (function () {
         }
         return this.instance.tconToolType + ":" + hash.toString(16) + ":" + mask.toString(16);
     };
+    TconToolStack.prototype.getName = function () {
+        var _this = this;
+        var head = this.instance.repairParts
+            .map(function (partIndex) { return _this.materials[partIndex].getName(); })
+            .filter(function (name, index, arr) { return arr.indexOf(name) === index; }) //remove dup
+            .join("-");
+        var toolName = head + " " + this.instance.name;
+        if (this.isBroken()) {
+            toolName = "Broken " + toolName;
+        }
+        return toolName;
+    };
+    TconToolStack.prototype.getTooltips = function () {
+        var lvInfo = ToolLeveling.getLevelInfo(this.xp, this.instance.is3x3);
+        return [
+            "\u00A77".concat(this.stats.durability - this.durability, " / ").concat(this.stats.durability),
+            "Level: ".concat(ToolLeveling.getLevelName(lvInfo.level)),
+            "XP: ".concat(lvInfo.currentXp, " / ").concat(lvInfo.next)
+        ];
+    };
     TconToolStack.prototype.clone = function () {
         return new TconToolStack({ id: this.id, count: this.count, data: this.data, extra: this.extra.copy() });
     };
@@ -2830,7 +2917,7 @@ var PartRegistry;
     function getIDFromData(type, material) {
         for (var id in data) {
             if (data[id].type === type && data[id].material === material) {
-                return parseInt(id);
+                return +id;
             }
         }
         return 0;
@@ -2844,7 +2931,7 @@ var PartRegistry;
                     var type = types_3[_i];
                     list.push({
                         input: [{ id: ItemID.tcon_pattern_blank, count: 1, data: 0 }, __assign(__assign({}, Material[key].getItem()), { count: type.cost })],
-                        output: [{ id: getIDFromData(type.key, key), count: 1, data: 0 }],
+                        output: [{ id: PartRegistry.getIDFromData(type.key, key), count: 1, data: 0 }],
                         pattern: type.key
                     });
                 }
@@ -2855,7 +2942,7 @@ var PartRegistry;
     PartRegistry.getAllPartBuildRecipeForRV = getAllPartBuildRecipeForRV;
     function getTooltips(id) {
         var tooltips = [];
-        var partData = getPartData(id);
+        var partData = PartRegistry.getPartData(id);
         if (partData) {
             var matData = Material[partData.material];
             if (matData) {
@@ -2885,9 +2972,9 @@ var PartRegistry;
     }
     PartRegistry.getTooltips = getTooltips;
     var onTooltipFunc = function (item, text, level) {
-        var tooltips = getTooltips(item.id);
-        for (var _i = 0, tooltips_1 = tooltips; _i < tooltips_1.length; _i++) {
-            var line = tooltips_1[_i];
+        var tooltips = PartRegistry.getTooltips(item.id);
+        for (var _i = 0, tooltips_3 = tooltips; _i < tooltips_3.length; _i++) {
+            var line = tooltips_3[_i];
             text.add(line);
         }
     };
@@ -2902,11 +2989,6 @@ var PartRegistry;
 Callback.addCallback("PreLoaded", function () {
     for (var key in Material) {
         PartRegistry.registerRecipes(key, Material[key]);
-    }
-});
-ModAPI.addAPICallback("KernelExtension", function (api) {
-    if (typeof api.getKEXVersionCode === "function" && api.getKEXVersionCode() >= 300) {
-        PartRegistry.replaceTooltipsWithKEX(api);
     }
 });
 var ToolTexture = /** @class */ (function () {
@@ -3426,6 +3508,9 @@ var ModNecrotic = /** @class */ (function (_super) {
     return ModNecrotic;
 }(TinkersModifier));
 Callback.addCallback("EntityDeath", function (entity, attacker, damageType) {
+    if (KEX) {
+        return;
+    }
     if (Entity.getType(entity) === EEntityType.WHITHER_SKELETON) {
         if (Math.random() < (EntityHelper.isPlayer(Entity.getType(attacker)) ? 0.1 : 0.05)) {
             var region = WorldRegion.getForDimension(Entity.getDimension(entity));
@@ -3433,12 +3518,6 @@ Callback.addCallback("EntityDeath", function (entity, attacker, damageType) {
         }
     }
 });
-// KEX.LootModule.addOnDropCallbackFor("entities/wither_skeleton", (drops, context) => {
-//     const player = context.getKillerPlayer();
-//     if(Math.random() < (player ? 0.1 : 0.05)){
-//         drops.addItem(ItemID.tcon_necrotic_bone, 1, 0);
-//     }
-// });
 // KEX.LootModule.createLootTableModifier("entities/wither_skeleton")
 //     .createNewPool()
 //         .addEntry()
@@ -4207,60 +4286,18 @@ var TconTool = /** @class */ (function (_super) {
         _this.setHandEquipped(true);
         _this.setMaxStack(1);
         _this.setMaxDamage(13);
-        _this.setCategory(EItemCategory.TOOL);
+        //this.setCategory(EItemCategory.TOOL);
         for (var i = 0; i <= _this.maxDamage; i++) {
             ItemModel.getFor(_this.id, i).setModelOverrideCallback(function (item) { return ToolModelManager.getModel(item); });
         }
-        ModAPI.addAPICallback("KernelExtension", function (api) {
-            if (typeof api.getKEXVersionCode === "function" && api.getKEXVersionCode() >= 300) {
-                api.ItemsModule.setExplodable(_this.id, true);
-                api.ItemsModule.setFireResistant(_this.id, true);
-            }
-        });
         return _this;
     }
-    TconTool.prototype.addToCreative = function (partsCount) {
-        var materials = [];
-        for (var key in Material) {
-            if (Material[key].getHeadStats().level !== ToolAPI.getToolLevel(this.id)) {
-                continue;
-            }
-            materials.length = 0;
-            for (var i = 0; i < partsCount; i++) {
-                materials.push(key);
-            }
-            Item.addToCreative(this.id, 1, 0, new ItemExtraData()
-                .putInt("durability", 0)
-                .putInt("xp", 0)
-                .putInt("repair", 0)
-                .putString("materials", materials.join("_"))
-                .putString("modifiers", ""));
-        }
-        Item.addCreativeGroup(this.stringID, this.name, [this.id]);
-    };
     TconTool.prototype.setToolParams = function (miningLevel) {
         ToolAPI.registerTool(this.id, { level: miningLevel, durability: this.maxDamage }, this.blockTypes || [], this);
-        TconToolFactory.registerToolId(this.id, this.tconToolType, miningLevel);
-    };
-    TconTool.prototype.buildStats = function (stats, materials) {
+        TconToolFactory.registerTool(this.id, this.tconToolType, miningLevel);
     };
     TconTool.prototype.getRepairModifierForPart = function (index) {
         return 1.0;
-    };
-    TconTool.prototype.onNameOverride = function (item, translation, name) {
-        if (item.extra) {
-            var stack = new TconToolStack(item);
-            var head = stack.materials[1].getName();
-            if (stack.isBroken()) {
-                return "Broken ".concat(head, " ").concat(name);
-            }
-            var lvInfo = ToolLeveling.getLevelInfo(stack.xp, this.is3x3);
-            return "".concat(head, " ").concat(name, "\n") +
-                "\u00A77".concat(stack.stats.durability - stack.durability, " / ").concat(stack.stats.durability, "\n") +
-                "Level: ".concat(ToolLeveling.getLevelName(lvInfo.level), "\n") +
-                "XP: ".concat(lvInfo.currentXp, " / ").concat(lvInfo.next);
-        }
-        return name;
     };
     TconTool.prototype.onBroke = function (item) {
         return true;
@@ -4363,18 +4400,6 @@ var TconTool = /** @class */ (function (_super) {
         });
     };
     TconTool.prototype.onItemUse = function (coords, item, block, player) {
-        var tier = KEX.ToolsModule.getTierByName("wood");
-        Game.message("[wood] speed: ".concat(tier.getSpeed(), ", uses: ").concat(tier.getUses(), ", damage: ").concat(tier.getAttackDamageBonus()));
-        tier = KEX.ToolsModule.getTierByName("stone");
-        Game.message("[stone] speed: ".concat(tier.getSpeed(), ", uses: ").concat(tier.getUses(), ", damage: ").concat(tier.getAttackDamageBonus()));
-        tier = KEX.ToolsModule.getTierByName("iron");
-        Game.message("[iron] speed: ".concat(tier.getSpeed(), ", uses: ").concat(tier.getUses(), ", damage: ").concat(tier.getAttackDamageBonus()));
-        tier = KEX.ToolsModule.getTierByName("diamond");
-        Game.message("[diamond] speed: ".concat(tier.getSpeed(), ", uses: ").concat(tier.getUses(), ", damage: ").concat(tier.getAttackDamageBonus()));
-        tier = KEX.ToolsModule.getTierByName("gold");
-        Game.message("[gold] speed: ".concat(tier.getSpeed(), ", uses: ").concat(tier.getUses(), ", damage: ").concat(tier.getAttackDamageBonus()));
-        tier = KEX.ToolsModule.getTierByName("netherite");
-        Game.message("[netherite] speed: ".concat(tier.getSpeed(), ", uses: ").concat(tier.getUses(), ", damage: ").concat(tier.getAttackDamageBonus()));
     };
     TconTool.prototype.onMending = function (item, player) {
         if (!item.extra) {
@@ -4565,6 +4590,7 @@ var ToolModelManager = /** @class */ (function () {
                 .setModUiSpriteBitmap(bmpBroken);
             bmpNormal.recycle();
             bmpBroken.recycle();
+            Thread.sleep(50);
         });
         this.models[uniqueKey] = { normal: modelNormal, broken: modelBroken };
         return this.models[uniqueKey][suffix];
@@ -4589,12 +4615,6 @@ var TconPickaxe = /** @class */ (function (_super) {
     };
     return TconPickaxe;
 }(TconTool));
-ItemRegistry.registerItem(new TconPickaxe(MiningLv.STONE));
-ItemRegistry.registerItem(new TconPickaxe(MiningLv.IRON));
-ItemRegistry.registerItem(new TconPickaxe(MiningLv.DIAMOND));
-ItemRegistry.registerItem(new TconPickaxe(MiningLv.OBSIDIAN));
-ItemRegistry.registerItem(new TconPickaxe(MiningLv.COBALT));
-TconToolFactory.addToCreative("pickaxe", "Pickaxe", 3);
 ToolForgeHandler.addRecipe("pickaxe", ["rod", "pickaxe", "binding"]);
 ToolForgeHandler.addLayout({
     title: "Pickaxe",
@@ -4637,12 +4657,6 @@ var TconShovel = /** @class */ (function (_super) {
     };
     return TconShovel;
 }(TconTool));
-ItemRegistry.registerItem(new TconShovel(MiningLv.STONE));
-ItemRegistry.registerItem(new TconShovel(MiningLv.IRON));
-ItemRegistry.registerItem(new TconShovel(MiningLv.DIAMOND));
-ItemRegistry.registerItem(new TconShovel(MiningLv.OBSIDIAN));
-ItemRegistry.registerItem(new TconShovel(MiningLv.COBALT));
-TconToolFactory.addToCreative("shovel", "Shovel", 3);
 ToolForgeHandler.addRecipe("shovel", ["rod", "shovel", "binding"]);
 ToolForgeHandler.addLayout({
     title: "Shovel",
@@ -4731,12 +4745,6 @@ var TconHatchet = /** @class */ (function (_super) {
     ];
     return TconHatchet;
 }(TconTool));
-ItemRegistry.registerItem(new TconHatchet(MiningLv.STONE));
-ItemRegistry.registerItem(new TconHatchet(MiningLv.IRON));
-ItemRegistry.registerItem(new TconHatchet(MiningLv.DIAMOND));
-ItemRegistry.registerItem(new TconHatchet(MiningLv.OBSIDIAN));
-ItemRegistry.registerItem(new TconHatchet(MiningLv.COBALT));
-TconToolFactory.addToCreative("hatchet", "Hatchet", 3);
 ToolForgeHandler.addRecipe("hatchet", ["rod", "axe", "binding"]);
 ToolForgeHandler.addLayout({
     title: "Hatchet",
@@ -4782,12 +4790,6 @@ var TconMattock = /** @class */ (function (_super) {
     };
     return TconMattock;
 }(TconTool));
-ItemRegistry.registerItem(new TconMattock(MiningLv.STONE));
-ItemRegistry.registerItem(new TconMattock(MiningLv.IRON));
-ItemRegistry.registerItem(new TconMattock(MiningLv.DIAMOND));
-ItemRegistry.registerItem(new TconMattock(MiningLv.OBSIDIAN));
-ItemRegistry.registerItem(new TconMattock(MiningLv.COBALT));
-TconToolFactory.addToCreative("mattock", "Mattock", 3);
 ToolForgeHandler.addRecipe("mattock", ["rod", "axe", "shovel"]);
 ToolForgeHandler.addLayout({
     title: "Mattock",
@@ -4823,12 +4825,6 @@ var TconSword = /** @class */ (function (_super) {
     TconSword.DURABILITY_MODIFIER = 1.1;
     return TconSword;
 }(TconTool));
-ItemRegistry.registerItem(new TconSword(MiningLv.STONE));
-ItemRegistry.registerItem(new TconSword(MiningLv.IRON));
-ItemRegistry.registerItem(new TconSword(MiningLv.DIAMOND));
-ItemRegistry.registerItem(new TconSword(MiningLv.OBSIDIAN));
-ItemRegistry.registerItem(new TconSword(MiningLv.COBALT));
-TconToolFactory.addToCreative("sword", "Broad Sword", 3);
 ToolForgeHandler.addRecipe("sword", ["rod", "sword", "guard"]);
 ToolForgeHandler.addLayout({
     title: "Broad Sword",
@@ -4865,12 +4861,6 @@ var TconHammer = /** @class */ (function (_super) {
     TconHammer.DURABILITY_MODIFIER = 2.5;
     return TconHammer;
 }(TconTool3x3));
-ItemRegistry.registerItem(new TconHammer(MiningLv.STONE));
-ItemRegistry.registerItem(new TconHammer(MiningLv.IRON));
-ItemRegistry.registerItem(new TconHammer(MiningLv.DIAMOND));
-ItemRegistry.registerItem(new TconHammer(MiningLv.OBSIDIAN));
-ItemRegistry.registerItem(new TconHammer(MiningLv.COBALT));
-TconToolFactory.addToCreative("hammer", "Hammer", 4);
 ToolForgeHandler.addRecipe("hammer", ["rod2", "hammer", "largeplate", "largeplate"]);
 ToolForgeHandler.addLayout({
     title: "Hammer",
@@ -4909,12 +4899,6 @@ var TconExcavator = /** @class */ (function (_super) {
     TconExcavator.DURABILITY_MODIFIER = 1.75;
     return TconExcavator;
 }(TconTool3x3));
-ItemRegistry.registerItem(new TconExcavator(MiningLv.STONE));
-ItemRegistry.registerItem(new TconExcavator(MiningLv.IRON));
-ItemRegistry.registerItem(new TconExcavator(MiningLv.DIAMOND));
-ItemRegistry.registerItem(new TconExcavator(MiningLv.OBSIDIAN));
-ItemRegistry.registerItem(new TconExcavator(MiningLv.COBALT));
-TconToolFactory.addToCreative("excavator", "Excavator", 4);
 ToolForgeHandler.addRecipe("excavator", ["rod2", "excavator", "largeplate", "binding2"]);
 ToolForgeHandler.addLayout({
     title: "Excavator",
@@ -5092,12 +5076,6 @@ var ChopTreeUpdatable = /** @class */ (function () {
     };
     return ChopTreeUpdatable;
 }());
-ItemRegistry.registerItem(new TconLumberaxe(MiningLv.STONE));
-ItemRegistry.registerItem(new TconLumberaxe(MiningLv.IRON));
-ItemRegistry.registerItem(new TconLumberaxe(MiningLv.DIAMOND));
-ItemRegistry.registerItem(new TconLumberaxe(MiningLv.OBSIDIAN));
-ItemRegistry.registerItem(new TconLumberaxe(MiningLv.COBALT));
-TconToolFactory.addToCreative("lumberaxe", "Lumber Axe", 4);
 ToolForgeHandler.addRecipe("lumberaxe", ["rod2", "broadaxe", "largeplate", "binding2"]);
 ToolForgeHandler.addLayout({
     title: "Lumber Axe",
@@ -5111,6 +5089,54 @@ ToolForgeHandler.addLayout({
     ],
     forgeOnly: true
 });
+ItemRegistry.registerItem(new TconPickaxe(MiningLv.STONE));
+ItemRegistry.registerItem(new TconPickaxe(MiningLv.IRON));
+ItemRegistry.registerItem(new TconPickaxe(MiningLv.DIAMOND));
+ItemRegistry.registerItem(new TconPickaxe(MiningLv.OBSIDIAN));
+ItemRegistry.registerItem(new TconPickaxe(MiningLv.COBALT));
+ItemRegistry.registerItem(new TconShovel(MiningLv.STONE));
+ItemRegistry.registerItem(new TconShovel(MiningLv.IRON));
+ItemRegistry.registerItem(new TconShovel(MiningLv.DIAMOND));
+ItemRegistry.registerItem(new TconShovel(MiningLv.OBSIDIAN));
+ItemRegistry.registerItem(new TconShovel(MiningLv.COBALT));
+ItemRegistry.registerItem(new TconHatchet(MiningLv.STONE));
+ItemRegistry.registerItem(new TconHatchet(MiningLv.IRON));
+ItemRegistry.registerItem(new TconHatchet(MiningLv.DIAMOND));
+ItemRegistry.registerItem(new TconHatchet(MiningLv.OBSIDIAN));
+ItemRegistry.registerItem(new TconHatchet(MiningLv.COBALT));
+ItemRegistry.registerItem(new TconMattock(MiningLv.STONE));
+ItemRegistry.registerItem(new TconMattock(MiningLv.IRON));
+ItemRegistry.registerItem(new TconMattock(MiningLv.DIAMOND));
+ItemRegistry.registerItem(new TconMattock(MiningLv.OBSIDIAN));
+ItemRegistry.registerItem(new TconMattock(MiningLv.COBALT));
+ItemRegistry.registerItem(new TconSword(MiningLv.STONE));
+ItemRegistry.registerItem(new TconSword(MiningLv.IRON));
+ItemRegistry.registerItem(new TconSword(MiningLv.DIAMOND));
+ItemRegistry.registerItem(new TconSword(MiningLv.OBSIDIAN));
+ItemRegistry.registerItem(new TconSword(MiningLv.COBALT));
+ItemRegistry.registerItem(new TconHammer(MiningLv.STONE));
+ItemRegistry.registerItem(new TconHammer(MiningLv.IRON));
+ItemRegistry.registerItem(new TconHammer(MiningLv.DIAMOND));
+ItemRegistry.registerItem(new TconHammer(MiningLv.OBSIDIAN));
+ItemRegistry.registerItem(new TconHammer(MiningLv.COBALT));
+ItemRegistry.registerItem(new TconExcavator(MiningLv.STONE));
+ItemRegistry.registerItem(new TconExcavator(MiningLv.IRON));
+ItemRegistry.registerItem(new TconExcavator(MiningLv.DIAMOND));
+ItemRegistry.registerItem(new TconExcavator(MiningLv.OBSIDIAN));
+ItemRegistry.registerItem(new TconExcavator(MiningLv.COBALT));
+ItemRegistry.registerItem(new TconLumberaxe(MiningLv.STONE));
+ItemRegistry.registerItem(new TconLumberaxe(MiningLv.IRON));
+ItemRegistry.registerItem(new TconLumberaxe(MiningLv.DIAMOND));
+ItemRegistry.registerItem(new TconLumberaxe(MiningLv.OBSIDIAN));
+ItemRegistry.registerItem(new TconLumberaxe(MiningLv.COBALT));
+TconToolFactory.addToCreative("pickaxe", "Pickaxe", 3);
+TconToolFactory.addToCreative("shovel", "Shovel", 3);
+TconToolFactory.addToCreative("hatchet", "Hatchet", 3);
+TconToolFactory.addToCreative("mattock", "Mattock", 3);
+TconToolFactory.addToCreative("sword", "Broad Sword", 3);
+TconToolFactory.addToCreative("hammer", "Hammer", 4);
+TconToolFactory.addToCreative("excavator", "Excavator", 4);
+TconToolFactory.addToCreative("lumberaxe", "Lumber Axe", 4);
 ModAPI.addAPICallback("ICore", function (api) {
     CastingRecipe.addMakeCastRecipes(ItemID.ingotCopper, "ingot");
     CastingRecipe.addMakeCastRecipes(ItemID.ingotTin, "ingot");
@@ -5401,6 +5427,16 @@ ModAPI.addAPICallback("KernelExtension", function (api) {
     if (typeof api.getKEXVersionCode === "function" && api.getKEXVersionCode() >= 300) {
         //@ts-ignore
         KEX = api;
+        Callback.addCallback("PostLoaded", function () {
+            PartRegistry.replaceTooltipsWithKEX(api);
+            TconToolFactory.addKEXFeature(api);
+        });
+        api.LootModule.addOnDropCallbackFor("entities/wither_skeleton", function (drops, context) {
+            var player = context.getKillerPlayer();
+            if (Math.random() < (player ? 0.1 : 0.05)) {
+                drops.addItem(ItemID.tcon_necrotic_bone, 1, 0);
+            }
+        });
     }
 });
 ModAPI.registerAPI("TConAPI", {

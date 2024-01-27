@@ -17,6 +17,9 @@ class ModNecrotic extends TinkersModifier {
 }
 
 Callback.addCallback("EntityDeath", (entity, attacker, damageType) => {
+    if(KEX){
+        return;
+    }
     if(Entity.getType(entity) === EEntityType.WHITHER_SKELETON){
         if(Math.random() < (EntityHelper.isPlayer(Entity.getType(attacker)) ? 0.1 : 0.05)){
             const region = WorldRegion.getForDimension(Entity.getDimension(entity));
@@ -25,12 +28,6 @@ Callback.addCallback("EntityDeath", (entity, attacker, damageType) => {
     }
 });
 
-// KEX.LootModule.addOnDropCallbackFor("entities/wither_skeleton", (drops, context) => {
-//     const player = context.getKillerPlayer();
-//     if(Math.random() < (player ? 0.1 : 0.05)){
-//         drops.addItem(ItemID.tcon_necrotic_bone, 1, 0);
-//     }
-// });
 
 // KEX.LootModule.createLootTableModifier("entities/wither_skeleton")
 //     .createNewPool()

@@ -140,7 +140,7 @@ class SmelteryControler extends TconTileEntity implements ILiquidStorage {
         return capacity - otherTotal;
     }
     getAmount(liquid: string): number {
-        return this.liquidStorage.getAmount(liquid) || 0;
+        return Math.round(this.liquidStorage.getAmount(liquid));
     }
     getRelativeAmount(liquid: string): number {
         const capacity = this.getLiquidCapacity();
@@ -149,7 +149,7 @@ class SmelteryControler extends TconTileEntity implements ILiquidStorage {
     getLiquid(liquid: string, amount: number): number {
         const got = Math.min(this.getAmount(liquid), amount);
         this.liquidStorage.liquidAmounts[liquid] -= got;
-        if(this.liquidStorage.liquidAmounts[liquid] <= 0){
+        if(this.liquidStorage.liquidAmounts[liquid] < 1){
             delete this.liquidStorage.liquidAmounts[liquid];
         }
         return got;
@@ -165,7 +165,7 @@ class SmelteryControler extends TconTileEntity implements ILiquidStorage {
         return this.totalLiquidAmount() > this.getLiquidCapacity();
     }
     isEmpty(liquid?: string): boolean {
-        return this.totalLiquidAmount() <= 0;
+        return this.totalLiquidAmount() < 1;
     }
 
     override getScreenByName(screenName: string, container: ItemContainer): UI.IWindow {
@@ -349,7 +349,7 @@ class SmelteryControler extends TconTileEntity implements ILiquidStorage {
         const liquids = this.liquidStorage.liquidAmounts;
         let amount = 0;
         for(let key in liquids){
-            if(liquids[key] <= 0){
+            if(liquids[key] < 1){
                 delete liquids[key];
                 continue;
             }
@@ -402,7 +402,9 @@ class SmelteryControler extends TconTileEntity implements ILiquidStorage {
             return false;
         }
 
-        Network.getClientForPlayer(player)?.sendMessage("Invalid Structure");
+        const client = Network.getClientForPlayer(player);
+        BlockEngine.sendMessage(client, "Invalid Structure");
+        
         return true;
 
     }

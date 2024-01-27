@@ -61,7 +61,7 @@ namespace PartRegistry {
     export function getIDFromData(type: string, material: string): number {
         for(let id in data){
             if(data[id].type === type && data[id].material === material){
-                return parseInt(id);
+                return +id;
             }
         }
         return 0;
@@ -76,7 +76,7 @@ namespace PartRegistry {
                 for(let type of types){
                     list.push({
                         input: [{id: ItemID.tcon_pattern_blank, count: 1, data: 0}, {...Material[key].getItem(), count: type.cost}],
-                        output: [{id: getIDFromData(type.key, key), count: 1, data: 0}],
+                        output: [{id: PartRegistry.getIDFromData(type.key, key), count: 1, data: 0}],
                         pattern: type.key
                     });
                 }
@@ -89,7 +89,7 @@ namespace PartRegistry {
 
     export function getTooltips(id: number): string[] {
         const tooltips: string[] = [];
-        const partData = getPartData(id);
+        const partData = PartRegistry.getPartData(id);
         if(partData){
             const matData = Material[partData.material];
             if(matData){
@@ -119,7 +119,7 @@ namespace PartRegistry {
     }
 
     const onTooltipFunc: KEX.ItemsModule.OnTooltipCallback = (item, text, level) => {
-        const tooltips = getTooltips(item.id);
+        const tooltips = PartRegistry.getTooltips(item.id);
         for(let line of tooltips){
             text.add(line);
         }
@@ -138,12 +138,5 @@ namespace PartRegistry {
 Callback.addCallback("PreLoaded", () => {
     for(let key in Material){
         PartRegistry.registerRecipes(key, Material[key]);
-    }
-});
-
-
-ModAPI.addAPICallback("KernelExtension", (api: typeof KEX) => {
-    if(typeof api.getKEXVersionCode === "function" && api.getKEXVersionCode() >= 300){
-        PartRegistry.replaceTooltipsWithKEX(api);
     }
 });

@@ -82,6 +82,7 @@
         "tool/type/hammer.ts",
         "tool/type/excavator.ts",
         "tool/type/lumberaxe.ts",
+        "tool/type/_define.ts",
 
         "integration/industrialcraft.ts",
         "integration/redpower.ts",

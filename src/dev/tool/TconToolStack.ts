@@ -118,6 +118,27 @@ class TconToolStack implements ItemInstance {
         return this.instance.tconToolType + ":" + hash.toString(16) + ":" + mask.toString(16);
     }
 
+    getName(): string {
+        const head: string = this.instance.repairParts
+            .map(partIndex => this.materials[partIndex].getName())
+            .filter((name, index, arr) => arr.indexOf(name) === index) //remove dup
+            .join("-");
+        let toolName = head + " " + this.instance.name;
+        if(this.isBroken()){
+            toolName = "Broken " + toolName;
+        }
+        return toolName;
+    }
+
+    getTooltips(): string[] {
+        const lvInfo = ToolLeveling.getLevelInfo(this.xp, this.instance.is3x3);
+        return [
+            `§7${this.stats.durability - this.durability} / ${this.stats.durability}`,
+            `Level: ${ToolLeveling.getLevelName(lvInfo.level)}`,
+            `XP: ${lvInfo.currentXp} / ${lvInfo.next}`
+        ];
+    }
+
     clone(): TconToolStack {
         return new TconToolStack({id: this.id, count: this.count, data: this.data, extra: this.extra.copy()});
     }

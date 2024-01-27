@@ -1,4 +1,4 @@
-class TconTool extends ItemCommon implements ItemBehavior, ToolAPI.ToolParams {
+abstract class TconTool extends ItemCommon implements ItemBehavior, ToolAPI.ToolParams {
 
     tconToolType: string;
     blockTypes: string[];
@@ -25,72 +25,23 @@ class TconTool extends ItemCommon implements ItemBehavior, ToolAPI.ToolParams {
         this.setHandEquipped(true);
         this.setMaxStack(1);
         this.setMaxDamage(13);
-        this.setCategory(EItemCategory.TOOL);
+        //this.setCategory(EItemCategory.TOOL);
 
         for(let i = 0; i <= this.maxDamage; i++){
             ItemModel.getFor(this.id, i).setModelOverrideCallback(item => ToolModelManager.getModel(item));
         }
 
-        ModAPI.addAPICallback("KernelExtension", (api: typeof KEX) => {
-            if(typeof api.getKEXVersionCode === "function" && api.getKEXVersionCode() >= 300){
-                api.ItemsModule.setExplodable(this.id, true);
-                api.ItemsModule.setFireResistant(this.id, true);
-            }
-        });
-
-    }
-
-    addToCreative(partsCount: number): void {
-
-        const materials: string[] = [];
-
-        for(let key in Material){
-            if(Material[key].getHeadStats().level !== ToolAPI.getToolLevel(this.id)){
-                continue;
-            }
-            materials.length = 0;
-            for(let i = 0; i < partsCount; i++){
-                materials.push(key);
-            }
-            Item.addToCreative(this.id, 1, 0, new ItemExtraData()
-                .putInt("durability", 0)
-                .putInt("xp", 0)
-                .putInt("repair", 0)
-                .putString("materials", materials.join("_"))
-                .putString("modifiers", "")
-            );
-        }
-
-        Item.addCreativeGroup(this.stringID, this.name, [this.id]);
-
     }
 
     setToolParams(miningLevel: number): void {
         ToolAPI.registerTool(this.id, {level: miningLevel, durability: this.maxDamage}, this.blockTypes || [], this);
-        TconToolFactory.registerToolId(this.id, this.tconToolType, miningLevel);
+        TconToolFactory.registerTool(this.id, this.tconToolType, miningLevel);
     }
 
-    buildStats(stats: ToolStats, materials: TinkersMaterial[]): void {
-    }
+    abstract buildStats(stats: ToolStats, materials: TinkersMaterial[]): void;
 
     getRepairModifierForPart(index: number): number {
         return 1.0;
-    }
-
-    onNameOverride(item: ItemInstance, translation: string, name: string): string {
-        if(item.extra){
-            const stack = new TconToolStack(item);
-            const head = stack.materials[1].getName();
-            if(stack.isBroken()){
-                return `Broken ${head} ${name}`;
-            }
-            const lvInfo = ToolLeveling.getLevelInfo(stack.xp, this.is3x3);
-            return `${head} ${name}\n` +
-                `§7${stack.stats.durability - stack.durability} / ${stack.stats.durability}\n` +
-                `Level: ${ToolLeveling.getLevelName(lvInfo.level)}\n` +
-                `XP: ${lvInfo.currentXp} / ${lvInfo.next}`;
-        }
-        return name;
     }
 
     onBroke(item: ItemInstance): true {
@@ -224,7 +175,7 @@ class TconTool extends ItemCommon implements ItemBehavior, ToolAPI.ToolParams {
 }
 
 
-class TconTool3x3 extends TconTool {
+abstract class TconTool3x3 extends TconTool {
 
     constructor(stringID: string, name: string, icon: string){
         super(stringID, name, icon);

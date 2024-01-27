@@ -21,15 +21,7 @@ class TconPickaxe extends TconTool {
 }
 
 
-ItemRegistry.registerItem(new TconPickaxe(MiningLv.STONE));
-ItemRegistry.registerItem(new TconPickaxe(MiningLv.IRON));
-ItemRegistry.registerItem(new TconPickaxe(MiningLv.DIAMOND));
-ItemRegistry.registerItem(new TconPickaxe(MiningLv.OBSIDIAN));
-ItemRegistry.registerItem(new TconPickaxe(MiningLv.COBALT));
-
-TconToolFactory.addToCreative("pickaxe", "Pickaxe", 3);
 ToolForgeHandler.addRecipe("pickaxe", ["rod", "pickaxe", "binding"]);
-
 ToolForgeHandler.addLayout({
     title: "Pickaxe",
     background: "tcon.icon.pickaxe",

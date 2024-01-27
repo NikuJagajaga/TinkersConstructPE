@@ -84,15 +84,7 @@ class TconHatchet extends TconTool {
 }
 
 
-ItemRegistry.registerItem(new TconHatchet(MiningLv.STONE));
-ItemRegistry.registerItem(new TconHatchet(MiningLv.IRON));
-ItemRegistry.registerItem(new TconHatchet(MiningLv.DIAMOND));
-ItemRegistry.registerItem(new TconHatchet(MiningLv.OBSIDIAN));
-ItemRegistry.registerItem(new TconHatchet(MiningLv.COBALT));
-
-TconToolFactory.addToCreative("hatchet", "Hatchet", 3);
 ToolForgeHandler.addRecipe("hatchet", ["rod", "axe", "binding"]);
-
 ToolForgeHandler.addLayout({
     title: "Hatchet",
     background: "tcon.icon.hatchet",

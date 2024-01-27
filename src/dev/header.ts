@@ -46,7 +46,6 @@ const Cfg = {
     },
     oreToIngotRatio: __config__.getNumber("oreToIngotRatio").intValue(),
     modifierSlots: __config__.getNumber("modifierSlots").intValue(),
-    showItemOnTable: __config__.getBool("showItemOnTable"),
     checkInsideSmeltery: __config__.getBool("checkInsideSmeltery")
 } as const;
 

@@ -31,15 +31,7 @@ class TconHammer extends TconTool3x3 {
 }
 
 
-ItemRegistry.registerItem(new TconHammer(MiningLv.STONE));
-ItemRegistry.registerItem(new TconHammer(MiningLv.IRON));
-ItemRegistry.registerItem(new TconHammer(MiningLv.DIAMOND));
-ItemRegistry.registerItem(new TconHammer(MiningLv.OBSIDIAN));
-ItemRegistry.registerItem(new TconHammer(MiningLv.COBALT));
-
-TconToolFactory.addToCreative("hammer", "Hammer", 4);
 ToolForgeHandler.addRecipe("hammer", ["rod2", "hammer", "largeplate", "largeplate"]);
-
 ToolForgeHandler.addLayout({
     title: "Hammer",
     background: "tcon.icon.hammer",

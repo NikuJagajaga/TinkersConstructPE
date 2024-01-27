@@ -216,11 +216,19 @@ class SearedTank extends TileWithLiquidModel {
 
     const dropFunc = () => [];
 
-    const nameFunc: Callback.ItemNameOverrideFunction = (item, name) => {
+    const getTooltips = (item: ItemInstance): string[] => {
         if(item.extra){
             const liquid = LiquidRegistry.getLiquidName(item.extra.getString("stored"));
             const amount = item.extra.getInt("amount");
-            return name + "\n§7" + liquid + ": " + amount + " mB";
+            return ["§7" + liquid + ": " + amount + " mB"];
+        }
+        return [];
+    }
+
+    const nameFunc: Callback.ItemNameOverrideFunction = (item, translation, name) => {
+        const tooltips = getTooltips(item);
+        if(tooltips.length > 0){
+            return name + "\n" + tooltips.join("\n");
         }
         return name;
     }
@@ -255,14 +263,34 @@ class SearedTank extends TileWithLiquidModel {
     Block.registerDropFunction(BlockID.tcon_tank_ingot, dropFunc);
     Block.registerDropFunction(BlockID.tcon_gauge_ingot, dropFunc);
     
-    Item.registerNameOverrideFunction(BlockID.tcon_tank_fuel, nameFunc);
-    Item.registerNameOverrideFunction(BlockID.tcon_gauge_fuel, nameFunc);
-    Item.registerNameOverrideFunction(BlockID.tcon_tank_ingot, nameFunc);
-    Item.registerNameOverrideFunction(BlockID.tcon_gauge_ingot, nameFunc);
-    
     Block.registerPlaceFunction(BlockID.tcon_tank_fuel, placeFunc);
     Block.registerPlaceFunction(BlockID.tcon_gauge_fuel, placeFunc);
     Block.registerPlaceFunction(BlockID.tcon_tank_ingot, placeFunc);
     Block.registerPlaceFunction(BlockID.tcon_gauge_ingot, placeFunc);
+
+    Item.registerNameOverrideFunction(BlockID.tcon_tank_fuel, nameFunc);
+    Item.registerNameOverrideFunction(BlockID.tcon_gauge_fuel, nameFunc);
+    Item.registerNameOverrideFunction(BlockID.tcon_tank_ingot, nameFunc);
+    Item.registerNameOverrideFunction(BlockID.tcon_gauge_ingot, nameFunc);
+
+    const onTooltipFunc: KEX.ItemsModule.OnTooltipCallback = (item, text, level) => {
+        const tooltips = getTooltips(item);
+        for(let line of tooltips){
+            text.add(line);
+        }
+    }
+
+    ModAPI.addAPICallback("KernelExtension", function(api: typeof KEX){
+        if(typeof api.getKEXVersionCode === "function" && api.getKEXVersionCode() >= 300){
+            delete Item.nameOverrideFunctions[BlockID.tcon_tank_fuel];
+            delete Item.nameOverrideFunctions[BlockID.tcon_gauge_fuel];
+            delete Item.nameOverrideFunctions[BlockID.tcon_tank_ingot];
+            delete Item.nameOverrideFunctions[BlockID.tcon_gauge_ingot];
+            api.ItemsModule.addTooltip(BlockID.tcon_tank_fuel, onTooltipFunc);
+            api.ItemsModule.addTooltip(BlockID.tcon_gauge_fuel, onTooltipFunc);
+            api.ItemsModule.addTooltip(BlockID.tcon_tank_ingot, onTooltipFunc);
+            api.ItemsModule.addTooltip(BlockID.tcon_gauge_ingot, onTooltipFunc);
+        }
+    });
 
 })();

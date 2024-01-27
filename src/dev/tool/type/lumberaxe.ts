@@ -197,15 +197,7 @@ class ChopTreeUpdatable implements Updatable {
 }
 
 
-ItemRegistry.registerItem(new TconLumberaxe(MiningLv.STONE));
-ItemRegistry.registerItem(new TconLumberaxe(MiningLv.IRON));
-ItemRegistry.registerItem(new TconLumberaxe(MiningLv.DIAMOND));
-ItemRegistry.registerItem(new TconLumberaxe(MiningLv.OBSIDIAN));
-ItemRegistry.registerItem(new TconLumberaxe(MiningLv.COBALT));
-
-TconToolFactory.addToCreative("lumberaxe", "Lumber Axe", 4);
 ToolForgeHandler.addRecipe("lumberaxe", ["rod2", "broadaxe", "largeplate", "binding2"]);
-
 ToolForgeHandler.addLayout({
     title: "Lumber Axe",
     background: "tcon.icon.lumberaxe",

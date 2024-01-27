@@ -39,15 +39,7 @@ class TconMattock extends TconTool {
 }
 
 
-ItemRegistry.registerItem(new TconMattock(MiningLv.STONE));
-ItemRegistry.registerItem(new TconMattock(MiningLv.IRON));
-ItemRegistry.registerItem(new TconMattock(MiningLv.DIAMOND));
-ItemRegistry.registerItem(new TconMattock(MiningLv.OBSIDIAN));
-ItemRegistry.registerItem(new TconMattock(MiningLv.COBALT));
-
-TconToolFactory.addToCreative("mattock", "Mattock", 3);
 ToolForgeHandler.addRecipe("mattock", ["rod", "axe", "shovel"]);
-
 ToolForgeHandler.addLayout({
     title: "Mattock",
     background: "tcon.icon.mattock",

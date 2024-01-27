@@ -31,15 +31,7 @@ class TconExcavator extends TconTool3x3 {
 }
 
 
-ItemRegistry.registerItem(new TconExcavator(MiningLv.STONE));
-ItemRegistry.registerItem(new TconExcavator(MiningLv.IRON));
-ItemRegistry.registerItem(new TconExcavator(MiningLv.DIAMOND));
-ItemRegistry.registerItem(new TconExcavator(MiningLv.OBSIDIAN));
-ItemRegistry.registerItem(new TconExcavator(MiningLv.COBALT));
-
-TconToolFactory.addToCreative("excavator", "Excavator", 4);
 ToolForgeHandler.addRecipe("excavator", ["rod2", "excavator", "largeplate", "binding2"]);
-
 ToolForgeHandler.addLayout({
     title: "Excavator",
     background: "tcon.icon.excavator",

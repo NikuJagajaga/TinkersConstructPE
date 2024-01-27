@@ -36,15 +36,7 @@ class TconShovel extends TconTool {
 }
 
 
-ItemRegistry.registerItem(new TconShovel(MiningLv.STONE));
-ItemRegistry.registerItem(new TconShovel(MiningLv.IRON));
-ItemRegistry.registerItem(new TconShovel(MiningLv.DIAMOND));
-ItemRegistry.registerItem(new TconShovel(MiningLv.OBSIDIAN));
-ItemRegistry.registerItem(new TconShovel(MiningLv.COBALT));
-
-TconToolFactory.addToCreative("shovel", "Shovel", 3);
 ToolForgeHandler.addRecipe("shovel", ["rod", "shovel", "binding"]);
-
 ToolForgeHandler.addLayout({
     title: "Shovel",
     background: "tcon.icon.shovel",
