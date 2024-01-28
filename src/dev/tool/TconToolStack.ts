@@ -104,8 +104,8 @@ class TconToolStack implements ItemInstance {
         this.extra.putInt("xp", xp + val);
         if(oldLv < newLv){
             const client = Network.getClientForPlayer(player);
-            BlockEngine.sendMessage(client, "§3" + ToolLeveling.getLevelupMessage(newLv, Item.getName(this.id, this.data)));
-            client.send("tcon.playSound", {name: "tcon.levelup.ogg"});
+            BlockEngine.sendMessage(client, "§3", ToolLeveling.getLevelupMessage(newLv), Item.getName(this.id, this.data), "" + newLv);
+            client?.send("tcon.playSound", {name: "tcon.levelup.ogg"});
         }
     }
 
@@ -119,13 +119,15 @@ class TconToolStack implements ItemInstance {
     }
 
     getName(): string {
-        const head: string = this.instance.repairParts
-            .map(partIndex => this.materials[partIndex].getName())
-            .filter((name, index, arr) => arr.indexOf(name) === index) //remove dup
-            .join("-");
-        let toolName = head + " " + this.instance.name;
+        const materials: TinkersMaterial[] = this.instance.repairParts
+            .map(partIndex => this.materials[partIndex])
+            .filter((material, index, arr) => arr.indexOf(material) === index); // remove duplicates
+        let toolName = this.instance.name;
+        for(let i = materials.length - 1; i >= 0; i--){
+            toolName = materials[i].getLocalizationOfPart(toolName);
+        }
         if(this.isBroken()){
-            toolName = "Broken " + toolName;
+            toolName = translate("Broken %s", toolName);
         }
         return toolName;
     }
@@ -133,9 +135,9 @@ class TconToolStack implements ItemInstance {
     getTooltips(): string[] {
         const lvInfo = ToolLeveling.getLevelInfo(this.xp, this.instance.is3x3);
         return [
-            `§7${this.stats.durability - this.durability} / ${this.stats.durability}`,
-            `Level: ${ToolLeveling.getLevelName(lvInfo.level)}`,
-            `XP: ${lvInfo.currentXp} / ${lvInfo.next}`
+            "§7" + translate("Durability: ") + (this.stats.durability - this.durability) + " / " + this.stats.durability,
+            translate("Level: ") + ToolLeveling.getLocalizedLevelName(lvInfo.level),
+            translate("XP: ") + lvInfo.currentXp + " / " + lvInfo.next
         ];
     }
 

@@ -2,15 +2,6 @@ class MoltenLiquid {
 
     static readonly PATH = "model/tcon_liquids.png";
 
-    /*
-    private static readonly baseTex = {
-        metal: FileTools.ReadImage(__dir__ + "texture-source/liquid/molten_metal.png"),
-        stone: FileTools.ReadImage(__dir__ + "texture-source/liquid/molten_stone.png"),
-        other: FileTools.ReadImage(__dir__ + "texture-source/liquid/molten_other.png"),
-        bucket: FileTools.ReadImage(__dir__ + "texture-source/liquid/bucket.png")
-    };
-    */
-
     private static liquidCount: number = 0;
     private static data: {[key: string]: {y: number, bmp: android.graphics.Bitmap, temp: number}} = {};
 
@@ -21,6 +12,13 @@ class MoltenLiquid {
         };
     }
 /*
+    private static readonly baseTex = {
+        metal: FileTools.ReadImage(__dir__ + "texture-source/liquid/molten_metal.png"),
+        stone: FileTools.ReadImage(__dir__ + "texture-source/liquid/molten_stone.png"),
+        other: FileTools.ReadImage(__dir__ + "texture-source/liquid/molten_other.png"),
+        bucket: FileTools.ReadImage(__dir__ + "texture-source/liquid/bucket.png")
+    };
+
     private static create(key: string, name: string, color: string, type: "metal" | "stone" | "other" = "metal"): void {
 
         const bitmap = new Bitmap.createBitmap(16, 16, Bitmap.Config.ARGB_8888);
@@ -55,12 +53,12 @@ class MoltenLiquid {
     }
 
     static createAndRegister(key: string, name: string, temp: number, color: string, type: "metal" | "stone" | "other" = "metal"): void {
-        //this.create(key, name, color, type);
-        LiquidRegistry.registerLiquid(key, name, ["liquid." + key]);
+        // this.create(key, name, color, type);
+        LiquidRegistry.registerLiquid(key, translate(name), ["liquid." + key]);
         
-        const id = createItem("tcon_bucket_" + key, name + " Bucket");
+        const id = createItem("tcon_bucket_" + key, key != "blood" ? name + " Bucket" : "Bucket o' " + name);
         Item.setCategory(id, EItemCategory.MATERIAL);
-        Item.addCreativeGroup("tcon_bucket", "TCon Buckets", [id]);
+        Item.addCreativeGroup("tcon_bucket", translate("TConstruct: Buckets"), [id]);
         LiquidRegistry.registerItem(key, {id: VanillaItemID.bucket, data: 0}, {id: id, data: 0});
         this.register(key, temp);
     }
@@ -85,7 +83,7 @@ MoltenLiquid.register("lava", 769);
 MoltenLiquid.register("milk", 320);
 MoltenLiquid.createAndRegister("molten_iron", "Molten Iron", 769, "#a81212");
 MoltenLiquid.createAndRegister("molten_gold", "Molten Gold", 532, "#f6d609");
-MoltenLiquid.createAndRegister("molten_pigiron", "Molten Pig Iron", 600, "#ef9e9b");
+MoltenLiquid.createAndRegister("molten_pigiron", "Molten Pigiron", 600, "#ef9e9b");
 MoltenLiquid.createAndRegister("molten_cobalt", "Molten Cobalt", 950, "#2882d4");
 MoltenLiquid.createAndRegister("molten_ardite", "Molten Ardite", 860, "#d14210");
 MoltenLiquid.createAndRegister("molten_manyullyn", "Molten Manyullyn", 1000, "#a15cf8");

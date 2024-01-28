@@ -8,7 +8,7 @@ ModAPI.addAPICallback("RecipeViewer", (api: RecipeViewerAPI) => {
 
         constructor(){
             const centerY = 80;
-            super("Part Build", BlockID.tcon_partbuilder0, {
+            super(translate("Part Building"), BlockID.tcon_partbuilder0, {
                 drawing: [
                     {type: "bitmap", x: 500 - 132 / 2, y: centerY - 90 / 2, bitmap: "tcon.arrow", scale: 6}
                 ],
@@ -36,7 +36,7 @@ ModAPI.addAPICallback("RecipeViewer", (api: RecipeViewerAPI) => {
     api.RecipeTypeRegistry.register("tcon_melting", new class extends api.RecipeType {
 
         constructor(){
-            super("Melting", BlockID.tcon_smeltery, {
+            super(translate("Melting"), BlockID.tcon_smeltery, {
                 drawing: [
                     {type: "bitmap", x: 86, y: 50, bitmap: "tcon.rv.smeltery", scale: 6},
                     {type: "bitmap", x: 452, y: 176, bitmap: "tcon.rv.fire_tank", scale: 6},
@@ -48,7 +48,7 @@ ModAPI.addAPICallback("RecipeViewer", (api: RecipeViewerAPI) => {
                     textTemp: {type: "text", x: 500, y: 50, font: {size: 50, alignment: UI.Font.ALIGN_CENTER}}
                 }
             });
-            this.setDescription("Melt");
+            this.setDescription(translate("Melt"));
             this.setTankLimit(MatValue.BLOCK);
         }
 
@@ -57,7 +57,7 @@ ModAPI.addAPICallback("RecipeViewer", (api: RecipeViewerAPI) => {
         }
 
         onOpen(elements: java.util.HashMap<string, UI.Element>, recipe: RecipePattern): void {
-            elements.get("textTemp").setBinding("text", recipe.temp + "°C");
+            elements.get("textTemp").setBinding("text", translate("%s°C", recipe.temp));
         }
 
     });
@@ -65,7 +65,7 @@ ModAPI.addAPICallback("RecipeViewer", (api: RecipeViewerAPI) => {
     api.RecipeTypeRegistry.register("tcon_alloying", new class extends api.RecipeType {
 
         constructor(){
-            super("Alloying", BlockID.tcon_smeltery, {
+            super(translate("Alloying"), BlockID.tcon_smeltery, {
                 drawing: [
                     {type: "bitmap", x: 50, y: 50, bitmap: "tcon.rv.smeltery_wide", scale: 6},
                     {type: "bitmap", x: 488, y: 150, bitmap: "tcon.arrow", scale: 6},
@@ -83,7 +83,7 @@ ModAPI.addAPICallback("RecipeViewer", (api: RecipeViewerAPI) => {
                     outputLiq0: {x: 746, y: 50, width: 108, height: 234}
                 }
             });
-            this.setDescription("Alloy");
+            this.setDescription(translate("Alloy"));
         }
 
         getAllList(): RecipePattern[] {
@@ -144,14 +144,14 @@ ModAPI.addAPICallback("RecipeViewer", (api: RecipeViewerAPI) => {
 
         onOpen(elements: java.util.HashMap<string, UI.Element>, recipe: RecipePattern): void {
             elements.get("scaleFlow").setBinding("texture", LiquidRegistry.getLiquidUITexture(recipe.inputLiq[0].liquid, 36, 66));
-            elements.get("textTime").setBinding("text", (CastingRecipe.calcCooldownTime(recipe.inputLiq[0].liquid, recipe.inputLiq[0].amount) / 20).toFixed(1) + " s");
-            elements.get("textConsume").setBinding("text", recipe.consume ? "Consumes cast!" : "");
+            elements.get("textTime").setBinding("text", translate("%s s", (CastingRecipe.calcCooldownTime(recipe.inputLiq[0].liquid, recipe.inputLiq[0].amount) / 20).toFixed(1)));
+            elements.get("textConsume").setBinding("text", recipe.consume ? translate("Consumes cast") : "");
         }
 
     }
 
-    api.RecipeTypeRegistry.register("tcon_itemcast", new CastingRV("Item Casting", BlockID.tcon_itemcast, "tcon.rv.table", "table"));
-    api.RecipeTypeRegistry.register("tcon_blockcast", new CastingRV("Block Casting", BlockID.tcon_blockcast, "tcon.rv.basin", "basin"));
+    api.RecipeTypeRegistry.register("tcon_itemcast", new CastingRV(translate("Item Casting"), BlockID.tcon_itemcast, "tcon.rv.table", "table"));
+    api.RecipeTypeRegistry.register("tcon_blockcast", new CastingRV(translate("Block Casting"), BlockID.tcon_blockcast, "tcon.rv.basin", "basin"));
 
 
 });

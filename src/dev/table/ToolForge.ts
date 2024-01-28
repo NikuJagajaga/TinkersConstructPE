@@ -1,3 +1,13 @@
+interface ForgePageProperties {
+    durability: number,
+    maxDurability: number,
+    miningTier: number,
+    miningSpeed: number,
+    meleeDamage: number,
+    modifierSlots: number,
+    modifiers: {type: string, level: number}[]
+}
+
 class ToolCrafterWindow extends CraftingWindow {
 
     consume: number[];
@@ -8,7 +18,7 @@ class ToolCrafterWindow extends CraftingWindow {
 
         const window = new UI.StandardWindow({
             standard: {
-                header: {text: {text: title}, height: 60},
+                header: {text: {text: translate(title)}, height: 60},
                 inventory: {standard: true},
                 background: {standard: true}
             },
@@ -39,8 +49,8 @@ class ToolCrafterWindow extends CraftingWindow {
         const loc = window.getWindow("content").getLocation();
         
         window.addWindow("stats", {
-            //-14 is mistery
-            location: {x: loc.x + loc.windowToGlobal(580 + 20) - 14, y: loc.y + loc.windowToGlobal(0 + 20), width: loc.windowToGlobal(400 - 40), height: loc.windowToGlobal(240 - 40), scrollY: 250},
+            // -14 is mistery (which is actually status bar offset, enable fullscreen!)
+            location: {x: loc.x + loc.windowToGlobal(580 + 20), y: loc.y + loc.windowToGlobal(0 + 20), width: loc.windowToGlobal(400 - 40), height: loc.windowToGlobal(240 - 40), scrollY: 250},
             drawing: [
                 {type: "background", color: Color.TRANSPARENT}
             ],
@@ -51,10 +61,10 @@ class ToolCrafterWindow extends CraftingWindow {
         });
 
         window.addWindow("modifiers", {
-            location: {x: loc.x + loc.windowToGlobal(580 + 20) - 14, y: loc.y + loc.windowToGlobal(260 + 20), width: loc.windowToGlobal(400 - 40), height: loc.windowToGlobal(240 - 40), scrollY: 250},
+            location: {x: loc.x + loc.windowToGlobal(580 + 20), y: loc.y + loc.windowToGlobal(260 + 20), width: loc.windowToGlobal(400 - 40), height: loc.windowToGlobal(240 - 40), scrollY: 250},
             drawing: [
                 {type: "background", color: Color.TRANSPARENT},
-                {type: "text", x: 500, y: 50, font: {size: 80, color: Color.YELLOW, shadow: 0.5, alignment: UI.Font.ALIGN_CENTER, bold: true}, text: "Modifiers"}
+                {type: "text", x: 500, y: 50, font: {size: 80, color: Color.YELLOW, shadow: 0.5, alignment: UI.Font.ALIGN_CENTER, bold: true}, text: translate("Modifiers")}
             ],
             elements: {
                 textModifiers: {type: "text", x: 20, y: 120, font: {size: 72, color: Color.WHITE, shadow: 0.5}, multiline: true}
@@ -66,7 +76,7 @@ class ToolCrafterWindow extends CraftingWindow {
         this.page = 0;
         this.isForge = !!isForge;
 
-        ItemContainer.addClientEventListener(this.name, "changeLayout", (container, win, content, data: {bg: string, slots: {x: number, y: number, bitmap: string}[]}) => {
+        ItemContainer.addClientEventListener(this.name, "changeLayout", (container, win, content, data: ForgeLayout) => {
 
             const centerX = 160;
             const centerY = 210;
@@ -84,8 +94,38 @@ class ToolCrafterWindow extends CraftingWindow {
                     slot.y = 2000;
                 }
             }
-            
-            content.elements.imageBg.bitmap = data.bg;
+
+            content.elements.imageBg.bitmap = data.background;
+
+            container.setText("textTitle", translate(data.title));
+            container.setText("textStats", addLineBreaks(20, translate(data.intro)));
+
+        });
+
+        ItemContainer.addClientEventListener(this.name, "showInfo", (container, win, content, data: ForgePageProperties) => {
+            const miningTier = MiningLvName[data.miningTier] ?? "Unknown mining tier %s";
+
+            container.setText("textStats", addLineBreaks(20,
+                translate("Durability: ") + data.durability + "/" + data.maxDurability + "\n" +
+                translate("Mining Tier: ") + translate(miningTier, data.miningTier) + "\n" +
+                translate("Mining Speed: ") + data.miningSpeed + "\n" +
+                translate("Melee Damage: ") + data.meleeDamage + "\n" +
+                translate("Modifiers: ") + data.modifierSlots
+            ));
+
+            container.setText("textModifiers", addLineBreaks(20, data.modifiers.map(mod => {
+                const modifier = Modifier[mod.type];
+                if (modifier == null) {
+                    return `${translate("Unknown modifier %s", mod.type)} (${mod.level})`;
+                }
+                return `${modifier.getLocalizedName()} (${mod.level}/${modifier.max})`;
+            }).join("\n")));
+
+        });
+
+        ItemContainer.addClientEventListener(this.name, "showHammer", (container, win, content, data: ForgeLayout) => {
+            container.setText("textStats", addLineBreaks(20, translate(data.intro)));
+            container.setText("textModifiers", "       .\n     /( _________\n     |  >:=========`\n     )(  \n     \"\"");
 
         });
 
@@ -242,7 +282,7 @@ class ToolCrafterWindow extends CraftingWindow {
                 for(let i = 0; i < result.pattern.length; i++){
                     slot = container.getSlot("slot" + i);
                     partData = PartRegistry.getPartData(slot.id);
-                    partData ? materials.push(partData.material) : alert("part error: " + slot.id);
+                    partData ? materials.push(partData.material) : alert(translate("Unknown slot type %s", slot.id));
                     consume[i] = 1;
                 }
                 const stack = TconToolFactory.createToolStack(result.result, materials);
@@ -263,8 +303,7 @@ class ToolCrafterWindow extends CraftingWindow {
         }
         else{
             const layout = ToolForgeHandler.getLayoutList(this.isForge)[this.page];
-            container.setText("textStats", addLineBreaks(16, layout.intro));
-            container.setText("textModifiers", "       .\n     /( _________\n     |  >:=========`\n     )(  \n     \"\"");
+            container.sendEvent("showHammer", layout);
         }
 
         this.consume = consume;
@@ -306,10 +345,7 @@ class ToolCrafterWindow extends CraftingWindow {
         this.page = this.page < 0 ? layouts.length - 1 : this.page >= layouts.length ? 0 : this.page;
 
         const layout = layouts[this.page];
-
-        container.setText("textTitle", layout.title);
-        container.setText("textStats", addLineBreaks(16, layout.intro));
-        container.sendEvent("changeLayout", {bg: layout.background, slots: layout.slots});
+        container.sendEvent("changeLayout", layout);
 
         this.onUpdate(container);
 
@@ -319,25 +355,24 @@ class ToolCrafterWindow extends CraftingWindow {
 
         const stack = new TconToolStack(item);
         const modifiers = TinkersModifierHandler.decodeToArray(item.extra.getString("modifiers"));
+        const level = ToolLeveling.getLevel(stack.xp, stack.instance.is3x3);
 
-        container.setText("textStats",
-            "Durability: " + (stack.stats.durability - item.extra.getInt("durability")) + "/" + stack.stats.durability + "\n" +
-            "Mining Level: " + MiningLvName[stack.stats.level] + "\n" +
-            "Mining Speed: " + ((stack.stats.efficiency * 100 | 0) / 100) + "\n" +
-            "Attack: " + ((stack.stats.damage * 100 | 0) / 100) + "\n" +
-            "Modifiers: " + (Cfg.modifierSlots + ToolLeveling.getLevel(stack.xp, stack.instance.is3x3) - modifiers.length)
-        );
-
-        container.setText("textModifiers", modifiers.map(mod => {
-            return `${Modifier[mod.type].getName()} (${mod.level}/${Modifier[mod.type].max})`;
-        }).join("\n"));
+        container.sendEvent("showInfo", {
+            durability: stack.stats.durability - item.extra.getInt("durability"),
+            maxDurability: stack.stats.durability,
+            miningTier: stack.stats.level,
+            miningSpeed: (stack.stats.efficiency * 100 | 0) / 100,
+            meleeDamage: (stack.stats.damage * 100 | 0) / 100,
+            modifierSlots: Cfg.modifierSlots + level - modifiers.length,
+            modifiers: modifiers
+        });
 
     }
 
 }
 
 
-createBlock("tcon_toolstation", [{name: "Tool Station"}], "wood");
+createBlock("tcon_toolstation", [{name: "Tinker Station"}], "wood");
 Recipes2.addShaped(BlockID.tcon_toolstation, "a:b", {a: ItemID.tcon_pattern_blank, b: "crafting_table"});
 BlockModel.register(BlockID.tcon_toolstation, (model, index) => {
     model.addBox( 0/16, 12/16,  0/16,  16/16, 16/16, 16/16, [["tcon_toolstation", 0], ["tcon_toolstation", 0], ["tcon_table_side", 0]]);
@@ -359,7 +394,7 @@ ToolForgeHandler.createForgeBlock("tcon_toolforge_alubrass", BlockID.blockAlubra
 
 (() => {
 
-    const winStation = new ToolCrafterWindow("tcon_toolstation", "Tool Station", false);
+    const winStation = new ToolCrafterWindow("tcon_toolstation", "Tinker Station", false);
     const winForge = new ToolCrafterWindow("tcon_toolforge", "Tool Forge", true);
 
     winStation.addTargetBlock(BlockID.tcon_toolstation);

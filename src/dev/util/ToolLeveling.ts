@@ -46,22 +46,28 @@ class ToolLeveling {
         return "Hacker";
     }
 
-    static getLevelupMessage(level: number, name: string): string {
-        let msg = "";
+    static getLocalizedLevelName(level: number): string {
+        return translate(this.getLevelName(level));
+    }
+
+    static getLevelupMessage(level: number): string {
         switch(level){
-            case 1: msg = `You begin to feel comfortable handling the ${name}`; break;
-            case 2: msg = `You are now accustomed to the weight of the ${name}`; break;
-            case 3: msg = `You have become adept at handling the ${name}`; break;
-            case 4: msg = `You are now an expert at using the ${name} !`; break;
-            case 5: msg = `You have mastered the ${name}!`; break;
-            case 6: msg = `You have grandmastered the ${name}!`; break;
-            case 7: msg = `You feel like you could fulfill mighty deeds with your ${name}!`; break;
-            case 8: msg = `You and your ${name} are living legends!`; break;
-            case 9: msg = `No god could stand in the way of you and your ${name}!`; break;
-            case 10: msg = `Your ${name} is pure awesome.`; break;
-            default: msg = `Your ${name} has reached level ${level}`; break;
+            case 1: return "You begin to feel comfortable handling the %s.";
+            case 2: return "You are now accustomed to the weight of the %s.";
+            case 3: return "You have become adept at handling the %s.";
+            case 4: return "You are now an expert at using the %s!";
+            case 5: return "You have mastered the %s!";
+            case 6: return "You have grandmastered the %s!";
+            case 7: return "You feel like you could fulfill mighty deeds with your %s!";
+            case 8: return "You and your %s are living legends!";
+            case 9: return "No god could stand in the way of you and your %s!";
+            case 10: return "Your %s is pure awesome.";
         }
-        return msg;
+        return "Your %s has reached level %s.";
+    }
+
+    static getLocalizedLevelupMessage(level: number, name: string) {
+        return translate(this.getLevelupMessage(level), name, level);
     }
 
 }

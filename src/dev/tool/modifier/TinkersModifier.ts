@@ -24,6 +24,10 @@ abstract class TinkersModifier {
         return this.name;
     }
 
+    getLocalizedName(): string {
+        return translate(this.getName());
+    }
+
     getTexIndex(): number {
         return this.texIndex;
     }

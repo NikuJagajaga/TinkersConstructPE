@@ -2,7 +2,7 @@ createItem("tcon_pattern_blank", "Pattern");
 Recipes2.addShaped({id: ItemID.tcon_pattern_blank, count: 4}, "ab:ba", {a: "planks", b: "stick"});
 
 
-Item.addCreativeGroup("tcon_sandcast", "Sand Cast", [
+Item.addCreativeGroup("tcon_sandcast", translate("TConstuct: Sand Cast"), [
     createItem("tcon_sandcast_blank", "Blank Sand Cast"),
     createItem("tcon_sandcast_pickaxe", "Pickaxe Head Sand Cast"),
     createItem("tcon_sandcast_shovel", "Shovel Head Sand Cast"),
@@ -46,7 +46,7 @@ CastingRecipe.setDefaultCapacity(ItemID.tcon_sandcast_plate, MatValue.INGOT);
 CastingRecipe.setDefaultCapacity(ItemID.tcon_sandcast_gear, MatValue.INGOT * 4);
 
 
-Item.addCreativeGroup("tcon_Sandcast", "Clay Cast", [
+Item.addCreativeGroup("tcon_claycast", translate("TConstuct: Clay Cast"), [
     createItem("tcon_claycast_pickaxe", "Pickaxe Head Clay Cast"),
     createItem("tcon_claycast_shovel", "Shovel Head Clay Cast"),
     createItem("tcon_claycast_axe", "Axe Head Clay Cast"),
@@ -87,7 +87,7 @@ CastingRecipe.setDefaultCapacity(ItemID.tcon_claycast_plate, MatValue.INGOT);
 CastingRecipe.setDefaultCapacity(ItemID.tcon_claycast_gear, MatValue.INGOT * 4);
 
 
-Item.addCreativeGroup("tcon_cast", "Cast", [
+Item.addCreativeGroup("tcon_cast", translate("TConstuct: Cast"), [
     createItem("tcon_cast_pickaxe", "Pickaxe Head Cast"),
     createItem("tcon_cast_shovel", "Shovel Head Cast"),
     createItem("tcon_cast_axe", "Axe Head Cast"),

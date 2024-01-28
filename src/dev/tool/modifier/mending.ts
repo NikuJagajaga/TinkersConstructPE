@@ -7,7 +7,7 @@ Item.registerUseFunction(ItemID.tcon_moss, (coords, item, block, playerUid) => {
         const region = WorldRegion.getForActor(playerUid);
         const level = player.getLevel();
         if(level < 10){
-            Network.getClientForPlayer(playerUid)?.sendMessage("Mending Moss requires at least 10 levels");
+            BlockEngine.sendMessage(Network.getClientForPlayer(playerUid), "Mending Moss requires at least 10 levels");
             return;
         }
         player.setLevel(level - 10);

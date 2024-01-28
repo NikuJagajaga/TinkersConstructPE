@@ -65,7 +65,7 @@ Recipes2.addShapeless(ItemID.tcon_slimeball_purple, [ItemID.tcon_slimeball_blue,
 MeltingRecipe.addRecipe(ItemID.tcon_slimeball_purple, "purpleslime", MatValue.SLIME_BALL);
 
 
-Item.addCreativeGroup("tcon_slimymud", "Slimy Mud", [
+Item.addCreativeGroup("tcon_slimymud", translate("Slimy Mud"), [
     createBlock("tcon_slimymud_green", [{name: "Slimy Mud"}]),
     createBlock("tcon_slimymud_blue", [{name: "Blue Slimy Mud"}]),
     createBlock("tcon_slimymud_magma", [{name: "Magma Slimy Mud"}])
@@ -75,7 +75,7 @@ Recipes2.addShapeless(BlockID.tcon_slimymud_blue, [{id: ItemID.tcon_slimeball_bl
 Recipes2.addShapeless(BlockID.tcon_slimymud_magma, [{id: "magma_cream", count: 4}, "soul_sand", "netherrack"]);
 
 
-Item.addCreativeGroup("tcon_slimycrystal", "Slime Crystal", [
+Item.addCreativeGroup("tcon_slimycrystal", translate("Slime Crystal"), [
     createItem("tcon_slimecrystal_green", "Slime Crystal"),
     createItem("tcon_slimecrystal_blue", "Blue Slime Crystal"),
     createItem("tcon_slimecrystal_magma", "Magma Slime Crystal")

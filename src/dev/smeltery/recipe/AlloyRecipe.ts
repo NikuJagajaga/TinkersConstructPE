@@ -13,7 +13,7 @@ class AlloyRecipe {
             inputAmount += input.amount;
         }
         if(result.amount > inputAmount){
-            alert("[TCon]: Invalid alloy recipe -> " + result.liquid);
+            alert(translate("[TConstuct]: Invalid alloy recipe -> %s", result.liquid));
             return;
         }
         this.data.push({inputs: inputs.map(input => ({liquid: input.liquid, amount: input.amount})), result: result});

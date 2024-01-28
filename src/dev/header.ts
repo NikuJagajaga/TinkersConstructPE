@@ -50,22 +50,50 @@ const Cfg = {
 } as const;
 
 const addLineBreaks = (length: number, text: string): string => {
-    const array: string[] = [];
-    const words = text.split(" ");
-    let i = 0;
-    let line: string[];
-    let count = 0;
-    while(i < words.length){
-        line = [];
-        count = 0;
-        while(i < words.length && count + words[i].length <= length){
-            line.push(words[i]);
-            count += words[i].length;
-            i++;
+    let characters = 0;
+    let bufferedLine = "";
+    let bufferedWord = "";
+    let index = 0;
+
+    const lines = [];
+    const chars = new java.lang.String(text).toCharArray();
+
+    while (index < chars.length) {
+        const next = chars[index++] as any;
+        // Reached word length limit of line and forcing newline
+        if (next == 10 || ++characters > length) {
+            if (characters <= length || bufferedLine.length == 0) {
+                bufferedLine += bufferedWord;
+            } else {
+                index -= bufferedWord.length;
+            }
+            lines.push(bufferedLine);
+            if (next != 10) {
+                index--;
+            }
+            characters = 0;
+            bufferedLine = bufferedWord = "";
+        } else {
+            // Leading whitespace will be ignored, indentation too
+            if (java.lang.Character.isWhitespace(next)) {
+                if (bufferedWord.length == 0) {
+                    characters--;
+                    continue;
+                }
+                bufferedLine += bufferedWord;
+                bufferedWord = "";
+            }
+            bufferedWord += java.lang.Character.toString(next);
         }
-        array.push(line.join(" "));
     }
-    return array.join("\n");
+    if (bufferedWord.length != 0) {
+        bufferedLine += bufferedWord;
+    }
+    if (bufferedLine.length != 0) {
+        lines.push(bufferedLine);
+    }
+
+    return lines.join("\n");
 }
 
 
