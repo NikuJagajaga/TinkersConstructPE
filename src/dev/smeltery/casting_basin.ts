@@ -61,9 +61,6 @@ class CastingBasin extends CastingTable {
     }
 
     override isValidCast(id: number): boolean {
-        if(IDRegistry.isVanilla(id)){
-            return id < 256;
-        }
         return ItemRegistry.isBlock(id);
     }
 

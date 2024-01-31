@@ -29,9 +29,9 @@ class MultiColorFilter extends ColorFilter {
             return pixel;
         }
         const color = this.brightnessData[index] < this.minBrightness ? this.colorLow : this.brightnessData[index] > this.maxBrightness ? this.colorHigh : this.colorMid;
-        let r = ColorFilter.mult(ColorFilter.getR(color), ColorFilter.getR(pixel)) & 0xff;
-        let g = ColorFilter.mult(ColorFilter.getG(color), ColorFilter.getG(pixel)) & 0xff;
-        let b = ColorFilter.mult(ColorFilter.getB(color), ColorFilter.getB(pixel)) & 0xff;
+        const r = ColorFilter.mult(ColorFilter.getR(color), ColorFilter.getR(pixel)) & 0xff;
+        const g = ColorFilter.mult(ColorFilter.getG(color), ColorFilter.getG(pixel)) & 0xff;
+        const b = ColorFilter.mult(ColorFilter.getB(color), ColorFilter.getB(pixel)) & 0xff;
         return Color.argb(a, r, g, b);
     }
 

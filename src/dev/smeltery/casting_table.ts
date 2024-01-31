@@ -89,9 +89,6 @@ class CastingTable extends TileWithLiquidModel {
     }
 
     isValidCast(id: number): boolean {
-        if(IDRegistry.isVanilla(id)){
-            return id >= 256;
-        }
         return ItemRegistry.isItem(id);
     }
 
