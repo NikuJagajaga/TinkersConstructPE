@@ -119,13 +119,11 @@ class TconToolStack implements ItemInstance {
     }
 
     getName(): string {
-        const materials: TinkersMaterial[] = this.instance.repairParts
-            .map(partIndex => this.materials[partIndex])
-            .filter((material, index, arr) => arr.indexOf(material) === index); // remove duplicates
-        let toolName = this.instance.name;
-        for(let i = materials.length - 1; i >= 0; i--){
-            toolName = materials[i].getLocalizationOfPart(toolName);
-        }
+        const head: string = this.instance.repairParts
+            .map(partIndex => this.materials[partIndex].getLocalizedName())
+            .filter((material, index, arr) => arr.indexOf(material) === index) // remove duplicates
+            .join("-");
+        let toolName = head + " " + this.instance.name;
         if(this.isBroken()){
             toolName = translate("Broken %s", toolName);
         }

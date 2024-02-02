@@ -188,7 +188,7 @@ Translation.addTranslation("Molten Iron", {
     de: "Geschmolzenes Eisen",
     id: "Besi Leleh",
     it: "Ferro fuso",
-    ja: "溶融した鉄", ko: "녹은 철",
+    ja: "溶けた鉄", ko: "녹은 철",
     pl: "Stopione żelazo",
     pt: "Ferro Derretido",
     ru: "Расплавленное железо",
@@ -200,7 +200,7 @@ Translation.addTranslation("Molten Iron Bucket", {
     de: "Eimer aus geschmolzenem Eisen",
     id: "Ember Besi Leleh",
     it: "Secchio di ferro fuso",
-    ja: "溶融した鉄入りバケツ",
+    ja: "溶けた鉄入りバケツ",
     ko: "녹은 철 양동이",
     pl: "Wiadro stopionego żelaza",
     pt: "Balde de Ferro Derretido",
@@ -213,7 +213,7 @@ Translation.addTranslation("Molten Gold", {
     de: "Geschmolzenes Gold",
     id: "Molten Gold",
     it: "Oro fuso",
-    ja: "溶融した金", ko: "녹은 금",
+    ja: "溶けた金", ko: "녹은 금",
     pl: "Stopione złoto",
     pt: "Ouro Derretido",
     ru: "Расплавленное золото",
@@ -225,7 +225,7 @@ Translation.addTranslation("Molten Gold Bucket", {
     de: "Eimer aus geschmolzenem Gold",
     id: "Molten Gold Bucket",
     it: "Secchio d'oro fuso",
-    ja: "溶融した金入りバケツ",
+    ja: "溶けた金入りバケツ",
     ko: "녹은 금 양동이",
     pl: "Wiadro stopionego złota",
     pt: "Balde de Ouro Derretido",
@@ -234,11 +234,11 @@ Translation.addTranslation("Molten Gold Bucket", {
     uk: "Відро розплавленого золота",
     zh: "熔融金桶"
 });
-Translation.addTranslation("Molten Pigiron", {
+Translation.addTranslation("Molten Pig Iron", {
     de: "Geschmolzenes Roheisen",
     id: "Molten Pigiron",
     it: "Ferro di maiale fuso",
-    ja: "溶融した銑鉄",
+    ja: "溶けたピッグアイアン",
     ko: "녹은 돼지 선철",
     pl: "Stopione świńskie żelazo",
     pt: "Ferro-Porco Derretido",
@@ -247,11 +247,11 @@ Translation.addTranslation("Molten Pigiron", {
     uk: "Розплавлене свиняче залізо",
     zh: "熔融生铁"
 });
-Translation.addTranslation("Molten Pigiron Bucket", {
+Translation.addTranslation("Molten Pig Iron Bucket", {
     de: "Eimer aus geschmolzenem Roheisen",
     id: "Molten Pigiron Bucket",
     it: "Secchio di ferro di maiale fuso",
-    ja: "溶融した銑鉄入りバケツ",
+    ja: "溶けたピッグアイアン入りバケツ",
     ko: "녹은 돼지 선철 양동이",
     pl: "Wiadro stopionego świńskiego żelaza",
     pt: "Balde de Ferro-Porco Derretido",
@@ -264,7 +264,7 @@ Translation.addTranslation("Molten Cobalt", {
     de: "Geschmolzenes Kobalt",
     id: "Molten Cobalt",
     it: "Cobalto fuso",
-    ja: "溶融したコバルト",
+    ja: "溶けたコバルト",
     ko: "녹은 코발트",
     pl: "Stopiony kobalt",
     pt: "Cobalto Derretido",
@@ -277,7 +277,7 @@ Translation.addTranslation("Molten Cobalt Bucket", {
     de: "Eimer mit geschmolzenem Kobalt",
     id: "Molten Cobalt Bucket",
     it: "Secchio di cobalto fuso",
-    ja: "溶融したコバルト入りバケツ",
+    ja: "溶けたコバルト入りバケツ",
     ko: "녹은 코발트 양동이",
     pl: "Wiadro stopionego kobaltu",
     pt: "Balde de Cobalto Derretido",
@@ -290,7 +290,7 @@ Translation.addTranslation("Molten Ardite", {
     de: "Geschmolzenes Ardite",
     id: "Ardite Leleh",
     it: "Ardite Fuso",
-    ja: "溶融したアルダイト",
+    ja: "溶けたアーダイト",
     ko: "녹은 아르다이트",
     pl: "Stopione ardite",
     pt: "Ardite Derretido",
@@ -303,7 +303,7 @@ Translation.addTranslation("Molten Ardite Bucket", {
     de: "Eimer mit geschmolzenem Ardite",
     id: "Ember Ardite Leleh",
     it: "Secchio di Ardite Fuso",
-    ja: "溶融したアルダイトのバケツ",
+    ja: "溶けたアーダイトのバケツ",
     ko: "녹은 아르다이트 양동이",
     pl: "Wiadro stopionego ardite",
     pt: "Balde de Ardite Derretido",
@@ -316,7 +316,7 @@ Translation.addTranslation("Molten Manyullyn", {
     de: "Geschmolzener Manyullyn",
     id: "Molten Manyullyn",
     it: "Manyullyn fuso",
-    ja: "溶融したマンユリン",
+    ja: "溶けたマニュリン",
     ko: "녹은 마뉼린",
     pl: "Stopiony Manyullyn",
     pt: "Manyullyn Derretida",
@@ -329,7 +329,7 @@ Translation.addTranslation("Molten Manyullyn Bucket", {
     de: "Geschmolzener Manyullyn-Eimer",
     id: "Molten Manyullyn Bucket",
     it: "Secchio di Manyullyn fuso",
-    ja: "溶融したマンユリン入りバケツ",
+    ja: "溶けたマニュリン入りバケツ",
     ko: "녹은 마뉼린 양동이",
     pl: "Wiadro stopionego Manyullynu",
     pt: "Balde de Manyullyn Derretida",
@@ -342,7 +342,7 @@ Translation.addTranslation("Molten Knightslime", {
     de: "Geschmolzener Ritterschleim",
     id: "Molten Knightslime",
     it: "Slime del cavaliere fuso",
-    ja: "溶融したナイトスライム",
+    ja: "溶けたナイトスライム",
     ko: "녹은 기사슬라임",
     pl: "Stopiony rycerski szlam",
     pt: "Cavaleiro-Slime Derretido",
@@ -355,7 +355,7 @@ Translation.addTranslation("Molten Knightslime Bucket", {
     de: "Geschmolzener Knightslime-Eimer",
     id: "Molten Knightslime Bucket",
     it: "Secchio di slime del cavaliere fuso",
-    ja: "溶融したナイトスライム入りバケツ",
+    ja: "溶けたナイトスライム入りバケツ",
     ko: "녹은 기사슬라임 양동이",
     pl: "Wiadro stopionego rycerskiego szlamu",
     pt: "Balde de Cavaleiro-Slime Derretido",
@@ -368,7 +368,7 @@ Translation.addTranslation("Molten Aluminum Brass", {
     de: "Geschmolzenes Aluminium-Bronze",
     id: "Besi Perunggu Aluminium Leleh",
     it: "Bronzo Alluminio Fuso",
-    ja: "溶融したアルミニウムブロンズ",
+    ja: "溶けたアルミブラス",
     ko: "녹은 알루미늄 브론즈",
     pl: "Stopiony brąz aluminiowy",
     pt: "Bronze de Alumínio Derretido",
@@ -381,7 +381,7 @@ Translation.addTranslation("Molten Aluminum Bucket", {
     de: "Eimer mit geschmolzenem Aluminium",
     id: "Ember Aluminium Leleh",
     it: "Secchio di Alluminio Fuso",
-    ja: "溶融したアルミニウムのバケツ",
+    ja: "溶けたアルミニウムのバケツ",
     ko: "녹은 알루미늄 양동이",
     pl: "Wiadro stopionego aluminium",
     pt: "Balde de Alumínio Derretido",
@@ -394,7 +394,7 @@ Translation.addTranslation("Molten Brass", {
     de: "Geschmolzenes Messing",
     id: "Molten Brass",
     it: "Ottone fuso",
-    ja: "溶融した黄銅", ko: "녹은 황동",
+    ja: "溶けた黄銅", ko: "녹은 황동",
     pl: "Stopiony mosiądz",
     pt: "Latão Derretido",
     ru: "Расплавленная латунь",
@@ -406,7 +406,7 @@ Translation.addTranslation("Molten Brass Bucket", {
     de: "Eimer aus geschmolzenem Messing",
     id: "Molten Brass Bucket",
     it: "Secchio di ottone fuso",
-    ja: "溶融した黄銅入りバケツ",
+    ja: "溶けた黄銅入りバケツ",
     ko: "녹은 황동 양동이",
     pl: "Wiadro stopionego mosiądzu",
     pt: "Balde de Latão Derretido",
@@ -419,7 +419,7 @@ Translation.addTranslation("Molten Copper", {
     de: "Geschmolzenes Kupfer",
     id: "Molten Copper",
     it: "Rame fuso",
-    ja: "溶融した銅", ko: "녹은 구리",
+    ja: "溶けた銅", ko: "녹은 구리",
     pl: "Stopiona miedź",
     pt: "Cobre Derretido",
     ru: "Расплавленная медь",
@@ -431,7 +431,7 @@ Translation.addTranslation("Molten Copper Bucket", {
     de: "Eimer aus geschmolzenem Kupfer",
     id: "Molten Copper Bucket",
     it: "Secchio di rame fuso",
-    ja: "溶融した銅入りバケツ",
+    ja: "溶けた銅入りバケツ",
     ko: "녹은 구리 양동이",
     pl: "Wiadro stopionej miedzi",
     pt: "Balde de Cobre Derretido",
@@ -444,7 +444,7 @@ Translation.addTranslation("Molten Tin", {
     de: "Geschmolzenes Zinn",
     id: "Molten Tin",
     it: "Stagno fuso",
-    ja: "溶融した錫", ko: "녹은 주석",
+    ja: "溶けた錫", ko: "녹은 주석",
     pl: "Stopiona cyna",
     pt: "Estanho Derretido",
     ru: "Расплавленное олово",
@@ -456,7 +456,7 @@ Translation.addTranslation("Molten Tin Bucket", {
     de: "Eimer aus geschmolzenem Zinn",
     id: "Molten Tin Bucket",
     it: "Secchio di stagno fuso",
-    ja: "溶融した錫入りバケツ",
+    ja: "溶けた錫入りバケツ",
     ko: "녹은 주석 양동이",
     pl: "Wiadro stopionej cyny",
     pt: "Balde de Estanho Derretido",
@@ -469,7 +469,7 @@ Translation.addTranslation("Molten Bronze", {
     de: "Geschmolzene Bronze",
     id: "Molten Bronze",
     it: "Bronzo fuso",
-    ja: "溶融した青銅", ko: "녹은 청동",
+    ja: "溶けた青銅", ko: "녹은 청동",
     pl: "Stopiony brąz",
     pt: "Bronze Derretido",
     ru: "Расплавленная бронза",
@@ -481,7 +481,7 @@ Translation.addTranslation("Molten Bronze Bucket", {
     de: "Eimer aus geschmolzener Bronze",
     id: "Molten Bronze Bucket",
     it: "Secchio di bronzo fuso",
-    ja: "溶融した青銅入りバケツ",
+    ja: "溶けた青銅入りバケツ",
     ko: "녹은 청동 양동이",
     pl: "Wiadro stopionego brązu",
     pt: "Balde de Bronze Derretido",
@@ -494,7 +494,7 @@ Translation.addTranslation("Molten Zinc", {
     de: "Geschmolzenes Zink",
     id: "Molten Zinc",
     it: "Zinco fuso",
-    ja: "溶融した亜鉛", ko: "녹은 아연",
+    ja: "溶けた亜鉛", ko: "녹은 아연",
     pl: "Stopiony cynk",
     pt: "Zinco Derretido",
     ru: "Расплавленный цинк",
@@ -506,7 +506,7 @@ Translation.addTranslation("Molten Zinc Bucket", {
     de: "Eimer für geschmolzenes Zink",
     id: "Molten Zinc Bucket",
     it: "Secchio di zinco fuso",
-    ja: "溶融した亜鉛入りバケツ",
+    ja: "溶けた亜鉛入りバケツ",
     ko: "녹은 아연 양동이",
     pl: "Wiadro stopionego cynku",
     pt: "Balde de Zinco Derretido",
@@ -519,7 +519,7 @@ Translation.addTranslation("Molten Lead", {
     de: "Geschmolzenes Blei",
     id: "Molten Lead",
     it: "Piombo fuso",
-    ja: "溶融した鉛", ko: "녹은 납",
+    ja: "溶けた鉛", ko: "녹은 납",
     pl: "Stopiony ołów",
     pt: "Chumbo Derretido",
     ru: "Расплавленный свинец",
@@ -531,7 +531,7 @@ Translation.addTranslation("Molten Lead Bucket", {
     de: "Geschmolzener Bleieimer",
     id: "Molten Lead Bucket",
     it: "Secchio di piombo fuso",
-    ja: "溶融した鉛入りバケツ",
+    ja: "溶けた鉛入りバケツ",
     ko: "녹은 납 양동이",
     pl: "Wiadro stopionego ołowiu",
     pt: "Balde de Chumbo Derretido",
@@ -544,7 +544,7 @@ Translation.addTranslation("Molten Nickel", {
     de: "Geschmolzenes Nickel",
     id: "Molten Nickel",
     it: "Nichel fuso",
-    ja: "溶融したニッケル",
+    ja: "溶けたニッケル",
     ko: "녹은 니켈",
     pl: "Stopiony nikiel",
     pt: "Níquel Derretido",
@@ -557,7 +557,7 @@ Translation.addTranslation("Molten Nickel Bucket", {
     de: "Eimer für geschmolzenes Nickel",
     id: "Molten Nickel Bucket",
     it: "Secchio di nichel fuso",
-    ja: "溶融したニッケル入りバケツ",
+    ja: "溶けたニッケル入りバケツ",
     ko: "녹은 니켈 양동이",
     pl: "Wiadro stopionego niklu",
     pt: "Balde de Níquel Derretido",
@@ -570,7 +570,7 @@ Translation.addTranslation("Molten Silver", {
     de: "Geschmolzenes Silber",
     id: "Molten Silver",
     it: "Argento fuso",
-    ja: "溶融した銀", ko: "녹은 은",
+    ja: "溶けた銀", ko: "녹은 은",
     pl: "Stopione srebro",
     pt: "Prata Derretida",
     ru: "Расплавленное серебро",
@@ -582,7 +582,7 @@ Translation.addTranslation("Molten Silver Bucket", {
     de: "Geschmolzener Silbereimer",
     id: "Molten Silver Bucket",
     it: "Secchio d'argento fuso",
-    ja: "溶融した銀入りバケツ",
+    ja: "溶けた銀入りバケツ",
     ko: "녹은 은 양동이",
     pl: "Wiadro stopionego srebra",
     pt: "Balde de Prata Derretida",
@@ -595,7 +595,7 @@ Translation.addTranslation("Molten Electrum", {
     de: "Geschmolzenes Elektrum",
     id: "Molten Electrum",
     it: "Elettro fuso",
-    ja: "溶融したエレクトラム",
+    ja: "溶けたエレクトラム",
     ko: "녹은 호박금",
     pl: "Stopione elektrum",
     pt: "Electrio Derretido",
@@ -608,7 +608,7 @@ Translation.addTranslation("Molten Electrum Bucket", {
     de: "Eimer mit geschmolzenem Elektrum",
     id: "Molten Electrum Bucket",
     it: "Secchio di Elettro fusa",
-    ja: "溶融したエレクトラム入りバケツ",
+    ja: "溶けたエレクトラム入りバケツ",
     ko: "녹은 호박금 양동이",
     pl: "Wiadro stopionego elektrum",
     pt: "Balde de Electrio Derretido",
@@ -621,7 +621,7 @@ Translation.addTranslation("Molten Steel", {
     de: "Geschmolzener Stahl",
     id: "Molten Steel",
     it: "Acciaio fuso",
-    ja: "溶融した鋼鉄", ko: "녹은 강철",
+    ja: "溶けた鋼鉄", ko: "녹은 강철",
     pl: "Stopiona stal",
     pt: "Aço Derretido",
     ru: "Расплавленная сталь",
@@ -633,7 +633,7 @@ Translation.addTranslation("Molten Steel Bucket", {
     de: "Eimer aus geschmolzenem Stahl",
     id: "Molten Steel Bucket",
     it: "Secchio di acciaio fuso",
-    ja: "溶融した鋼鉄入りバケツ",
+    ja: "溶けた鋼鉄入りバケツ",
     ko: "녹은 강철 양동이",
     pl: "Wiadro stopionej stali",
     pt: "Balde de Aço Derretido",
@@ -646,7 +646,7 @@ Translation.addTranslation("Molten Aluminum", {
     de: "Geschmolzenes Aluminium",
     id: "Molten Aluminum",
     it: "Alluminio fuso",
-    ja: "溶融したアルミニウム",
+    ja: "溶けたアルミニウム",
     ko: "녹은 알루미늄",
     pl: "Stopione aluminium",
     pt: "Aluminio Derretido",
@@ -659,7 +659,7 @@ Translation.addTranslation("Molten Aluminum Bucket", {
     de: "Eimer für geschmolzenes Aluminium",
     id: "Molten Aluminum Bucket",
     it: "Secchio di alluminio fuso",
-    ja: "溶融したアルミニウム入りバケツ",
+    ja: "溶けたアルミニウム入りバケツ",
     ko: "녹은 알루미늄 양동이",
     pl: "Wiadro stopionego aluminium",
     pt: "Balde de Aluminio Derretido",
@@ -684,7 +684,7 @@ Translation.addTranslation("Seared Stone Bucket", {
     de: "Seared Stone Bucket",
     id: "Ember Batu hangus Leleh",
     it: "Secchio di pietra scottata",
-    ja: "溶融した焼成石入りバケツ",
+    ja: "溶けた焼成石入りバケツ",
     ko: "녹은 그을린 돌 양동이",
     pl: "Wiadro suszonego kamienia",
     pt: "Balde de Pedra Carbonizada",
@@ -697,7 +697,7 @@ Translation.addTranslation("Molten Obsidian", {
     de: "Geschmolzener Obsidian",
     id: "Obsidian Leleh",
     it: "Ossidiana fusa",
-    ja: "溶融した黒曜石",
+    ja: "溶けた黒曜石",
     ko: "녹은 흑요석",
     pl: "Stopiony obsydian",
     pt: "Obsidian Derretida",
@@ -710,7 +710,7 @@ Translation.addTranslation("Molten Obsidian Bucket", {
     de: "Eimer aus geschmolzenem Obsidian",
     id: "Ember Obsidian Leleh",
     it: "Secchio di ossidiana fusa",
-    ja: "溶融した黒曜石入りバケツ",
+    ja: "溶けた黒曜石入りバケツ",
     ko: "녹은 흑요석 양동이",
     pl: "Wiadro stopionego obsydianu",
     pt: "Balde de Obsidian Derretida",
@@ -723,7 +723,7 @@ Translation.addTranslation("Molten Clay", {
     de: "Geschmolzener Ton",
     id: "Terakota Leleh",
     it: "Argilla fusa",
-    ja: "溶融した粘土", ko: "녹은 점토",
+    ja: "溶けた粘土", ko: "녹은 점토",
     pl: "Stopiona glina",
     pt: "Argila Derretida",
     ru: "Расплавленная глина",
@@ -735,7 +735,7 @@ Translation.addTranslation("Molten Clay Bucket", {
     de: "Geschmolzener Lehmeimer",
     id: "Ember Terakota Leleh",
     it: "Secchio di argilla fusa",
-    ja: "溶融した粘土入りバケツ",
+    ja: "溶けた粘土入りバケツ",
     ko: "녹은 점토 양동이",
     pl: "Wiadro stopionej gliny",
     pt: "Balde de Argila Derretida",
@@ -774,7 +774,7 @@ Translation.addTranslation("Molten Emerald", {
     de: "Geschmolzener Smaragd",
     id: "Zamrud Leleh",
     it: "Smeraldo fuso",
-    ja: "溶融したエメラルド",
+    ja: "溶けたエメラルド",
     ko: "녹은 에메랄드",
     pl: "Stopiony szmaragd",
     pt: "Esmeralda Derretida",
@@ -787,7 +787,7 @@ Translation.addTranslation("Molten Emerald Bucket", {
     de: "Geschmolzener Smaragdeimer",
     id: "Ember Zamrud Leleh",
     it: "Secchio di smeraldo fuso",
-    ja: "溶融したエメラルド入りバケツ",
+    ja: "溶けたエメラルド入りバケツ",
     ko: "녹은 에메랄드 양동이",
     pl: "Wiadro stopionego szmaragdu",
     pt: "Balde de Esmeralda Derretida",
@@ -800,7 +800,7 @@ Translation.addTranslation("Molten Glass", {
     de: "Geschmolzenes Glas",
     id: "Kaca Leleh",
     it: "Vetro fuso",
-    ja: "溶融したガラス",
+    ja: "溶けたガラス",
     ko: "녹은 유리",
     pl: "Stopione szkło",
     pt: "Vidro Derretido",
@@ -813,7 +813,7 @@ Translation.addTranslation("Molten Glass Bucket", {
     de: "Eimer aus geschmolzenem Glas",
     id: "Ember Kaca Leleh",
     it: "Secchio di vetro fuso",
-    ja: "溶融したガラス入りバケツ",
+    ja: "溶けたガラス入りバケツ",
     ko: "녹은 유리 양동이",
     pl: "Wiadro stopionego szkła",
     pt: "Balde de Vidro Derretido",
@@ -1250,7 +1250,7 @@ Translation.addTranslation("Ardite Ore", {
     de: "Arditerz",
     id: "Batu Ardite",
     it: "Minerale di Ardite",
-    ja: "アルダイト鉱石",
+    ja: "アーダイト鉱石",
     ko: "아르다이트 광석",
     pl: "Ruda Ardytu",
     pt: "Minério de Ardite",
@@ -1289,7 +1289,7 @@ Translation.addTranslation("Block of Ardite", {
     de: "Arditblock",
     id: "Blok Ardite",
     it: "Blocco di Ardite",
-    ja: "アルダイトブロック",
+    ja: "アーダイトブロック",
     ko: "아르다이트 블록",
     pl: "Blok Ardytu",
     pt: "Bloco de Ardite",
@@ -1302,7 +1302,7 @@ Translation.addTranslation("Block of Manyullyn", {
     de: "Block von Manyullyn",
     id: "Blok Manyullyn",
     it: "Blocco di Manyullyn",
-    ja: "マンユリンブロック",
+    ja: "マニュリンブロック",
     ko: "마뉼린",
     pl: "Block Manyullynu",
     pt: "Bloco de Manyullyn",
@@ -1328,7 +1328,7 @@ Translation.addTranslation("Block of Aluminum Brass", {
     de: "Block aus Aluminiumbronze",
     id: "Blok Perunggu Aluminium",
     it: "Blocco di Bronzo Alluminio",
-    ja: "アルミニウムブロンズブロック",
+    ja: "アルミブラスブロック",
     ko: "알루미늄 브론즈 블록",
     pl: "Blok Brązu Aluminium",
     pt: "Bloco de Bronze de Alumínio",
@@ -1367,7 +1367,7 @@ Translation.addTranslation("Ardite Ingot", {
     de: "Arditbarren",
     id: "Bilah Ardite",
     it: "Lingotto di Ardite",
-    ja: "アルダイトインゴット",
+    ja: "アーダイトインゴット",
     ko: "아르다이트 주괴",
     pl: "Sztabka Ardytu",
     pt: "Lingote de Ardite",
@@ -1380,7 +1380,7 @@ Translation.addTranslation("Manyullyn Ingot", {
     de: "Manyullyn-Barren",
     id: "Batangan Manyullyn",
     it: "Lingotto di Manyullyn",
-    ja: "マンユリンインゴット",
+    ja: "マニュリンインゴット",
     ko: "마뉼린 주괴",
     pl: "Sztabka Manyullynu",
     pt: "Lingote de Manyullyn",
@@ -1406,7 +1406,7 @@ Translation.addTranslation("Aluminum Brass Ingot", {
     de: "Aluminiumbronze-Barren",
     id: "Bilah Perunggu Aluminium",
     it: "Lingotto di Bronzo Alluminio",
-    ja: "アルミニウムブロンズインゴット",
+    ja: "アルミブラスインゴット",
     ko: "알루미늄 브론즈 주괴",
     pl: "Sztabka Brązu Aluminium",
     pt: "Lingote de Bronze de Alumínio",
@@ -1419,7 +1419,7 @@ Translation.addTranslation("Knightslime Nugget", {
     de: "Knightslime-Nugget",
     id: "Nugget Knightslime",
     it: "Pepita di slime del cavaliere",
-    ja: "ナイトスライム塊",
+    ja: "ナイトスライムナゲット",
     ko: "기사슬라임 조각",
     pl: "Bryłka rycerskiego szlamu",
     pt: "Pepita de Cavaleiro-Slime",
@@ -1432,7 +1432,7 @@ Translation.addTranslation("Cobalt Nugget", {
     de: "Kobalt-Nugget",
     id: "Nugget Kobalt",
     it: "Pepita di cobalto",
-    ja: "コバルト塊", ko: "코발트 조각",
+    ja: "コバルトナゲット", ko: "코발트 조각",
     pl: "Bryłka kobaltu",
     pt: "Pepita de Cobalto",
     ru: "Кобальтовый самородок",
@@ -1444,7 +1444,7 @@ Translation.addTranslation("Ardite Nugget", {
     de: "Ardit-Nugget",
     id: "Nugget Ardite",
     it: "Pepita di Ardite",
-    ja: "アルダイトナゲット",
+    ja: "アーダイトナゲット",
     ko: "아르다이트 너겟",
     pl: "Nugget Ardytu",
     pt: "Nugget de Ardite",
@@ -1457,7 +1457,7 @@ Translation.addTranslation("Manyullyn Nugget", {
     de: "Manyullyn-Nugget",
     id: "Nugget Manyullyn",
     it: "Pepita di Manyullyn",
-    ja: "マンユリン塊", ko: "마뉼린 조각",
+    ja: "マニュリンナゲット", ko: "마뉼린 조각",
     pl: "Bryłka Manyullynu",
     pt: "Pepita de Manyullyn",
     ru: "Манюллиновый самородок",
@@ -1469,7 +1469,7 @@ Translation.addTranslation("Pigiron Nugget", {
     de: "Roheisennugget",
     id: "Nugget Besi Gubal",
     it: "Pepita di ferro di maiale",
-    ja: "銑鉄塊",
+    ja: "銑鉄ナゲット",
     ko: "돼지 선철 조각",
     pl: "Bryłka świńskiego żelaza",
     pt: "Pepita de Ferro-Porco",
@@ -1482,7 +1482,7 @@ Translation.addTranslation("Aluminum Brass Nugget", {
     de: "Aluminiumbronze-Nugget",
     id: "Nugget Perunggu Aluminium",
     it: "Pepita di Bronzo Alluminio",
-    ja: "アルミニウムブロンズナゲット",
+    ja: "アルミブラスナゲット",
     ko: "알루미늄 브론즈 너겟",
     pl: "Nugget Brązu Aluminium",
     pt: "Nugget de Bronze de Alumínio",
@@ -1520,7 +1520,7 @@ Translation.addTranslation("Blue Slime", {
     de: "Blaue Schleimkugel",
     id: "Slime Biru",
     it: "Slime Blu",
-    ja: "青いスライム",
+    ja: "青スライム",
     ko: "파란 슬라임",
     pl: "Niebieski szlam",
     pt: "Slime Azul",
@@ -1532,7 +1532,7 @@ Translation.addTranslation("Purple Slime", {
     de: "Lila Schleimkugel",
     id: "Slime Ungu",
     it: "Slime Viola",
-    ja: "紫のスライム",
+    ja: "紫スライム",
     ko: "보라색 슬라임",
     pl: "Fioletowy szlam",
     pt: "Slime Roxo",
@@ -1592,7 +1592,7 @@ Translation.addTranslation("Blue Slime Crystal", {
     de: "Blauer Schleimkristall",
     id: "Kristal Slime Biru",
     it: "Cristallo di Slime Blu",
-    ja: "青いスライムクリスタル",
+    ja: "青スライムクリスタル",
     ko: "파란 슬라임 크리스탈",
     pl: "Niebieski kryształ szlamu",
     pt: "Cristal de Slime Azul",
@@ -4940,7 +4940,7 @@ MoltenLiquid.register("lava", 769);
 MoltenLiquid.register("milk", 320);
 MoltenLiquid.createAndRegister("molten_iron", "Molten Iron", 769, "#a81212");
 MoltenLiquid.createAndRegister("molten_gold", "Molten Gold", 532, "#f6d609");
-MoltenLiquid.createAndRegister("molten_pigiron", "Molten Pigiron", 600, "#ef9e9b");
+MoltenLiquid.createAndRegister("molten_pigiron", "Molten Pig Iron", 600, "#ef9e9b");
 MoltenLiquid.createAndRegister("molten_cobalt", "Molten Cobalt", 950, "#2882d4");
 MoltenLiquid.createAndRegister("molten_ardite", "Molten Ardite", 860, "#d14210");
 MoltenLiquid.createAndRegister("molten_manyullyn", "Molten Manyullyn", 1000, "#a15cf8");
@@ -5868,9 +5868,6 @@ var CastingTable = /** @class */ (function (_super) {
         this.liquidStorage.liquidLimits = CastingRecipe.getTableLimits(this.container.getSlot("slotInput").id);
     };
     CastingTable.prototype.isValidCast = function (id) {
-        if (IDRegistry.isVanilla(id)) {
-            return id >= 256;
-        }
         return ItemRegistry.isItem(id);
     };
     CastingTable.prototype.getRecipe = function (stored) {
@@ -6033,9 +6030,6 @@ var CastingBasin = /** @class */ (function (_super) {
         this.liquidStorage.liquidLimits = CastingRecipe.getBasinLimits(this.container.getSlot("slotInput").id);
     };
     CastingBasin.prototype.isValidCast = function (id) {
-        if (IDRegistry.isVanilla(id)) {
-            return id < 256;
-        }
         return ItemRegistry.isBlock(id);
     };
     CastingBasin.prototype.getRecipe = function (stored) {
@@ -6829,7 +6823,7 @@ var Material = {
         .setHeadStats(204, 6, 5.5, MiningLv.DIAMOND)
         .setHandleStats(0.85, 60)
         .setExtraStats(50),
-    pigiron: new TinkersMaterial("Pigiron", 17, "molten_pigiron", true)
+    pigiron: new TinkersMaterial("Pig Iron", 17, "molten_pigiron", true)
         .setItem(ItemID.ingotPigiron)
         .setHeadStats(380, 6.2, 4.5, MiningLv.DIAMOND)
         .setHandleStats(1.2, 0)
@@ -7177,13 +7171,11 @@ var TconToolStack = /** @class */ (function () {
     };
     TconToolStack.prototype.getName = function () {
         var _this = this;
-        var materials = this.instance.repairParts
-            .map(function (partIndex) { return _this.materials[partIndex]; })
-            .filter(function (material, index, arr) { return arr.indexOf(material) === index; }); // remove duplicates
-        var toolName = this.instance.name;
-        for (var i = materials.length - 1; i >= 0; i--) {
-            toolName = materials[i].getLocalizationOfPart(toolName);
-        }
+        var head = this.instance.repairParts
+            .map(function (partIndex) { return _this.materials[partIndex].getLocalizedName(); })
+            .filter(function (material, index, arr) { return arr.indexOf(material) === index; }) // remove duplicates
+            .join("-");
+        var toolName = head + " " + this.instance.name;
         if (this.isBroken()) {
             toolName = translate("Broken %s", toolName);
         }
@@ -7350,7 +7342,7 @@ var ToolTexture = /** @class */ (function () {
     ToolTexture.prototype.getCoords = function (partNum, index, isBroken) {
         var part = isBroken && partNum === this.brokenIndex ? this.partsCount : partNum;
         return {
-            x: (index & 15) << 4,
+            x: (index & 15) << 4, //(index % 16) * 16
             y: (part << 1) + (index >> 4) << 4 // (part * 2 + (index / 16 | 0)) * 16
         };
     };
@@ -8325,7 +8317,7 @@ var ToolCrafterWindow = /** @class */ (function (_super) {
         var _this = this;
         var window = new UI.StandardWindow({
             standard: {
-                header: { text: { text: title }, height: 60 },
+                header: { text: { text: translate(title) }, height: 60 },
                 inventory: { standard: true },
                 background: { standard: true }
             },
@@ -8647,8 +8639,8 @@ ToolForgeHandler.createForgeBlock("tcon_toolforge_manyullyn", BlockID.blockManyu
 ToolForgeHandler.createForgeBlock("tcon_toolforge_pigiron", BlockID.blockPigiron);
 ToolForgeHandler.createForgeBlock("tcon_toolforge_alubrass", BlockID.blockAlubrass);
 (function () {
-    var winStation = new ToolCrafterWindow("tcon_toolstation", translate("Tinker Station"), false);
-    var winForge = new ToolCrafterWindow("tcon_toolforge", translate("Tool Forge"), true);
+    var winStation = new ToolCrafterWindow("tcon_toolstation", "Tinker Station", false);
+    var winForge = new ToolCrafterWindow("tcon_toolforge", "Tool Forge", true);
     winStation.addTargetBlock(BlockID.tcon_toolstation);
     winForge.addTargetBlock(BlockID.tcon_toolforge_iron);
     winForge.addTargetBlock(BlockID.tcon_toolforge_gold);
