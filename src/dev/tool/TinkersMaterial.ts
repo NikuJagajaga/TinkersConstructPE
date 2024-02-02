@@ -120,7 +120,7 @@ const Material: {[key: string]: TinkersMaterial} = {
         .setHandleStats(0.85, -150)
         .setExtraStats(75),
 
-    endstone: new TinkersMaterial("End", 7)
+    endstone: new TinkersMaterial("End Stone", 7)
         .setItem("end_stone")
         .setHeadStats(420, 3.23, 3.23, MiningLv.OBSIDIAN)
         .setHandleStats(0.85, 0)
