@@ -18,7 +18,7 @@ namespace TconToolFactory {
             const stack = new TconToolStack(item);
             return stack.getName();
         }
-        return name;
+        return translation;
     }
 
     const onTooltipFunc: KEX.ItemsModule.OnTooltipCallback = (item, text, level) => {
@@ -125,7 +125,7 @@ namespace TconToolFactory {
             }
         }
         for(let lv in tools[type]){
-            Item.addCreativeGroup("tcontool_" + type, name, [tools[type][lv]]);
+            Item.addCreativeGroup("tcontool_" + type, translate(name), [tools[type][lv]]);
         }
 
     }

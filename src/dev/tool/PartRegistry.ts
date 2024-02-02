@@ -21,17 +21,16 @@ namespace PartRegistry {
         {key: "binding2", name: "Tough Binding", cost: 3},
         {key: "guard", name: "Wide Guard", cost: 1},
         {key: "largeplate", name: "Large Plate", cost: 8}
-    ] as const;
+    ];
 
-    const nameOverrideFunc: Callback.ItemNameOverrideFunction = (item, translation, name) => name + "\n" + getTooltips(item.id).join("\n");
+    const nameOverrideFunc: Callback.ItemNameOverrideFunction = (item, translation, name) => translation + "\n" + getTooltips(item.id).join("\n");
 
     export function createParts(key: string, material: TinkersMaterial): void {
-        const name = material.getName();
         let id = 0;
         for(let type of types){
-            id = createItem(`tconpart_${type.key}_${key}`, `${name} ${type.name}`);
+            id = createItem(`tconpart_${type.key}_${key}`, material.getLocalizationOfPart(type.name));
             Item.registerNameOverrideFunction(id, nameOverrideFunc);
-            Item.addCreativeGroup("tconpart_" + type.key, type.name, [id]);
+            Item.addCreativeGroup("tconpart_" + type.key, translate(type.name), [id]);
             data[id] = {type: type.key, material: key};
         }
     }
@@ -96,22 +95,23 @@ namespace PartRegistry {
                 const mask = PartCategory[partData.type];
                 if(mask & EPartCategory.HEAD){
                     const head = matData.getHeadStats();
-                    tooltips.push("", "§fHead");
-                    tooltips.push("§7Durability: " + head.durability);
-                    tooltips.push("Mining Level: " + MiningLvName[head.level]);
-                    tooltips.push("Mining Speed: " + head.speed);
-                    tooltips.push("Attack: " + head.attack);
+                    const miningTier = MiningLvName[head.level];
+                    tooltips.push("", "§f" + translate("Head"));
+                    tooltips.push("§7" + translate("Durability: ") + head.durability);
+                    tooltips.push(translate("Mining Tier: ") + translate(miningTier));
+                    tooltips.push(translate("Mining Speed: ") + head.speed);
+                    tooltips.push(translate("Melee Damage: ") + head.attack);
                 }
                 if(mask & EPartCategory.HANDLE){
                     const handle = matData.getHandleStats();
-                    tooltips.push("", "§fHandle");
-                    tooltips.push("§7Modifier: " + handle.modifier);
-                    tooltips.push("Durability: " + handle.durability);
+                    tooltips.push("", "§f" + translate("Handle"));
+                    tooltips.push("§7" + translate("Multiplier: ") + handle.modifier);
+                    tooltips.push(translate("Durability: ") + handle.durability);
                 }
                 if(mask & EPartCategory.EXTRA){
                     const extra = matData.getExtraStats();
-                    tooltips.push("", "§fExtra");
-                    tooltips.push("§7Durability: " + extra.durability);
+                    tooltips.push("", "§f" + translate("Extra"));
+                    tooltips.push("§7" + translate("Durability: ") + extra.durability);
                 }
             }
         }

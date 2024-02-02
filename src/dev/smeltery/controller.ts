@@ -38,7 +38,7 @@ class SmelteryHandler {
                 container.sendEvent("selectLiquid", {});
             }
         }},
-        textDump: {type: "text", x: 104 * SCALE, y: 78 * SCALE, z: 1003, text: "Dump", font: {size: 30, color: Color.WHITE, shadow: 0.5, alignment: 1}},
+        textDump: {type: "text", x: 104 * SCALE, y: 78 * SCALE, z: 1003, text: translate("Dump"), font: {size: 30, color: Color.WHITE, shadow: 0.5, alignment: 1}},
         iconSelect: {type: "image", x: 131.6 * SCALE, y: 81.6 * SCALE, z: 1003, bitmap: "mod_browser_update_icon", scale: SCALE * 0.8},
         btnR: {type: "button", x: 698, y: 13, bitmap: "classic_button_up", bitmap2: "classic_button_down", scale: 2, clicker: {onClick: () => RV?.RecipeTypeRegistry.openRecipePage(["tcon_melting", "tcon_alloying"])}},
         textR: {type: "text", x: 698 + 14, y: 13 - 6, z: 1, text: "R", font: {color: Color.WHITE, size: 20, shadow: 0.5, align: UI.Font.ALIGN_CENTER}}
@@ -71,7 +71,7 @@ class SmelteryHandler {
 
         this.window = new UI.StandardWindow({
             standard: {
-                header: {text: {text: "Smeltery"}, height: 60},
+                header: {text: {text: translate("Smeltery")}, height: 60},
                 inventory: {standard: true},
                 background: {standard: true}
             },
@@ -402,9 +402,7 @@ class SmelteryControler extends TconTileEntity implements ILiquidStorage {
             return false;
         }
 
-        const client = Network.getClientForPlayer(player);
-        BlockEngine.sendMessage(client, "Invalid Structure");
-        
+        BlockEngine.sendMessage(Network.getClientForPlayer(player), "Invalid block inside the structure");
         return true;
 
     }

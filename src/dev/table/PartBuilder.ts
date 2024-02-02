@@ -1,4 +1,4 @@
-Item.addCreativeGroup("tcon_partbuilder", "Part Builder", [
+Item.addCreativeGroup("tcon_partbuilder", translate("Part Builder"), [
     createBlock("tcon_partbuilder0", [{name: "Part Builder", texture: [0, 0, ["log_side", 0]]}], "wood"),
     createBlock("tcon_partbuilder1", [{name: "Part Builder", texture: [0, 0, ["log_side", 1]]}], "wood"),
     createBlock("tcon_partbuilder2", [{name: "Part Builder", texture: [0, 0, ["log_side", 2]]}], "wood"),
@@ -76,6 +76,15 @@ Recipes2.addShaped(BlockID.tcon_partbuilder4, "a:b", {a: ItemID.tcon_pattern_bla
 Recipes2.addShaped(BlockID.tcon_partbuilder5, "a:b", {a: ItemID.tcon_pattern_blank, b: {id: "log2", data: 1}});
 
 
+interface PartBuilderStats {
+    material: string,
+    head: HeadStats,
+    handle: HandleStats,
+    extra: ExtraStats,
+    slotMaterialCount?: number,
+    patternDataCost?: number
+}
+
 const PartBuilderWindow = new class extends CraftingWindow {
 
     selectedPattern = -1;
@@ -88,8 +97,8 @@ const PartBuilderWindow = new class extends CraftingWindow {
             slotResult: {type: "slot", x: 440, y: 136 - 52, size: 104, visual: true, clicker: {onClick: (_, container: ItemContainer) => container.sendEvent("craft", {})}},
             cursor: {type: "image", x: 0, y: 2000, z: 1, width: 64, height: 64, bitmap: "_selection"},
             textCost: {type: "text", x: 288, y: 300, font: {size: 24, color: Color.GRAY, alignment: UI.Font.ALIGN_CENTER}},
-            textTitle: {type: "text", x: 780, y: 4, font: {size: 32, color: Color.YELLOW, bold: true, alignment: UI.Font.ALIGN_CENTER}, text: "Title"},
-            textStats: {type: "text", x: 608, y: 64, font: {size: 24, color: Color.WHITE}, multiline: true, text: "Description"},
+            textTitle: {type: "text", x: 780, y: 4, font: {size: 32, color: Color.YELLOW, bold: true, alignment: UI.Font.ALIGN_CENTER}, text: translate("Title")},
+            textStats: {type: "text", x: 608, y: 64, font: {size: 24, color: Color.WHITE}, multiline: true, text: translate("Description")},
             btnR: {type: "button", x: 440 + 104 - 36, y: 136 + 52 + 24, bitmap: "classic_button_up", bitmap2: "classic_button_down", scale: 2, clicker: {onClick: () => RV?.RecipeTypeRegistry.openRecipePage("tcon_partbuilder")}},
             textR: {type: "text", x: 440 + 104 - 22, y: 136 + 52 + 18, z: 1, text: "R", font: {color: Color.WHITE, size: 20, shadow: 0.5, align: UI.Font.ALIGN_CENTER}}
         };
@@ -109,7 +118,7 @@ const PartBuilderWindow = new class extends CraftingWindow {
 
         const window = new UI.StandardWindow({
             standard: {
-                header: {text: {text: "Part Builder"}, height: 60},
+                header: {text: {text: translate("Part Builder")}, height: 60},
                 inventory: {standard: true},
                 background: {standard: true}
             },
@@ -131,6 +140,40 @@ const PartBuilderWindow = new class extends CraftingWindow {
                 const selectedElem = elems.get("btn" + data.index);
                 elems.get("cursor")?.setPosition(selectedElem.x, selectedElem.y);
             }
+        });
+
+        ItemContainer.addClientEventListener(this.name, "stats", (container, win, content, data: PartBuilderStats) => {
+            if (data.material == null) {
+                container.setText("textTitle", translate("Part Builder"));
+                container.setText("textStats", addLineBreaks(20, translate("Here you can craft tool parts to fulfill your tinkering fantasies.") + "\n\n" + translate("To craft a part simply put a blank pattern into the left slot and select the part you want. The remaining slot holds the material you want to craft your part out of.")));
+
+            } else {
+                const material = Material[data.material]?.getLocalizedName() ?? "Unknown material %s";
+                container.setText("textTitle", translate(material, data.material));
+
+                const miningTier = MiningLvName[data.head.level] ?? "Unknown mining tier %s";
+                container.setText("textStats", addLineBreaks(20,
+                    translate("Head") + "\n" +
+                    translate("Durability: ") + data.head.durability + "\n" +
+                    translate("Mining Tier: ") + translate(miningTier, data.head.level) + "\n" +
+                    translate("Mining Speed: ") + data.head.speed + "\n" +
+                    translate("Melee Damage: ") + data.head.attack + "\n\n" +
+                    translate("Handle") + "\n" +
+                    translate("Multiplier: ") + data.handle.modifier + "\n" +
+                    translate("Durability: ") + data.handle.durability + "\n\n" +
+                    translate("Extra") + "\n" +
+                    translate("Durability: ") + data.extra.durability
+                ));
+
+                if (data.patternDataCost != null) {
+                    container.setText("textCost", translate("Material value: %s", data.slotMaterialCount + " / " + data.patternDataCost));
+                    return;
+                }
+
+            }
+
+            container.setText("textCost", "");
+
         });
 
     }
@@ -193,54 +236,50 @@ const PartBuilderWindow = new class extends CraftingWindow {
         const patternData = PartRegistry.types[this.selectedPattern];
         const slotPattern = container.getSlot("slotPattern");
         const slotMaterial = container.getSlot("slotMaterial");
+        let requiresPattern = true;
         let item: Tile;
-        let statsHead: HeadStats;
-        let statsHandle: HandleStats;
-        let statsExtra: ExtraStats;
         let resultId = 0;
-        let textCost = "";
-        let textTitle = "";
-        let textStats = "";
 
         if(slotPattern.id === ItemID.tcon_pattern_blank && patternData){
 
             for(let key in Material){
                 item = Material[key].getItem();
                 if(item && item.id === slotMaterial.id && (item.data === -1 || item.data === slotMaterial.data)){
-                    statsHead = Material[key].getHeadStats();
-                    statsHandle = Material[key].getHandleStats();
-                    statsExtra = Material[key].getExtraStats();
-                    textTitle = Material[key].getName();
-                    textStats = "Head\n" +
-                                "Durability: " + statsHead.durability + "\n" +
-                                "Mining Level: " + MiningLvName[statsHead.level] + "\n" +
-                                "Mining Speed: " + statsHead.speed + "\n" +
-                                "Attack" + statsHead.attack + "\n" +
-                                "\n" +
-                                "Handle\n" +
-                                "Modifier: " + statsHandle.modifier + "\n" +
-                                "Durability: " + statsHandle.durability + "\n" +
-                                "\n" +
-                                "Extra\n" +
-                                "Durability: " + statsExtra.durability;
+                    this.showMaterial(container, key, slotMaterial.count, patternData.cost);
                     if(!Material[key].isMetal){
-                        textCost = `Material Value:  ${slotMaterial.count} / ${patternData.cost}`;
                         if(slotMaterial.count >= patternData.cost){
                             resultId = PartRegistry.getIDFromData(patternData.key, key);
                         }
                     }
+                    requiresPattern = false;
                     break;
                 }
             }
 
         }
 
-        container.setText("textCost", textCost);
-        container.setText("textTitle", textTitle || "Part Builder");
-        container.setText("textStats", textStats || addLineBreaks(18, "Here you can craft tool parts to fulfill your tinkering fantasies") + "\n\n" + addLineBreaks(18, "To craft a part simply put its pattern into the left slot. The two right slot hold the material you want to craft your part out of."));
+        if (requiresPattern) {
+            container.sendEvent("stats", {});
+        }
+
         container.sendChanges();
         container.sendEvent("refresh", {result: resultId, index: this.selectedPattern});
 
+    }
+
+    private showMaterial(container: ItemContainer, key: string, slotMaterialCount: number, patternDataCost: number): void {
+        const material = Material[key];
+        const packet: PartBuilderStats = {
+            material: key,
+            head: material.getHeadStats(),
+            handle: material.getHandleStats(),
+            extra: material.getExtraStats()
+        };
+        if(!material.isMetal){
+            packet.slotMaterialCount = slotMaterialCount;
+            packet.patternDataCost = patternDataCost;
+        }
+        container.sendEvent("stats", packet);
     }
 
     onCraft(container: ItemContainer, client: NetworkClient): void {

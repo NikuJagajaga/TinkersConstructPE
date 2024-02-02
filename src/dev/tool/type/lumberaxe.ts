@@ -96,7 +96,7 @@ class TconLumberaxe extends TconTool {
         while(it.hasNext()){
             updatable = it.next();
             if(updatable.name === updatableName){
-                Network.getClientForPlayer(player)?.sendMessage("Tree chopping in progress...");
+                BlockEngine.sendMessage(Network.getClientForPlayer(player), "Tree chopping in progress...");
                 return;
             }
         }

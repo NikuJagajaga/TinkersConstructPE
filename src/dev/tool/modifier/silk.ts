@@ -8,7 +8,7 @@ MeltingRecipe.addRecipe(ItemID.tcon_silky_cloth, "molten_gold", MatValue.INGOT);
 class ModSilk extends TinkersModifier {
 
     constructor(){
-        super("silk", "SilkTouch", 5, [ItemID.tcon_silky_jewel], 1, false, ["luck"]);
+        super("silk", "Silky", 5, [ItemID.tcon_silky_jewel], 1, false, ["luck"]);
     }
     
     override applyStats(stats: ToolStats, level: number): void {

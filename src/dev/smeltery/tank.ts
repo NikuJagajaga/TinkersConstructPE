@@ -56,7 +56,7 @@ class TankModelManager {
 
 
 
-Item.addCreativeGroup("tcon_tank", "Seared Tanks", [
+Item.addCreativeGroup("tcon_tank", translate("Seared Tanks"), [
     createBlock("tcon_tank_fuel", [{name: "Seared Fuel Tank", texture: [["tcon_tank_top", 0], ["tcon_tank_top", 0], 0]}]),
     createBlock("tcon_gauge_fuel", [{name: "Seared Fuel Gauge", texture: [["tcon_gauge_top", 0], ["tcon_gauge_top", 0], 0]}]),
     createBlock("tcon_tank_ingot", [{name: "Seared Ingot Tank", texture: [["tcon_tank_top", 0], ["tcon_tank_top", 0], 0]}]),
@@ -228,9 +228,9 @@ class SearedTank extends TileWithLiquidModel {
     const nameFunc: Callback.ItemNameOverrideFunction = (item, translation, name) => {
         const tooltips = getTooltips(item);
         if(tooltips.length > 0){
-            return name + "\n" + tooltips.join("\n");
+            return translation + "\n" + tooltips.join("\n");
         }
-        return name;
+        return translation;
     }
 
     const placeFunc: Block.PlaceFunction = (coords, item, block, player, blockSource) => {

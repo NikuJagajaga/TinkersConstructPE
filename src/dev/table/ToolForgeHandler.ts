@@ -32,7 +32,7 @@ class ToolForgeHandler {
 
         const id = createBlock(namedID, [{name: "Tool Forge", texture: [["tcon_toolforge", 0]]}]);
 
-        Item.addCreativeGroup("tcon_toolforge", "Tool Forge", [id]);
+        Item.addCreativeGroup("tcon_toolforge", translate("Tool Forge"), [id]);
         Recipes2.addShaped(id, "aaa:bcb:b_b", {a: BlockID.tcon_stone, b: block, c: BlockID.tcon_toolstation});
 
         BlockModel.register(id, (model, index) => {

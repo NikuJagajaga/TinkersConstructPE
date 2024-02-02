@@ -1,8 +1,8 @@
 createBlock("tcon_faucet", [
     {name: "Seared Faucet"},
-    {name: "faucet", isTech: true},
-    {name: "faucet", isTech: true},
-    {name: "faucet", isTech: true}
+    {name: "Seared Faucet", isTech: true},
+    {name: "Seared Faucet", isTech: true},
+    {name: "Seared Faucet", isTech: true}
 ]);
 
 Recipes2.addShaped(BlockID.tcon_faucet, "a_a:_a_", {a: ItemID.tcon_brick});

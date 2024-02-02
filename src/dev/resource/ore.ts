@@ -8,7 +8,7 @@ Block.createBlock("oreArdite", [{name: "Ardite Ore", texture: [["tcon_ore_ardite
 ToolAPI.registerBlockMaterial(BlockID.oreArdite, "stone", MiningLv.COBALT, true);
 Block.setDestroyLevel(BlockID.oreArdite, MiningLv.COBALT);
 
-Item.addCreativeGroup("ores", Translation.translate("Ores"), [BlockID.oreCobalt, BlockID.oreArdite]);
+Item.addCreativeGroup("ores", translate("Ores"), [BlockID.oreCobalt, BlockID.oreArdite]);
 
 MeltingRecipe.addRecipe(BlockID.oreCobalt, "molten_cobalt", MatValue.ORE);
 MeltingRecipe.addRecipe(BlockID.oreArdite, "molten_ardite", MatValue.ORE);
