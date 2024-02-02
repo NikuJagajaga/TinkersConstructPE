@@ -83,7 +83,7 @@ MoltenLiquid.register("lava", 769);
 MoltenLiquid.register("milk", 320);
 MoltenLiquid.createAndRegister("molten_iron", "Molten Iron", 769, "#a81212");
 MoltenLiquid.createAndRegister("molten_gold", "Molten Gold", 532, "#f6d609");
-MoltenLiquid.createAndRegister("molten_pigiron", "Molten Pigiron", 600, "#ef9e9b");
+MoltenLiquid.createAndRegister("molten_pigiron", "Molten Pig Iron", 600, "#ef9e9b");
 MoltenLiquid.createAndRegister("molten_cobalt", "Molten Cobalt", 950, "#2882d4");
 MoltenLiquid.createAndRegister("molten_ardite", "Molten Ardite", 860, "#d14210");
 MoltenLiquid.createAndRegister("molten_manyullyn", "Molten Manyullyn", 1000, "#a15cf8");
