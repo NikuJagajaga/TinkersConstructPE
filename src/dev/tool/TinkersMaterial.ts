@@ -180,7 +180,7 @@ const Material: {[key: string]: TinkersMaterial} = {
         .setHandleStats(0.85, 60)
         .setExtraStats(50),
 
-    pigiron: new TinkersMaterial("Pigiron", 17, "molten_pigiron", true)
+    pigiron: new TinkersMaterial("Pig Iron", 17, "molten_pigiron", true)
         .setItem(ItemID.ingotPigiron)
         .setHeadStats(380, 6.2, 4.5, MiningLv.DIAMOND)
         .setHandleStats(1.2, 0)
