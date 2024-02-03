@@ -2,6 +2,7 @@ abstract class TileWithLiquidModel extends TconTileEntity {
 
     anim: Animation.Base;
     render: Render;
+    //mesh: RenderMesh;
 
     animPos: Vector;
     animScale: Vector;

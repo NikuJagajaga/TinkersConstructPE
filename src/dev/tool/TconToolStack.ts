@@ -123,7 +123,7 @@ class TconToolStack implements ItemInstance {
             .map(partIndex => this.materials[partIndex].getLocalizedName())
             .filter((material, index, arr) => arr.indexOf(material) === index) // remove duplicates
             .join("-");
-        let toolName = head + " " + this.instance.name;
+        let toolName = head + " " + translate(this.instance.name);
         if(this.isBroken()){
             toolName = translate("Broken %s", toolName);
         }

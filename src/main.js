@@ -1678,7 +1678,7 @@ Translation.addTranslation("Blank Sand Cast", {
 Translation.addTranslation("Pickaxe Head Sand Cast", {
     id: "Bagian Alat Penggaruk Heading Sand Cast",
     it: "Testa Pala Sand Cast",
-    ja: "採鉱具首 Sand Cast",
+    ja: "つるはし頭部の砂型",
     ko: "곡괭이 머리 Form Sand Cast",
     pl: "Głowa Młota Piaskowej Formy",
     pt: "Cabeça da Pá Sand Cast",
@@ -1690,7 +1690,7 @@ Translation.addTranslation("Pickaxe Head Sand Cast", {
 Translation.addTranslation("Shovel Head Sand Cast", {
     id: "Bagian Alat Lampu Sand Cast",
     it: "Testa Pala Sand Cast",
-    ja: "シャVEL首 Sand Cast",
+    ja: "シャベル頭部の砂型",
     ko: "삽 머리 Form Sand Cast",
     pl: "Głowa Łopaty Piaskowej Formy",
     pt: "Cabeça do Pá Sand Cast",
@@ -1702,7 +1702,7 @@ Translation.addTranslation("Shovel Head Sand Cast", {
 Translation.addTranslation("Axe Head Sand Cast", {
     id: "Bagian Alat Capitan Sand Cast",
     it: "Testa Ascia Sand Cast",
-    ja: "アクス首 Sand Cast",
+    ja: "斧頭部の砂型",
     ko: "도끼 머리 Form Sand Cast",
     pl: "Topór Głowy Piaskowej Formy",
     pt: "Cabeça do Machado Sand Cast",
@@ -1715,7 +1715,7 @@ Translation.addTranslation("Broad Axe Head Sand Cast", {
     de: "Breiter Axtkopf im Sandguss",
     id: "Tuangan Kepala Kapak Lebar Pasir",
     it: "Stampo di sabbia per teste di ascia grande",
-    ja: "大斧頭の砂型",
+    ja: "大斧頭部の砂型",
     ko: "넓은면 도끼 머리 모래 금형",
     pl: "Piaskowa forma szerokiej głowicy siekiery",
     pt: "Molde de Areia para Cabeça de Machado Grande",
@@ -1727,7 +1727,7 @@ Translation.addTranslation("Broad Axe Head Sand Cast", {
 Translation.addTranslation("Sword Blade Head Sand Cast", {
     id: "Kepala Pisau Sand Cast",
     it: "Lama della Spada Sand Cast",
-    ja: "剣刀首 Sand Cast",
+    ja: "刀身の砂型",
     ko: "검 날개 Form Sand Cast",
     pl: "Miecz Klingi Piaskowej Formy",
     pt: "Lâmina da Espada Sand Cast",
@@ -1740,7 +1740,7 @@ Translation.addTranslation("Hammer Head Sand Cast", {
     de: "Hammerkopf im Sandguss",
     id: "Tuangan Kepala Palu Pasir",
     it: "Stampo di sabbia per testa di martello",
-    ja: "ハンマー頭の砂型",
+    ja: "ハンマー頭部の砂型",
     ko: "망치 머리 모래 금형",
     pl: "Piaskowa forma głowicy młota",
     pt: "Molde de Areia para Cabeça de Martelo",
@@ -1752,7 +1752,7 @@ Translation.addTranslation("Hammer Head Sand Cast", {
 Translation.addTranslation("Excavator Head Sand Cast", {
     id: "Eksavator Bagian Ranjang Sand Cast",
     it: "Testa Escavatore Sand Cast",
-    ja: "エキサベータ頭 Sand Cast",
+    ja: "エクスカベーター頭部の砂型",
     ko: "고 grader 부 Form Sand Cast",
     pl: "Ładowarki Świadła Piaskowej Formy",
     pt: "Cabeça do Escavador Sand Cast",
@@ -1764,7 +1764,7 @@ Translation.addTranslation("Excavator Head Sand Cast", {
 Translation.addTranslation("Tool Rod Sand Cast", {
     id: "Rod Alat Sand Cast",
     it: "Manico Attrezzo Sand Cast",
-    ja: "ツールロッド Sand Cast",
+    ja: "持ち手の砂型",
     ko: "도구 융 Form Sand Cast",
     pl: "Narzędzie Rączki Piaskowej Formy",
     pt: "Haste de Ferramenta Sand Cast",
@@ -1776,7 +1776,7 @@ Translation.addTranslation("Tool Rod Sand Cast", {
 Translation.addTranslation("Tough Tool Rod Sand Cast", {
     id: "Rod Alat Tebal Sand Cast",
     it: "Manico Strumento Robusto Sand Cast",
-    ja: "強いツールロッド Sand Cast",
+    ja: "強化持ち手の砂型",
     ko: "튼튼한 도구 융 Form Sand Cast",
     pl: "Silna Narzędziowa Rączka Piaskowej Formy",
     pt: "Haste de Ferramenta Forte Sand Cast",
@@ -1788,7 +1788,7 @@ Translation.addTranslation("Tough Tool Rod Sand Cast", {
 Translation.addTranslation("Binding Sand Cast", {
     id: "Bindings Sand Cast",
     it: "Fissaggio Sand Cast",
-    ja: "バインディング Sand Cast",
+    ja: "締め具の砂型",
     ko: "묶음 Form Sand Cast",
     pl: "Sklejanie Piaskowej Formy",
     pt: "Fixação Sand Cast",
@@ -1800,7 +1800,7 @@ Translation.addTranslation("Binding Sand Cast", {
 Translation.addTranslation("Tough Binding Sand Cast", {
     id: "Bindings Kuat Sand Cast",
     it: "Fissaggio Robusto Sand Cast",
-    ja: "強力なバインディング Sand Cast",
+    ja: "強化締め具の砂型",
     ko: "강력한 묶음 Form Sand Cast",
     pl: "Mocne Sklejanie Piaskowej Formy",
     pt: "Fixação Forte Sand Cast",
@@ -1812,7 +1812,7 @@ Translation.addTranslation("Tough Binding Sand Cast", {
 Translation.addTranslation("Wide Guard Sand Cast", {
     id: "Penghalang Lebar Sand Cast",
     it: "Guardia Larga Sand Cast",
-    ja: "ワイドガード Sand Cast",
+    ja: "鍔の砂型",
     ko: "워이드가드 Form Sand Cast",
     pl: "Szeroka Ochrona Piaskowej Formy",
     pt: "Guarda Larga Sand Cast",
@@ -1851,7 +1851,7 @@ Translation.addTranslation("Nugget Sand Cast", {
     de: "Nugget-Sandguss",
     id: "Tuangan Nugget Pasir",
     it: "Stampo di sabbia per pepite",
-    ja: "塊の砂型",
+    ja: "ナゲットの砂型",
     ko: "조각 모래 금형",
     pl: "Piaskowa forma bryłki",
     pt: "Molde de Areia para Pepitas",
@@ -1876,7 +1876,7 @@ Translation.addTranslation("Gem Sand Cast", {
 Translation.addTranslation("Plate Sand Cast", {
     id: "Piring Pasir Sand Cast",
     it: "Piastrella Sabbia Fusione",
-    ja: "プレート Sand Cast",
+    ja: "プレートの砂型",
     ko: "판 Form Sand Cast",
     pl: "Blacha Piaskowej Formy",
     pt: "Prancha Sand Cast",
@@ -1901,7 +1901,7 @@ Translation.addTranslation("Gear Sand Cast", {
 Translation.addTranslation("TConstruct: Clay Cast", {
     id: "TConstruct: Bentuk Tanah Liat",
     it: "TConstruct: Modelli di Argilla",
-    ja: "TConstruct：クレYフォーム",
+    ja: "TConstruct：粘土鋳型",
     ko: "TConstruct: 수lad형",
     pl: "TConstruct: Glina Odlewów",
     pt: "TConstruct: Modelos de Barro",
@@ -1913,7 +1913,7 @@ Translation.addTranslation("TConstruct: Clay Cast", {
 Translation.addTranslation("Pickaxe Head Clay Cast", {
     id: "Bentuk Tanah Liat Untuk Kepekaan Palu",
     it: "Modello d'Argilla per la Testa Piccone",
-    ja: "クレYピッカヘッド",
+    ja: "つるはし頭部の粘土鋳型",
     ko: "곡괭이 헤드 수lad형",
     pl: "Glina Głowicy Kilofa",
     pt: "Modelo de Enxó de Barro",
@@ -1925,7 +1925,7 @@ Translation.addTranslation("Pickaxe Head Clay Cast", {
 Translation.addTranslation("Shovel Head Clay Cast", {
     id: "Bentuk Tanah Liat untuk kepalanya Palet",
     it: "Modello d'Argilla per la Testa Zappa",
-    ja: "ショVELHEADクレY",
+    ja: "シャベル頭部の粘土鋳型",
     ko: "삽 헤드 수lad형",
     pl: "Glina Łopaty",
     pt: "Modelo de Pá Mineração de Barro",
@@ -1937,7 +1937,7 @@ Translation.addTranslation("Shovel Head Clay Cast", {
 Translation.addTranslation("Axe Head Clay Cast", {
     id: "Bentuk Tanah Liat untuk Kekepaan Tongseng",
     it: "Modello d'Argilla per la Testa Ascia",
-    ja: "アクスヘッドクレY",
+    ja: "斧頭部の粘土鋳型",
     ko: "도끼 헤드 수lad형",
     pl: "Topór Gliny",
     pt: "Modelo de Machado de Barro",
@@ -1949,7 +1949,7 @@ Translation.addTranslation("Axe Head Clay Cast", {
 Translation.addTranslation("Broad Axe Head Clay Cast", {
     id: "Bentuk Tanah Liat untuk Kekepaan Parangs",
     it: "Modello d'Argilla per la Testa Broadaxe",
-    ja: "ブロードアクスヘッドクレY",
+    ja: "大斧頭部の粘土鋳型",
     ko: "넓은 도끼 헤드 수lad형",
     pl: "Sekira Gliny",
     pt: "Modelo de Hacha Ampla de Barro",
@@ -1961,7 +1961,7 @@ Translation.addTranslation("Broad Axe Head Clay Cast", {
 Translation.addTranslation("Sword Blade Head Clay Cast", {
     id: "Bentuk Tanah Liat untuk Pedang",
     it: "Modello d'Argilla per la Lama Spada",
-    ja: "ソードブレードヘッドクレY",
+    ja: "刀身の粘土鋳型",
     ko: "Espada 블레이드 헤드 수lad형",
     pl: "Miecz Gliniany",
     pt: "Modelo de Lâmina de Espada de Barro",
@@ -1973,7 +1973,7 @@ Translation.addTranslation("Sword Blade Head Clay Cast", {
 Translation.addTranslation("Hammer Head Clay Cast", {
     id: "Bentuk Tanah Liat untuk Kepala Lesung",
     it: "Modello d'Argilla per la Testa Martello",
-    ja: "ハマーヘッドクレY",
+    ja: "ハンマー頭部の粘土鋳型",
     ko: "모트 Hammer head 수lad형",
     pl: "Młot garncarzowski",
     pt: "Modelo da Cabeça do Martelo de Barro",
@@ -1985,7 +1985,7 @@ Translation.addTranslation("Hammer Head Clay Cast", {
 Translation.addTranslation("Excavator Head Clay Cast", {
     id: "Bentuk Tanah Liat untuk Kepala Eksaktor",
     it: "Modello d'Argilla per la Testa Escavatore",
-    ja: "エキサベイターヘッドクレY",
+    ja: "エクスカベーター頭部の粘土鋳型",
     ko: "Eksakseeta head 수lad형",
     pl: "Łopata garncarzowska",
     pt: "Modelo da Cabeca do Retroescavadeira de Barro",
@@ -1997,7 +1997,7 @@ Translation.addTranslation("Excavator Head Clay Cast", {
 Translation.addTranslation("Tool Rod Clay Cast", {
     id: "Bentuk Tanah Liat untuk Batang Alat",
     it: "Modello d'Argilla per il Manico Strumento",
-    ja: "ツールロッドクレY",
+    ja: "持ち手の粘土鋳型",
     ko: "도구 로드 수lad형",
     pl: "Rączka narzędzia gliniane",
     pt: "Modelo da Varão de Ferramenta de Barro",
@@ -2009,7 +2009,7 @@ Translation.addTranslation("Tool Rod Clay Cast", {
 Translation.addTranslation("Tough Tool Rod Clay Cast", {
     id: "Bentuk Tanah Liat untuk Batang Alat Tebal",
     it: "Modello d'Argilla per il Manico Strumento Robusto",
-    ja: "ツーグhttロッドクレY",
+    ja: "強化持ち手の粘土鋳型",
     ko: "단단한 도구 로드 수lad형",
     pl: "Silna rączka narzędziowa glinianym odlaniem",
     pt: "Modelo para Vareta de Ferramenta Forte de Barro",
@@ -2021,7 +2021,7 @@ Translation.addTranslation("Tough Tool Rod Clay Cast", {
 Translation.addTranslation("Binding Clay Cast", {
     id: "Bentuk Tanah Liat untuk Penjepit",
     it: "Modello d'Argilla per l'Attacco",
-    ja: "バインディングクレY",
+    ja: "締め具の粘土鋳型",
     ko: "바인딩 수lad형",
     pl: "Glinka na wiązanie",
     pt: "Modelo de Ligação de Barro",
@@ -2033,7 +2033,7 @@ Translation.addTranslation("Binding Clay Cast", {
 Translation.addTranslation("Tough Binding Clay Cast", {
     id: "Bentuk Tanah Liat untuk Pengikatan yang Kuat",
     it: "Modello d'Argilla per Attacco Resistente",
-    ja: "トゥフフバインディングクレY",
+    ja: "強化締め具の粘土鋳型",
     ko: "강력한 묶음 수lad형",
     pl: "Ciężkie wiązanie glinianego odlewu",
     pt: "Modelo de Ligação Firme de Barro",
@@ -2045,7 +2045,7 @@ Translation.addTranslation("Tough Binding Clay Cast", {
 Translation.addTranslation("Wide Guard Clay Cast", {
     id: "Bentuk Tanah Liat untuk Pelindung yang Lembaran",
     it: "Modello d'Argilla per Paraurti Largo",
-    ja: "ワイドガードクレY",
+    ja: "鍔の粘土鋳型",
     ko: "폭죽 가드 수lad형",
     pl: "Szeroka tarcza glinianego odlewu",
     pt: "Modelo de Proteção Larga de Barro",
@@ -2057,7 +2057,7 @@ Translation.addTranslation("Wide Guard Clay Cast", {
 Translation.addTranslation("Large Plate Clay Cast", {
     id: "Bentuk Tanah Liat untuk Piring Besar",
     it: "Modello d'Argilla per Piastrella Grande",
-    ja: "ラージプレートクレY",
+    ja: "大板の粘土鋳型",
     ko: "큰 플레이트 수lad형",
     pl: "Duży płyta glinianego odlewu",
     pt: "Modelo de Prancha Grande de Barro",
@@ -2069,7 +2069,7 @@ Translation.addTranslation("Large Plate Clay Cast", {
 Translation.addTranslation("Ingot Clay Cast", {
     id: "Bentuk Tanah Liat untuk Ingota",
     it: "Modello d'Argilla per Getto",
-    ja: "インゴットクレY",
+    ja: "インゴットの粘土鋳型",
     ko: "añ그고t 수lad형",
     pl: "Blok glinianego odlewu",
     pt: "Modelo de Gusa de Barro",
@@ -2081,7 +2081,7 @@ Translation.addTranslation("Ingot Clay Cast", {
 Translation.addTranslation("Nugget Clay Cast", {
     id: "Bentuk Tanah Liat untuk Nugget",
     it: "Modello d'Argilla per Pepita",
-    ja: "ナッゲットクレY",
+    ja: "ナゲットの粘土鋳型",
     ko: "누겟t 수lad형",
     pl: "Ziarenko glinianego odlewu",
     pt: "Modelo de Garimpo de Barro",
@@ -2093,7 +2093,7 @@ Translation.addTranslation("Nugget Clay Cast", {
 Translation.addTranslation("Gem Clay Cast", {
     id: "Bentuk Tanah Liat untuk Batu Permata",
     it: "Modello d'Argilla per Gemma Preziosa",
-    ja: "GEMクレY",
+    ja: "宝石の粘土鋳型",
     ko: "보석 수lad형",
     pl: "Forma glinianej klejnotów",
     pt: "Modelo de Joia de Barro",
@@ -2105,7 +2105,7 @@ Translation.addTranslation("Gem Clay Cast", {
 Translation.addTranslation("Plate Clay Cast", {
     id: "Bentuk Tanah Liat untuk Piring",
     it: "Modello d'Argilla per Lastra",
-    ja: "PLATEクレY",
+    ja: "プレートの粘土鋳型",
     ko: "판 수lad형",
     pl: "Płytka glinianego odlewu",
     pt: "Modelo de Placa de Barro",
@@ -2117,7 +2117,7 @@ Translation.addTranslation("Plate Clay Cast", {
 Translation.addTranslation("Gear Clay Cast", {
     id: "Bentuk Tanah Liat untuk Roda Gigi",
     it: "Modello d'Argilla per Ingranaggio",
-    ja: "ギアクレY",
+    ja: "歯車の粘土鋳型",
     ko: "기어 수lad형",
     pl: "Łopatka glinianego odlewu",
     pt: "Engrenagem do Modelo de Barro",
@@ -2129,7 +2129,7 @@ Translation.addTranslation("Gear Clay Cast", {
 Translation.addTranslation("TConstruct: Casts", {
     id: "TConstruct: Cetakan",
     it: "TConstruct: Modelli di Colata",
-    ja: "TConstruct: キャスト",
+    ja: "TConstruct: 鋳型",
     ko: "TConstruct: 주 Lad형",
     pl: "TConstruct: Formy Odlewnicze",
     pt: "TConstruct: Moldes",
@@ -2141,7 +2141,7 @@ Translation.addTranslation("TConstruct: Casts", {
 Translation.addTranslation("Pickaxe Head Cast", {
     id: "Bentuk Cangkul Kepala Wijen",
     it: "Modello della Testa Piccone",
-    ja: "ピカックヘッドキャスト",
+    ja: "つるはし頭部の鋳型",
     ko: "채굴도구 탑재부 수lad형",
     pl: "Odlew głowicy kilofa",
     pt: "Modelo da Cabeca do Pavão",
@@ -2153,7 +2153,7 @@ Translation.addTranslation("Pickaxe Head Cast", {
 Translation.addTranslation("Shovel Head Cast", {
     id: "Cetakan Bagian Atas Sabit",
     it: "Modello della testa pala",
-    ja: "ショベルヘッドキャスト",
+    ja: "シャベル頭部の鋳型",
     ko: "삽 머리 주 Lad형",
     pl: "Odlew głowni łopaty",
     pt: "Modelo da lâmina da pá",
@@ -2165,7 +2165,7 @@ Translation.addTranslation("Shovel Head Cast", {
 Translation.addTranslation("Axe Head Cast", {
     id: "Cetakan Bagian Atas Tajam",
     it: "Modello della testa ascia",
-    ja: "アクセヘッドキャスト",
+    ja: "斧頭部の鋳型",
     ko: "도끼 머리 주 Lad형",
     pl: "Odlew topora",
     pt: "Modelo da lâmina do machado",
@@ -2177,7 +2177,7 @@ Translation.addTranslation("Axe Head Cast", {
 Translation.addTranslation("Broad Axe Head Cast", {
     id: "Cetakan Bagian Atas Paling Layak",
     it: "Modello della testa scure",
-    ja: "ブロードアクセヘッドキャスト",
+    ja: "大斧頭部の鋳型",
     ko: "넓은 도끼 머리 주 Lad형",
     pl: "Odlew szerokotorowej sekiry",
     pt: "Modelo da lâmina larga do machado",
@@ -2189,7 +2189,7 @@ Translation.addTranslation("Broad Axe Head Cast", {
 Translation.addTranslation("Sword Blade Head Cast", {
     id: "Cetakan Bagian Depan Pedang",
     it: "Modello della lama della spada",
-    ja: "ソードブレードヘッドキャスト",
+    ja: "刀身の鋳型",
     ko: "검 가위 주 Lad형",
     pl: "Odlew ostrza miecza",
     pt: "Modelo da lâmina da espada",
@@ -2201,7 +2201,7 @@ Translation.addTranslation("Sword Blade Head Cast", {
 Translation.addTranslation("Hammer Head Cast", {
     id: "Cetakan Bagian Atas Peluh",
     it: "Modello della testa martello",
-    ja: "ハンマーヘッドキャスト",
+    ja: "ハンマー頭部の鋳型",
     ko: "모chel 머리 주 Lad형",
     pl: "Odlew głowni młota",
     pt: "Modelo da cabeça do martelo",
@@ -2213,7 +2213,7 @@ Translation.addTranslation("Hammer Head Cast", {
 Translation.addTranslation("Excavator Head Cast", {
     id: "Cetakan Bagian Atas Ekskavator",
     it: "Modello per la testa pale escavatore",
-    ja: "エクスカバターヘッドキャスト",
+    ja: "エクスカベーター頭部の鋳型",
     ko: "발굴기 헤드 주 Lad형",
     pl: "Odlew głowy ładowarki",
     pt: "Modelo de cabeça do escavador",
@@ -2225,7 +2225,7 @@ Translation.addTranslation("Excavator Head Cast", {
 Translation.addTranslation("Tool Rod Cast", {
     id: "Cetakan Batang Alat",
     it: "Modello del manico dell'attrezzo",
-    ja: "ツールロッドキャスト",
+    ja: "持ち手の鋳型",
     ko: "도구 바느질 주 Lad형",
     pl: "Odlew rękojeści narzędzia",
     pt: "Modelo do eixo do instrumento",
@@ -2237,7 +2237,7 @@ Translation.addTranslation("Tool Rod Cast", {
 Translation.addTranslation("Tough Tool Rod Cast", {
     id: "Cetakan Batang Alat Kekuatan Tinggi",
     it: "Modello del manico robusto dell'attrezzo",
-    ja: "強化ツールロッドキャスト",
+    ja: "強化持ち手の鋳型",
     ko: "강력한 도구 바느질 주 Lad형",
     pl: "Odlew wytrzymałej rękojeści narzędzia",
     pt: "Modelo do eixo resistente do instrumento",
@@ -2249,7 +2249,7 @@ Translation.addTranslation("Tough Tool Rod Cast", {
 Translation.addTranslation("Binding Cast", {
     id: "Cetak Perekat",
     it: "Modello di fissaggio",
-    ja: "バインディングキャスト",
+    ja: "締め具の鋳型",
     ko: "부속 장착 주 Lad형",
     pl: "Odlew elementu montażowego",
     pt: "Modelo de fixação",
@@ -2261,7 +2261,7 @@ Translation.addTranslation("Binding Cast", {
 Translation.addTranslation("Tough Binding Cast", {
     id: "Cetak Perekat Kuat",
     it: "Modello di fissaggio robusto",
-    ja: "強化バインディングキャスト",
+    ja: "強化締め具の鋳型",
     ko: "강력한 부속 장착 주 Lad형",
     pl: "Odlew wytrzymałego elementu montażowego",
     pt: "Modelo de fixação reforçada",
@@ -2273,7 +2273,7 @@ Translation.addTranslation("Tough Binding Cast", {
 Translation.addTranslation("Wide Guard Cast", {
     id: "Cetak Pelindung Lebar",
     it: "Modello della guardia larga",
-    ja: "ワイドガードキャスト",
+    ja: "鍔の鋳型",
     ko: "넓은 가드 주 Lad형",
     pl: "Odlew szerokiej osłony",
     pt: "Modelo da guarda ampla",
@@ -2285,7 +2285,7 @@ Translation.addTranslation("Wide Guard Cast", {
 Translation.addTranslation("Large Plate Cast", {
     id: "Cetak Plat Besar",
     it: "Modello della lastra grande",
-    ja: "ラージプレートキャスト",
+    ja: "大板の鋳型",
     ko: "큰 판자 주 Lad형",
     pl: "Odlew dużej płyty",
     pt: "Modelo da lâmina grande",
@@ -2297,7 +2297,7 @@ Translation.addTranslation("Large Plate Cast", {
 Translation.addTranslation("Ingot Cast", {
     id: "Cetak Ingota",
     it: "Modello del lingotto",
-    ja: "インゴットキャスト",
+    ja: "インゴットの鋳型",
     ko: "인그от 주 Lad형",
     pl: "Odlew ingotu",
     pt: "Modelo de lingote",
@@ -2309,7 +2309,7 @@ Translation.addTranslation("Ingot Cast", {
 Translation.addTranslation("Nugget Cast", {
     id: "Cetak Nugget",
     it: "Modello del nugget",
-    ja: "ナゲットキャスト",
+    ja: "ナゲットの鋳型",
     ko: "누гре트 주 Lad형",
     pl: "Odlew samorodka",
     pt: "Modelo de nugget",
@@ -2321,7 +2321,7 @@ Translation.addTranslation("Nugget Cast", {
 Translation.addTranslation("Gem Cast", {
     id: "Cetak Permata",
     it: "Modello della gemma",
-    ja: "ジェムキャスト",
+    ja: "宝石の鋳型",
     ko: "보석 주 Lad형",
     pl: "Odlew kamienia szlachetnego",
     pt: "Modelo de gema",
@@ -2333,7 +2333,7 @@ Translation.addTranslation("Gem Cast", {
 Translation.addTranslation("Plate Cast", {
     id: "Cetak Las",
     it: "Modello della lastra",
-    ja: "プレートキャスト",
+    ja: "プレートの鋳型",
     ko: "판자 주 Lad형",
     pl: "Odlew płyty",
     pt: "Modelo de lâmina",
@@ -2345,7 +2345,7 @@ Translation.addTranslation("Plate Cast", {
 Translation.addTranslation("Gear Cast", {
     id: "Cetak Roda Gigi",
     it: "Modello dell'ingranaggio",
-    ja: "ギアキャスト",
+    ja: "歯車の鋳型",
     ko: "톱니 주 Lad형",
     pl: "Odlew zębatego koła",
     pt: "Modelo de engrenagem",
@@ -2422,7 +2422,7 @@ Translation.addTranslation("Description", {
     zh: "描述"
 });
 Translation.addTranslation("Head", {
-    de: "Kopf", id: "Head", it: "Testa", ja: "ヘッド部", ko: "머리",
+    de: "Kopf", id: "Head", it: "Testa", ja: "頭部", ko: "머리",
     pl: "Głowica",
     pt: "Cabeça",
     ru: "Наконечник",
@@ -2446,7 +2446,7 @@ Translation.addTranslation("Mining Tier: ", {
     de: "Erntestufe: ",
     id: "Harvest Tier: ",
     it: "Livello di raccolta: ",
-    ja: "採掘ランク: ",
+    ja: "採掘レベル: ",
     ko: "채굴 등급: ",
     pt: "Nivel de Coleta: ",
     ru: "Добывает: ",
@@ -2494,25 +2494,13 @@ Translation.addTranslation("Multiplier: ", {
     de: "Multiplikator: ",
     id: "Multiplikator: ",
     it: "Moltiplicatore: ",
-    ja: "係数: ", ko: "곱셈 계수: ",
+    ja: "補正: ", ko: "곱셈 계수: ",
     pl: "Współczynnik wielokrotności: ",
     pt: "Multiplicador: ",
     ru: "Множитель: ",
     sv: "Multiplikatör: ",
     uk: "Множник: ",
     zh: "乘數器："
-});
-Translation.addTranslation("Durability: ", {
-    de: "Haltbarkeit: ",
-    id: "Durability: ",
-    it: "Durabilità: ",
-    ja: "耐久度: ", ko: "내구도: ",
-    pl: "Wytrzymałość:",
-    pt: "Durabilidade: ",
-    ru: "Прочность: ",
-    sv: "Hållbarhet: ",
-    uk: "Міцність: ",
-    zh: "耐久度："
 });
 Translation.addTranslation("Extra", {
     de: "Extra", id: "Extra", it: "Extra", ja: "締め具",
@@ -2541,7 +2529,7 @@ Translation.addTranslation("Tool Forge", {
     de: "Werkzeugschmiede",
     id: "Tool Forge",
     it: "Fucina degli strumenti",
-    ja: "道具鋳造工", ko: "도구 대장간",
+    ja: "道具鍛冶台", ko: "도구 대장간",
     pl: "Mistrz majsterkowania",
     pt: "Forja de ferramentas",
     ru: "Кузня для инструментов",
@@ -2553,7 +2541,7 @@ Translation.addTranslation("Repair & Modify", {
     de: "Reparieren & Modifizieren",
     id: "Repair & Modify",
     it: "Ripara e modifica",
-    ja: "修理と変更",
+    ja: "修理と改造",
     ko: "수리 & 수식어",
     pl: "Napraw i modyfikuj",
     pt: "Repare & Modifique",
@@ -2641,7 +2629,7 @@ Translation.addTranslation("Tinker Station", {
     de: "Bastelstation",
     id: "Tinker Station",
     it: "Stazione dell'armeggiatore",
-    ja: "ティンカー台",
+    ja: "道具組立台",
     ko: "대장장이 작업대",
     pl: "Stacja majsterkowania",
     pt: "Estação Tinker",
@@ -2667,7 +2655,7 @@ Translation.addTranslation("XP: ", {
     de: "EP: ",
     id: "EXP: ",
     it: "Punti esperienza: ",
-    ja: "ＸＰ：",
+    ja: "経験値: ",
     ko: "경험치 :",
     pl: "PK: ",
     pt: "xp: ",
@@ -2683,7 +2671,7 @@ Translation.addTranslation("Pickaxe Head", {
     de: "Spitzhackenkopf",
     id: "Kepala Beliung",
     it: "Testa del Piccone",
-    ja: "つるはしの頭",
+    ja: "つるはし頭部",
     ko: "곡괭이 머리",
     pl: "Głowica Kilofa",
     pt: "Cabeça de Picareta",
@@ -2696,7 +2684,7 @@ Translation.addTranslation("Shovel Head", {
     de: "Schaufelkopf",
     id: "Kepala Sekop",
     it: "Testa della Pala",
-    ja: "シャベルの頭", ko: "삽 머리",
+    ja: "シャベル頭部", ko: "삽 머리",
     pl: "Głowica Łopaty",
     pt: "Cabeça de Pá",
     ru: "Наконечник лопаты",
@@ -2708,7 +2696,7 @@ Translation.addTranslation("Axe Head", {
     de: "Axtkopf",
     id: "Kepala Kapak",
     it: "Testa dell'Ascia",
-    ja: "斧の頭", ko: "도끼 머리",
+    ja: "斧頭部", ko: "도끼 머리",
     pl: "Głowica Topora",
     pt: "Cabeça de Machado",
     ru: "Наконечник топора",
@@ -2720,7 +2708,7 @@ Translation.addTranslation("Broad Axe Head", {
     de: "Breiter Axtkopf",
     id: "Kepala Kapak Lebar",
     it: "Testa dell'Ascia Larga",
-    ja: "広斧ヘッド", ko: "넓은 도끼 머리",
+    ja: "大斧頭部", ko: "넓은 도끼 머리",
     pl: "Szeroka Głowica Topora",
     pt: "Cabeça de Machado Largo",
     ru: "Наконечник тесака",
@@ -2732,7 +2720,7 @@ Translation.addTranslation("Sword Blade", {
     de: "Schwertklinge",
     id: "Pisau Pedang",
     it: "Lama della Spada",
-    ja: "剣の刃", ko: "검 검",
+    ja: "刀身", ko: "검 검",
     pl: "Ostrze Miecza",
     pt: "Lâmina de Espada",
     ru: "Лезвие секиры",
@@ -2744,7 +2732,7 @@ Translation.addTranslation("Hammer Head", {
     de: "Hammerkopf",
     id: "Kepala Palu",
     it: "Testa del Martello",
-    ja: "ハンマーヘッド", ko: "망치 머리",
+    ja: "ハンマー頭部", ko: "망치 머리",
     pl: "Głowica Młota",
     pt: "Cabeça de Martelo",
     ru: "Наконечник молота",
@@ -2756,7 +2744,7 @@ Translation.addTranslation("Excavator Head", {
     de: "Baggerschaufelkopf",
     id: "Kepala Excavator",
     it: "Testa dell'Escavatore",
-    ja: "掘削ヘッド", ko: "굴착기 헤드",
+    ja: "エクスカベーター頭部", ko: "굴착기 헤드",
     pl: "Głowica Koparki",
     pt: "Cabeça Escavadora",
     ru: "Наконечник экскаватора",
@@ -2768,7 +2756,7 @@ Translation.addTranslation("Tool Rod", {
     de: "Werkzeugstange",
     id: "Tang Alat",
     it: "Astina Strumento",
-    ja: "ツールロッド", ko: "도구 막대",
+    ja: "持ち手", ko: "도구 막대",
     pl: "Pręt Narzędziowy",
     pt: "Haste de Ferramenta",
     ru: "Рукоятка инструмента",
@@ -2780,7 +2768,7 @@ Translation.addTranslation("Tough Tool Rod", {
     de: "Robuste Werkzeugstange",
     id: "Tang Alat yang Kokoh",
     it: "Astina Strumento Resistente",
-    ja: "頑丈なツールロッド", ko: "튼튼한 도구 막대",
+    ja: "強化持ち手", ko: "튼튼한 도구 막대",
     pl: "Wytrzymały Pręt Narzędziowy",
     pt: "Haste de Ferramenta Resistente",
     ru: "Крепкая рукоятка инструмента",
@@ -2792,7 +2780,7 @@ Translation.addTranslation("Binding", {
     de: "Binder",
     id: "Pengikat",
     it: "Vincolo",
-    ja: "バインディング", ko: "바인딩",
+    ja: "締め具", ko: "바인딩",
     pl: "Więzadło",
     pt: "Vínculo",
     ru: "Крепление",
@@ -2804,7 +2792,7 @@ Translation.addTranslation("Tough Binding", {
     de: "Robuster Binder",
     id: "Pengikat Kuat",
     it: "Legatura Resistente",
-    ja: "頑丈なバインディング", ko: "튼튼한 바인딩",
+    ja: "強化締め具", ko: "튼튼한 바인딩",
     pl: "Wytrzymałe Wiązanie",
     pt: "Vínculo Resistente",
     ru: "Крепкое крепление",
@@ -2816,7 +2804,7 @@ Translation.addTranslation("Wide Guard", {
     de: "Breite Schutzkappe",
     id: "Penjaga Lebar",
     it: "Guardia Larga",
-    ja: "広いガード",
+    ja: "鍔",
     ko: "넓은 가드",
     pl: "Szeroka Ochrona",
     pt: "Guarda Larga",
@@ -2853,7 +2841,7 @@ Translation.addTranslation("Pickaxe", {
     de: "Spitzhacke",
     id: "Pickaxe",
     it: "Piccone",
-    ja: "ツルハシ", ko: "곡괭이", pl: "Kilof",
+    ja: "つるはし", ko: "곡괭이", pl: "Kilof",
     pt: "Picareta",
     ru: "Кирка", sv: "Hacka", uk: "Кайло", zh: "镐"
 });
@@ -2949,7 +2937,7 @@ Translation.addTranslation("Broad Sword", {
     de: "Breitschwert",
     id: "Pedang Lebar",
     it: "Spada Larga",
-    ja: "広剣", ko: "넓은 검",
+    ja: "ブロードソード", ko: "넓은 검",
     pl: "Szeroki Miecz",
     pt: "Espada Larga",
     ru: "Секира",
@@ -4017,7 +4005,7 @@ Translation.addTranslation("Mending Moss requires at least 10 levels", {
     de: "Erfordert mindestens Stufe 10 für Heilenden Moos",
     id: "Regenerasi moss membutuhkan minimal level 10",
     it: "Il muschio curativo richiede almeno livello 10",
-    ja: "回復の苔がレベル10以上必要です",
+    ja: "回復の苔を活性化するにはレベル10以上必要です",
     ko: "치유의 머드는 최소 10级이 필요합니다.",
     pl: "Naprawiający mch wymaga co najmniej poziomu 10",
     pt: "Requer pelo menos nível 10 para o Líquen Restaurador",
@@ -4869,102 +4857,78 @@ var MoltenLiquid = /** @class */ (function () {
             height: this.liquidCount * 32
         };
     };
-    /*
-        private static readonly baseTex = {
-            metal: FileTools.ReadImage(__dir__ + "texture-source/liquid/molten_metal.png"),
-            stone: FileTools.ReadImage(__dir__ + "texture-source/liquid/molten_stone.png"),
-            other: FileTools.ReadImage(__dir__ + "texture-source/liquid/molten_other.png"),
-            bucket: FileTools.ReadImage(__dir__ + "texture-source/liquid/bucket.png")
-        };
-    
-        private static create(key: string, name: string, color: string, type: "metal" | "stone" | "other" = "metal"): void {
-    
-            const bitmap = new Bitmap.createBitmap(16, 16, Bitmap.Config.ARGB_8888);
-            const canvas = new Canvas(bitmap);
-            const paint = new Paint();
-            paint.setColorFilter(new ColorFilter(Color.parseColor(color), PorterDuff.Mode.MULTIPLY));
-            canvas.drawBitmap(this.baseTex[type], 0, 0, paint);
-            UI.TextureSource.put("liquid." + key, bitmap);
-            LiquidRegistry.registerLiquid(key, name, ["liquid." + key]);
-    
-            const bucket = this.baseTex.bucket.copy(Bitmap.Config.ARGB_8888, true);
-            let w: number;
-            let h: number;
-            for(w = 0; w < 16; w++){
-            for(h = 0; h < 16; h++){
-                bucket.getPixel(w, h) === Color.GREEN && bucket.setPixel(w, h, bitmap.getPixel(w, h));
-            }
-            }
-            const path = __dir__ + "res/items-opaque/bucket/tcon_bucket_" + key + ".png";
-            const file = new java.io.File(path);
-            file.getParentFile().mkdirs();
-            FileTools.WriteImage(path, bucket);
-    
-        }
-    */
-    MoltenLiquid.register = function (key, temp) {
+    MoltenLiquid.register = function (liquid, temp, type, color) {
+        if (color === void 0) { color = 0xffffff; }
         if (temp < 300) {
             return;
         }
-        this.data[key] = { y: this.liquidCount * 32, bmp: LiquidRegistry.getLiquidUIBitmap(key, 16, 16), temp: temp - 300 };
+        this.data[liquid] = { y: this.liquidCount * 32, temp: temp - 300 };
         this.liquidCount++;
     };
-    MoltenLiquid.createAndRegister = function (key, name, temp, color, type) {
-        if (type === void 0) { type = "metal"; }
-        // this.create(key, name, color, type);
-        LiquidRegistry.registerLiquid(key, translate(name), ["liquid." + key]);
-        var id = createItem("tcon_bucket_" + key, key != "blood" ? name + " Bucket" : "Bucket o' " + name);
+    MoltenLiquid.createAndRegister = function (liquid, name, temp, type, color) {
+        LiquidRegistry.registerLiquid(liquid, translate(name), ["liquid." + liquid]);
+        var id = createItem("tcon_bucket_" + liquid, liquid !== "blood" ? name + " Bucket" : "Bucket o' " + name);
         Item.setCategory(id, EItemCategory.MATERIAL);
         Item.addCreativeGroup("tcon_bucket", translate("TConstruct: Buckets"), [id]);
-        LiquidRegistry.registerItem(key, { id: VanillaItemID.bucket, data: 0 }, { id: id, data: 0 });
-        this.register(key, temp);
+        LiquidRegistry.registerItem(liquid, { id: VanillaItemID.bucket, data: 0 }, { id: id, data: 0 });
+        this.register(liquid, temp, type);
     };
-    MoltenLiquid.isExist = function (key) {
-        return key in this.data;
+    MoltenLiquid.isExist = function (liquid) {
+        return liquid in this.data;
     };
-    MoltenLiquid.getY = function (key) {
+    MoltenLiquid.getY = function (liquid) {
         var _a, _b;
-        return (_b = (_a = this.data[key]) === null || _a === void 0 ? void 0 : _a.y) !== null && _b !== void 0 ? _b : -1;
+        return (_b = (_a = this.data[liquid]) === null || _a === void 0 ? void 0 : _a.y) !== null && _b !== void 0 ? _b : -1;
     };
-    MoltenLiquid.getTemp = function (key) {
+    MoltenLiquid.getTemp = function (liquid) {
         var _a, _b;
-        return (_b = (_a = this.data[key]) === null || _a === void 0 ? void 0 : _a.temp) !== null && _b !== void 0 ? _b : -1;
+        return (_b = (_a = this.data[liquid]) === null || _a === void 0 ? void 0 : _a.temp) !== null && _b !== void 0 ? _b : -1;
     };
     MoltenLiquid.PATH = "model/tcon_liquids.png";
+    MoltenLiquid.PATH2 = "model/tcon_liquids_v2.png";
+    MoltenLiquid.typeCount = 6;
+    MoltenLiquid.types = {
+        water: 0,
+        lava: 1,
+        milk: 2,
+        metal: 3,
+        stone: 4,
+        other: 5
+    };
     MoltenLiquid.liquidCount = 0;
     MoltenLiquid.data = {};
     return MoltenLiquid;
 }());
-MoltenLiquid.register("water", 320);
-MoltenLiquid.register("lava", 769);
-MoltenLiquid.register("milk", 320);
-MoltenLiquid.createAndRegister("molten_iron", "Molten Iron", 769, "#a81212");
-MoltenLiquid.createAndRegister("molten_gold", "Molten Gold", 532, "#f6d609");
-MoltenLiquid.createAndRegister("molten_pigiron", "Molten Pig Iron", 600, "#ef9e9b");
-MoltenLiquid.createAndRegister("molten_cobalt", "Molten Cobalt", 950, "#2882d4");
-MoltenLiquid.createAndRegister("molten_ardite", "Molten Ardite", 860, "#d14210");
-MoltenLiquid.createAndRegister("molten_manyullyn", "Molten Manyullyn", 1000, "#a15cf8");
-MoltenLiquid.createAndRegister("molten_knightslime", "Molten Knightslime", 370, "#d236ff");
-MoltenLiquid.createAndRegister("molten_alubrass", "Molten Aluminum Brass", 500, "#ece347");
-MoltenLiquid.createAndRegister("molten_brass", "Molten Brass", 470, "#ede38b");
-MoltenLiquid.createAndRegister("molten_copper", "Molten Copper", 542, "#ed9f07");
-MoltenLiquid.createAndRegister("molten_tin", "Molten Tin", 350, "#c1cddc");
-MoltenLiquid.createAndRegister("molten_bronze", "Molten Bronze", 475, "#e3bd68");
-MoltenLiquid.createAndRegister("molten_zinc", "Molten Zinc", 375, "#d3efe8");
-MoltenLiquid.createAndRegister("molten_lead", "Molten Lead", 400, "#4d4968");
-MoltenLiquid.createAndRegister("molten_nickel", "Molten Nickel", 727, "#c8d683");
-MoltenLiquid.createAndRegister("molten_silver", "Molten Silver", 480, "#d1ecf6");
-MoltenLiquid.createAndRegister("molten_electrum", "Molten Electrum", 500, "#e8db49");
-MoltenLiquid.createAndRegister("molten_steel", "Molten Steel", 681, "#a7a7a7");
-MoltenLiquid.createAndRegister("molten_aluminum", "Molten Aluminum", 330, "#efe0d5");
-MoltenLiquid.createAndRegister("molten_stone", "Seared Stone", 800, "#777777", "stone");
-MoltenLiquid.createAndRegister("molten_obsidian", "Molten Obsidian", 1000, "#2c0d59", "stone");
-MoltenLiquid.createAndRegister("molten_clay", "Molten Clay", 700, "#c67453", "stone");
-MoltenLiquid.createAndRegister("molten_dirt", "Liquid Dirt", 500, "#a68564", "stone");
-MoltenLiquid.createAndRegister("molten_emerald", "Molten Emerald", 999, "#58e78e");
-MoltenLiquid.createAndRegister("molten_glass", "Molten Glass", 625, "#c0f5fe");
-MoltenLiquid.createAndRegister("blood", "Blood", 336, "#540000", "other");
-MoltenLiquid.createAndRegister("purpleslime", "Liquid Purple Slime", 520, "#a81212", "other");
+MoltenLiquid.register("water", 320, "water");
+MoltenLiquid.register("lava", 769, "lava");
+MoltenLiquid.register("milk", 320, "milk");
+MoltenLiquid.createAndRegister("molten_iron", "Molten Iron", 769, "metal", 0xa81212);
+MoltenLiquid.createAndRegister("molten_gold", "Molten Gold", 532, "metal", 0xf6d609);
+MoltenLiquid.createAndRegister("molten_pigiron", "Molten Pig Iron", 600, "metal", 0xef9e9b);
+MoltenLiquid.createAndRegister("molten_cobalt", "Molten Cobalt", 950, "metal", 0x2882d4);
+MoltenLiquid.createAndRegister("molten_ardite", "Molten Ardite", 860, "metal", 0xd14210);
+MoltenLiquid.createAndRegister("molten_manyullyn", "Molten Manyullyn", 1000, "metal", 0xa15cf8);
+MoltenLiquid.createAndRegister("molten_knightslime", "Molten Knightslime", 370, "metal", 0xd236ff);
+MoltenLiquid.createAndRegister("molten_alubrass", "Molten Aluminum Brass", 500, "metal", 0xece347);
+MoltenLiquid.createAndRegister("molten_brass", "Molten Brass", 470, "metal", 0xede38b);
+MoltenLiquid.createAndRegister("molten_copper", "Molten Copper", 542, "metal", 0xed9f07);
+MoltenLiquid.createAndRegister("molten_tin", "Molten Tin", 350, "metal", 0xc1cddc);
+MoltenLiquid.createAndRegister("molten_bronze", "Molten Bronze", 475, "metal", 0xe3bd68);
+MoltenLiquid.createAndRegister("molten_zinc", "Molten Zinc", 375, "metal", 0xd3efe8);
+MoltenLiquid.createAndRegister("molten_lead", "Molten Lead", 400, "metal", 0x4d4968);
+MoltenLiquid.createAndRegister("molten_nickel", "Molten Nickel", 727, "metal", 0xc8d683);
+MoltenLiquid.createAndRegister("molten_silver", "Molten Silver", 480, "metal", 0xd1ecf6);
+MoltenLiquid.createAndRegister("molten_electrum", "Molten Electrum", 500, "metal", 0xe8db49);
+MoltenLiquid.createAndRegister("molten_steel", "Molten Steel", 681, "metal", 0xa7a7a7);
+MoltenLiquid.createAndRegister("molten_aluminum", "Molten Aluminum", 330, "metal", 0xefe0d5);
+MoltenLiquid.createAndRegister("molten_stone", "Seared Stone", 800, "stone", 0x777777);
+MoltenLiquid.createAndRegister("molten_obsidian", "Molten Obsidian", 1000, "stone", 0x2c0d59);
+MoltenLiquid.createAndRegister("molten_clay", "Molten Clay", 700, "stone", 0xc67453);
+MoltenLiquid.createAndRegister("molten_dirt", "Liquid Dirt", 500, "stone", 0xa68564);
+MoltenLiquid.createAndRegister("molten_emerald", "Molten Emerald", 999, "metal", 0x58e78e);
+MoltenLiquid.createAndRegister("molten_glass", "Molten Glass", 625, "metal", 0xc0f5fe);
+MoltenLiquid.createAndRegister("blood", "Blood", 336, "other", 0x540000);
+MoltenLiquid.createAndRegister("purpleslime", "Liquid Purple Slime", 520, "other", 0xa81212);
 var SmelteryFuel = /** @class */ (function () {
     function SmelteryFuel() {
     }
@@ -7175,7 +7139,7 @@ var TconToolStack = /** @class */ (function () {
             .map(function (partIndex) { return _this.materials[partIndex].getLocalizedName(); })
             .filter(function (material, index, arr) { return arr.indexOf(material) === index; }) // remove duplicates
             .join("-");
-        var toolName = head + " " + this.instance.name;
+        var toolName = head + " " + translate(this.instance.name);
         if (this.isBroken()) {
             toolName = translate("Broken %s", toolName);
         }

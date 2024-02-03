@@ -55,4 +55,6 @@ def gen_tool(tool_type: str, parts_count: int):
 
     image.save(OUT_DIR / f"tcontool_{tool_type}.png")
 
+
+def gen_liquid():
     pass
