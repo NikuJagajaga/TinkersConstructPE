@@ -366,8 +366,10 @@ class SmelteryControler extends TconTileEntity implements ILiquidStorage {
                 array.push({liquid: key, amount: liquids[key]});
             }
         }
-        for(let i = 0; i < this.data.select; i++){
-            array.push(array.shift());
+        if(array.length > 0){
+            for(let i = 0; i < this.data.select; i++){
+                array.push(array.shift());
+            }
         }
         return array;
     }
@@ -593,7 +595,7 @@ class SmelteryControler extends TconTileEntity implements ILiquidStorage {
         this.container.sendEvent("changeScales", {mode0: modes[0], mode1: modes[1], mode2: modes[2]});
         this.container.sendEvent("updateLiquidScales", {capacity: liquidCapacity, liqArray: liqArray});
         this.container.setText("textFuel", "fuel: " + this.data.fuel);
-        this.container.setText("textLiquid", liqArray[0] ? LiquidRegistry.getLiquidName(liqArray[0].liquid) + "\n" + liqArray[0].amount + " mB" : "");
+        this.container.setText("textLiquid", liqArray.length > 0 ? LiquidRegistry.getLiquidName(liqArray[0].liquid) + "\n" + liqArray[0].amount.toFixed() + " mB" : "");
         this.container.sendChanges();
         
     }

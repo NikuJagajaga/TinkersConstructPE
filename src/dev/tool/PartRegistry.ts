@@ -99,8 +99,8 @@ namespace PartRegistry {
                     tooltips.push("", "§f" + translate("Head"));
                     tooltips.push("§7" + translate("Durability: ") + head.durability);
                     tooltips.push(translate("Mining Tier: ") + translate(miningTier));
-                    tooltips.push(translate("Mining Speed: ") + head.speed);
-                    tooltips.push(translate("Melee Damage: ") + head.attack);
+                    tooltips.push(translate("Mining Speed: ") + head.efficiency);
+                    tooltips.push(translate("Melee Damage: ") + head.damage);
                 }
                 if(mask & EPartCategory.HANDLE){
                     const handle = matData.getHandleStats();

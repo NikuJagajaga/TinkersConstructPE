@@ -29,7 +29,7 @@ class TconLumberaxe extends TconTool {
         stats.head(materials[1], materials[2])
              .extra(materials[3])
              .handle(materials[0]);
-        stats.attack += 2;
+        stats.damage += 2;
         stats.durability *= TconLumberaxe.DURABILITY_MODIFIER;
     }
 

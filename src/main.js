@@ -6353,8 +6353,10 @@ var SmelteryControler = /** @class */ (function (_super) {
                 array.push({ liquid: key, amount: liquids[key] });
             }
         }
-        for (var i = 0; i < this.data.select; i++) {
-            array.push(array.shift());
+        if (array.length > 0) {
+            for (var i = 0; i < this.data.select; i++) {
+                array.push(array.shift());
+            }
         }
         return array;
     };
@@ -6555,7 +6557,7 @@ var SmelteryControler = /** @class */ (function (_super) {
         this.container.sendEvent("changeScales", { mode0: modes[0], mode1: modes[1], mode2: modes[2] });
         this.container.sendEvent("updateLiquidScales", { capacity: liquidCapacity, liqArray: liqArray });
         this.container.setText("textFuel", "fuel: " + this.data.fuel);
-        this.container.setText("textLiquid", liqArray[0] ? LiquidRegistry.getLiquidName(liqArray[0].liquid) + "\n" + liqArray[0].amount + " mB" : "");
+        this.container.setText("textLiquid", liqArray.length > 0 ? LiquidRegistry.getLiquidName(liqArray[0].liquid) + "\n" + liqArray[0].amount.toFixed() + " mB" : "");
         this.container.sendChanges();
     };
     SmelteryControler.prototype.spawnParticle = function (data) {
@@ -6677,8 +6679,8 @@ var TinkersMaterial = /** @class */ (function () {
     TinkersMaterial.prototype.getItem = function () {
         return this.item;
     };
-    TinkersMaterial.prototype.setHeadStats = function (durability, speed, attack, level) {
-        this.headStats = { durability: durability, speed: speed, attack: attack, level: level };
+    TinkersMaterial.prototype.setHeadStats = function (durability, efficiency, damage, level) {
+        this.headStats = { durability: durability, efficiency: efficiency, damage: damage, level: level };
         return this;
     };
     TinkersMaterial.prototype.setHandleStats = function (modifier, durability) {
@@ -6840,7 +6842,10 @@ var Material = {
 };
 var ToolStats = /** @class */ (function () {
     function ToolStats() {
-        this.durability = this.level = this.attack = this.speed = 0;
+        this.durability = 0;
+        this.level = 0;
+        this.damage = 0;
+        this.efficiency = 0;
     }
     //call this first
     ToolStats.prototype.head = function () {
@@ -6849,20 +6854,18 @@ var ToolStats = /** @class */ (function () {
             materials[_i] = arguments[_i];
         }
         var length = materials.length;
-        this.durability = this.level = this.attack = this.speed = 0;
+        this.durability = this.level = this.damage = this.efficiency = 0;
         var stats;
         for (var i = 0; i < length; i++) {
             stats = materials[i].getHeadStats();
             this.durability += stats.durability;
-            this.attack += stats.attack;
-            this.speed += stats.speed;
-            if (stats.level > this.level) {
-                this.level = stats.level;
-            }
+            this.damage += stats.damage;
+            this.efficiency += stats.efficiency;
+            this.level = Math.min(this.level, stats.level);
         }
         this.durability = Math.max(1, this.durability / length | 0);
-        this.attack /= length;
-        this.speed /= length;
+        this.damage /= length;
+        this.efficiency /= length;
         return this;
     };
     //call this second
@@ -6906,8 +6909,8 @@ var ToolStats = /** @class */ (function () {
         return {
             durability: Math.round(this.durability),
             level: this.level,
-            damage: this.attack,
-            efficiency: this.speed
+            damage: this.damage,
+            efficiency: this.efficiency
         };
     };
     return ToolStats;
@@ -7079,8 +7082,8 @@ var TconToolStack = /** @class */ (function () {
     };
     TconToolStack.prototype.getStats = function () {
         var stats = this.getBaseStats();
-        stats.speed *= this.instance.miningSpeedModifier;
-        stats.attack *= this.instance.damagePotential;
+        stats.efficiency *= this.instance.miningSpeedModifier;
+        stats.damage *= this.instance.damagePotential;
         this.forEachModifiers(function (mod, level) {
             mod.applyStats(stats, level);
         });
@@ -7249,8 +7252,8 @@ var PartRegistry;
                     tooltips.push("", "§f" + translate("Head"));
                     tooltips.push("§7" + translate("Durability: ") + head.durability);
                     tooltips.push(translate("Mining Tier: ") + translate(miningTier));
-                    tooltips.push(translate("Mining Speed: ") + head.speed);
-                    tooltips.push(translate("Melee Damage: ") + head.attack);
+                    tooltips.push(translate("Mining Speed: ") + head.efficiency);
+                    tooltips.push(translate("Melee Damage: ") + head.damage);
                 }
                 if (mask & EPartCategory.HANDLE) {
                     var handle = matData.getHandleStats();
@@ -7653,10 +7656,18 @@ var ModHaste = /** @class */ (function (_super) {
         return _super.call(this, "haste", "Haste", 0, ["redstone"], 50, true) || this;
     }
     ModHaste.prototype.applyStats = function (stats, level) {
-        for (var i = level; i--;) {
-            stats.speed += stats.speed <= ModHaste.step1 ? 0.15 - 0.05 * stats.speed / ModHaste.step1 : stats.speed <= ModHaste.step2 ? 0.1 - 0.05 * (stats.speed - ModHaste.step1) / (ModHaste.step2 - ModHaste.step1) : 0.05;
+        for (var i = 0; i < level; i++) {
+            if (stats.efficiency <= ModHaste.step1) {
+                stats.efficiency += 0.15 - 0.05 * stats.efficiency / ModHaste.step1;
+            }
+            else if (stats.efficiency <= ModHaste.step2) {
+                stats.efficiency += 0.1 - 0.05 * (stats.efficiency - ModHaste.step1) / (ModHaste.step2 - ModHaste.step1);
+            }
+            else {
+                stats.efficiency += 0.05;
+            }
         }
-        stats.speed += (level / this.max | 0) * 0.5;
+        stats.efficiency += (level / this.max | 0) * 0.5;
     };
     ModHaste.step1 = 15;
     ModHaste.step2 = 25;
@@ -7678,10 +7689,18 @@ var ModSharp = /** @class */ (function (_super) {
         return _super.call(this, "sharp", "Sharper", 2, ["quartz"], 72, true) || this;
     }
     ModSharp.prototype.applyStats = function (stats, level) {
-        for (var i = level; i--;) {
-            stats.attack += stats.attack <= 10 ? 0.05 - 0.025 * stats.attack / 10 : stats.attack <= 20 ? 0.025 - 0.01 * stats.attack / 20 : 0.015;
+        for (var i = 0; i < level; i++) {
+            if (stats.damage <= 10) {
+                stats.damage += 0.05 - 0.025 * stats.damage / 10;
+            }
+            else if (stats.damage <= 20) {
+                stats.damage += 0.025 - 0.01 * stats.damage / 20;
+            }
+            else {
+                stats.damage += 0.015;
+            }
         }
-        stats.attack += (level / this.max | 0) * 0.25;
+        stats.damage += (level / this.max | 0) * 0.25;
     };
     return ModSharp;
 }(TinkersModifier));
@@ -7695,8 +7714,8 @@ var ModDiamond = /** @class */ (function (_super) {
         if (stats.level < MiningLv.OBSIDIAN) {
             stats.level++;
         }
-        stats.speed += 0.5;
-        stats.attack++;
+        stats.efficiency += 0.5;
+        stats.damage++;
     };
     return ModDiamond;
 }(TinkersModifier));
@@ -7724,8 +7743,8 @@ var ModSilk = /** @class */ (function (_super) {
         return _super.call(this, "silk", "Silky", 5, [ItemID.tcon_silky_jewel], 1, false, ["luck"]) || this;
     }
     ModSilk.prototype.applyStats = function (stats, level) {
-        stats.speed = Math.max(1, stats.speed - 3);
-        stats.attack = Math.max(1, stats.attack - 3);
+        stats.efficiency = Math.max(1, stats.efficiency - 3);
+        stats.damage = Math.max(1, stats.damage - 3);
     };
     ModSilk.prototype.applyEnchant = function (enchant, level) {
         enchant.silk = true;
@@ -8054,8 +8073,8 @@ var PartBuilderWindow = new /** @class */ (function (_super) {
                 container.setText("textStats", addLineBreaks(20, translate("Head") + "\n" +
                     translate("Durability: ") + data.head.durability + "\n" +
                     translate("Mining Tier: ") + translate(miningTier, data.head.level) + "\n" +
-                    translate("Mining Speed: ") + data.head.speed + "\n" +
-                    translate("Melee Damage: ") + data.head.attack + "\n\n" +
+                    translate("Mining Speed: ") + data.head.efficiency + "\n" +
+                    translate("Melee Damage: ") + data.head.damage + "\n\n" +
                     translate("Handle") + "\n" +
                     translate("Multiplier: ") + data.handle.modifier + "\n" +
                     translate("Durability: ") + data.handle.durability + "\n\n" +
@@ -9024,7 +9043,7 @@ var TconHatchet = /** @class */ (function (_super) {
         stats.head(materials[1])
             .extra(materials[2])
             .handle(materials[0]);
-        stats.attack += 0.5;
+        stats.damage += 0.5;
     };
     //Destroying plants does not reduce durability.
     TconHatchet.prototype.onDestroy = function (item, coords, block, player) {
@@ -9114,7 +9133,7 @@ var TconMattock = /** @class */ (function (_super) {
     TconMattock.prototype.buildStats = function (stats, materials) {
         stats.head(materials[1], materials[2])
             .handle(materials[0]);
-        stats.attack += 3;
+        stats.damage += 3;
     };
     TconMattock.prototype.onItemUse = function (coords, item, block, player) {
         if (item.extra && (block.id === VanillaTileID.grass || block.id === VanillaTileID.dirt) && coords.side === EBlockSide.UP) {
@@ -9157,7 +9176,7 @@ var TconSword = /** @class */ (function (_super) {
         stats.head(materials[1])
             .extra(materials[2])
             .handle(materials[0]);
-        stats.attack += 1;
+        stats.damage += 1;
         stats.durability *= TconSword.DURABILITY_MODIFIER;
     };
     TconSword.prototype.getRepairModifierForPart = function (index) {
@@ -9271,7 +9290,7 @@ var TconLumberaxe = /** @class */ (function (_super) {
         stats.head(materials[1], materials[2])
             .extra(materials[3])
             .handle(materials[0]);
-        stats.attack += 2;
+        stats.damage += 2;
         stats.durability *= TconLumberaxe.DURABILITY_MODIFIER;
     };
     TconLumberaxe.prototype.getRepairModifierForPart = function (index) {

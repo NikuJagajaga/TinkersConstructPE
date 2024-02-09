@@ -156,8 +156,8 @@ const PartBuilderWindow = new class extends CraftingWindow {
                     translate("Head") + "\n" +
                     translate("Durability: ") + data.head.durability + "\n" +
                     translate("Mining Tier: ") + translate(miningTier, data.head.level) + "\n" +
-                    translate("Mining Speed: ") + data.head.speed + "\n" +
-                    translate("Melee Damage: ") + data.head.attack + "\n\n" +
+                    translate("Mining Speed: ") + data.head.efficiency + "\n" +
+                    translate("Melee Damage: ") + data.head.damage + "\n\n" +
                     translate("Handle") + "\n" +
                     translate("Multiplier: ") + data.handle.modifier + "\n" +
                     translate("Durability: ") + data.handle.durability + "\n\n" +

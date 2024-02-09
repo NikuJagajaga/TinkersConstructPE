@@ -28,7 +28,7 @@ class TconHatchet extends TconTool {
         stats.head(materials[1])
              .extra(materials[2])
              .handle(materials[0]);
-        stats.attack += 0.5;
+        stats.damage += 0.5;
     }
 
     //Destroying plants does not reduce durability.

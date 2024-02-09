@@ -1,4 +1,4 @@
-interface HeadStats {durability: number, speed: number, attack: number, level: number}
+interface HeadStats {durability: number, efficiency: number, damage: number, level: number}
 interface HandleStats {modifier: number, durability: number}
 interface ExtraStats {durability: number}
 
@@ -45,8 +45,8 @@ class TinkersMaterial {
         return this.item;
     }
 
-    setHeadStats(durability: number, speed: number, attack: number, level: number): this {
-        this.headStats = {durability, speed, attack, level};
+    setHeadStats(durability: number, efficiency: number, damage: number, level: number): this {
+        this.headStats = {durability, efficiency, damage, level};
         return this;
     }
 

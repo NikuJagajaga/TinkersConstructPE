@@ -54,8 +54,8 @@ class TconToolStack implements ItemInstance {
 
     private getStats(): ToolAPI.ToolMaterial {
         const stats = this.getBaseStats();
-        stats.speed *= this.instance.miningSpeedModifier;
-        stats.attack *= this.instance.damagePotential;
+        stats.efficiency *= this.instance.miningSpeedModifier;
+        stats.damage *= this.instance.damagePotential;
         this.forEachModifiers((mod, level) => {
             mod.applyStats(stats, level);
         });

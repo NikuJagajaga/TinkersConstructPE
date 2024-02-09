@@ -18,7 +18,7 @@ class TconMattock extends TconTool {
     override buildStats(stats: ToolStats, materials: TinkersMaterial[]): void {
         stats.head(materials[1], materials[2])
              .handle(materials[0]);
-        stats.attack += 3;
+        stats.damage += 3;
     }
 
     index = 0;

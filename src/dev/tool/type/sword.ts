@@ -19,7 +19,7 @@ class TconSword extends TconTool {
         stats.head(materials[1])
              .extra(materials[2])
              .handle(materials[0]);
-        stats.attack += 1;
+        stats.damage += 1;
         stats.durability *= TconSword.DURABILITY_MODIFIER;
     }
 

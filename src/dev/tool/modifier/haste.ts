@@ -8,10 +8,18 @@ class ModHaste extends TinkersModifier {
     }
 
     override applyStats(stats: ToolStats, level: number): void {
-        for(let i = level; i--;){
-            stats.speed += stats.speed <= ModHaste.step1 ? 0.15 - 0.05 * stats.speed / ModHaste.step1 : stats.speed <= ModHaste.step2 ? 0.1 - 0.05 * (stats.speed - ModHaste.step1) / (ModHaste.step2 - ModHaste.step1) : 0.05;
+        for(let i = 0; i < level; i++){
+            if(stats.efficiency <= ModHaste.step1){
+                stats.efficiency += 0.15 - 0.05 * stats.efficiency / ModHaste.step1;
+            }
+            else if(stats.efficiency <= ModHaste.step2){
+                stats.efficiency += 0.1 - 0.05 * (stats.efficiency - ModHaste.step1) / (ModHaste.step2 - ModHaste.step1);
+            }
+            else{
+                stats.efficiency += 0.05;
+            }
         }
-        stats.speed += (level / this.max | 0) * 0.5;
+        stats.efficiency += (level / this.max | 0) * 0.5;
     }
     
 }

@@ -9,8 +9,8 @@ class ModDiamond extends TinkersModifier {
         if(stats.level < MiningLv.OBSIDIAN){
             stats.level++;
         }
-        stats.speed += 0.5;
-        stats.attack++;
+        stats.efficiency += 0.5;
+        stats.damage++;
     }
     
 }

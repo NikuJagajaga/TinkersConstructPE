@@ -12,8 +12,8 @@ class ModSilk extends TinkersModifier {
     }
     
     override applyStats(stats: ToolStats, level: number): void {
-        stats.speed = Math.max(1, stats.speed - 3);
-        stats.attack = Math.max(1, stats.attack - 3);
+        stats.efficiency = Math.max(1, stats.efficiency - 3);
+        stats.damage = Math.max(1, stats.damage - 3);
     }
 
     override applyEnchant(enchant: ToolAPI.EnchantData, level: number): void {
