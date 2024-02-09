@@ -1,7 +1,9 @@
 class ModDiamond extends TinkersModifier {
 
     constructor(){
-        super("diamond", "Diamond", 3, ["diamond"], 1, false);
+        super("diamond", "Diamond", 1, false);
+        this.texIndex = 3;
+        this.setRecipe(["diamond"]);
     }
 
     override applyStats(stats: ToolStats, level: number): void {

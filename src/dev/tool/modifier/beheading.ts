@@ -1,7 +1,9 @@
 class ModBeheading extends TinkersModifier {
 
     constructor(){
-        super("beheading", "Beheading", 7, ["ender_pearl", "obsidian"], 1, true);
+        super("beheading", "Beheading", 1, true);
+        this.texIndex = 7;
+        this.setRecipe(["ender_pearl", "obsidian"]);
     }
 
     override onKillEntity(victim: number, player: number, damageType: number, level: number): void {

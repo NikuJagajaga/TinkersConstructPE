@@ -7562,23 +7562,22 @@ ItemRegistry.registerItem(new class extends ItemThrowable {
 });
 */ 
 var TinkersModifier = /** @class */ (function () {
-    function TinkersModifier(key, name, texIndex, recipe, max, multi, hate) {
+    function TinkersModifier(key, name, max, multi) {
+        this.texIndex = -1;
         this.key = key;
         this.name = name;
-        this.texIndex = texIndex;
         this.max = max;
-        this.recipe = recipe.map(function (item) { return getIDData(item); });
         this.hate = {};
         if (!multi) {
             this.hate[key] = true;
         }
-        if (hate) {
-            for (var _i = 0, hate_1 = hate; _i < hate_1.length; _i++) {
-                var mod = hate_1[_i];
-                this.hate[mod] = true;
-            }
-        }
     }
+    TinkersModifier.prototype.setRecipe = function (recipe) {
+        this.recipe = recipe.map(function (item) { return getIDData(item); });
+    };
+    TinkersModifier.prototype.addConflict = function (mod) {
+        this.hate[mod] = true;
+    };
     TinkersModifier.prototype.getKey = function () {
         return this.key;
     };
@@ -7653,7 +7652,10 @@ var TinkersModifierHandler = /** @class */ (function () {
 var ModHaste = /** @class */ (function (_super) {
     __extends(ModHaste, _super);
     function ModHaste() {
-        return _super.call(this, "haste", "Haste", 0, ["redstone"], 50, true) || this;
+        var _this = _super.call(this, "haste", "Haste", 50, true) || this;
+        _this.texIndex = 0;
+        _this.setRecipe(["redstone"]);
+        return _this;
     }
     ModHaste.prototype.applyStats = function (stats, level) {
         for (var i = 0; i < level; i++) {
@@ -7676,7 +7678,11 @@ var ModHaste = /** @class */ (function (_super) {
 var ModLuck = /** @class */ (function (_super) {
     __extends(ModLuck, _super);
     function ModLuck() {
-        return _super.call(this, "luck", "Luck", 1, ["lapis_lazuli"], 360, false, ["silk"]) || this;
+        var _this = _super.call(this, "luck", "Luck", 360, false) || this;
+        _this.texIndex = 1;
+        _this.setRecipe(["lapis_lazuli"]);
+        _this.addConflict("silk");
+        return _this;
     }
     ModLuck.prototype.applyEnchant = function (enchant, level) {
         enchant.fortune = level < 60 ? 0 : level < 180 ? 1 : level < 360 ? 2 : 3;
@@ -7686,7 +7692,10 @@ var ModLuck = /** @class */ (function (_super) {
 var ModSharp = /** @class */ (function (_super) {
     __extends(ModSharp, _super);
     function ModSharp() {
-        return _super.call(this, "sharp", "Sharper", 2, ["quartz"], 72, true) || this;
+        var _this = _super.call(this, "sharp", "Sharper", 72, true) || this;
+        _this.texIndex = 2;
+        _this.setRecipe(["quartz"]);
+        return _this;
     }
     ModSharp.prototype.applyStats = function (stats, level) {
         for (var i = 0; i < level; i++) {
@@ -7707,7 +7716,10 @@ var ModSharp = /** @class */ (function (_super) {
 var ModDiamond = /** @class */ (function (_super) {
     __extends(ModDiamond, _super);
     function ModDiamond() {
-        return _super.call(this, "diamond", "Diamond", 3, ["diamond"], 1, false) || this;
+        var _this = _super.call(this, "diamond", "Diamond", 1, false) || this;
+        _this.texIndex = 3;
+        _this.setRecipe(["diamond"]);
+        return _this;
     }
     ModDiamond.prototype.applyStats = function (stats, level) {
         stats.durability += 500;
@@ -7722,7 +7734,10 @@ var ModDiamond = /** @class */ (function (_super) {
 var ModEmerald = /** @class */ (function (_super) {
     __extends(ModEmerald, _super);
     function ModEmerald() {
-        return _super.call(this, "emerald", "Emerald", 4, ["emerald"], 1, false) || this;
+        var _this = _super.call(this, "emerald", "Emerald", 1, false) || this;
+        _this.texIndex = 4;
+        _this.setRecipe(["emerald"]);
+        return _this;
     }
     ModEmerald.prototype.applyStats = function (stats, level) {
         stats.durability += stats.durability >> 1;
@@ -7740,7 +7755,11 @@ MeltingRecipe.addRecipe(ItemID.tcon_silky_cloth, "molten_gold", MatValue.INGOT);
 var ModSilk = /** @class */ (function (_super) {
     __extends(ModSilk, _super);
     function ModSilk() {
-        return _super.call(this, "silk", "Silky", 5, [ItemID.tcon_silky_jewel], 1, false, ["luck"]) || this;
+        var _this = _super.call(this, "silk", "Silky", 1, false) || this;
+        _this.texIndex = 5;
+        _this.setRecipe([ItemID.tcon_silky_jewel]);
+        _this.addConflict("luck");
+        return _this;
     }
     ModSilk.prototype.applyStats = function (stats, level) {
         stats.efficiency = Math.max(1, stats.efficiency - 3);
@@ -7756,7 +7775,10 @@ Recipes2.addShaped(ItemID.tcon_reinforcement, "aaa:aba:aaa", { a: "obsidian", b:
 var ModReinforced = /** @class */ (function (_super) {
     __extends(ModReinforced, _super);
     function ModReinforced() {
-        return _super.call(this, "reinforced", "Reinforced", 6, [ItemID.tcon_reinforcement], 1, true) || this;
+        var _this = _super.call(this, "reinforced", "Reinforced", 1, true) || this;
+        _this.texIndex = 6;
+        _this.setRecipe([ItemID.tcon_reinforcement]);
+        return _this;
     }
     ModReinforced.prototype.onConsume = function (level) {
         return level >= 5 ? true : Math.random() < level * 0.2;
@@ -7766,7 +7788,10 @@ var ModReinforced = /** @class */ (function (_super) {
 var ModBeheading = /** @class */ (function (_super) {
     __extends(ModBeheading, _super);
     function ModBeheading() {
-        return _super.call(this, "beheading", "Beheading", 7, ["ender_pearl", "obsidian"], 1, true) || this;
+        var _this = _super.call(this, "beheading", "Beheading", 1, true) || this;
+        _this.texIndex = 7;
+        _this.setRecipe(["ender_pearl", "obsidian"]);
+        return _this;
     }
     ModBeheading.prototype.onKillEntity = function (victim, player, damageType, level) {
         var headMeta = EntityHelper.getHeadMeta(victim);
@@ -7784,7 +7809,10 @@ Recipes.addFurnace(BlockID.tcon_graveyard_soil, BlockID.tcon_consecrated_soil);
 var ModSmite = /** @class */ (function (_super) {
     __extends(ModSmite, _super);
     function ModSmite() {
-        return _super.call(this, "smite", "Smite", 8, [BlockID.tcon_consecrated_soil], 24, true) || this;
+        var _this = _super.call(this, "smite", "Smite", 24, true) || this;
+        _this.texIndex = 8;
+        _this.setRecipe([BlockID.tcon_consecrated_soil]);
+        return _this;
     }
     ModSmite.prototype.onAttack = function (item, victim, player, level) {
         return EntityHelper.isUndead(victim) ? 7 / this.max * level : 0;
@@ -7794,7 +7822,10 @@ var ModSmite = /** @class */ (function (_super) {
 var ModSpider = /** @class */ (function (_super) {
     __extends(ModSpider, _super);
     function ModSpider() {
-        return _super.call(this, "spider", "Bane of Arthropods", 9, ["fermented_spider_eye"], 24, true) || this;
+        var _this = _super.call(this, "spider", "Bane of Arthropods", 24, true) || this;
+        _this.texIndex = 9;
+        _this.setRecipe(["fermented_spider_eye"]);
+        return _this;
     }
     ModSpider.prototype.onAttack = function (item, victim, player, level) {
         return EntityHelper.isArthropods(victim) ? 7 / this.max * level : 0;
@@ -7804,7 +7835,10 @@ var ModSpider = /** @class */ (function (_super) {
 var ModFiery = /** @class */ (function (_super) {
     __extends(ModFiery, _super);
     function ModFiery() {
-        return _super.call(this, "fiery", "Fiery", 10, ["blaze_powder"], 25, true) || this;
+        var _this = _super.call(this, "fiery", "Fiery", 25, true) || this;
+        _this.texIndex = 10;
+        _this.setRecipe(["blaze_powder"]);
+        return _this;
     }
     ModFiery.prototype.onAttack = function (item, victim, player, level) {
         Entity.setFire(victim, 1 + (level >> 3), true);
@@ -7816,7 +7850,10 @@ createItem("tcon_necrotic_bone", "Necrotic Bone");
 var ModNecrotic = /** @class */ (function (_super) {
     __extends(ModNecrotic, _super);
     function ModNecrotic() {
-        return _super.call(this, "necrotic", "Necrotic", 11, [ItemID.tcon_necrotic_bone], 1, true) || this;
+        var _this = _super.call(this, "necrotic", "Necrotic", 1, true) || this;
+        _this.texIndex = 11;
+        _this.setRecipe([ItemID.tcon_necrotic_bone]);
+        return _this;
     }
     ModNecrotic.prototype.onDealDamage = function (victim, player, damageValue, damageType, level) {
         var add = damageValue * 0.1 * level | 0;
@@ -7853,7 +7890,10 @@ Callback.addCallback("EntityDeath", function (entity, attacker, damageType) {
 var ModKnockback = /** @class */ (function (_super) {
     __extends(ModKnockback, _super);
     function ModKnockback() {
-        return _super.call(this, "knockback", "Knockback", 12, [VanillaBlockID.piston], 10, true) || this;
+        var _this = _super.call(this, "knockback", "Knockback", 10, true) || this;
+        _this.texIndex = 12;
+        _this.setRecipe([VanillaBlockID.piston]);
+        return _this;
     }
     ModKnockback.prototype.onAttack = function (item, victim, player, level) {
         var vec = Entity.getLookVector(player);
@@ -7884,7 +7924,10 @@ Item.registerUseFunction(ItemID.tcon_moss, function (coords, item, block, player
 var ModMending = /** @class */ (function (_super) {
     __extends(ModMending, _super);
     function ModMending() {
-        return _super.call(this, "mending", "Mending", 13, [ItemID.tcon_mending_moss], 1, true) || this;
+        var _this = _super.call(this, "mending", "Mending", 1, true) || this;
+        _this.texIndex = 13;
+        _this.setRecipe([ItemID.tcon_mending_moss]);
+        return _this;
     }
     ModMending.prototype.onMending = function (level) {
         return level;
@@ -7894,7 +7937,10 @@ var ModMending = /** @class */ (function (_super) {
 var ModShulking = /** @class */ (function (_super) {
     __extends(ModShulking, _super);
     function ModShulking() {
-        return _super.call(this, "shulking", "Shulking", 14, ["chorus_fruit_popped"], 50, false) || this;
+        var _this = _super.call(this, "shulking", "Shulking", 50, false) || this;
+        _this.texIndex = 14;
+        _this.setRecipe(["chorus_fruit_popped"]);
+        return _this;
     }
     ModShulking.prototype.onAttack = function (item, victim, player, level) {
         Entity.addEffect(victim, EPotionEffect.LEVITATION, 0, (level >> 1) + 10);
@@ -7905,7 +7951,10 @@ var ModShulking = /** @class */ (function (_super) {
 var ModWeb = /** @class */ (function (_super) {
     __extends(ModWeb, _super);
     function ModWeb() {
-        return _super.call(this, "web", "Web", 15, ["web"], 1, true) || this;
+        var _this = _super.call(this, "web", "Web", 1, true) || this;
+        _this.texIndex = 15;
+        _this.setRecipe(["web"]);
+        return _this;
     }
     ModWeb.prototype.onAttack = function (item, victim, player, level) {
         Entity.addEffect(victim, EPotionEffect.MOVEMENT_SLOWDOWN, 1, level * 20);
@@ -8895,8 +8944,10 @@ var ToolModelManager = /** @class */ (function () {
         }
         for (var key in stack.modifiers) {
             index = Modifier[key].getTexIndex();
-            coordsNormal.push(texture.getModCoords(index));
-            coordsBroken.push(texture.getModCoords(index));
+            if (index !== -1) {
+                coordsNormal.push(texture.getModCoords(index));
+                coordsBroken.push(texture.getModCoords(index));
+            }
         }
         Threading.initThread("tcon_toolmodel", function () {
             var size = 1 / 16;

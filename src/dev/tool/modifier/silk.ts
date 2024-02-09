@@ -8,7 +8,10 @@ MeltingRecipe.addRecipe(ItemID.tcon_silky_cloth, "molten_gold", MatValue.INGOT);
 class ModSilk extends TinkersModifier {
 
     constructor(){
-        super("silk", "Silky", 5, [ItemID.tcon_silky_jewel], 1, false, ["luck"]);
+        super("silk", "Silky", 1, false);
+        this.texIndex = 5;
+        this.setRecipe([ItemID.tcon_silky_jewel]);
+        this.addConflict("luck");
     }
     
     override applyStats(stats: ToolStats, level: number): void {

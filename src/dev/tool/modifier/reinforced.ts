@@ -5,7 +5,9 @@ Recipes2.addShaped(ItemID.tcon_reinforcement, "aaa:aba:aaa", {a: "obsidian", b: 
 class ModReinforced extends TinkersModifier {
 
     constructor(){
-        super("reinforced", "Reinforced", 6, [ItemID.tcon_reinforcement], 1, true);
+        super("reinforced", "Reinforced", 1, true);
+        this.texIndex = 6;
+        this.setRecipe([ItemID.tcon_reinforcement]);
     }
 
     override onConsume(level: number): boolean {

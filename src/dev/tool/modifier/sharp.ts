@@ -1,7 +1,9 @@
 class ModSharp extends TinkersModifier {
 
     constructor(){
-        super("sharp", "Sharper", 2, ["quartz"], 72, true);
+        super("sharp", "Sharper", 72, true);
+        this.texIndex = 2;
+        this.setRecipe(["quartz"]);
     }
 
     override applyStats(stats: ToolStats, level: number): void {

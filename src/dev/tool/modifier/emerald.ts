@@ -1,7 +1,9 @@
 class ModEmerald extends TinkersModifier {
 
     constructor(){
-        super("emerald", "Emerald", 4, ["emerald"], 1, false);
+        super("emerald", "Emerald", 1, false);
+        this.texIndex = 4;
+        this.setRecipe(["emerald"]);
     }
 
     override applyStats(stats: ToolStats, level: number): void {

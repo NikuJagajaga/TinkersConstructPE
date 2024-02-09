@@ -1,7 +1,10 @@
 class ModLuck extends TinkersModifier {
 
     constructor(){
-        super("luck", "Luck", 1, ["lapis_lazuli"], 360, false, ["silk"]);
+        super("luck", "Luck", 360, false);
+        this.texIndex = 1;
+        this.setRecipe(["lapis_lazuli"]);
+        this.addConflict("silk");
     }
 
     override applyEnchant(enchant: ToolAPI.EnchantData, level: number): void {

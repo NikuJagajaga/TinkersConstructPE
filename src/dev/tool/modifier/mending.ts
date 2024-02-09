@@ -21,7 +21,9 @@ Item.registerUseFunction(ItemID.tcon_moss, (coords, item, block, playerUid) => {
 class ModMending extends TinkersModifier {
 
     constructor(){
-        super("mending", "Mending", 13, [ItemID.tcon_mending_moss], 1, true);
+        super("mending", "Mending", 1, true);
+        this.texIndex = 13;
+        this.setRecipe([ItemID.tcon_mending_moss]);
     }
 
     override onMending(level: number): number {

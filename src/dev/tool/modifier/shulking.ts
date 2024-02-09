@@ -1,7 +1,9 @@
 class ModShulking extends TinkersModifier {
 
     constructor(){
-        super("shulking", "Shulking", 14, ["chorus_fruit_popped"], 50, false);
+        super("shulking", "Shulking", 50, false);
+        this.texIndex = 14;
+        this.setRecipe(["chorus_fruit_popped"]);
     }
 
     override onAttack(item: ItemInstance, victim: number, player: number, level: number): number {

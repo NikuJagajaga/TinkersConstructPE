@@ -37,8 +37,10 @@ class ToolModelManager {
 
         for(let key in stack.modifiers){
             index = Modifier[key].getTexIndex();
-            coordsNormal.push(texture.getModCoords(index));
-            coordsBroken.push(texture.getModCoords(index));
+            if(index !== -1){
+                coordsNormal.push(texture.getModCoords(index));
+                coordsBroken.push(texture.getModCoords(index));
+            }
         }
 
         Threading.initThread("tcon_toolmodel", () => {

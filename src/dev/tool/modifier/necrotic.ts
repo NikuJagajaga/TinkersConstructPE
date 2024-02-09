@@ -4,7 +4,9 @@ createItem("tcon_necrotic_bone", "Necrotic Bone");
 class ModNecrotic extends TinkersModifier {
 
     constructor(){
-        super("necrotic", "Necrotic", 11, [ItemID.tcon_necrotic_bone], 1, true);
+        super("necrotic", "Necrotic", 1, true);
+        this.texIndex = 11;
+        this.setRecipe([ItemID.tcon_necrotic_bone]);
     }
 
     override onDealDamage(victim: number, player: number, damageValue: number, damageType: number, level: number): void {

@@ -27,6 +27,7 @@ def main():
     generate.gen_parts("binding2", "part/binding2.png")
     generate.gen_parts("guard", "part/guard.png")
     generate.gen_parts("largeplate", "part/largeplate.png")
+    generate.gen_parts("sharpening", "part/sharpening.png")
 
     generate.gen_tool("pickaxe", 3)
     generate.gen_tool("shovel", 3)

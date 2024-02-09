@@ -7,7 +7,9 @@ Recipes.addFurnace(BlockID.tcon_graveyard_soil, BlockID.tcon_consecrated_soil);
 class ModSmite extends TinkersModifier {
 
     constructor(){
-        super("smite", "Smite", 8, [BlockID.tcon_consecrated_soil], 24, true);
+        super("smite", "Smite", 24, true);
+        this.texIndex = 8;
+        this.setRecipe([BlockID.tcon_consecrated_soil]);
     }
 
     override onAttack(item: ItemInstance, victim: number, player: number, level: number): number {

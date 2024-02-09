@@ -4,7 +4,9 @@ class ModHaste extends TinkersModifier {
     private static readonly step2 = 25;
 
     constructor(){
-        super("haste", "Haste", 0, ["redstone"], 50, true);
+        super("haste", "Haste", 50, true);
+        this.texIndex = 0;
+        this.setRecipe(["redstone"]);
     }
 
     override applyStats(stats: ToolStats, level: number): void {

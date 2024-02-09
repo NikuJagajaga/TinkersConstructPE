@@ -1,19 +1,29 @@
 abstract class TinkersModifier {
 
-    private recipe: {id: number, data: number}[];
-    private hate: {[key: string]: true};
+    protected key: string;
+    protected name: string;
+    protected texIndex: number = -1;
+    public max: number;
 
-    constructor(private key: string, private name: string, private texIndex: number, recipe: (Tile | number | Recipes2.VanillaID)[], public max: number, multi: boolean, hate?: string[]){
-        this.recipe = recipe.map(item => getIDData(item));
+    protected recipe: Tile[];
+    protected hate: {[key: string]: true};
+
+    constructor(key: string, name: string, max: number, multi: boolean){
+        this.key = key;
+        this.name = name;
+        this.max = max;
         this.hate = {};
         if(!multi){
             this.hate[key] = true;
         }
-        if(hate){
-            for(let mod of hate){
-                this.hate[mod] = true;
-            }
-        }
+    }
+
+    protected setRecipe(recipe: AnyID[]): void {
+        this.recipe = recipe.map(item => getIDData(item));
+    }
+
+    protected addConflict(mod: string): void {
+        this.hate[mod] = true;
     }
 
     getKey(): string {
