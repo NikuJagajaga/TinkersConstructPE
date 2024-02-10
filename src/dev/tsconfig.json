@@ -13,8 +13,8 @@
     "include": [
 
         "header.ts",
-        "translation.ts",
         "enum.ts",
+        "translation/*.ts",
 
         "util/TconTileEntity.ts",
         "util/TileWithLiquidModel.ts",

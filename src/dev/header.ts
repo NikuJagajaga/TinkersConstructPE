@@ -130,3 +130,12 @@ const createItem = (namedID: string, name: string, texture: Item.TextureData = {
 ItemModel.setCurrentCacheGroup("tcon", "2.2.0");
 
 Network.addClientPacket("tcon.playSound", (data: {name: string, volume?: number, pitch?: number}) => SoundManager.playSound(data.name, data.volume, data.pitch));
+
+
+const translate = (text: string, ...parameters: any) => {
+	text = Translation.translate(text);
+	if (parameters.length > 0) {
+		return java.lang.String.format(text, parameters.map((obj: any) => "" + obj));
+	}
+	return text;
+};
