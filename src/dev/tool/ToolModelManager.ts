@@ -1,5 +1,7 @@
 class ToolModelManager {
 
+    private static readonly THREAD_NAME = "tcon_toolmodel";
+
     private static models: {[key: string]: {normal: ItemModel, broken: ItemModel}} = {};
 
     static getModel(item: ItemInstance): ItemModel {
@@ -17,7 +19,7 @@ class ToolModelManager {
             return this.models[uniqueKey][suffix];
         }
 
-        if(Threading.getThread("tcon_toolmodel")?.isAlive()){
+        if(Threading.getThread(this.THREAD_NAME)?.isAlive()){
             return null;
         }
 
@@ -43,7 +45,7 @@ class ToolModelManager {
             }
         }
 
-        Threading.initThread("tcon_toolmodel", () => {
+        Threading.initThread(this.THREAD_NAME, () => {
 
             const size = 1 / 16;
             let coords: {x: number, y: number}[];

@@ -7619,19 +7619,16 @@ var TinkersModifier = /** @class */ (function () {
         }
         return true;
     };
-    TinkersModifier.prototype.applyStats = function (stats, level) {
-    };
-    TinkersModifier.prototype.applyEnchant = function (enchant, level) {
-    };
-    TinkersModifier.prototype.onDestroy = function (item, coords, block, player, level) {
-    };
+    TinkersModifier.prototype.applyStats = function (stats, level) { };
+    TinkersModifier.prototype.applyEnchant = function (enchant, level) { };
+    TinkersModifier.prototype.onDestroy = function (item, coords, block, player, level) { };
     TinkersModifier.prototype.onAttack = function (item, victim, player, level) {
         return 0;
     };
-    TinkersModifier.prototype.onDealDamage = function (victim, player, damageValue, damageType, level) {
-    };
-    TinkersModifier.prototype.onKillEntity = function (victim, player, damageType, level) {
-    };
+    TinkersModifier.prototype.onDealDamage = function (victim, player, damageValue, damageType, level) { };
+    TinkersModifier.prototype.onPlayerDamaged = function (victim, player, damageValue, damageType, level) { };
+    TinkersModifier.prototype.onKillEntity = function (victim, player, damageType, level) { };
+    TinkersModifier.prototype.onPlayerDeath = function (victim, player, damageType, level) { };
     TinkersModifier.prototype.onConsume = function (level) {
         return false;
     };
@@ -8711,7 +8708,7 @@ var TconTool = /** @class */ (function (_super) {
         _this.setHandEquipped(true);
         _this.setMaxStack(1);
         _this.setMaxDamage(13);
-        //this.setCategory(EItemCategory.TOOL);
+        _this.setCategory(EItemCategory.TOOL);
         for (var i = 0; i <= _this.maxDamage; i++) {
             ItemModel.getFor(_this.id, i).setModelOverrideCallback(function (item) { return ToolModelManager.getModel(item); });
         }
@@ -8815,6 +8812,15 @@ var TconTool = /** @class */ (function (_super) {
             mod.onDealDamage(victim, player, damageValue, damageType, level);
         });
     };
+    TconTool.prototype.onPlayerDamaged = function (item, victim, player, damageValue, damageType) {
+        if (!item.extra) {
+            return;
+        }
+        var stack = new TconToolStack(item);
+        stack.forEachModifiers(function (mod, level) {
+            mod.onPlayerDamaged(victim, player, damageValue, damageType, level);
+        });
+    };
     TconTool.prototype.onKillEntity = function (item, victim, player, damageType) {
         if (!item.extra) {
             return;
@@ -8822,6 +8828,15 @@ var TconTool = /** @class */ (function (_super) {
         var stack = new TconToolStack(item);
         stack.forEachModifiers(function (mod, level) {
             mod.onKillEntity(victim, player, damageType, level);
+        });
+    };
+    TconTool.prototype.onPlayerDeath = function (item, victim, player, damageType) {
+        if (!item.extra) {
+            return;
+        }
+        var stack = new TconToolStack(item);
+        stack.forEachModifiers(function (mod, level) {
+            mod.onPlayerDeath(victim, player, damageType, level);
         });
     };
     TconTool.prototype.onItemUse = function (coords, item, block, player) {
@@ -8911,25 +8926,31 @@ Callback.addCallback("EntityHurt", function (attacker, victim, damageValue, dama
     if (EntityHelper.isPlayer(attacker)) {
         var item = Entity.getCarriedItem(attacker);
         var tool = ToolAPI.getToolData(item.id);
-        (tool === null || tool === void 0 ? void 0 : tool.onDealDamage) && tool.onDealDamage(item, victim, attacker, damageValue, damageType);
+        tool === null || tool === void 0 ? void 0 : tool.onDealDamage(item, victim, attacker, damageValue, damageType);
     }
     if (EntityHelper.isPlayer(victim)) {
+        var item = Entity.getCarriedItem(attacker);
+        var tool = ToolAPI.getToolData(item.id);
+        tool === null || tool === void 0 ? void 0 : tool.onPlayerDamaged(item, victim, attacker, damageValue, damageType);
     }
 });
 Callback.addCallback("EntityDeath", function (entity, attacker, damageType) {
     if (EntityHelper.isPlayer(attacker)) {
         var item = Entity.getCarriedItem(attacker);
         var tool = ToolAPI.getToolData(item.id);
-        (tool === null || tool === void 0 ? void 0 : tool.onKillEntity) && tool.onKillEntity(item, entity, attacker, damageType);
+        tool === null || tool === void 0 ? void 0 : tool.onKillEntity(item, entity, attacker, damageType);
     }
     if (EntityHelper.isPlayer(entity)) {
+        var item = Entity.getCarriedItem(attacker);
+        var tool = ToolAPI.getToolData(item.id);
+        tool === null || tool === void 0 ? void 0 : tool.onPlayerDeath(item, entity, attacker, damageType);
     }
 });
 Callback.addCallback("LocalTick", function () {
     if (World.getThreadTime() % 150 === 0) {
         var item = Player.getCarriedItem();
         var tool = ToolAPI.getToolData(item.id);
-        (tool === null || tool === void 0 ? void 0 : tool.onMending) && tool.onMending(item, Player.get());
+        tool === null || tool === void 0 ? void 0 : tool.onMending(item, Player.get());
     }
 });
 var ToolModelManager = /** @class */ (function () {
@@ -8947,7 +8968,7 @@ var ToolModelManager = /** @class */ (function () {
         if (this.models[uniqueKey]) {
             return this.models[uniqueKey][suffix];
         }
-        if ((_a = Threading.getThread("tcon_toolmodel")) === null || _a === void 0 ? void 0 : _a.isAlive()) {
+        if ((_a = Threading.getThread(this.THREAD_NAME)) === null || _a === void 0 ? void 0 : _a.isAlive()) {
             return null;
         }
         var modelNormal = ItemModel.newStandalone();
@@ -8969,7 +8990,7 @@ var ToolModelManager = /** @class */ (function () {
                 coordsBroken.push(texture.getModCoords(index));
             }
         }
-        Threading.initThread("tcon_toolmodel", function () {
+        Threading.initThread(this.THREAD_NAME, function () {
             var size = 1 / 16;
             var coords;
             var x = 0;
@@ -9026,6 +9047,7 @@ var ToolModelManager = /** @class */ (function () {
         this.models[uniqueKey] = { normal: modelNormal, broken: modelBroken };
         return this.models[uniqueKey][suffix];
     };
+    ToolModelManager.THREAD_NAME = "tcon_toolmodel";
     ToolModelManager.models = {};
     return ToolModelManager;
 }());

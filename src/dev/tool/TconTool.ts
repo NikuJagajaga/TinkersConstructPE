@@ -25,7 +25,7 @@ abstract class TconTool extends ItemCommon implements ItemBehavior, ToolAPI.Tool
         this.setHandEquipped(true);
         this.setMaxStack(1);
         this.setMaxDamage(13);
-        //this.setCategory(EItemCategory.TOOL);
+        this.setCategory(EItemCategory.TOOL);
 
         for(let i = 0; i <= this.maxDamage; i++){
             ItemModel.getFor(this.id, i).setModelOverrideCallback(item => ToolModelManager.getModel(item));
@@ -142,6 +142,16 @@ abstract class TconTool extends ItemCommon implements ItemBehavior, ToolAPI.Tool
         });
     }
 
+    onPlayerDamaged(item: ItemInstance, victim: number, player: number, damageValue: number, damageType: number): void {
+        if(!item.extra){
+            return;
+        }
+        const stack = new TconToolStack(item);
+        stack.forEachModifiers((mod, level) => {
+            mod.onPlayerDamaged(victim, player, damageValue, damageType, level);
+        });
+    }
+
     onKillEntity(item: ItemInstance, victim: number, player: number, damageType: number): void {
         if(!item.extra){
             return;
@@ -149,6 +159,16 @@ abstract class TconTool extends ItemCommon implements ItemBehavior, ToolAPI.Tool
         const stack = new TconToolStack(item);
         stack.forEachModifiers((mod, level) => {
             mod.onKillEntity(victim, player, damageType, level);
+        });
+    }
+
+    onPlayerDeath(item: ItemInstance, victim: number, player: number, damageType: number): void {
+        if(!item.extra){
+            return;
+        }
+        const stack = new TconToolStack(item);
+        stack.forEachModifiers((mod, level) => {
+            mod.onPlayerDeath(victim, player, damageType, level);
         });
     }
 
@@ -251,10 +271,12 @@ Callback.addCallback("EntityHurt", (attacker: number, victim: number, damageValu
     if(EntityHelper.isPlayer(attacker)){
         const item = Entity.getCarriedItem(attacker);
         const tool = ToolAPI.getToolData(item.id) as TconTool;
-        tool?.onDealDamage && tool.onDealDamage(item, victim, attacker, damageValue, damageType);
+        tool?.onDealDamage(item, victim, attacker, damageValue, damageType);
     }
     if(EntityHelper.isPlayer(victim)){
-        
+        const item = Entity.getCarriedItem(attacker);
+        const tool = ToolAPI.getToolData(item.id) as TconTool;
+        tool?.onPlayerDamaged(item, victim, attacker, damageValue, damageType);
     }
 });
 
@@ -262,10 +284,12 @@ Callback.addCallback("EntityDeath", (entity: number, attacker: number, damageTyp
     if(EntityHelper.isPlayer(attacker)){
         const item = Entity.getCarriedItem(attacker);
         const tool = ToolAPI.getToolData(item.id) as TconTool;
-        tool?.onKillEntity && tool.onKillEntity(item, entity, attacker, damageType);
+        tool?.onKillEntity(item, entity, attacker, damageType);
     }
     if(EntityHelper.isPlayer(entity)){
-
+        const item = Entity.getCarriedItem(attacker);
+        const tool = ToolAPI.getToolData(item.id) as TconTool;
+        tool?.onPlayerDeath(item, entity, attacker, damageType);
     }
 });
 
@@ -273,6 +297,6 @@ Callback.addCallback("LocalTick", () => {
     if(World.getThreadTime() % 150 === 0){
         const item = Player.getCarriedItem();
         const tool = ToolAPI.getToolData(item.id) as TconTool;
-        tool?.onMending && tool.onMending(item, Player.get());
+        tool?.onMending(item, Player.get());
     }
 });

@@ -60,29 +60,21 @@ abstract class TinkersModifier {
         return true;
     }
 
-    applyStats(stats: ToolStats, level: number): void {
+    applyStats(stats: ToolStats, level: number): void {}
 
-    }
+    applyEnchant(enchant: ToolAPI.EnchantData, level: number): void {}
 
-    applyEnchant(enchant: ToolAPI.EnchantData, level: number): void {
-        
-    }
-
-    onDestroy(item: ItemInstance, coords: Callback.ItemUseCoordinates, block: Tile, player: number, level: number): void {
-
-    }
+    onDestroy(item: ItemInstance, coords: Callback.ItemUseCoordinates, block: Tile, player: number, level: number): void {}
 
     onAttack(item: ItemInstance, victim: number, player: number, level: number): number {
         return 0;
     }
 
-    onDealDamage(victim: number, player: number, damageValue: number, damageType: number, level: number): void {
+    onDealDamage(victim: number, player: number, damageValue: number, damageType: number, level: number): void {}
+    onPlayerDamaged(victim: number, player: number, damageValue: number, damageType: number, level: number): void {}
 
-    }
-    
-    onKillEntity(victim: number, player: number, damageType: number, level: number): void {
-
-    }
+    onKillEntity(victim: number, player: number, damageType: number, level: number): void {}
+    onPlayerDeath(victim: number, player: number, damageType: number, level: number): void {}
 
     onConsume(level: number): boolean {
         return false;
