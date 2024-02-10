@@ -7128,6 +7128,18 @@ var TconToolStack = /** @class */ (function () {
             client === null || client === void 0 ? void 0 : client.send("tcon.playSound", { name: "tcon.levelup.ogg" });
         }
     };
+    TconToolStack.prototype.getModifierCounts = function () {
+        var modifiers = TinkersModifierHandler.decodeToArray(this.extra.getString("modifiers"));
+        var use = 0;
+        for (var _i = 0, modifiers_1 = modifiers; _i < modifiers_1.length; _i++) {
+            var mod = modifiers_1[_i];
+            use += Modifier[mod.type].getConsumeSlots();
+        }
+        return {
+            use: use,
+            max: Cfg.modifierSlots + ToolLeveling.getLevel(this.xp, this.instance.is3x3)
+        };
+    };
     TconToolStack.prototype.uniqueKey = function () {
         var hash = this.materials.reduce(function (value, material) { return 31 * value + material.getTexIndex(); }, 0);
         var mask = 0;
@@ -7564,6 +7576,7 @@ ItemRegistry.registerItem(new class extends ItemThrowable {
 var TinkersModifier = /** @class */ (function () {
     function TinkersModifier(key, name, max, multi) {
         this.texIndex = -1;
+        this.consumeSlots = 1;
         this.key = key;
         this.name = name;
         this.max = max;
@@ -7590,12 +7603,15 @@ var TinkersModifier = /** @class */ (function () {
     TinkersModifier.prototype.getTexIndex = function () {
         return this.texIndex;
     };
+    TinkersModifier.prototype.getConsumeSlots = function () {
+        return this.consumeSlots;
+    };
     TinkersModifier.prototype.getRecipe = function () {
         return this.recipe;
     };
     TinkersModifier.prototype.canBeTogether = function (modifiers) {
-        for (var _i = 0, modifiers_1 = modifiers; _i < modifiers_1.length; _i++) {
-            var mod = modifiers_1[_i];
+        for (var _i = 0, modifiers_2 = modifiers; _i < modifiers_2.length; _i++) {
+            var mod = modifiers_2[_i];
             if (this.hate[mod.type]) {
                 return false;
             }
@@ -8484,6 +8500,7 @@ var ToolCrafterWindow = /** @class */ (function (_super) {
             }
             var stack_1 = new TconToolStack(slotTool);
             var modifiers = TinkersModifierHandler.decodeToArray(stack_1.extra.getString("modifiers"));
+            var modCount = stack_1.getModifierCounts();
             var find3 = void 0;
             var _loop_2 = function (key) {
                 find3 = modifiers.find(function (mod) { return mod.type === key; });
@@ -8492,7 +8509,7 @@ var ToolCrafterWindow = /** @class */ (function (_super) {
                     find3.level += addMod_1[key];
                     return "continue";
                 }
-                if (Modifier[key].canBeTogether(modifiers) && modifiers.length < Cfg.modifierSlots + ToolLeveling.getLevel(stack_1.xp, stack_1.instance.is3x3)) {
+                if (Modifier[key].canBeTogether(modifiers) && modCount.use + Modifier[key].getConsumeSlots() <= modCount.max) {
                     addMod_1[key] = Math.min(addMod_1[key], Modifier[key].max);
                     modifiers.push({ type: key, level: addMod_1[key] });
                 }
@@ -8640,14 +8657,14 @@ var ToolCrafterWindow = /** @class */ (function (_super) {
     ToolCrafterWindow.prototype.showInfo = function (container, item) {
         var stack = new TconToolStack(item);
         var modifiers = TinkersModifierHandler.decodeToArray(item.extra.getString("modifiers"));
-        var level = ToolLeveling.getLevel(stack.xp, stack.instance.is3x3);
+        var modCount = stack.getModifierCounts();
         container.sendEvent("showInfo", {
             durability: stack.stats.durability - item.extra.getInt("durability"),
             maxDurability: stack.stats.durability,
             miningTier: stack.stats.level,
             miningSpeed: (stack.stats.efficiency * 100 | 0) / 100,
             meleeDamage: (stack.stats.damage * 100 | 0) / 100,
-            modifierSlots: Cfg.modifierSlots + level - modifiers.length,
+            modifierSlots: modCount.max - modCount.use,
             modifiers: modifiers
         });
     };
@@ -8897,12 +8914,16 @@ Callback.addCallback("EntityHurt", function (attacker, victim, damageValue, dama
         var tool = ToolAPI.getToolData(item.id);
         (tool === null || tool === void 0 ? void 0 : tool.onDealDamage) && tool.onDealDamage(item, victim, attacker, damageValue, damageType);
     }
+    if (EntityHelper.isPlayer(victim)) {
+    }
 });
 Callback.addCallback("EntityDeath", function (entity, attacker, damageType) {
     if (EntityHelper.isPlayer(attacker)) {
         var item = Entity.getCarriedItem(attacker);
         var tool = ToolAPI.getToolData(item.id);
         (tool === null || tool === void 0 ? void 0 : tool.onKillEntity) && tool.onKillEntity(item, entity, attacker, damageType);
+    }
+    if (EntityHelper.isPlayer(entity)) {
     }
 });
 Callback.addCallback("LocalTick", function () {

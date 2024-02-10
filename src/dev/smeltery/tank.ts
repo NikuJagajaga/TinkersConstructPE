@@ -275,7 +275,7 @@ class SearedTank extends TileWithLiquidModel {
 
     const onTooltipFunc: KEX.ItemsModule.OnTooltipCallback = (item, text, level) => {
         const tooltips = getTooltips(item);
-        for(let line of tooltips){
+        for(const line of tooltips){
             text.add(line);
         }
     }

@@ -27,7 +27,7 @@ namespace PartRegistry {
 
     export function createParts(key: string, material: TinkersMaterial): void {
         let id = 0;
-        for(let type of types){
+        for(const type of types){
             id = createItem(`tconpart_${type.key}_${key}`, material.getLocalizationOfPart(type.name));
             Item.registerNameOverrideFunction(id, nameOverrideFunc);
             Item.addCreativeGroup("tconpart_" + type.key, translate(type.name), [id]);
@@ -42,7 +42,7 @@ namespace PartRegistry {
     export function registerRecipes(key: string, material: TinkersMaterial): void {
         let id = 0;
         let liquid = "";
-        for(let type of types){
+        for(const type of types){
             id = ItemID[`tconpart_${type.key}_${key}`];
             liquid = material.getMoltenLiquid();
             if(liquid){
@@ -72,7 +72,7 @@ namespace PartRegistry {
 
         for(let key in Material){
             if(!Material[key].isMetal){
-                for(let type of types){
+                for(const type of types){
                     list.push({
                         input: [{id: ItemID.tcon_pattern_blank, count: 1, data: 0}, {...Material[key].getItem(), count: type.cost}],
                         output: [{id: PartRegistry.getIDFromData(type.key, key), count: 1, data: 0}],
@@ -120,7 +120,7 @@ namespace PartRegistry {
 
     const onTooltipFunc: KEX.ItemsModule.OnTooltipCallback = (item, text, level) => {
         const tooltips = PartRegistry.getTooltips(item.id);
-        for(let line of tooltips){
+        for(const line of tooltips){
             text.add(line);
         }
     }

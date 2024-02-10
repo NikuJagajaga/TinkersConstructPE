@@ -109,6 +109,19 @@ class TconToolStack implements ItemInstance {
         }
     }
 
+    getModifierInfo(): {modifiers: {type: string, level: number}[], usedCount: number, maxCount: number} {
+        const modifiers = TinkersModifierHandler.decodeToArray(this.extra.getString("modifiers"));
+        let usedCount = 0;
+        for(const mod of modifiers){
+            usedCount += Modifier[mod.type].getConsumeSlots();
+        }
+        return {
+            modifiers,
+            usedCount,
+            maxCount: Cfg.modifierSlots + ToolLeveling.getLevel(this.xp, this.instance.is3x3)
+        };
+    }
+
     uniqueKey(): string {
         const hash = this.materials.reduce((value, material) => 31 * value + material.getTexIndex(), 0);
         let mask = 0;

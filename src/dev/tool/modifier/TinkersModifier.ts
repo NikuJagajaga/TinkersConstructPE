@@ -3,6 +3,7 @@ abstract class TinkersModifier {
     protected key: string;
     protected name: string;
     protected texIndex: number = -1;
+    protected consumeSlots = 1;
     public max: number;
 
     protected recipe: Tile[];
@@ -42,12 +43,16 @@ abstract class TinkersModifier {
         return this.texIndex;
     }
 
+    getConsumeSlots(): number {
+        return this.consumeSlots;
+    }
+
     getRecipe(): Tile[] {
         return this.recipe;
     }
 
     canBeTogether(modifiers: {type: string, level: number}[]): boolean {
-        for(let mod of modifiers){
+        for(const mod of modifiers){
             if(this.hate[mod.type]){
                 return false;
             }
@@ -106,7 +111,7 @@ class TinkersModifierHandler {
 
     static decodeToObj(code: string): {[key: string]: number} {
         const mods: {[key: string]: number} = {};
-        for(let mod of this.decodeToArray(code)){
+        for(const mod of this.decodeToArray(code)){
             mods[mod.type] ??= 0;
             mods[mod.type] += mod.level;
         }

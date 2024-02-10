@@ -182,7 +182,7 @@ class ToolCrafterWindow extends CraftingWindow {
             }
 
             const stack = new TconToolStack(slotTool);
-            const modifiers = TinkersModifierHandler.decodeToArray(stack.extra.getString("modifiers"));
+            const {modifiers, usedCount, maxCount} = stack.getModifierInfo();
             let find3: {type: string, level: number};
             for(let key in addMod){
                 find3 = modifiers.find(mod => mod.type === key);
@@ -191,7 +191,7 @@ class ToolCrafterWindow extends CraftingWindow {
                     find3.level += addMod[key];
                     continue;
                 }
-                if(Modifier[key].canBeTogether(modifiers) && modifiers.length < Cfg.modifierSlots + ToolLeveling.getLevel(stack.xp, stack.instance.is3x3)){
+                if(Modifier[key].canBeTogether(modifiers) && usedCount + Modifier[key].getConsumeSlots() <= maxCount){
                     addMod[key] = Math.min(addMod[key], Modifier[key].max);
                     modifiers.push({type: key, level: addMod[key]});
                 }
@@ -354,8 +354,7 @@ class ToolCrafterWindow extends CraftingWindow {
     private showInfo(container: ItemContainer, item: ItemInstance): void {
 
         const stack = new TconToolStack(item);
-        const modifiers = TinkersModifierHandler.decodeToArray(item.extra.getString("modifiers"));
-        const level = ToolLeveling.getLevel(stack.xp, stack.instance.is3x3);
+        const modInfo = stack.getModifierInfo();
 
         container.sendEvent("showInfo", {
             durability: stack.stats.durability - item.extra.getInt("durability"),
@@ -363,8 +362,8 @@ class ToolCrafterWindow extends CraftingWindow {
             miningTier: stack.stats.level,
             miningSpeed: (stack.stats.efficiency * 100 | 0) / 100,
             meleeDamage: (stack.stats.damage * 100 | 0) / 100,
-            modifierSlots: Cfg.modifierSlots + level - modifiers.length,
-            modifiers: modifiers
+            modifierSlots: modInfo.maxCount - modInfo.usedCount,
+            modifiers: modInfo.modifiers
         });
 
     }

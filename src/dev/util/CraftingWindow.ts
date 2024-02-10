@@ -125,7 +125,7 @@ Callback.addCallback("ItemUse", (coords, item, touchBlock, isExternal, player) =
 
     if(Entity.getSneaking(player)) return;
 
-    for(let {block, window} of CraftingWindow.blocks){
+    for(const {block, window} of CraftingWindow.blocks){
         if(block.id === touchBlock.id && (block.data === -1 || block.data === touchBlock.data)){
             window.openFor(player);
             Game.prevent();

@@ -380,7 +380,7 @@ class SmelteryControler extends TconTileEntity implements ILiquidStorage {
         let stored = "";
         let amount = 0;
         let fuelData: ISmelteryFuel;
-        for(let pos of this.tanksPos){
+        for(const pos of this.tanksPos){
             iTank = StorageInterface.getLiquidStorage(this.blockSource, pos.x, pos.y, pos.z);
             tank = iTank?.getOutputTank(-1);
             if(tank){
@@ -423,7 +423,7 @@ class SmelteryControler extends TconTileEntity implements ILiquidStorage {
             let height = 0;
             let max = 0;
             let y = 0;
-            for(let {liquid, amount} of data.liqArray){
+            for(const {liquid, amount} of data.liqArray){
                 height = amount / data.capacity * sizeY;
                 max = Math.max(sizeX, sizeZ, height);
                 parts.push({
@@ -450,14 +450,14 @@ class SmelteryControler extends TconTileEntity implements ILiquidStorage {
 
     interactWithEntitiesInside(): void {
         const entities: number[] = [];
-        for(let ent of this.region.listEntitiesInAABB(this.area.from, this.area.to)){
+        for(const ent of this.region.listEntitiesInAABB(this.area.from, this.area.to)){
             if(MeltingRecipe.getEntRecipe(ent)){
                 entities.push(ent);
             }
         }
         const liquidCapacity = this.getLiquidCapacity();
         let result: LiquidInstance;
-        for(let ent of entities){
+        for(const ent of entities){
             result = MeltingRecipe.getEntRecipe(ent);
             if(this.totalLiquidAmount() + result.amount <= liquidCapacity){
                 this.liquidStorage.addLiquid(result.liquid, result.amount);
@@ -491,8 +491,8 @@ class SmelteryControler extends TconTileEntity implements ILiquidStorage {
             }
     
             if((tick & 3) === 0){
-                for(let recipe of AlloyRecipe.getRecipes(this.liquidStorage.liquidAmounts)){
-                    for(let input of recipe.inputs){
+                for(const recipe of AlloyRecipe.getRecipes(this.liquidStorage.liquidAmounts)){
+                    for(const input of recipe.inputs){
                         this.getLiquid(input.liquid, input.amount);
                     }
                     this.addLiquid(recipe.result.liquid, recipe.result.amount);

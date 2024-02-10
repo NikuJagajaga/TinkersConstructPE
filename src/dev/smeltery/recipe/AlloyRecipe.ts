@@ -9,7 +9,7 @@ class AlloyRecipe {
 
     static addRecipe(result: LiquidInstance, ...inputs: LiquidInstance[]): void {
         let inputAmount = 0;
-        for(let input of inputs){
+        for(const input of inputs){
             inputAmount += input.amount;
         }
         if(result.amount > inputAmount){

@@ -253,6 +253,9 @@ Callback.addCallback("EntityHurt", (attacker: number, victim: number, damageValu
         const tool = ToolAPI.getToolData(item.id) as TconTool;
         tool?.onDealDamage && tool.onDealDamage(item, victim, attacker, damageValue, damageType);
     }
+    if(EntityHelper.isPlayer(victim)){
+        
+    }
 });
 
 Callback.addCallback("EntityDeath", (entity: number, attacker: number, damageType: number) => {
@@ -260,6 +263,9 @@ Callback.addCallback("EntityDeath", (entity: number, attacker: number, damageTyp
         const item = Entity.getCarriedItem(attacker);
         const tool = ToolAPI.getToolData(item.id) as TconTool;
         tool?.onKillEntity && tool.onKillEntity(item, entity, attacker, damageType);
+    }
+    if(EntityHelper.isPlayer(entity)){
+
     }
 });
 
