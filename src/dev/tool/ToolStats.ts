@@ -15,7 +15,7 @@ class ToolStats implements ToolAPI.ToolMaterial {
             this.durability += stats.durability;
             this.damage += stats.damage;
             this.efficiency += stats.efficiency;
-            this.level = Math.min(this.level, stats.level);
+            this.level = Math.max(this.level, stats.level);
         }
         this.durability = Math.max(1, this.durability / length | 0);
         this.damage /= length;

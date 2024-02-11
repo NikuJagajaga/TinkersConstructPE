@@ -125,8 +125,12 @@ class TconToolStack implements ItemInstance {
     uniqueKey(): string {
         const hash = this.materials.reduce((value, material) => 31 * value + material.getTexIndex(), 0);
         let mask = 0;
+        let index = 0;
         for(let key in this.modifiers){
-            mask |= 1 << Modifier[key].getTexIndex();
+            index = Modifier[key].getTexIndex();
+            if(index !== -1){
+                mask |= 1 << index;
+            }
         }
         return this.instance.tconToolType + ":" + hash.toString(16) + ":" + mask.toString(16);
     }

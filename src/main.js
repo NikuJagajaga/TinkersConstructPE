@@ -6861,7 +6861,7 @@ var ToolStats = /** @class */ (function () {
             this.durability += stats.durability;
             this.damage += stats.damage;
             this.efficiency += stats.efficiency;
-            this.level = Math.min(this.level, stats.level);
+            this.level = Math.max(this.level, stats.level);
         }
         this.durability = Math.max(1, this.durability / length | 0);
         this.damage /= length;
@@ -7144,8 +7144,12 @@ var TconToolStack = /** @class */ (function () {
     TconToolStack.prototype.uniqueKey = function () {
         var hash = this.materials.reduce(function (value, material) { return 31 * value + material.getTexIndex(); }, 0);
         var mask = 0;
+        var index = 0;
         for (var key in this.modifiers) {
-            mask |= 1 << Modifier[key].getTexIndex();
+            index = Modifier[key].getTexIndex();
+            if (index !== -1) {
+                mask |= 1 << index;
+            }
         }
         return this.instance.tconToolType + ":" + hash.toString(16) + ":" + mask.toString(16);
     };

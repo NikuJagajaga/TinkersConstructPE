@@ -56,5 +56,6 @@ MODIFIERS: list[str] = [
     "knockback",
     "mending",
     "shulking",
-    "web"
+    "web",
+    "soulbound"
 ]
