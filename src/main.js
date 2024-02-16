@@ -7026,7 +7026,7 @@ var TconToolFactory;
             }
             stack = TconToolFactory.createToolStack(type, materials);
             if (stack && stack.id !== -1) {
-                Item.addToCreative(stack.id, stack.count, stack.data, stack.extra.putInt("xp", 2e9));
+                Item.addToCreative(stack.id, stack.count, stack.data, stack.extra);
             }
         }
         for (var lv in tools[type]) {
@@ -7100,12 +7100,13 @@ var TconToolStack = /** @class */ (function () {
         return this.durability >= this.stats.durability;
     };
     TconToolStack.prototype.consumeDurability = function (value, player) {
+        var _this = this;
         var cancel = false;
         var consume = 0;
         for (var i = 0; i < value; i++) {
             cancel = false;
             this.forEachModifiers(function (mod, level) {
-                if (mod.onConsume(level))
+                if (mod.onConsume(_this, level))
                     cancel = true;
             });
             if (!cancel)
@@ -7131,15 +7132,15 @@ var TconToolStack = /** @class */ (function () {
     TconToolStack.prototype.getModifierInfo = function () {
         var modifiers = TinkersModifierHandler.decodeToArray(this.extra.getString("modifiers"));
         var usedCount = 0;
+        var maxCount = Cfg.modifierSlots + ToolLeveling.getLevel(this.xp, this.instance.is3x3);
         for (var _i = 0, modifiers_1 = modifiers; _i < modifiers_1.length; _i++) {
             var mod = modifiers_1[_i];
-            usedCount += Modifier[mod.type].getConsumeSlots();
+            if (Modifier[mod.type]) {
+                usedCount += Modifier[mod.type].getConsumeSlots();
+                maxCount += Modifier[mod.type].getBonusSlots(mod.level);
+            }
         }
-        return {
-            modifiers: modifiers,
-            usedCount: usedCount,
-            maxCount: Cfg.modifierSlots + ToolLeveling.getLevel(this.xp, this.instance.is3x3)
-        };
+        return { modifiers: modifiers, usedCount: usedCount, maxCount: maxCount };
     };
     TconToolStack.prototype.uniqueKey = function () {
         var hash = this.materials.reduce(function (value, material) { return 31 * value + material.getTexIndex(); }, 0);
@@ -7596,20 +7597,17 @@ var TinkersModifier = /** @class */ (function () {
     TinkersModifier.prototype.addConflict = function (mod) {
         this.hate[mod] = true;
     };
-    TinkersModifier.prototype.getKey = function () {
-        return this.key;
-    };
-    TinkersModifier.prototype.getName = function () {
-        return this.name;
-    };
     TinkersModifier.prototype.getLocalizedName = function () {
-        return translate(this.getName());
+        return translate(this.name);
     };
     TinkersModifier.prototype.getTexIndex = function () {
         return this.texIndex;
     };
     TinkersModifier.prototype.getConsumeSlots = function () {
         return this.consumeSlots;
+    };
+    TinkersModifier.prototype.getBonusSlots = function (level) {
+        return 0;
     };
     TinkersModifier.prototype.getRecipe = function () {
         return this.recipe;
@@ -7625,20 +7623,18 @@ var TinkersModifier = /** @class */ (function () {
     };
     TinkersModifier.prototype.applyStats = function (stats, level) { };
     TinkersModifier.prototype.applyEnchant = function (enchant, level) { };
-    TinkersModifier.prototype.onDestroy = function (item, coords, block, player, level) { };
-    TinkersModifier.prototype.onAttack = function (item, victim, player, level) {
+    TinkersModifier.prototype.onDestroy = function (stack, coords, block, player, level) { };
+    TinkersModifier.prototype.onAttack = function (stack, victim, player, level) {
         return 0;
     };
-    TinkersModifier.prototype.onDealDamage = function (victim, player, damageValue, damageType, level) { };
-    TinkersModifier.prototype.onPlayerDamaged = function (victim, player, damageValue, damageType, level) { };
-    TinkersModifier.prototype.onKillEntity = function (victim, player, damageType, level) { };
-    TinkersModifier.prototype.onPlayerDeath = function (victim, player, damageType, level) { };
-    TinkersModifier.prototype.onConsume = function (level) {
+    TinkersModifier.prototype.onDealDamage = function (stack, victim, player, damageValue, damageType, level) { };
+    TinkersModifier.prototype.onPlayerDamaged = function (stack, victim, player, damageValue, damageType, level) { };
+    TinkersModifier.prototype.onKillEntity = function (stack, victim, player, damageType, level) { };
+    TinkersModifier.prototype.onPlayerDeath = function (stack, victim, player, damageType, level) { };
+    TinkersModifier.prototype.onConsume = function (stack, level) {
         return false;
     };
-    TinkersModifier.prototype.onMending = function (level) {
-        return 0;
-    };
+    TinkersModifier.prototype.onTick = function (stack, player, level) { };
     return TinkersModifier;
 }());
 var TinkersModifierHandler = /** @class */ (function () {
@@ -7798,7 +7794,7 @@ var ModReinforced = /** @class */ (function (_super) {
         _this.setRecipe([ItemID.tcon_reinforcement]);
         return _this;
     }
-    ModReinforced.prototype.onConsume = function (level) {
+    ModReinforced.prototype.onConsume = function (stack, level) {
         return level >= 5 ? true : Math.random() < level * 0.2;
     };
     return ModReinforced;
@@ -7811,7 +7807,7 @@ var ModBeheading = /** @class */ (function (_super) {
         _this.setRecipe(["ender_pearl", "obsidian"]);
         return _this;
     }
-    ModBeheading.prototype.onKillEntity = function (victim, player, damageType, level) {
+    ModBeheading.prototype.onKillEntity = function (stack, victim, player, damageType, level) {
         var headMeta = EntityHelper.getHeadMeta(victim);
         if (headMeta !== -1 && Math.random() < 0.1 * level) {
             var region = WorldRegion.getForActor(player);
@@ -7873,7 +7869,7 @@ var ModNecrotic = /** @class */ (function (_super) {
         _this.setRecipe([ItemID.tcon_necrotic_bone]);
         return _this;
     }
-    ModNecrotic.prototype.onDealDamage = function (victim, player, damageValue, damageType, level) {
+    ModNecrotic.prototype.onDealDamage = function (stack, victim, player, damageValue, damageType, level) {
         var add = damageValue * 0.1 * level | 0;
         if (add > 0) {
             Entity.setHealth(player, Math.min(Entity.getHealth(player) + add, Entity.getMaxHealth(player)));
@@ -7947,8 +7943,11 @@ var ModMending = /** @class */ (function (_super) {
         _this.setRecipe([ItemID.tcon_mending_moss]);
         return _this;
     }
-    ModMending.prototype.onMending = function (level) {
-        return level;
+    ModMending.prototype.onTick = function (stack, player, level) {
+        if (World.getThreadTime() % 150 === 0) {
+            stack.durability -= level;
+            stack.applyToHand(player);
+        }
     };
     return ModMending;
 }(TinkersModifier));
@@ -7980,6 +7979,20 @@ var ModWeb = /** @class */ (function (_super) {
     };
     return ModWeb;
 }(TinkersModifier));
+createItem("tcon_creative_modifier", "Creative Modifier");
+var ModCreative = /** @class */ (function (_super) {
+    __extends(ModCreative, _super);
+    function ModCreative() {
+        var _this = _super.call(this, "creative", "Creative", 99, false) || this;
+        _this.consumeSlots = 0;
+        _this.setRecipe([ItemID.tcon_creative_modifier]);
+        return _this;
+    }
+    ModCreative.prototype.getBonusSlots = function (level) {
+        return level;
+    };
+    return ModCreative;
+}(TinkersModifier));
 var Modifier = {
     haste: new ModHaste(),
     luck: new ModLuck(),
@@ -7996,7 +8009,8 @@ var Modifier = {
     knockback: new ModKnockback(),
     mending: new ModMending(),
     shuling: new ModShulking(),
-    web: new ModWeb()
+    web: new ModWeb(),
+    creative: new ModCreative()
 };
 Item.addCreativeGroup("tcon_partbuilder", translate("Part Builder"), [
     createBlock("tcon_partbuilder0", [{ name: "Part Builder", texture: [0, 0, ["log_side", 0]] }], "wood"),
@@ -8760,7 +8774,7 @@ var TconTool = /** @class */ (function (_super) {
         //KEX compatibility (ToolAPI.getBlockData will NOT be null)
         if ((blockData === null || blockData === void 0 ? void 0 : blockData.material) && this.blockTypes.indexOf(blockData.material.name) !== -1 && stack.stats.level >= blockData.level && !stack.isBroken()) {
             stack.forEachModifiers(function (mod, level) {
-                mod.onDestroy(item, coords, block, player, level);
+                mod.onDestroy(stack, coords, block, player, level);
             });
             if (this.isWeapon) {
                 stack.consumeDurability(2, player);
@@ -8780,7 +8794,7 @@ var TconTool = /** @class */ (function (_super) {
         var stack = new TconToolStack(item);
         var bonus = 0;
         stack.forEachModifiers(function (mod, level) {
-            bonus += mod.onAttack(item, victim, player, level);
+            bonus += mod.onAttack(stack, victim, player, level);
         });
         this.toolMaterial.damage = stack.stats.damage + bonus;
         if (this.isWeapon) {
@@ -8802,7 +8816,7 @@ var TconTool = /** @class */ (function (_super) {
         var bonus = 0;
         if (attacker !== 0 && victim !== 0) {
             stack.forEachModifiers(function (mod, level) {
-                bonus += mod.onAttack(item, victim, attacker, level);
+                bonus += mod.onAttack(stack, victim, attacker, level);
             });
         }
         return stack.stats.damage + bonus;
@@ -8813,7 +8827,7 @@ var TconTool = /** @class */ (function (_super) {
         }
         var stack = new TconToolStack(item);
         stack.forEachModifiers(function (mod, level) {
-            mod.onDealDamage(victim, player, damageValue, damageType, level);
+            mod.onDealDamage(stack, victim, player, damageValue, damageType, level);
         });
     };
     TconTool.prototype.onPlayerDamaged = function (item, victim, player, damageValue, damageType) {
@@ -8822,7 +8836,7 @@ var TconTool = /** @class */ (function (_super) {
         }
         var stack = new TconToolStack(item);
         stack.forEachModifiers(function (mod, level) {
-            mod.onPlayerDamaged(victim, player, damageValue, damageType, level);
+            mod.onPlayerDamaged(stack, victim, player, damageValue, damageType, level);
         });
     };
     TconTool.prototype.onKillEntity = function (item, victim, player, damageType) {
@@ -8831,7 +8845,7 @@ var TconTool = /** @class */ (function (_super) {
         }
         var stack = new TconToolStack(item);
         stack.forEachModifiers(function (mod, level) {
-            mod.onKillEntity(victim, player, damageType, level);
+            mod.onKillEntity(stack, victim, player, damageType, level);
         });
     };
     TconTool.prototype.onPlayerDeath = function (item, victim, player, damageType) {
@@ -8840,24 +8854,19 @@ var TconTool = /** @class */ (function (_super) {
         }
         var stack = new TconToolStack(item);
         stack.forEachModifiers(function (mod, level) {
-            mod.onPlayerDeath(victim, player, damageType, level);
+            mod.onPlayerDeath(stack, victim, player, damageType, level);
         });
     };
     TconTool.prototype.onItemUse = function (coords, item, block, player) {
     };
-    TconTool.prototype.onMending = function (item, player) {
+    TconTool.prototype.onTick = function (item, player) {
         if (!item.extra) {
             return;
         }
         var stack = new TconToolStack(item);
-        var add = 0;
         stack.forEachModifiers(function (mod, level) {
-            add += mod.onMending(level);
+            mod.onTick(stack, player, level);
         });
-        if (add > 0) {
-            stack.durability -= add;
-            stack.applyToHand(player);
-        }
     };
     return TconTool;
 }(ItemCommon));
@@ -8906,7 +8915,7 @@ var TconTool3x3 = /** @class */ (function (_super) {
                         region.destroyBlock(pos, true, player);
                         consume++;
                         stack.forEachModifiers(function (mod, level) {
-                            mod.onDestroy(item, { x: pos.x, y: pos.y, z: pos.z, side: coords.side, relative: World.getRelativeCoords(pos.x, pos.y, pos.z, coords.side) }, block2, player, level);
+                            mod.onDestroy(stack, { x: pos.x, y: pos.y, z: pos.z, side: coords.side, relative: World.getRelativeCoords(pos.x, pos.y, pos.z, coords.side) }, block2, player, level);
                         });
                     }
                 }
@@ -8916,7 +8925,7 @@ var TconTool3x3 = /** @class */ (function (_super) {
         if ((blockData === null || blockData === void 0 ? void 0 : blockData.material) && this.blockTypes.indexOf(blockData.material.name) !== -1 && stack.stats.level >= blockData.level) {
             consume++;
             stack.forEachModifiers(function (mod, level) {
-                mod.onDestroy(item, coords, block, player, level);
+                mod.onDestroy(stack, coords, block, player, level);
             });
         }
         stack.consumeDurability(consume, player);
@@ -8951,11 +8960,9 @@ Callback.addCallback("EntityDeath", function (entity, attacker, damageType) {
     }
 });
 Callback.addCallback("LocalTick", function () {
-    if (World.getThreadTime() % 150 === 0) {
-        var item = Player.getCarriedItem();
-        var tool = ToolAPI.getToolData(item.id);
-        tool === null || tool === void 0 ? void 0 : tool.onMending(item, Player.get());
-    }
+    var item = Player.getCarriedItem();
+    var tool = ToolAPI.getToolData(item.id);
+    tool === null || tool === void 0 ? void 0 : tool.onTick(item, Player.get());
 });
 var ToolModelManager = /** @class */ (function () {
     function ToolModelManager() {
@@ -9151,7 +9158,7 @@ var TconHatchet = /** @class */ (function (_super) {
         var blockData = ToolAPI.getBlockData(block.id);
         if (blockData && this.blockTypes.indexOf(blockData.material.name) !== -1 && stack.stats.level >= blockData.level && !stack.isBroken()) {
             stack.forEachModifiers(function (mod, level) {
-                mod.onDestroy(item, coords, block, player, level);
+                mod.onDestroy(stack, coords, block, player, level);
             });
             if (blockData.material.name !== "plant") {
                 if (this.isWeapon) {
@@ -9421,7 +9428,7 @@ var TconLumberaxe = /** @class */ (function (_super) {
                         if (blockData && this_1.blockTypes.indexOf(blockData.material.name) !== -1 && stack.stats.level >= blockData.level) {
                             region.destroyBlock(x, y, z, true, player);
                             stack.forEachModifiers(function (mod, level) {
-                                mod.onDestroy(item, { x: x, y: y, z: z, side: coords.side, relative: World.getRelativeCoords(x, y, z, coords.side) }, block2_1, player, level);
+                                mod.onDestroy(stack, { x: x, y: y, z: z, side: coords.side, relative: World.getRelativeCoords(x, y, z, coords.side) }, block2_1, player, level);
                             });
                             consume++;
                         }
@@ -9521,7 +9528,7 @@ var ChopTreeUpdatable = /** @class */ (function () {
             return true;
         region.destroyBlock(coords, true, this.player);
         stack.forEachModifiers(function (mod, level) {
-            mod.onDestroy(carried, { x: coords.x, y: coords.y, z: coords.z, side: EBlockSide.DOWN, relative: coords }, block, _this.player, level);
+            mod.onDestroy(stack, { x: coords.x, y: coords.y, z: coords.z, side: EBlockSide.DOWN, relative: coords }, block, _this.player, level);
         });
         stack.consumeDurability(1, this.player);
         stack.addXp(1, this.player);

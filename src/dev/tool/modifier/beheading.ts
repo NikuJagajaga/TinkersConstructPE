@@ -6,7 +6,7 @@ class ModBeheading extends TinkersModifier {
         this.setRecipe(["ender_pearl", "obsidian"]);
     }
 
-    override onKillEntity(victim: number, player: number, damageType: number, level: number): void {
+    override onKillEntity(stack: TconToolStack, victim: number, player: number, damageType: number, level: number): void {
         const headMeta = EntityHelper.getHeadMeta(victim);
         if(headMeta !== -1 && Math.random() < 0.1 * level){
             const region = WorldRegion.getForActor(player);

@@ -1,6 +1,6 @@
 ConfigureMultiplayer({
     name: "Tinkers' Construct",
-    version: "2.2.3",
+    version: "2.3.0",
     isClientOnly: false
 });
 

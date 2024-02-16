@@ -40,7 +40,7 @@ class TconHatchet extends TconTool {
         const blockData = ToolAPI.getBlockData(block.id);
         if(blockData && this.blockTypes.indexOf(blockData.material.name) !== -1 && stack.stats.level >= blockData.level && !stack.isBroken()){
             stack.forEachModifiers((mod, level) => {
-                mod.onDestroy(item, coords, block, player, level);
+                mod.onDestroy(stack, coords, block, player, level);
             });
             if(blockData.material.name !== "plant"){
                 if(this.isWeapon){

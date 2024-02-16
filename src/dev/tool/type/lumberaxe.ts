@@ -70,7 +70,7 @@ class TconLumberaxe extends TconTool {
                 if(blockData && this.blockTypes.indexOf(blockData.material.name) !== -1 && stack.stats.level >= blockData.level){
                     region.destroyBlock(x, y, z, true, player);
                     stack.forEachModifiers((mod, level) => {
-                        mod.onDestroy(item, {x: x, y: y, z: z, side: coords.side, relative: World.getRelativeCoords(x, y, z, coords.side)}, block2, player, level);
+                        mod.onDestroy(stack, {x: x, y: y, z: z, side: coords.side, relative: World.getRelativeCoords(x, y, z, coords.side)}, block2, player, level);
                     });
                     consume++;
                 }
@@ -181,7 +181,7 @@ class ChopTreeUpdatable implements Updatable {
 
         region.destroyBlock(coords, true, this.player);
         stack.forEachModifiers((mod, level) => {
-            mod.onDestroy(carried, {x: coords.x, y: coords.y, z: coords.z, side: EBlockSide.DOWN, relative: coords}, block, this.player, level);
+            mod.onDestroy(stack, {x: coords.x, y: coords.y, z: coords.z, side: EBlockSide.DOWN, relative: coords}, block, this.player, level);
         });
         stack.consumeDurability(1, this.player);
         stack.addXp(1, this.player);

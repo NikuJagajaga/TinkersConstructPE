@@ -14,5 +14,6 @@ const Modifier: {[key: string]: TinkersModifier} = {
     knockback: new ModKnockback(),
     mending: new ModMending(),
     shuling: new ModShulking(),
-    web: new ModWeb()
+    web: new ModWeb(),
+    creative: new ModCreative()
 } as const;

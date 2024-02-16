@@ -121,7 +121,7 @@ namespace TconToolFactory {
             }
             stack = TconToolFactory.createToolStack(type, materials);
             if(stack && stack.id !== -1){
-                Item.addToCreative(stack.id, stack.count, stack.data, stack.extra.putInt("xp", 2e9));
+                Item.addToCreative(stack.id, stack.count, stack.data, stack.extra);
             }
         }
         for(let lv in tools[type]){

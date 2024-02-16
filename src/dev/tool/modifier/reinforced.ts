@@ -10,7 +10,7 @@ class ModReinforced extends TinkersModifier {
         this.setRecipe([ItemID.tcon_reinforcement]);
     }
 
-    override onConsume(level: number): boolean {
+    override onConsume(stack: TconToolStack, level: number): boolean {
         return level >= 5 ? true : Math.random() < level * 0.2;
     }
     

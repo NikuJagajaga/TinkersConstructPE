@@ -82,12 +82,12 @@ class TconToolStack implements ItemInstance {
         for(let i = 0; i < value; i++){
             cancel = false;
             this.forEachModifiers((mod, level) => {
-                if(mod.onConsume(level)) cancel = true;
+                if(mod.onConsume(this, level)) cancel = true;
             });
             if(!cancel) consume++;
         }
 
-        let isBroken = this.isBroken();
+        const isBroken = this.isBroken();
 
         this.durability += consume;
 
@@ -112,14 +112,14 @@ class TconToolStack implements ItemInstance {
     getModifierInfo(): {modifiers: {type: string, level: number}[], usedCount: number, maxCount: number} {
         const modifiers = TinkersModifierHandler.decodeToArray(this.extra.getString("modifiers"));
         let usedCount = 0;
+        let maxCount = Cfg.modifierSlots + ToolLeveling.getLevel(this.xp, this.instance.is3x3);
         for(const mod of modifiers){
-            usedCount += Modifier[mod.type].getConsumeSlots();
+            if(Modifier[mod.type]){
+                usedCount += Modifier[mod.type].getConsumeSlots();
+                maxCount += Modifier[mod.type].getBonusSlots(mod.level);
+            }
         }
-        return {
-            modifiers,
-            usedCount,
-            maxCount: Cfg.modifierSlots + ToolLeveling.getLevel(this.xp, this.instance.is3x3)
-        };
+        return {modifiers, usedCount, maxCount};
     }
 
     uniqueKey(): string {

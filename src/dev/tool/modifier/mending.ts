@@ -26,8 +26,11 @@ class ModMending extends TinkersModifier {
         this.setRecipe([ItemID.tcon_mending_moss]);
     }
 
-    override onMending(level: number): number {
-        return level;
+    override onTick(stack: TconToolStack, player: number, level: number): void {
+        if(World.getThreadTime() % 150 === 0){
+            stack.durability -= level;
+            stack.applyToHand(player);
+        }
     }
     
 }

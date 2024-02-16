@@ -1,10 +1,10 @@
 abstract class TinkersModifier {
 
-    protected key: string;
-    protected name: string;
-    protected texIndex: number = -1;
+    readonly key: string;
+    readonly name: string;
+    protected texIndex = -1;
     protected consumeSlots = 1;
-    public max: number;
+    readonly max: number;
 
     protected recipe: Tile[];
     protected hate: {[key: string]: true};
@@ -27,16 +27,8 @@ abstract class TinkersModifier {
         this.hate[mod] = true;
     }
 
-    getKey(): string {
-        return this.key;
-    }
-
-    getName(): string {
-        return this.name;
-    }
-
     getLocalizedName(): string {
-        return translate(this.getName());
+        return translate(this.name);
     }
 
     getTexIndex(): number {
@@ -45,6 +37,10 @@ abstract class TinkersModifier {
 
     getConsumeSlots(): number {
         return this.consumeSlots;
+    }
+
+    getBonusSlots(level: number): number {
+        return 0;
     }
 
     getRecipe(): Tile[] {
@@ -61,28 +57,25 @@ abstract class TinkersModifier {
     }
 
     applyStats(stats: ToolStats, level: number): void {}
-
     applyEnchant(enchant: ToolAPI.EnchantData, level: number): void {}
 
-    onDestroy(item: ItemInstance, coords: Callback.ItemUseCoordinates, block: Tile, player: number, level: number): void {}
+    onDestroy(stack: TconToolStack, coords: Callback.ItemUseCoordinates, block: Tile, player: number, level: number): void {}
 
-    onAttack(item: ItemInstance, victim: number, player: number, level: number): number {
+    onAttack(stack: TconToolStack, victim: number, player: number, level: number): number {
         return 0;
     }
 
-    onDealDamage(victim: number, player: number, damageValue: number, damageType: number, level: number): void {}
-    onPlayerDamaged(victim: number, player: number, damageValue: number, damageType: number, level: number): void {}
+    onDealDamage(stack: TconToolStack, victim: number, player: number, damageValue: number, damageType: number, level: number): void {}
+    onPlayerDamaged(stack: TconToolStack, victim: number, player: number, damageValue: number, damageType: number, level: number): void {}
 
-    onKillEntity(victim: number, player: number, damageType: number, level: number): void {}
-    onPlayerDeath(victim: number, player: number, damageType: number, level: number): void {}
+    onKillEntity(stack: TconToolStack, victim: number, player: number, damageType: number, level: number): void {}
+    onPlayerDeath(stack: TconToolStack, victim: number, player: number, damageType: number, level: number): void {}
 
-    onConsume(level: number): boolean {
+    onConsume(stack: TconToolStack, level: number): boolean {
         return false;
     }
 
-    onMending(level: number): number {
-        return 0;
-    }
+    onTick(stack: TconToolStack, player: number, level: number): void {}
 
 }
 

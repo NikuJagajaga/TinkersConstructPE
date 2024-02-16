@@ -9,7 +9,7 @@ class ModNecrotic extends TinkersModifier {
         this.setRecipe([ItemID.tcon_necrotic_bone]);
     }
 
-    override onDealDamage(victim: number, player: number, damageValue: number, damageType: number, level: number): void {
+    override onDealDamage(stack: TconToolStack, victim: number, player: number, damageValue: number, damageType: number, level: number): void {
         const add = damageValue * 0.1 * level | 0;
         if(add > 0){
             Entity.setHealth(player, Math.min(Entity.getHealth(player) + add, Entity.getMaxHealth(player)));

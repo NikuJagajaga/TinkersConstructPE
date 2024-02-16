@@ -82,7 +82,7 @@ abstract class TconTool extends ItemCommon implements ItemBehavior, ToolAPI.Tool
         //KEX compatibility (ToolAPI.getBlockData will NOT be null)
         if(blockData?.material && this.blockTypes.indexOf(blockData.material.name) !== -1 && stack.stats.level >= blockData.level && !stack.isBroken()){
             stack.forEachModifiers((mod, level) => {
-                mod.onDestroy(item, coords, block, player, level);
+                mod.onDestroy(stack, coords, block, player, level);
             });
             if(this.isWeapon){
                 stack.consumeDurability(2, player);
@@ -103,7 +103,7 @@ abstract class TconTool extends ItemCommon implements ItemBehavior, ToolAPI.Tool
         const stack = new TconToolStack(item);
         let bonus = 0;
         stack.forEachModifiers((mod, level) => {
-            bonus += mod.onAttack(item, victim, player, level);
+            bonus += mod.onAttack(stack, victim, player, level);
         });
         this.toolMaterial.damage = stack.stats.damage + bonus;
         if(this.isWeapon){
@@ -126,7 +126,7 @@ abstract class TconTool extends ItemCommon implements ItemBehavior, ToolAPI.Tool
         let bonus = 0;
         if(attacker !== 0 && victim !== 0){
             stack.forEachModifiers((mod, level) => {
-                bonus += mod.onAttack(item, victim, attacker, level);
+                bonus += mod.onAttack(stack, victim, attacker, level);
             });
         }
         return stack.stats.damage + bonus;
@@ -138,7 +138,7 @@ abstract class TconTool extends ItemCommon implements ItemBehavior, ToolAPI.Tool
         }
         const stack = new TconToolStack(item);
         stack.forEachModifiers((mod, level) => {
-            mod.onDealDamage(victim, player, damageValue, damageType, level);
+            mod.onDealDamage(stack, victim, player, damageValue, damageType, level);
         });
     }
 
@@ -148,7 +148,7 @@ abstract class TconTool extends ItemCommon implements ItemBehavior, ToolAPI.Tool
         }
         const stack = new TconToolStack(item);
         stack.forEachModifiers((mod, level) => {
-            mod.onPlayerDamaged(victim, player, damageValue, damageType, level);
+            mod.onPlayerDamaged(stack, victim, player, damageValue, damageType, level);
         });
     }
 
@@ -158,7 +158,7 @@ abstract class TconTool extends ItemCommon implements ItemBehavior, ToolAPI.Tool
         }
         const stack = new TconToolStack(item);
         stack.forEachModifiers((mod, level) => {
-            mod.onKillEntity(victim, player, damageType, level);
+            mod.onKillEntity(stack, victim, player, damageType, level);
         });
     }
 
@@ -168,7 +168,7 @@ abstract class TconTool extends ItemCommon implements ItemBehavior, ToolAPI.Tool
         }
         const stack = new TconToolStack(item);
         stack.forEachModifiers((mod, level) => {
-            mod.onPlayerDeath(victim, player, damageType, level);
+            mod.onPlayerDeath(stack, victim, player, damageType, level);
         });
     }
 
@@ -176,20 +176,14 @@ abstract class TconTool extends ItemCommon implements ItemBehavior, ToolAPI.Tool
 
     }
 
-    onMending(item: ItemInstance, player: number): void {
+    onTick(item: ItemInstance, player: number): void {
         if(!item.extra){
             return;
         }
         const stack = new TconToolStack(item);
-        let add = 0;
         stack.forEachModifiers((mod, level) => {
-            add += mod.onMending(level);
+            mod.onTick(stack, player, level);
         });
-        if(add > 0){
-            stack.durability -= add;
-            stack.applyToHand(player);
-        }
-        
     }
 
 }
@@ -240,7 +234,7 @@ abstract class TconTool3x3 extends TconTool {
                 region.destroyBlock(pos, true, player);
                 consume++;
                 stack.forEachModifiers((mod, level) => {
-                    mod.onDestroy(item, {x: pos.x, y: pos.y, z: pos.z, side: coords.side, relative: World.getRelativeCoords(pos.x, pos.y, pos.z, coords.side)}, block2, player, level);
+                    mod.onDestroy(stack, {x: pos.x, y: pos.y, z: pos.z, side: coords.side, relative: World.getRelativeCoords(pos.x, pos.y, pos.z, coords.side)}, block2, player, level);
                 });
             }
         }
@@ -252,7 +246,7 @@ abstract class TconTool3x3 extends TconTool {
         if(blockData?.material && this.blockTypes.indexOf(blockData.material.name) !== -1 && stack.stats.level >= blockData.level){
             consume++;
             stack.forEachModifiers((mod, level) => {
-                mod.onDestroy(item, coords, block, player, level);
+                mod.onDestroy(stack, coords, block, player, level);
             });
         }
 
@@ -294,9 +288,7 @@ Callback.addCallback("EntityDeath", (entity: number, attacker: number, damageTyp
 });
 
 Callback.addCallback("LocalTick", () => {
-    if(World.getThreadTime() % 150 === 0){
-        const item = Player.getCarriedItem();
-        const tool = ToolAPI.getToolData(item.id) as TconTool;
-        tool?.onMending(item, Player.get());
-    }
+    const item = Player.getCarriedItem();
+    const tool = ToolAPI.getToolData(item.id) as TconTool;
+    tool?.onTick(item, Player.get());
 });
