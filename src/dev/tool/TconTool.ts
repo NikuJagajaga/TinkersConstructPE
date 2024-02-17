@@ -1,26 +1,21 @@
 abstract class TconTool extends ItemCommon implements ItemBehavior, ToolAPI.ToolParams {
 
-    tconToolType: string;
-    blockTypes: string[];
-    isWeapon: boolean;
-    is3x3: boolean;
-    miningSpeedModifier: number;
-    damagePotential: number;
-    repairParts: number[];
-    texture: ToolTexture;
-
+    abstract readonly tconToolType: string;
+    abstract readonly blockTypes: string[];
+    abstract readonly isWeapon: boolean;
+    abstract readonly partsCount: number;
+    abstract readonly headParts: number[];
+    abstract readonly texture: ToolTexture;
+    
+    readonly is3x3: boolean = false;
+    readonly miningSpeedModifier: number = 1.0;
+    readonly damagePotential: number = 1.0;
+    
     toolMaterial: ToolAPI.ToolMaterial;
 
     constructor(stringID: string, name: string, icon: string){
 
         super(stringID, name, icon, false);
-
-        this.tconToolType = stringID;
-        this.isWeapon = false;
-        this.is3x3 = false;
-        this.miningSpeedModifier = 1.0;
-        this.damagePotential = 1.0;
-        this.repairParts = [1]; //head
 
         this.setHandEquipped(true);
         this.setMaxStack(1);
@@ -191,9 +186,10 @@ abstract class TconTool extends ItemCommon implements ItemBehavior, ToolAPI.Tool
 
 abstract class TconTool3x3 extends TconTool {
 
+    readonly is3x3 = true;
+
     constructor(stringID: string, name: string, icon: string){
         super(stringID, name, icon);
-        this.is3x3 = true;
     }
 
     override onDestroy(item: ItemInstance, coords: Callback.ItemUseCoordinates, block: Tile, player: number): true {
@@ -218,6 +214,7 @@ abstract class TconTool3x3 extends TconTool {
             case 2: radius.x = 0; break;
         }
 
+        const drop = Game.isItemSpendingAllowed(player);
         let blockData: ToolAPI.BlockData;
         let block2: Tile;
         let consume = 0;
@@ -231,7 +228,7 @@ abstract class TconTool3x3 extends TconTool {
             block2 = region.getBlock(pos);
             blockData = ToolAPI.getBlockData(block2.id);
             if(blockData?.material && this.blockTypes.indexOf(blockData.material.name) !== -1 && stack.stats.level >= blockData.level){
-                region.destroyBlock(pos, true, player);
+                region.destroyBlock(pos, drop, player);
                 consume++;
                 stack.forEachModifiers((mod, level) => {
                     mod.onDestroy(stack, {x: pos.x, y: pos.y, z: pos.z, side: coords.side, relative: World.getRelativeCoords(pos.x, pos.y, pos.z, coords.side)}, block2, player, level);

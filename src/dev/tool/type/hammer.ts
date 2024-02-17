@@ -2,19 +2,19 @@ class TconHammer extends TconTool3x3 {
 
     private static readonly DURABILITY_MODIFIER = 2.5;
 
+    readonly tconToolType = "hammer";
+    readonly blockTypes = ["stone"];
+    readonly isWeapon = false;
+    readonly partsCount = 4;
+    readonly headParts = [1, 2, 3];
+    readonly texture = new ToolTexture(this.tconToolType, this.partsCount, 0);
+
+    readonly miningSpeedModifier = 0.4;
+    readonly damagePotential = 1.2;
+
     constructor(miningLevel: number){
-
         super("tcontool_hammer_lv" + miningLevel, "Hammer", "tcontool_hammer");
-
-        this.tconToolType = "hammer";
-        this.blockTypes = ["stone"];
-        this.texture = new ToolTexture(this.tconToolType, 4, 0);
-        this.miningSpeedModifier = 0.4;
-        this.damagePotential = 1.2;
-        this.repairParts = [1, 2, 3];
-
         this.setToolParams(miningLevel);
-
     }
 
     override buildStats(stats: ToolStats, materials: TinkersMaterial[]): void {

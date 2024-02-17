@@ -7156,7 +7156,7 @@ var TconToolStack = /** @class */ (function () {
     };
     TconToolStack.prototype.getName = function () {
         var _this = this;
-        var head = this.instance.repairParts
+        var head = this.instance.headParts
             .map(function (partIndex) { return _this.materials[partIndex].getLocalizedName(); })
             .filter(function (material, index, arr) { return arr.indexOf(material) === index; }) // remove duplicates
             .join("-");
@@ -7579,6 +7579,32 @@ ItemRegistry.registerItem(new class extends ItemThrowable {
 
 });
 */ 
+var TconTrait = /** @class */ (function () {
+    function TconTrait(level) {
+        this.level = level;
+    }
+    TconTrait.prototype.getLocalizedName = function () {
+        return translate(this.name);
+    };
+    TconTrait.prototype.getBonusSlots = function () {
+        return this.level;
+    };
+    TconTrait.prototype.applyStats = function (stats) { };
+    TconTrait.prototype.applyEnchant = function (enchant) { };
+    TconTrait.prototype.onDestroy = function (stack, coords, block, player) { };
+    TconTrait.prototype.onAttack = function (stack, victim, player) {
+        return 0;
+    };
+    TconTrait.prototype.onDealDamage = function (stack, victim, player, damageValue, damageType) { };
+    TconTrait.prototype.onPlayerDamaged = function (stack, victim, player, damageValue, damageType) { };
+    TconTrait.prototype.onKillEntity = function (stack, victim, player, damageType) { };
+    TconTrait.prototype.onPlayerDeath = function (stack, victim, player, damageType) { };
+    TconTrait.prototype.onConsume = function (stack, player) {
+        return false;
+    };
+    TconTrait.prototype.onTick = function (stack, player) { };
+    return TconTrait;
+}());
 var TinkersModifier = /** @class */ (function () {
     function TinkersModifier(key, name, max, multi) {
         this.texIndex = -1;
@@ -8535,7 +8561,7 @@ var ToolCrafterWindow = /** @class */ (function (_super) {
             for (var key in addMod_1) {
                 _loop_2(key);
             }
-            var mat_1 = stack_1.instance.repairParts.map(function (index) { return stack_1.materials[index].getItem(); });
+            var mat_1 = stack_1.instance.headParts.map(function (index) { return stack_1.materials[index].getItem(); });
             var space = stack_1.durability;
             var newDur = space;
             var value = 0;
@@ -8717,12 +8743,9 @@ var TconTool = /** @class */ (function (_super) {
     __extends(TconTool, _super);
     function TconTool(stringID, name, icon) {
         var _this = _super.call(this, stringID, name, icon, false) || this;
-        _this.tconToolType = stringID;
-        _this.isWeapon = false;
         _this.is3x3 = false;
         _this.miningSpeedModifier = 1.0;
         _this.damagePotential = 1.0;
-        _this.repairParts = [1]; //head
         _this.setHandEquipped(true);
         _this.setMaxStack(1);
         _this.setMaxDamage(13);
@@ -8899,6 +8922,7 @@ var TconTool3x3 = /** @class */ (function (_super) {
                 radius.x = 0;
                 break;
         }
+        var drop = Game.isItemSpendingAllowed(player);
         var blockData;
         var block2;
         var consume = 0;
@@ -8912,7 +8936,7 @@ var TconTool3x3 = /** @class */ (function (_super) {
                     block2 = region.getBlock(pos);
                     blockData = ToolAPI.getBlockData(block2.id);
                     if ((blockData === null || blockData === void 0 ? void 0 : blockData.material) && this.blockTypes.indexOf(blockData.material.name) !== -1 && stack.stats.level >= blockData.level) {
-                        region.destroyBlock(pos, true, player);
+                        region.destroyBlock(pos, drop, player);
                         consume++;
                         stack.forEachModifiers(function (mod, level) {
                             mod.onDestroy(stack, { x: pos.x, y: pos.y, z: pos.z, side: coords.side, relative: World.getRelativeCoords(pos.x, pos.y, pos.z, coords.side) }, block2, player, level);
@@ -9068,7 +9092,10 @@ var TconPickaxe = /** @class */ (function (_super) {
         var _this = _super.call(this, "tcontool_pickaxe_lv" + miningLevel, "Pickaxe", "tcontool_pickaxe") || this;
         _this.tconToolType = "pickaxe";
         _this.blockTypes = ["stone"];
-        _this.texture = new ToolTexture(_this.tconToolType, 3, 1);
+        _this.isWeapon = false;
+        _this.partsCount = 3;
+        _this.headParts = [1];
+        _this.texture = new ToolTexture(_this.tconToolType, _this.partsCount, 1);
         _this.setToolParams(miningLevel);
         return _this;
     }
@@ -9096,7 +9123,10 @@ var TconShovel = /** @class */ (function (_super) {
         var _this = _super.call(this, "tcontool_shovel_lv" + miningLevel, "Shovel", "tcontool_shovel") || this;
         _this.tconToolType = "shovel";
         _this.blockTypes = ["dirt"];
-        _this.texture = new ToolTexture(_this.tconToolType, 3, 1);
+        _this.isWeapon = false;
+        _this.partsCount = 3;
+        _this.headParts = [1];
+        _this.texture = new ToolTexture(_this.tconToolType, _this.partsCount, 1);
         _this.damagePotential = 0.9;
         _this.setToolParams(miningLevel);
         return _this;
@@ -9138,7 +9168,10 @@ var TconHatchet = /** @class */ (function (_super) {
         var _this = _super.call(this, "tcontool_hatchet_lv" + miningLevel, "Hatchet", "tcontool_hatchet") || this;
         _this.tconToolType = "hatchet";
         _this.blockTypes = ["wood", "plant"];
-        _this.texture = new ToolTexture(_this.tconToolType, 3, 1);
+        _this.isWeapon = false;
+        _this.partsCount = 3;
+        _this.headParts = [1];
+        _this.texture = new ToolTexture(_this.tconToolType, _this.partsCount, 1);
         _this.damagePotential = 1.1;
         _this.setToolParams(miningLevel);
         return _this;
@@ -9224,13 +9257,15 @@ var TconMattock = /** @class */ (function (_super) {
     __extends(TconMattock, _super);
     function TconMattock(miningLevel) {
         var _this = _super.call(this, "tcontool_mattock_lv" + miningLevel, "Mattock", "tcontool_mattock") || this;
-        _this.index = 0;
         _this.tconToolType = "mattock";
         _this.blockTypes = ["wood", "dirt"];
-        _this.texture = new ToolTexture(_this.tconToolType, 3, 1);
+        _this.isWeapon = false;
+        _this.partsCount = 3;
+        _this.headParts = [1, 2];
+        _this.texture = new ToolTexture(_this.tconToolType, _this.partsCount, 1);
         _this.miningSpeedModifier = 0.95;
         _this.damagePotential = 0.9;
-        _this.repairParts = [1, 2];
+        _this.index = 0;
         _this.setToolParams(miningLevel);
         return _this;
     }
@@ -9271,8 +9306,10 @@ var TconSword = /** @class */ (function (_super) {
         var _this = _super.call(this, "tcontool_sword_lv" + miningLevel, "Broad Sword", "tcontool_sword") || this;
         _this.tconToolType = "sword";
         _this.blockTypes = ["fibre"];
-        _this.texture = new ToolTexture(_this.tconToolType, 3, 1);
         _this.isWeapon = true;
+        _this.partsCount = 3;
+        _this.headParts = [1];
+        _this.texture = new ToolTexture(_this.tconToolType, _this.partsCount, 1);
         _this.setToolParams(miningLevel);
         return _this;
     }
@@ -9306,10 +9343,12 @@ var TconHammer = /** @class */ (function (_super) {
         var _this = _super.call(this, "tcontool_hammer_lv" + miningLevel, "Hammer", "tcontool_hammer") || this;
         _this.tconToolType = "hammer";
         _this.blockTypes = ["stone"];
-        _this.texture = new ToolTexture(_this.tconToolType, 4, 0);
+        _this.isWeapon = false;
+        _this.partsCount = 4;
+        _this.headParts = [1, 2, 3];
+        _this.texture = new ToolTexture(_this.tconToolType, _this.partsCount, 0);
         _this.miningSpeedModifier = 0.4;
         _this.damagePotential = 1.2;
-        _this.repairParts = [1, 2, 3];
         _this.setToolParams(miningLevel);
         return _this;
     }
@@ -9344,10 +9383,12 @@ var TconExcavator = /** @class */ (function (_super) {
         var _this = _super.call(this, "tcontool_excavator_lv" + miningLevel, "Excavator", "tcontool_excavator") || this;
         _this.tconToolType = "excavator";
         _this.blockTypes = ["dirt"];
-        _this.texture = new ToolTexture(_this.tconToolType, 4, 0);
+        _this.isWeapon = false;
+        _this.partsCount = 4;
+        _this.headParts = [1, 2];
+        _this.texture = new ToolTexture(_this.tconToolType, _this.partsCount, 1);
         _this.miningSpeedModifier = 0.28;
         _this.damagePotential = 1.25;
-        _this.repairParts = [1, 2];
         _this.setToolParams(miningLevel);
         return _this;
     }
@@ -9381,12 +9422,14 @@ var TconLumberaxe = /** @class */ (function (_super) {
     function TconLumberaxe(miningLevel) {
         var _this = _super.call(this, "tcontool_lumberaxe_lv" + miningLevel, "Lumber Axe", "tcontool_lumberaxe") || this;
         _this.tconToolType = "lumberaxe";
-        _this.is3x3 = true;
         _this.blockTypes = ["wood"];
-        _this.texture = new ToolTexture(_this.tconToolType, 3, 1);
+        _this.isWeapon = false;
+        _this.partsCount = 4;
+        _this.headParts = [1, 2];
+        _this.texture = new ToolTexture(_this.tconToolType, _this.partsCount, 1);
+        _this.is3x3 = true;
         _this.miningSpeedModifier = 0.35;
         _this.damagePotential = 1.2;
-        _this.repairParts = [1, 2];
         _this.setToolParams(miningLevel);
         return _this;
     }
@@ -9412,6 +9455,7 @@ var TconLumberaxe = /** @class */ (function (_super) {
             this.treechop(coords, stack.uniqueKey(), player);
             return true;
         }
+        var drop = Game.isItemSpendingAllowed(player);
         var blockData = ToolAPI.getBlockData(block.id);
         if (blockData && this.blockTypes.indexOf(blockData.material.name) !== -1 && stack.stats.level >= blockData.level) {
             var region = WorldRegion.getForActor(player);
@@ -9426,7 +9470,7 @@ var TconLumberaxe = /** @class */ (function (_super) {
                         block2_1 = region.getBlock(x, y, z);
                         blockData = ToolAPI.getBlockData(block2_1.id);
                         if (blockData && this_1.blockTypes.indexOf(blockData.material.name) !== -1 && stack.stats.level >= blockData.level) {
-                            region.destroyBlock(x, y, z, true, player);
+                            region.destroyBlock(x, y, z, drop, player);
                             stack.forEachModifiers(function (mod, level) {
                                 mod.onDestroy(stack, { x: x, y: y, z: z, side: coords.side, relative: World.getRelativeCoords(x, y, z, coords.side) }, block2_1, player, level);
                             });
@@ -9479,6 +9523,7 @@ var ChopTreeUpdatable = /** @class */ (function () {
         var _this = this;
         this.name = updatableName;
         this.player = player;
+        this.drop = Game.isItemSpendingAllowed(player);
         this.uniqueKey = uniqueKey;
         this.target = [];
         this.visited = [];
@@ -9526,7 +9571,7 @@ var ChopTreeUpdatable = /** @class */ (function () {
         }
         if (!coords)
             return true;
-        region.destroyBlock(coords, true, this.player);
+        region.destroyBlock(coords, this.drop, this.player);
         stack.forEachModifiers(function (mod, level) {
             mod.onDestroy(stack, { x: coords.x, y: coords.y, z: coords.z, side: EBlockSide.DOWN, relative: coords }, block, _this.player, level);
         });

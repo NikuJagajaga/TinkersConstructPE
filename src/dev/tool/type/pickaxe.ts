@@ -1,15 +1,15 @@
 class TconPickaxe extends TconTool {
 
+    readonly tconToolType = "pickaxe";
+    readonly blockTypes = ["stone"];
+    readonly isWeapon = false;
+    readonly partsCount = 3;
+    readonly headParts = [1];
+    readonly texture = new ToolTexture(this.tconToolType, this.partsCount, 1);
+
     constructor(miningLevel: number){
-
         super("tcontool_pickaxe_lv" + miningLevel, "Pickaxe", "tcontool_pickaxe");
-
-        this.tconToolType = "pickaxe";
-        this.blockTypes = ["stone"];
-        this.texture = new ToolTexture(this.tconToolType, 3, 1);
-
         this.setToolParams(miningLevel);
-
     }
 
     override buildStats(stats: ToolStats, materials: TinkersMaterial[]): void {

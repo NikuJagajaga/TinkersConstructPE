@@ -136,7 +136,7 @@ class TconToolStack implements ItemInstance {
     }
 
     getName(): string {
-        const head: string = this.instance.repairParts
+        const head: string = this.instance.headParts
             .map(partIndex => this.materials[partIndex].getLocalizedName())
             .filter((material, index, arr) => arr.indexOf(material) === index) // remove duplicates
             .join("-");

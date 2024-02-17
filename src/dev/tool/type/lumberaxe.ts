@@ -9,20 +9,20 @@ class TconLumberaxe extends TconTool {
 
     private static readonly DURABILITY_MODIFIER = 2;
 
+    readonly tconToolType = "lumberaxe";
+    readonly blockTypes = ["wood"];
+    readonly isWeapon = false;
+    readonly partsCount = 4;
+    readonly headParts = [1, 2];
+    readonly texture = new ToolTexture(this.tconToolType, this.partsCount, 1);
+
+    readonly is3x3 = true;
+    readonly miningSpeedModifier = 0.35;
+    readonly damagePotential = 1.2;
+
     constructor(miningLevel: number){
-
         super("tcontool_lumberaxe_lv" + miningLevel, "Lumber Axe", "tcontool_lumberaxe");
-
-        this.tconToolType = "lumberaxe";
-        this.is3x3 = true;
-        this.blockTypes = ["wood"];
-        this.texture = new ToolTexture(this.tconToolType, 3, 1);
-        this.miningSpeedModifier = 0.35;
-        this.damagePotential = 1.2;
-        this.repairParts = [1, 2];
-
         this.setToolParams(miningLevel);
-
     }
 
     override buildStats(stats: ToolStats, materials: TinkersMaterial[]): void {
@@ -54,6 +54,7 @@ class TconLumberaxe extends TconTool {
             return true;
         }
         
+        const drop = Game.isItemSpendingAllowed(player);
         let blockData = ToolAPI.getBlockData(block.id);
         
         if(blockData && this.blockTypes.indexOf(blockData.material.name) !== -1 && stack.stats.level >= blockData.level){
@@ -68,7 +69,7 @@ class TconLumberaxe extends TconTool {
                 block2 = region.getBlock(x, y, z);
                 blockData = ToolAPI.getBlockData(block2.id);
                 if(blockData && this.blockTypes.indexOf(blockData.material.name) !== -1 && stack.stats.level >= blockData.level){
-                    region.destroyBlock(x, y, z, true, player);
+                    region.destroyBlock(x, y, z, drop, player);
                     stack.forEachModifiers((mod, level) => {
                         mod.onDestroy(stack, {x: x, y: y, z: z, side: coords.side, relative: World.getRelativeCoords(x, y, z, coords.side)}, block2, player, level);
                     });
@@ -112,6 +113,7 @@ class ChopTreeUpdatable implements Updatable {
 
     name: string;
     player: number;
+    drop: boolean;
     uniqueKey: string;
     target: Vector[];
     visited: Vector[];
@@ -122,6 +124,7 @@ class ChopTreeUpdatable implements Updatable {
 
         this.name = updatableName;
         this.player = player;
+        this.drop = Game.isItemSpendingAllowed(player);
         this.uniqueKey = uniqueKey;
         this.target = [];
         this.visited = [];
@@ -179,7 +182,7 @@ class ChopTreeUpdatable implements Updatable {
 
         if(!coords) return true;
 
-        region.destroyBlock(coords, true, this.player);
+        region.destroyBlock(coords, this.drop, this.player);
         stack.forEachModifiers((mod, level) => {
             mod.onDestroy(stack, {x: coords.x, y: coords.y, z: coords.z, side: EBlockSide.DOWN, relative: coords}, block, this.player, level);
         });

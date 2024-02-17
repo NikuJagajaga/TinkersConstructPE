@@ -1,18 +1,18 @@
 class TconMattock extends TconTool {
 
+    readonly tconToolType = "mattock";
+    readonly blockTypes = ["wood", "dirt"];
+    readonly isWeapon = false;
+    readonly partsCount = 3;
+    readonly headParts = [1, 2];
+    readonly texture = new ToolTexture(this.tconToolType, this.partsCount, 1);
+
+    readonly miningSpeedModifier = 0.95;
+    readonly damagePotential = 0.9;
+
     constructor(miningLevel: number){
-
         super("tcontool_mattock_lv" + miningLevel, "Mattock", "tcontool_mattock");
-
-        this.tconToolType = "mattock";
-        this.blockTypes = ["wood", "dirt"];
-        this.texture = new ToolTexture(this.tconToolType, 3, 1);
-        this.miningSpeedModifier = 0.95;
-        this.damagePotential = 0.9;
-        this.repairParts = [1, 2];
-
         this.setToolParams(miningLevel);
-
     }
 
     override buildStats(stats: ToolStats, materials: TinkersMaterial[]): void {

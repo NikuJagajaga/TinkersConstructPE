@@ -11,17 +11,18 @@ class TconHatchet extends TconTool {
         {id: VanillaTileID.crimson_stem, data: -1, stripped: VanillaTileID.stripped_crimson_stem, isStem: true}
     ];
 
+    readonly tconToolType = "hatchet";
+    readonly blockTypes = ["wood", "plant"];
+    readonly isWeapon = false;
+    readonly partsCount = 3;
+    readonly headParts = [1];
+    readonly texture = new ToolTexture(this.tconToolType, this.partsCount, 1);
+
+    readonly damagePotential = 1.1;
+
     constructor(miningLevel: number){
-
         super("tcontool_hatchet_lv" + miningLevel, "Hatchet", "tcontool_hatchet");
-
-        this.tconToolType = "hatchet";
-        this.blockTypes = ["wood", "plant"];
-        this.texture = new ToolTexture(this.tconToolType, 3, 1);
-        this.damagePotential = 1.1;
-
         this.setToolParams(miningLevel);
-
     }
 
     override buildStats(stats: ToolStats, materials: TinkersMaterial[]): void {

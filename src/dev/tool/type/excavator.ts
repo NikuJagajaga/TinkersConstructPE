@@ -2,19 +2,19 @@ class TconExcavator extends TconTool3x3 {
 
     private static readonly DURABILITY_MODIFIER = 1.75;
 
+    readonly tconToolType = "excavator";
+    readonly blockTypes = ["dirt"];
+    readonly isWeapon = false;
+    readonly partsCount = 4;
+    readonly headParts = [1, 2];
+    readonly texture = new ToolTexture(this.tconToolType, this.partsCount, 1);
+
+    readonly miningSpeedModifier = 0.28;
+    readonly damagePotential = 1.25;
+
     constructor(miningLevel: number){
-
         super("tcontool_excavator_lv" + miningLevel, "Excavator", "tcontool_excavator");
-
-        this.tconToolType = "excavator";
-        this.blockTypes = ["dirt"];
-        this.texture = new ToolTexture(this.tconToolType, 4, 0);
-        this.miningSpeedModifier = 0.28;
-        this.damagePotential = 1.25;
-        this.repairParts = [1, 2];
-
         this.setToolParams(miningLevel);
-
     }
 
     override buildStats(stats: ToolStats, materials: TinkersMaterial[]): void {

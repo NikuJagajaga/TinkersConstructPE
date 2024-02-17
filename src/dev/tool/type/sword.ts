@@ -2,17 +2,16 @@ class TconSword extends TconTool {
 
     private static DURABILITY_MODIFIER = 1.1;
 
+    readonly tconToolType = "sword";
+    readonly blockTypes = ["fibre"];
+    readonly isWeapon = true;
+    readonly partsCount = 3;
+    readonly headParts = [1];
+    readonly texture = new ToolTexture(this.tconToolType, this.partsCount, 1);
+
     constructor(miningLevel: number){
-
         super("tcontool_sword_lv" + miningLevel, "Broad Sword", "tcontool_sword");
-
-        this.tconToolType = "sword";
-        this.blockTypes = ["fibre"];
-        this.texture = new ToolTexture(this.tconToolType, 3, 1);
-        this.isWeapon = true;
-
         this.setToolParams(miningLevel);
-
     }
 
     override buildStats(stats: ToolStats, materials: TinkersMaterial[]): void {

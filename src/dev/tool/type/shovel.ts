@@ -1,16 +1,17 @@
 class TconShovel extends TconTool {
 
+    readonly tconToolType = "shovel";
+    readonly blockTypes = ["dirt"];
+    readonly isWeapon = false;
+    readonly partsCount = 3;
+    readonly headParts = [1];
+    readonly texture = new ToolTexture(this.tconToolType, this.partsCount, 1);
+
+    readonly damagePotential = 0.9;
+
     constructor(miningLevel: number){
-
         super("tcontool_shovel_lv" + miningLevel, "Shovel", "tcontool_shovel");
-
-        this.tconToolType = "shovel";
-        this.blockTypes = ["dirt"];
-        this.texture = new ToolTexture(this.tconToolType, 3, 1);
-        this.damagePotential = 0.9;
-
         this.setToolParams(miningLevel);
-
     }
 
     override buildStats(stats: ToolStats, materials: TinkersMaterial[]): void {
