@@ -9,6 +9,7 @@ class TconToolStack implements ItemInstance {
     readonly materials: TinkersMaterial[];
     readonly modifiers: {[key: string]: number};
     readonly stats: ToolAPI.ToolMaterial;
+    readonly traits: TraitWithLevel[];
 
     constructor(item: ItemInstance){
 
@@ -19,8 +20,53 @@ class TconToolStack implements ItemInstance {
 
         this.instance = ToolAPI.getToolData(this.id) as TconTool;
         this.materials = new String(this.extra.getString("materials")).split("_").map(mat => Material[mat]);
-        this.modifiers = TinkersModifierHandler.decodeToObj(this.extra.getString("modifiers"));
+        this.modifiers = TconModifier.decodeToObj(this.extra.getString("modifiers"));
         this.stats = this.getStats();
+
+        const headTraits: TraitWithLevel[] = [];
+        const extraTraits: TraitWithLevel[] = [];
+        let find: TraitWithLevel;
+
+        for(let i = 0; i < this.materials.length; i++){
+            if(this.instance.headParts.indexOf(i) !== -1){
+                for(const trait of this.materials[i].getHeadTraits()){
+                    find = headTraits.find(t => t.trait == trait.trait);
+                    if(find){
+                        find.level = Math.max(find.level, trait.level);
+                    }
+                    else{
+                        headTraits.push(trait);
+                    }
+                }
+            }
+            else{
+                for(const trait of this.materials[i].getExtraTraits()){
+                    find = extraTraits.find(t => t.trait == trait.trait);
+                    if(find){
+                        find.level = Math.max(find.level, trait.level);
+                    }
+                    else{
+                        extraTraits.push(trait);
+                    }
+                }
+            }
+        }
+
+        this.traits = [...headTraits];
+
+        for(const trait of extraTraits){
+            find = this.traits.find(t => t.trait == trait.trait);
+            if(find){
+                find.level += trait.level;
+            }
+            else{
+                this.traits.push(trait);
+            }
+        }
+
+        for(let key in this.modifiers){
+            this.traits.push({trait: Modifier[key].trait, level: this.modifiers[key]});
+        }
 
     }
 
@@ -56,17 +102,21 @@ class TconToolStack implements ItemInstance {
         const stats = this.getBaseStats();
         stats.efficiency *= this.instance.miningSpeedModifier;
         stats.damage *= this.instance.damagePotential;
-        this.forEachModifiers((mod, level) => {
-            mod.applyStats(stats, level);
+        this.forEachTraits((trait, level) => {
+            trait.applyStats(stats, level);
         });
         const toolMaterial = stats.getToolMaterial();
         this.id = TconToolFactory.getToolId(this.instance.tconToolType, toolMaterial.level);
         return toolMaterial;
     }
 
-    forEachModifiers(func: (mod: TinkersModifier, level: number) => void): void {
-        for(let key in this.modifiers){
-            Modifier[key] && func(Modifier[key], this.modifiers[key]);
+    getRepairItems(): Tile[] {
+        return this.instance.headParts.map(index => this.materials[index].getItem());
+    }
+
+    forEachTraits(func: (trait: TconTrait, level: number) => void): void {
+        for(const {trait, level} of this.traits){
+            func(trait, level);
         }
     }
 
@@ -81,8 +131,8 @@ class TconToolStack implements ItemInstance {
 
         for(let i = 0; i < value; i++){
             cancel = false;
-            this.forEachModifiers((mod, level) => {
-                if(mod.onConsume(this, level)) cancel = true;
+            this.forEachTraits((trait, level) => {
+                if(trait.onConsume(this, level)) cancel = true;
             });
             if(!cancel) consume++;
         }
@@ -114,10 +164,10 @@ class TconToolStack implements ItemInstance {
         let usedCount = 0;
         let maxCount = Cfg.modifierSlots + ToolLeveling.getLevel(this.xp, this.instance.is3x3);
         for(const mod of modifiers){
-            if(Modifier[mod.type]){
-                usedCount += Modifier[mod.type].getConsumeSlots();
-                maxCount += Modifier[mod.type].getBonusSlots(mod.level);
-            }
+            usedCount += Modifier[mod.type].getConsumeSlots();
+        }
+        for(const {trait, level} of this.traits){
+            maxCount += trait.getBonusSlots(level);
         }
         return {modifiers, usedCount, maxCount};
     }

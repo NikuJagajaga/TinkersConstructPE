@@ -1,17 +1,28 @@
 interface HeadStats {durability: number, efficiency: number, damage: number, level: number}
 interface HandleStats {modifier: number, durability: number}
 interface ExtraStats {durability: number}
+interface TraitWithLevel {trait: TconTrait, level: number}
 
 
 class TinkersMaterial {
+
+    private readonly name: string;
+    private readonly texIndex: number;
+    private readonly moltenLiquid: string;
+    readonly isMetal: boolean;
 
     private item: Tile;
     private headStats: HeadStats;
     private handleStats: HandleStats;
     private extraStats: ExtraStats;
+    private headTraits: TraitWithLevel[] = [];
+    private extraTraits: TraitWithLevel[] = [];
 
-    constructor(private name: string, private texIndex: number, private moltenLiquid?: string, public readonly isMetal?: boolean){
-
+    constructor(name: string, texIndex: number, moltenLiquid?: string, isMetal?: boolean){
+        this.name = name;
+        this.texIndex = texIndex;
+        this.moltenLiquid = moltenLiquid || "";
+        this.isMetal = isMetal || false;
     }
 
     getName(): string {
@@ -31,7 +42,7 @@ class TinkersMaterial {
     }
 
     getMoltenLiquid(): string {
-        return this.moltenLiquid || "";
+        return this.moltenLiquid;
     }
 
     setItem(item: AnyID): this {
@@ -60,6 +71,16 @@ class TinkersMaterial {
         return this;
     }
 
+    addHeadTraits(trait: TconTrait, level: number): this {
+        this.headTraits.push({trait, level});
+        return this;
+    }
+
+    addExtraTraits(trait: TconTrait, level: number): this {
+        this.extraTraits.push({trait, level});
+        return this;
+    }
+
     getHeadStats(): HeadStats {
         return this.headStats;
     }
@@ -70,6 +91,14 @@ class TinkersMaterial {
 
     getExtraStats(): ExtraStats {
         return this.extraStats;
+    }
+
+    getHeadTraits(): TraitWithLevel[] {
+        return this.headTraits;
+    }
+
+    getExtraTraits(): TraitWithLevel[] {
+        return this.extraTraits;
     }
 
 }

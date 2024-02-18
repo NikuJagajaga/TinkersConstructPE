@@ -8,6 +8,7 @@
         "skipLibCheck": true,
         "outFile": "../main.js",
         "newLine": "LF",
+        "removeComments": true,
         "experimentalDecorators": true
     },
     "include": [
@@ -49,7 +50,10 @@
         "resource/cast.ts",
         "resource/misc.ts",
 
-        "tool/trait/TconTrait.ts",
+        "tool/TconTrait.ts",
+        "tool/trait/*.ts",
+        
+        "tool/TconModifier.ts",
 
         "tool/modifier/TinkersModifier.ts",
         "tool/modifier/haste.ts",

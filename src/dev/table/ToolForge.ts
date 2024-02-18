@@ -200,7 +200,7 @@ class ToolCrafterWindow extends CraftingWindow {
                 }
             }
 
-            const mat = stack.instance.headParts.map(index => stack.materials[index].getItem());
+            const mat = stack.getRepairItems();
             const space = stack.durability;
             let newDur = space;
             let value = 0;

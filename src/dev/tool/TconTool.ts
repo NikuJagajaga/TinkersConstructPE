@@ -46,8 +46,8 @@ abstract class TconTool extends ItemCommon implements ItemBehavior, ToolAPI.Tool
     modifyEnchant(enchant: ToolAPI.EnchantData, item: ItemInstance, coords?: Callback.ItemUseCoordinates, block?: Tile): void {
         if(item.extra){
             const stack = new TconToolStack(item);
-            stack.forEachModifiers((mod, level) => {
-                mod.applyEnchant(enchant, level);
+            stack.forEachTraits((trait, level) => {
+                trait.applyEnchant(enchant, level);
             });
         }
     }
@@ -76,8 +76,8 @@ abstract class TconTool extends ItemCommon implements ItemBehavior, ToolAPI.Tool
         const blockData = ToolAPI.getBlockData(block.id);
         //KEX compatibility (ToolAPI.getBlockData will NOT be null)
         if(blockData?.material && this.blockTypes.indexOf(blockData.material.name) !== -1 && stack.stats.level >= blockData.level && !stack.isBroken()){
-            stack.forEachModifiers((mod, level) => {
-                mod.onDestroy(stack, coords, block, player, level);
+            stack.forEachTraits((trait, level) => {
+                trait.onDestroy(stack, coords, block, player, level);
             });
             if(this.isWeapon){
                 stack.consumeDurability(2, player);
@@ -97,8 +97,8 @@ abstract class TconTool extends ItemCommon implements ItemBehavior, ToolAPI.Tool
         }
         const stack = new TconToolStack(item);
         let bonus = 0;
-        stack.forEachModifiers((mod, level) => {
-            bonus += mod.onAttack(stack, victim, player, level);
+        stack.forEachTraits((trait, level) => {
+            bonus += trait.onAttack(stack, victim, player, level);
         });
         this.toolMaterial.damage = stack.stats.damage + bonus;
         if(this.isWeapon){
@@ -120,8 +120,8 @@ abstract class TconTool extends ItemCommon implements ItemBehavior, ToolAPI.Tool
         const stack = new TconToolStack(item);
         let bonus = 0;
         if(attacker !== 0 && victim !== 0){
-            stack.forEachModifiers((mod, level) => {
-                bonus += mod.onAttack(stack, victim, attacker, level);
+            stack.forEachTraits((trait, level) => {
+                bonus += trait.onAttack(stack, victim, attacker, level);
             });
         }
         return stack.stats.damage + bonus;
@@ -132,8 +132,8 @@ abstract class TconTool extends ItemCommon implements ItemBehavior, ToolAPI.Tool
             return;
         }
         const stack = new TconToolStack(item);
-        stack.forEachModifiers((mod, level) => {
-            mod.onDealDamage(stack, victim, player, damageValue, damageType, level);
+        stack.forEachTraits((trait, level) => {
+            trait.onDealDamage(stack, victim, player, damageValue, damageType, level);
         });
     }
 
@@ -142,8 +142,8 @@ abstract class TconTool extends ItemCommon implements ItemBehavior, ToolAPI.Tool
             return;
         }
         const stack = new TconToolStack(item);
-        stack.forEachModifiers((mod, level) => {
-            mod.onPlayerDamaged(stack, victim, player, damageValue, damageType, level);
+        stack.forEachTraits((trait, level) => {
+            trait.onPlayerDamaged(stack, victim, player, damageValue, damageType, level);
         });
     }
 
@@ -152,8 +152,8 @@ abstract class TconTool extends ItemCommon implements ItemBehavior, ToolAPI.Tool
             return;
         }
         const stack = new TconToolStack(item);
-        stack.forEachModifiers((mod, level) => {
-            mod.onKillEntity(stack, victim, player, damageType, level);
+        stack.forEachTraits((trait, level) => {
+            trait.onKillEntity(stack, victim, player, damageType, level);
         });
     }
 
@@ -162,8 +162,8 @@ abstract class TconTool extends ItemCommon implements ItemBehavior, ToolAPI.Tool
             return;
         }
         const stack = new TconToolStack(item);
-        stack.forEachModifiers((mod, level) => {
-            mod.onPlayerDeath(stack, victim, player, damageType, level);
+        stack.forEachTraits((trait, level) => {
+            trait.onPlayerDeath(stack, victim, player, damageType, level);
         });
     }
 
@@ -176,8 +176,8 @@ abstract class TconTool extends ItemCommon implements ItemBehavior, ToolAPI.Tool
             return;
         }
         const stack = new TconToolStack(item);
-        stack.forEachModifiers((mod, level) => {
-            mod.onTick(stack, player, level);
+        stack.forEachTraits((trait, level) => {
+            trait.onTick(stack, player, level);
         });
     }
 
@@ -230,8 +230,8 @@ abstract class TconTool3x3 extends TconTool {
             if(blockData?.material && this.blockTypes.indexOf(blockData.material.name) !== -1 && stack.stats.level >= blockData.level){
                 region.destroyBlock(pos, drop, player);
                 consume++;
-                stack.forEachModifiers((mod, level) => {
-                    mod.onDestroy(stack, {x: pos.x, y: pos.y, z: pos.z, side: coords.side, relative: World.getRelativeCoords(pos.x, pos.y, pos.z, coords.side)}, block2, player, level);
+                stack.forEachTraits((trait, level) => {
+                    trait.onDestroy(stack, {x: pos.x, y: pos.y, z: pos.z, side: coords.side, relative: World.getRelativeCoords(pos.x, pos.y, pos.z, coords.side)}, block2, player, level);
                 });
             }
         }
@@ -242,8 +242,8 @@ abstract class TconTool3x3 extends TconTool {
 
         if(blockData?.material && this.blockTypes.indexOf(blockData.material.name) !== -1 && stack.stats.level >= blockData.level){
             consume++;
-            stack.forEachModifiers((mod, level) => {
-                mod.onDestroy(stack, coords, block, player, level);
+            stack.forEachTraits((trait, level) => {
+                trait.onDestroy(stack, coords, block, player, level);
             });
         }
 
