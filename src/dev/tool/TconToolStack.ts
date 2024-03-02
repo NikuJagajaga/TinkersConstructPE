@@ -19,7 +19,7 @@ class TconToolStack implements ItemInstance {
         this.extra = item.extra;
 
         this.instance = ToolAPI.getToolData(this.id) as TconTool;
-        this.materials = new String(this.extra.getString("materials")).split("_").map(mat => Material[mat]);
+        this.materials = new String(this.extra.getString("materials")).split("_").map(mat => Materials[mat]);
         this.modifiers = TconModifier.decodeToObj(this.extra.getString("modifiers"));
         this.traits = [];
 
@@ -65,7 +65,7 @@ class TconToolStack implements ItemInstance {
         }
 
         for(let key in this.modifiers){
-            this.traits.push({trait: Modifier[key].trait, level: this.modifiers[key]});
+            this.traits.push({trait: Modifiers[key].trait, level: this.modifiers[key]});
         }
 
         this.stats = this.getStats();
@@ -166,7 +166,7 @@ class TconToolStack implements ItemInstance {
         let usedCount = 0;
         let maxCount = Cfg.modifierSlots + ToolLeveling.getLevel(this.xp, this.instance.is3x3);
         for(const mod of modifiers){
-            usedCount += Modifier[mod.type].getConsumeSlots();
+            usedCount += Modifiers[mod.type].getConsumeSlots();
         }
         for(const {trait, level} of this.traits){
             maxCount += trait.getBonusSlots(level);
@@ -179,7 +179,7 @@ class TconToolStack implements ItemInstance {
         let mask = 0;
         let index = 0;
         for(let key in this.modifiers){
-            index = Modifier[key].getTexIndex();
+            index = Modifiers[key].getTexIndex();
             if(index !== -1){
                 mask |= 1 << index;
             }

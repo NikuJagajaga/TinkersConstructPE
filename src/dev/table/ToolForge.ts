@@ -225,8 +225,8 @@ class ToolCrafterWindow extends CraftingWindow {
 
             const addMod: {[key: string]: number} = {};
             let count = 0;
-            for(let key in Modifier){
-                count = Math.min(...Modifier[key].getRecipe().map(recipe => {
+            for(let key in Modifiers){
+                count = Math.min(...Modifiers[key].getRecipe().map(recipe => {
                     const find2 = items.find(item => item.id === recipe.id && (recipe.data === -1 || item.data === recipe.data));
                     return find2 ? find2.count : 0;
                 }));
@@ -240,13 +240,13 @@ class ToolCrafterWindow extends CraftingWindow {
             let find3: {type: string, level: number};
             for(let key in addMod){
                 find3 = modifiers.find(mod => mod.type === key);
-                if(find3 && find3.level < Modifier[key].maxLevel){
-                    addMod[key] = Math.min(addMod[key], Modifier[key].maxLevel - find3.level);
+                if(find3 && find3.level < Modifiers[key].maxLevel){
+                    addMod[key] = Math.min(addMod[key], Modifiers[key].maxLevel - find3.level);
                     find3.level += addMod[key];
                     continue;
                 }
-                if(Modifier[key].canBeTogether(modifiers) && usedCount + Modifier[key].getConsumeSlots() <= maxCount){
-                    addMod[key] = Math.min(addMod[key], Modifier[key].maxLevel);
+                if(Modifiers[key].canBeTogether(modifiers) && usedCount + Modifiers[key].getConsumeSlots() <= maxCount){
+                    addMod[key] = Math.min(addMod[key], Modifiers[key].maxLevel);
                     modifiers.push({type: key, level: addMod[key]});
                 }
                 else{
@@ -278,7 +278,7 @@ class ToolCrafterWindow extends CraftingWindow {
 
             items.length = 0;
             for(let key in addMod){
-                items.push(...Modifier[key].getRecipe().map(item => ({id: item.id, count: addMod[key], data: item.data})));
+                items.push(...Modifiers[key].getRecipe().map(item => ({id: item.id, count: addMod[key], data: item.data})));
             }
             count > 0 && items.push({id: find.id, count: count, data: 0});
 

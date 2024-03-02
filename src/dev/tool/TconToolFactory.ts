@@ -114,7 +114,7 @@ namespace TconToolFactory {
         const materials: string[] = [];
         let stack: TconToolStack;
 
-        for(let key in Material){
+        for(let key in Materials){
             materials.length = 0;
             for(let i = 0; i < partsCount; i++){
                 materials.push(key);

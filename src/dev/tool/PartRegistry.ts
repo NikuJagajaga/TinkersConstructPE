@@ -35,8 +35,8 @@ namespace PartRegistry {
         }
     }
 
-    for(let key in Material){
-        PartRegistry.createParts(key, Material[key]);
+    for(let key in Materials){
+        PartRegistry.createParts(key, Materials[key]);
     }
 
     export function registerRecipes(key: string, material: TinkersMaterial): void {
@@ -70,11 +70,11 @@ namespace PartRegistry {
 
         const list: RecipePattern[] = [];
 
-        for(let key in Material){
-            if(!Material[key].isMetal){
+        for(let key in Materials){
+            if(!Materials[key].isMetal){
                 for(const type of types){
                     list.push({
-                        input: [{id: ItemID.tcon_pattern_blank, count: 1, data: 0}, {...Material[key].getItem(), count: type.cost}],
+                        input: [{id: ItemID.tcon_pattern_blank, count: 1, data: 0}, {...Materials[key].getItem(), count: type.cost}],
                         output: [{id: PartRegistry.getIDFromData(type.key, key), count: 1, data: 0}],
                         pattern: type.key
                     });
@@ -90,7 +90,7 @@ namespace PartRegistry {
         const tooltips: string[] = [];
         const partData = PartRegistry.getPartData(id);
         if(partData){
-            const matData = Material[partData.material];
+            const matData = Materials[partData.material];
             if(matData){
                 const mask = PartCategory[partData.type];
                 if(mask & EPartCategory.HEAD){
@@ -136,7 +136,7 @@ namespace PartRegistry {
 
 
 Callback.addCallback("PreLoaded", () => {
-    for(let key in Material){
-        PartRegistry.registerRecipes(key, Material[key]);
+    for(let key in Materials){
+        PartRegistry.registerRecipes(key, Materials[key]);
     }
 });

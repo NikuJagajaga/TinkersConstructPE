@@ -1,4 +1,4 @@
-new class extends TconTrait {
+const TraitBeheading = new class extends TconTrait {
 
     constructor(){
         super("beheading", "Beheading", "#10574b");

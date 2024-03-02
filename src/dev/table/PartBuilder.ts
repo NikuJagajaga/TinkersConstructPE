@@ -148,7 +148,7 @@ const PartBuilderWindow = new class extends CraftingWindow {
                 container.setText("textStats", addLineBreaks(20, translate("Here you can craft tool parts to fulfill your tinkering fantasies.") + "\n\n" + translate("To craft a part simply put a blank pattern into the left slot and select the part you want. The remaining slot holds the material you want to craft your part out of.")));
 
             } else {
-                const material = Material[data.material]?.getLocalizedName() ?? "Unknown material %s";
+                const material = Materials[data.material]?.getLocalizedName() ?? "Unknown material %s";
                 container.setText("textTitle", translate(material, data.material));
 
                 const miningTier = MiningLvName[data.head.level] ?? "Unknown mining tier %s";
@@ -214,8 +214,8 @@ const PartBuilderWindow = new class extends CraftingWindow {
                 break;
             case "slotMaterial":
                 let item: Tile;
-                for(let key in Material){
-                    item = Material[key].getItem();
+                for(let key in Materials){
+                    item = Materials[key].getItem();
                     if(item && id === item.id && (item.data === -1 || data === item.data)){
                         this.autoSetPattern(container, player);
                         return true;
@@ -242,11 +242,11 @@ const PartBuilderWindow = new class extends CraftingWindow {
 
         if(slotPattern.id === ItemID.tcon_pattern_blank && patternData){
 
-            for(let key in Material){
-                item = Material[key].getItem();
+            for(let key in Materials){
+                item = Materials[key].getItem();
                 if(item && item.id === slotMaterial.id && (item.data === -1 || item.data === slotMaterial.data)){
                     this.showMaterial(container, key, slotMaterial.count, patternData.cost);
-                    if(!Material[key].isMetal){
+                    if(!Materials[key].isMetal){
                         if(slotMaterial.count >= patternData.cost){
                             resultId = PartRegistry.getIDFromData(patternData.key, key);
                         }
@@ -268,7 +268,7 @@ const PartBuilderWindow = new class extends CraftingWindow {
     }
 
     private showMaterial(container: ItemContainer, key: string, slotMaterialCount: number, patternDataCost: number): void {
-        const material = Material[key];
+        const material = Materials[key];
         const packet: PartBuilderStats = {
             material: key,
             head: material.getHeadStats(),
@@ -293,10 +293,10 @@ const PartBuilderWindow = new class extends CraftingWindow {
 
         if(slotPattern.id === ItemID.tcon_pattern_blank && patternData){
             cost = patternData.cost;
-            for(let key in Material){
-                item = Material[key].getItem();
+            for(let key in Materials){
+                item = Materials[key].getItem();
                 if(item && item.id === slotMaterial.id && (item.data === -1 || item.data === slotMaterial.data)){
-                    if(!Material[key].isMetal){
+                    if(!Materials[key].isMetal){
                         if(slotMaterial.count >= cost){
                             resultId = PartRegistry.getIDFromData(patternData.key, key);
                         }

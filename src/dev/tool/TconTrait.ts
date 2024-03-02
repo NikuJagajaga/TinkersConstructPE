@@ -24,7 +24,7 @@ abstract class TconTrait {
     }
 
     getBonusSlots(level: number): number {
-        return level;
+        return 0;
     }
 
     applyStats(stats: ToolStats, level: number): void {}

@@ -1,4 +1,4 @@
-new class extends TconTrait {
+const TraitCreative = new class extends TconTrait {
 
     constructor(){
         super("creative", "Creative");

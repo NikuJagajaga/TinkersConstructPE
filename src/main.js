@@ -6636,7 +6636,7 @@ var TconTrait = (function () {
         return translate(this.name);
     };
     TconTrait.prototype.getBonusSlots = function (level) {
-        return level;
+        return 0;
     };
     TconTrait.prototype.applyStats = function (stats, level) { };
     TconTrait.prototype.applyEnchant = function (enchant, level) { };
@@ -6664,7 +6664,7 @@ var TraitWritable = new (function (_super) {
     };
     return class_1;
 }(TconTrait));
-new (function (_super) {
+var TraitBeheading = new (function (_super) {
     __extends(class_2, _super);
     function class_2() {
         return _super.call(this, "beheading", "Beheading", "#10574b") || this;
@@ -6678,7 +6678,7 @@ new (function (_super) {
     };
     return class_2;
 }(TconTrait));
-new (function (_super) {
+var TraitCreative = new (function (_super) {
     __extends(class_3, _super);
     function class_3() {
         return _super.call(this, "creative", "Creative") || this;
@@ -6965,7 +6965,7 @@ var TinkersMaterial = (function () {
     };
     return TinkersMaterial;
 }());
-var Material = {
+var Materials = {
     wood: new TinkersMaterial("Wooden", 0)
         .setItem("planks")
         .setHeadStats(35, 2, 2, MiningLv.STONE)
@@ -7279,7 +7279,7 @@ var TconToolFactory;
     function addToCreative(type, name, partsCount) {
         var materials = [];
         var stack;
-        for (var key in Material) {
+        for (var key in Materials) {
             materials.length = 0;
             for (var i = 0; i < partsCount; i++) {
                 materials.push(key);
@@ -7303,7 +7303,7 @@ var TconToolStack = (function () {
         this.data = item.data;
         this.extra = item.extra;
         this.instance = ToolAPI.getToolData(this.id);
-        this.materials = new String(this.extra.getString("materials")).split("_").map(function (mat) { return Material[mat]; });
+        this.materials = new String(this.extra.getString("materials")).split("_").map(function (mat) { return Materials[mat]; });
         this.modifiers = TconModifier.decodeToObj(this.extra.getString("modifiers"));
         this.traits = [];
         var headTraits = [];
@@ -7357,7 +7357,7 @@ var TconToolStack = (function () {
             _loop_3(trait);
         }
         for (var key in this.modifiers) {
-            this.traits.push({ trait: Modifier[key].trait, level: this.modifiers[key] });
+            this.traits.push({ trait: Modifiers[key].trait, level: this.modifiers[key] });
         }
         this.stats = this.getStats();
     }
@@ -7455,7 +7455,7 @@ var TconToolStack = (function () {
         var maxCount = Cfg.modifierSlots + ToolLeveling.getLevel(this.xp, this.instance.is3x3);
         for (var _i = 0, modifiers_1 = modifiers; _i < modifiers_1.length; _i++) {
             var mod = modifiers_1[_i];
-            usedCount += Modifier[mod.type].getConsumeSlots();
+            usedCount += Modifiers[mod.type].getConsumeSlots();
         }
         for (var _a = 0, _b = this.traits; _a < _b.length; _a++) {
             var _c = _b[_a], trait = _c.trait, level = _c.level;
@@ -7468,7 +7468,7 @@ var TconToolStack = (function () {
         var mask = 0;
         var index = 0;
         for (var key in this.modifiers) {
-            index = Modifier[key].getTexIndex();
+            index = Modifiers[key].getTexIndex();
             if (index !== -1) {
                 mask |= 1 << index;
             }
@@ -7530,8 +7530,8 @@ var PartRegistry;
         }
     }
     PartRegistry.createParts = createParts;
-    for (var key in Material) {
-        PartRegistry.createParts(key, Material[key]);
+    for (var key in Materials) {
+        PartRegistry.createParts(key, Materials[key]);
     }
     function registerRecipes(key, material) {
         var id = 0;
@@ -7563,12 +7563,12 @@ var PartRegistry;
     PartRegistry.getIDFromData = getIDFromData;
     function getAllPartBuildRecipeForRV() {
         var list = [];
-        for (var key in Material) {
-            if (!Material[key].isMetal) {
+        for (var key in Materials) {
+            if (!Materials[key].isMetal) {
                 for (var _i = 0, types_3 = PartRegistry.types; _i < types_3.length; _i++) {
                     var type = types_3[_i];
                     list.push({
-                        input: [{ id: ItemID.tcon_pattern_blank, count: 1, data: 0 }, __assign(__assign({}, Material[key].getItem()), { count: type.cost })],
+                        input: [{ id: ItemID.tcon_pattern_blank, count: 1, data: 0 }, __assign(__assign({}, Materials[key].getItem()), { count: type.cost })],
                         output: [{ id: PartRegistry.getIDFromData(type.key, key), count: 1, data: 0 }],
                         pattern: type.key
                     });
@@ -7582,7 +7582,7 @@ var PartRegistry;
         var tooltips = [];
         var partData = PartRegistry.getPartData(id);
         if (partData) {
-            var matData = Material[partData.material];
+            var matData = Materials[partData.material];
             if (matData) {
                 var mask = PartCategory[partData.type];
                 if (mask & EPartCategory.HEAD) {
@@ -7626,8 +7626,8 @@ var PartRegistry;
     PartRegistry.replaceTooltipsWithKEX = replaceTooltipsWithKEX;
 })(PartRegistry || (PartRegistry = {}));
 Callback.addCallback("PreLoaded", function () {
-    for (var key in Material) {
-        PartRegistry.registerRecipes(key, Material[key]);
+    for (var key in Materials) {
+        PartRegistry.registerRecipes(key, Materials[key]);
     }
 });
 var ToolTexture = (function () {
@@ -7927,7 +7927,11 @@ var TconModifier = (function () {
         this.consumeSlots = count;
         return this;
     };
-    TconModifier.prototype.setRecipe = function (recipe) {
+    TconModifier.prototype.setRecipe = function () {
+        var recipe = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            recipe[_i] = arguments[_i];
+        }
         this.recipe = recipe.map(function (item) { return getIDData(item); });
         return this;
     };
@@ -7972,7 +7976,7 @@ var TconModifier = (function () {
             var str = split_1[_i];
             mod = str.split(":");
             level = parseInt(mod[1]);
-            if (mod.length === 2 && (mod[0] in Modifier) && !isNaN(level)) {
+            if (mod.length === 2 && (mod[0] in Modifiers) && !isNaN(level)) {
                 array.push({ type: mod[0], level: level });
             }
         }
@@ -7991,17 +7995,63 @@ var TconModifier = (function () {
     };
     return TconModifier;
 }());
-var Modifier = {
+var Modifiers = {
     haste: new TconModifier(TraitHaste, 50)
         .setTexIndex(0)
-        .setRecipe(["redstone"]),
+        .setRecipe("redstone"),
     luck: new TconModifier(TraitLuck, 360)
         .setTexIndex(1)
-        .setRecipe(["lapis_lazuli"])
+        .setRecipe("lapis_lazuli")
         .addConflict("luck", "silk"),
     sharp: new TconModifier(TraitSharp, 72)
         .setTexIndex(2)
-        .setRecipe(["quartz"])
+        .setRecipe("quartz"),
+    diamond: new TconModifier(TraitDiamond, 1)
+        .setTexIndex(3)
+        .setRecipe("diamond")
+        .addConflict("diamond"),
+    emerald: new TconModifier(TraitEmerald, 1)
+        .setTexIndex(4)
+        .setRecipe("emerald")
+        .addConflict("emerald"),
+    silk: new TconModifier(TraitSilk, 1)
+        .setTexIndex(5)
+        .setRecipe(ItemID.tcon_silky_jewel)
+        .addConflict("luck", "silk"),
+    reinforced: new TconModifier(TraitReinforced, 1)
+        .setTexIndex(6)
+        .setRecipe(ItemID.tcon_reinforcement),
+    beheading: new TconModifier(TraitBeheading, 1)
+        .setTexIndex(7)
+        .setRecipe("ender_pearl", "obsidian"),
+    smite: new TconModifier(TraitSmite, 24)
+        .setTexIndex(8)
+        .setRecipe(BlockID.tcon_consecrated_soil),
+    spider: new TconModifier(TraitSpider, 24)
+        .setTexIndex(9)
+        .setRecipe("fermented_spider_eye"),
+    fiery: new TconModifier(TraitFiery, 25)
+        .setTexIndex(10)
+        .setRecipe("blaze_powder"),
+    necrotic: new TconModifier(TraitNecrotic, 1)
+        .setTexIndex(11)
+        .setRecipe(ItemID.tcon_necrotic_bone),
+    knockback: new TconModifier(TraitKnockback, 10)
+        .setTexIndex(12)
+        .setRecipe(VanillaBlockID.piston),
+    mending: new TconModifier(TraitMending, 1)
+        .setTexIndex(13)
+        .setRecipe(ItemID.tcon_mending_moss),
+    shulking: new TconModifier(TraitShulking, 50)
+        .setTexIndex(14)
+        .setRecipe("chorus_fruit_popped"),
+    web: new TconModifier(TraitWeb, 1)
+        .setTexIndex(15)
+        .setRecipe("web"),
+    creative: new TconModifier(TraitCreative, 99)
+        .setRecipe(ItemID.tcon_creative_modifier)
+        .addConflict("creative")
+        .setConsumeSlots(0)
 };
 Item.addCreativeGroup("tcon_partbuilder", translate("Part Builder"), [
     createBlock("tcon_partbuilder0", [{ name: "Part Builder", texture: [0, 0, ["log_side", 0]] }], "wood"),
@@ -8139,7 +8189,7 @@ var PartBuilderWindow = new (function (_super) {
                 container.setText("textStats", addLineBreaks(20, translate("Here you can craft tool parts to fulfill your tinkering fantasies.") + "\n\n" + translate("To craft a part simply put a blank pattern into the left slot and select the part you want. The remaining slot holds the material you want to craft your part out of.")));
             }
             else {
-                var material = (_b = (_a = Material[data.material]) === null || _a === void 0 ? void 0 : _a.getLocalizedName()) !== null && _b !== void 0 ? _b : "Unknown material %s";
+                var material = (_b = (_a = Materials[data.material]) === null || _a === void 0 ? void 0 : _a.getLocalizedName()) !== null && _b !== void 0 ? _b : "Unknown material %s";
                 container.setText("textTitle", translate(material, data.material));
                 var miningTier = (_c = MiningLvName[data.head.level]) !== null && _c !== void 0 ? _c : "Unknown mining tier %s";
                 container.setText("textStats", addLineBreaks(20, translate("Head") + "\n" +
@@ -8194,8 +8244,8 @@ var PartBuilderWindow = new (function (_super) {
                 break;
             case "slotMaterial":
                 var item = void 0;
-                for (var key in Material) {
-                    item = Material[key].getItem();
+                for (var key in Materials) {
+                    item = Materials[key].getItem();
                     if (item && id === item.id && (item.data === -1 || data === item.data)) {
                         this.autoSetPattern(container, player);
                         return true;
@@ -8218,11 +8268,11 @@ var PartBuilderWindow = new (function (_super) {
         var item;
         var resultId = 0;
         if (slotPattern.id === ItemID.tcon_pattern_blank && patternData) {
-            for (var key in Material) {
-                item = Material[key].getItem();
+            for (var key in Materials) {
+                item = Materials[key].getItem();
                 if (item && item.id === slotMaterial.id && (item.data === -1 || item.data === slotMaterial.data)) {
                     this.showMaterial(container, key, slotMaterial.count, patternData.cost);
-                    if (!Material[key].isMetal) {
+                    if (!Materials[key].isMetal) {
                         if (slotMaterial.count >= patternData.cost) {
                             resultId = PartRegistry.getIDFromData(patternData.key, key);
                         }
@@ -8239,7 +8289,7 @@ var PartBuilderWindow = new (function (_super) {
         container.sendEvent("refresh", { result: resultId, index: this.selectedPattern });
     };
     class_19.prototype.showMaterial = function (container, key, slotMaterialCount, patternDataCost) {
-        var material = Material[key];
+        var material = Materials[key];
         var packet = {
             material: key,
             head: material.getHeadStats(),
@@ -8261,10 +8311,10 @@ var PartBuilderWindow = new (function (_super) {
         var resultId = 0;
         if (slotPattern.id === ItemID.tcon_pattern_blank && patternData) {
             cost = patternData.cost;
-            for (var key in Material) {
-                item = Material[key].getItem();
+            for (var key in Materials) {
+                item = Materials[key].getItem();
                 if (item && item.id === slotMaterial.id && (item.data === -1 || item.data === slotMaterial.data)) {
-                    if (!Material[key].isMetal) {
+                    if (!Materials[key].isMetal) {
                         if (slotMaterial.count >= cost) {
                             resultId = PartRegistry.getIDFromData(patternData.key, key);
                         }
@@ -8333,10 +8383,10 @@ var RepairHandler = (function () {
     }
     RepairHandler.calcRepairAmount = function (material) {
         var item;
-        for (var key in Material) {
-            item = Material[key].getItem();
+        for (var key in Materials) {
+            item = Materials[key].getItem();
             if (item.id === material.id && (item.data === -1 || item.data === material.data)) {
-                return Material[key].getHeadStats().durability * this.value;
+                return Materials[key].getHeadStats().durability * this.value;
             }
         }
         return 0;
@@ -8527,8 +8577,8 @@ var ToolCrafterWindow = (function (_super) {
             }
             var addMod_1 = {};
             var count = 0;
-            for (var key in Modifier) {
-                count = Math.min.apply(Math, Modifier[key].getRecipe().map(function (recipe) {
+            for (var key in Modifiers) {
+                count = Math.min.apply(Math, Modifiers[key].getRecipe().map(function (recipe) {
                     var find2 = items_1.find(function (item) { return item.id === recipe.id && (recipe.data === -1 || item.data === recipe.data); });
                     return find2 ? find2.count : 0;
                 }));
@@ -8541,13 +8591,13 @@ var ToolCrafterWindow = (function (_super) {
             var find3 = void 0;
             var _loop_5 = function (key) {
                 find3 = modifiers.find(function (mod) { return mod.type === key; });
-                if (find3 && find3.level < Modifier[key].maxLevel) {
-                    addMod_1[key] = Math.min(addMod_1[key], Modifier[key].maxLevel - find3.level);
+                if (find3 && find3.level < Modifiers[key].maxLevel) {
+                    addMod_1[key] = Math.min(addMod_1[key], Modifiers[key].maxLevel - find3.level);
                     find3.level += addMod_1[key];
                     return "continue";
                 }
-                if (Modifier[key].canBeTogether(modifiers) && usedCount + Modifier[key].getConsumeSlots() <= maxCount) {
-                    addMod_1[key] = Math.min(addMod_1[key], Modifier[key].maxLevel);
+                if (Modifiers[key].canBeTogether(modifiers) && usedCount + Modifiers[key].getConsumeSlots() <= maxCount) {
+                    addMod_1[key] = Math.min(addMod_1[key], Modifiers[key].maxLevel);
                     modifiers.push({ type: key, level: addMod_1[key] });
                 }
                 else {
@@ -8584,7 +8634,7 @@ var ToolCrafterWindow = (function (_super) {
             }
             items_1.length = 0;
             var _loop_7 = function (key) {
-                items_1.push.apply(items_1, Modifier[key].getRecipe().map(function (item) { return ({ id: item.id, count: addMod_1[key], data: item.data }); }));
+                items_1.push.apply(items_1, Modifiers[key].getRecipe().map(function (item) { return ({ id: item.id, count: addMod_1[key], data: item.data }); }));
             };
             for (var key in addMod_1) {
                 _loop_7(key);
@@ -9013,7 +9063,7 @@ var ToolModelManager = (function () {
             coordsBroken.push(texture.getCoords(i, index, true));
         }
         for (var key in stack.modifiers) {
-            index = Modifier[key].getTexIndex();
+            index = Modifiers[key].getTexIndex();
             if (index !== -1) {
                 coordsNormal.push(texture.getModCoords(index));
                 coordsBroken.push(texture.getModCoords(index));

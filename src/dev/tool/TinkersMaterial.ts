@@ -105,7 +105,7 @@ class TinkersMaterial {
 
 
 //params source: slimeknights.tconstruct.tools.TinkerMaterials.java
-const Material: {[key: string]: TinkersMaterial} = {
+const Materials = {
 
     wood: new TinkersMaterial("Wooden", 0)
         .setItem("planks")
@@ -270,4 +270,4 @@ const Material: {[key: string]: TinkersMaterial} = {
         .setHandleStats(0.9, 150)
         .setExtraStats(25)
 
-};
+} as const;

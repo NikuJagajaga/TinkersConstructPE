@@ -38,7 +38,7 @@ class ToolModelManager {
         }
 
         for(let key in stack.modifiers){
-            index = Modifier[key].getTexIndex();
+            index = Modifiers[key].getTexIndex();
             if(index !== -1){
                 coordsNormal.push(texture.getModCoords(index));
                 coordsBroken.push(texture.getModCoords(index));

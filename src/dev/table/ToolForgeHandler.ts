@@ -59,10 +59,10 @@ class RepairHandler {
 
     static calcRepairAmount(material: ItemInstance): number {
         let item: Tile;
-        for(let key in Material){
-            item = Material[key].getItem();
+        for(let key in Materials){
+            item = Materials[key].getItem();
             if(item.id === material.id && (item.data === -1 || item.data === material.data)){
-                return Material[key].getHeadStats().durability * this.value;
+                return Materials[key].getHeadStats().durability * this.value;
             }
         }
         return 0;
