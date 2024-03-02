@@ -71,12 +71,12 @@ class TinkersMaterial {
         return this;
     }
 
-    addHeadTraits(trait: TconTrait, level: number): this {
+    addHeadTraits(trait: TconTrait, level: number = 1): this {
         this.headTraits.push({trait, level});
         return this;
     }
 
-    addExtraTraits(trait: TconTrait, level: number): this {
+    addExtraTraits(trait: TconTrait, level: number = 1): this {
         this.extraTraits.push({trait, level});
         return this;
     }
@@ -165,7 +165,8 @@ const Material: {[key: string]: TinkersMaterial} = {
         .setItem(ItemID.tcon_paperstack)
         .setHeadStats(12, 0.51, 0.05, MiningLv.STONE)
         .setHandleStats(0.1, 5)
-        .setExtraStats(15),
+        .setExtraStats(15)
+        .addHeadTraits(Traits.writable),
 
     sponge: new TinkersMaterial("Sponge", 10)
         .setItem("sponge")

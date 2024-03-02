@@ -1,7 +1,7 @@
-class TraitSilk extends TconTrait {
+const TraitSilk = new class extends TconTrait {
 
-    constructor(parent: TconModifier){
-        super("silk", "Silky", parent);
+    constructor(){
+        super("silk", "Silky", "#fbe28b");
     }
     
     override applyStats(stats: ToolStats, level: number): void {

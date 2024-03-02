@@ -1,7 +1,7 @@
-class TraitBeheading extends TconTrait {
+new class extends TconTrait {
 
-    constructor(parent: TconModifier){
-        super("beheading", "Beheading", parent);
+    constructor(){
+        super("beheading", "Beheading", "#10574b");
     }
 
     override onKillEntity(stack: TconToolStack, victim: number, player: number, damageType: number, level: number): void {
@@ -11,5 +11,5 @@ class TraitBeheading extends TconTrait {
             region.dropItem(Entity.getPosition(victim), VanillaBlockID.skull, 1, headMeta);
         }
     }
-    
+
 }

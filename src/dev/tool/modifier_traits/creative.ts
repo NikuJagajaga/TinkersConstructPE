@@ -1,7 +1,7 @@
-class TraitCreative extends TconTrait {
+new class extends TconTrait {
 
-    constructor(parent: TconModifier){
-        super("creative", "Creative", parent);
+    constructor(){
+        super("creative", "Creative");
     }
 
     getBonusSlots(level: number): number {

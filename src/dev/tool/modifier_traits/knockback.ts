@@ -1,7 +1,7 @@
-class TraitKnockback extends TconTrait {
+const TraitKnockback = new class extends TconTrait {
 
-    constructor(parent: TconModifier){
-        super("knockback", "Knockback", parent);
+    constructor(){
+        super("knockback", "Knockback", "#9f9f9f");
     }
 
     override onAttack(item: ItemInstance, victim: number, player: number, level: number): number {

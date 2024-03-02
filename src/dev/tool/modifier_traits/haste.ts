@@ -1,19 +1,18 @@
-class TraitHaste extends TconTrait {
+const TraitHaste = new class extends TconTrait {
 
-    private static readonly step1 = 15;
-    private static readonly step2 = 25;
-
-    constructor(parent: TconModifier){
-        super("haste", "Haste", parent);
+    constructor(){
+        super("haste", "Haste", "#910000");
     }
 
     override applyStats(stats: ToolStats, level: number): void {
+        const step1 = 15;
+        const step2 = 25;
         for(let i = 0; i < level; i++){
-            if(stats.efficiency <= TraitHaste.step1){
-                stats.efficiency += 0.15 - 0.05 * stats.efficiency / TraitHaste.step1;
+            if(stats.efficiency <= step1){
+                stats.efficiency += 0.15 - 0.05 * stats.efficiency / step1;
             }
-            else if(stats.efficiency <= TraitHaste.step2){
-                stats.efficiency += 0.1 - 0.05 * (stats.efficiency - TraitHaste.step1) / (TraitHaste.step2 - TraitHaste.step1);
+            else if(stats.efficiency <= step2){
+                stats.efficiency += 0.1 - 0.05 * (stats.efficiency - step1) / (step2 - step1);
             }
             else{
                 stats.efficiency += 0.05;

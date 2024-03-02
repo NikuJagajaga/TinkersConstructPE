@@ -1,7 +1,7 @@
-class TraitDiamond extends TconTrait {
+const TraitDiamond = new class extends TconTrait {
 
-    constructor(parent: TconModifier){
-        super("diamond", "Diamond", parent);
+    constructor(){
+        super("diamond", "Diamond", "#8cf4e2");
     }
 
     override applyStats(stats: ToolStats, level: number): void {

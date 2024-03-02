@@ -84,6 +84,31 @@ var Cfg = {
     modifierSlots: __config__.getNumber("modifierSlots").intValue(),
     checkInsideSmeltery: __config__.getBool("checkInsideSmeltery")
 };
+var toRoman = function (num) {
+    if (num < 1 || num > 100) {
+        return "";
+    }
+    var romanNumerals = [
+        [100, "C"],
+        [90, "XC"],
+        [50, "L"],
+        [40, "XL"],
+        [10, "X"],
+        [9, "IX"],
+        [5, "V"],
+        [4, "IV"],
+        [1, "I"]
+    ];
+    var roman = "";
+    for (var _i = 0, romanNumerals_1 = romanNumerals; _i < romanNumerals_1.length; _i++) {
+        var _a = romanNumerals_1[_i], value = _a[0], symbol = _a[1];
+        while (num >= value) {
+            roman += symbol;
+            num -= value;
+        }
+    }
+    return roman;
+};
 var addLineBreaks = function (length, text) {
     var characters = 0;
     var bufferedLine = "";
@@ -6598,12 +6623,15 @@ StorageInterface.createInterface(BlockID.tcon_smeltery, {
 });
 var Traits = {};
 var TconTrait = (function () {
-    function TconTrait(key, name, parent) {
+    function TconTrait(key, name, color) {
         this.key = key;
         this.name = name;
-        this.parent = parent;
+        this.color = color ? Color.parseColor(color) : Color.WHITE;
         Traits[key] = this;
     }
+    TconTrait.prototype.setParent = function (modifier) {
+        this.parent = modifier;
+    };
     TconTrait.prototype.getLocalizedName = function (level) {
         return translate(this.name);
     };
@@ -6626,36 +6654,46 @@ var TconTrait = (function () {
     TconTrait.prototype.onTick = function (stack, player, level) { };
     return TconTrait;
 }());
-var TraitBeheading = (function (_super) {
-    __extends(TraitBeheading, _super);
-    function TraitBeheading(parent) {
-        return _super.call(this, "beheading", "Beheading", parent) || this;
+var TraitWritable = new (function (_super) {
+    __extends(class_1, _super);
+    function class_1() {
+        return _super.call(this, "writable", "Writable", "#ffffff") || this;
     }
-    TraitBeheading.prototype.onKillEntity = function (stack, victim, player, damageType, level) {
+    class_1.prototype.getBonusSlots = function (level) {
+        return level;
+    };
+    return class_1;
+}(TconTrait));
+new (function (_super) {
+    __extends(class_2, _super);
+    function class_2() {
+        return _super.call(this, "beheading", "Beheading", "#10574b") || this;
+    }
+    class_2.prototype.onKillEntity = function (stack, victim, player, damageType, level) {
         var headMeta = EntityHelper.getHeadMeta(victim);
         if (headMeta !== -1 && Math.random() < 0.1 * level) {
             var region = WorldRegion.getForActor(player);
             region.dropItem(Entity.getPosition(victim), VanillaBlockID.skull, 1, headMeta);
         }
     };
-    return TraitBeheading;
+    return class_2;
 }(TconTrait));
-var TraitCreative = (function (_super) {
-    __extends(TraitCreative, _super);
-    function TraitCreative(parent) {
-        return _super.call(this, "creative", "Creative", parent) || this;
+new (function (_super) {
+    __extends(class_3, _super);
+    function class_3() {
+        return _super.call(this, "creative", "Creative") || this;
     }
-    TraitCreative.prototype.getBonusSlots = function (level) {
+    class_3.prototype.getBonusSlots = function (level) {
         return level;
     };
-    return TraitCreative;
+    return class_3;
 }(TconTrait));
-var TraitDiamond = (function (_super) {
-    __extends(TraitDiamond, _super);
-    function TraitDiamond(parent) {
-        return _super.call(this, "diamond", "Diamond", parent) || this;
+var TraitDiamond = new (function (_super) {
+    __extends(class_4, _super);
+    function class_4() {
+        return _super.call(this, "diamond", "Diamond", "#8cf4e2") || this;
     }
-    TraitDiamond.prototype.applyStats = function (stats, level) {
+    class_4.prototype.applyStats = function (stats, level) {
         stats.durability += 500;
         if (stats.level < MiningLv.OBSIDIAN) {
             stats.level++;
@@ -6663,44 +6701,46 @@ var TraitDiamond = (function (_super) {
         stats.efficiency += 0.5;
         stats.damage++;
     };
-    return TraitDiamond;
+    return class_4;
 }(TconTrait));
-var TraitEmerald = (function (_super) {
-    __extends(TraitEmerald, _super);
-    function TraitEmerald(parent) {
-        return _super.call(this, "emerald", "Emerald", parent) || this;
+var TraitEmerald = new (function (_super) {
+    __extends(class_5, _super);
+    function class_5() {
+        return _super.call(this, "emerald", "Emerald", "#41f384") || this;
     }
-    TraitEmerald.prototype.applyStats = function (stats, level) {
+    class_5.prototype.applyStats = function (stats, level) {
         stats.durability += stats.durability >> 1;
         if (stats.level < MiningLv.DIAMOND) {
             stats.level++;
         }
     };
-    return TraitEmerald;
+    return class_5;
 }(TconTrait));
-var TraitFiery = (function (_super) {
-    __extends(TraitFiery, _super);
-    function TraitFiery(parent) {
-        return _super.call(this, "fiery", "Fiery", parent) || this;
+var TraitFiery = new (function (_super) {
+    __extends(class_6, _super);
+    function class_6() {
+        return _super.call(this, "fiery", "Fiery", "#ea9e32") || this;
     }
-    TraitFiery.prototype.onAttack = function (item, victim, player, level) {
+    class_6.prototype.onAttack = function (item, victim, player, level) {
         Entity.setFire(victim, 1 + (level >> 3), true);
         return 0;
     };
-    return TraitFiery;
+    return class_6;
 }(TconTrait));
-var TraitHaste = (function (_super) {
-    __extends(TraitHaste, _super);
-    function TraitHaste(parent) {
-        return _super.call(this, "haste", "Haste", parent) || this;
+var TraitHaste = new (function (_super) {
+    __extends(class_7, _super);
+    function class_7() {
+        return _super.call(this, "haste", "Haste", "#910000") || this;
     }
-    TraitHaste.prototype.applyStats = function (stats, level) {
+    class_7.prototype.applyStats = function (stats, level) {
+        var step1 = 15;
+        var step2 = 25;
         for (var i = 0; i < level; i++) {
-            if (stats.efficiency <= TraitHaste.step1) {
-                stats.efficiency += 0.15 - 0.05 * stats.efficiency / TraitHaste.step1;
+            if (stats.efficiency <= step1) {
+                stats.efficiency += 0.15 - 0.05 * stats.efficiency / step1;
             }
-            else if (stats.efficiency <= TraitHaste.step2) {
-                stats.efficiency += 0.1 - 0.05 * (stats.efficiency - TraitHaste.step1) / (TraitHaste.step2 - TraitHaste.step1);
+            else if (stats.efficiency <= step2) {
+                stats.efficiency += 0.1 - 0.05 * (stats.efficiency - step1) / (step2 - step1);
             }
             else {
                 stats.efficiency += 0.05;
@@ -6708,75 +6748,80 @@ var TraitHaste = (function (_super) {
         }
         stats.efficiency += (level / this.parent.maxLevel | 0) * 0.5;
     };
-    TraitHaste.step1 = 15;
-    TraitHaste.step2 = 25;
-    return TraitHaste;
+    return class_7;
 }(TconTrait));
-var TraitKnockback = (function (_super) {
-    __extends(TraitKnockback, _super);
-    function TraitKnockback(parent) {
-        return _super.call(this, "knockback", "Knockback", parent) || this;
+var TraitKnockback = new (function (_super) {
+    __extends(class_8, _super);
+    function class_8() {
+        return _super.call(this, "knockback", "Knockback", "#9f9f9f") || this;
     }
-    TraitKnockback.prototype.onAttack = function (item, victim, player, level) {
+    class_8.prototype.onAttack = function (item, victim, player, level) {
         var vec = Entity.getLookVector(player);
         var speed = 1 + level * 0.1;
         Entity.setVelocity(victim, vec.x * speed, 0.1, vec.z * speed);
         return 0;
     };
-    return TraitKnockback;
+    return class_8;
 }(TconTrait));
-var TraitLuck = (function (_super) {
-    __extends(TraitLuck, _super);
-    function TraitLuck(parent) {
-        return _super.call(this, "luck", "Luck", parent) || this;
+var TraitLuck = new (function (_super) {
+    __extends(class_9, _super);
+    function class_9() {
+        return _super.call(this, "luck", "Luck", "#2d51e2") || this;
     }
-    TraitLuck.prototype.applyEnchant = function (enchant, level) {
-        enchant.fortune = level < 60 ? 0 : level < 180 ? 1 : level < 360 ? 2 : 3;
+    class_9.prototype.getLuckLevel = function (level) {
+        return level < 60 ? 0 : level < 180 ? 1 : level < 360 ? 2 : 3;
     };
-    return TraitLuck;
+    class_9.prototype.getLocalizedName = function (level) {
+        var roman = toRoman(this.getLuckLevel(level));
+        return translate(this.name) + " " + roman;
+    };
+    class_9.prototype.applyEnchant = function (enchant, level) {
+        enchant.fortune = this.getLuckLevel(level);
+    };
+    return class_9;
 }(TconTrait));
-var TraitMending = (function (_super) {
-    __extends(TraitMending, _super);
-    function TraitMending(parent) {
-        return _super.call(this, "mending", "Mending", parent) || this;
+var TraitMending = new (function (_super) {
+    __extends(class_10, _super);
+    function class_10() {
+        return _super.call(this, "mending", "Mending", "#43ab32") || this;
     }
-    TraitMending.prototype.onTick = function (stack, player, level) {
+    class_10.prototype.onTick = function (stack, player, level) {
         if (World.getThreadTime() % 150 === 0) {
             stack.durability -= level;
             stack.applyToHand(player);
         }
     };
-    return TraitMending;
+    return class_10;
 }(TconTrait));
-var TraitNecrotic = (function (_super) {
-    __extends(TraitNecrotic, _super);
-    function TraitNecrotic(parent) {
-        return _super.call(this, "necrotic", "Necrotic", parent) || this;
+var TraitNecrotic = new (function (_super) {
+    __extends(class_11, _super);
+    function class_11() {
+        return _super.call(this, "necrotic", "Necrotic", "#5e0000") || this;
     }
-    TraitNecrotic.prototype.onDealDamage = function (stack, victim, player, damageValue, damageType, level) {
+    class_11.prototype.onDealDamage = function (stack, victim, player, damageValue, damageType, level) {
         var add = damageValue * 0.1 * level | 0;
         if (add > 0) {
             Entity.setHealth(player, Math.min(Entity.getHealth(player) + add, Entity.getMaxHealth(player)));
         }
     };
-    return TraitNecrotic;
+    return class_11;
 }(TconTrait));
-var TraitReinforced = (function (_super) {
-    __extends(TraitReinforced, _super);
-    function TraitReinforced(parent) {
-        return _super.call(this, "reinforced", "Reinforced", parent) || this;
+var TraitReinforced = new (function (_super) {
+    __extends(class_12, _super);
+    function class_12() {
+        return _super.call(this, "reinforced", "Reinforced", "#502e83") || this;
     }
-    TraitReinforced.prototype.onConsume = function (stack, level) {
+    class_12.prototype.onConsume = function (stack, level) {
         return level >= 5 ? true : Math.random() < level * 0.2;
     };
-    return TraitReinforced;
+    return class_12;
 }(TconTrait));
-var TraitSharp = (function (_super) {
-    __extends(TraitSharp, _super);
-    function TraitSharp(parent) {
-        return _super.call(this, "sharp", "Sharp", parent) || this;
+var TraitSharp = new (function (_super) {
+    __extends(class_13, _super);
+    function class_13() {
+        return _super.call(this, "sharp", "Sharp", "#fff6f6") || this;
     }
-    TraitSharp.prototype.applyStats = function (stats, level) {
+    class_13.prototype.applyStats = function (stats, level) {
         for (var i = 0; i < level; i++) {
             if (stats.damage <= 10) {
                 stats.damage += 0.05 - 0.025 * stats.damage / 10;
@@ -6790,63 +6835,63 @@ var TraitSharp = (function (_super) {
         }
         stats.damage += (level / this.parent.maxLevel | 0) * 0.25;
     };
-    return TraitSharp;
+    return class_13;
 }(TconTrait));
-var TraitShulking = (function (_super) {
-    __extends(TraitShulking, _super);
-    function TraitShulking(parent) {
-        return _super.call(this, "shulking", "Shulking", parent) || this;
+var TraitShulking = new (function (_super) {
+    __extends(class_14, _super);
+    function class_14() {
+        return _super.call(this, "shulking", "Shulking", "#aaccff") || this;
     }
-    TraitShulking.prototype.onAttack = function (item, victim, player, level) {
+    class_14.prototype.onAttack = function (item, victim, player, level) {
         Entity.addEffect(victim, EPotionEffect.LEVITATION, 0, (level >> 1) + 10);
         return 0;
     };
-    return TraitShulking;
+    return class_14;
 }(TconTrait));
-var TraitSilk = (function (_super) {
-    __extends(TraitSilk, _super);
-    function TraitSilk(parent) {
-        return _super.call(this, "silk", "Silky", parent) || this;
+var TraitSilk = new (function (_super) {
+    __extends(class_15, _super);
+    function class_15() {
+        return _super.call(this, "silk", "Silky", "#fbe28b") || this;
     }
-    TraitSilk.prototype.applyStats = function (stats, level) {
+    class_15.prototype.applyStats = function (stats, level) {
         stats.efficiency = Math.max(1, stats.efficiency - 3);
         stats.damage = Math.max(1, stats.damage - 3);
     };
-    TraitSilk.prototype.applyEnchant = function (enchant, level) {
+    class_15.prototype.applyEnchant = function (enchant, level) {
         enchant.silk = true;
     };
-    return TraitSilk;
+    return class_15;
 }(TconTrait));
-var TraitSmite = (function (_super) {
-    __extends(TraitSmite, _super);
-    function TraitSmite(parent) {
-        return _super.call(this, "smite", "Smite", parent) || this;
+var TraitSmite = new (function (_super) {
+    __extends(class_16, _super);
+    function class_16() {
+        return _super.call(this, "smite", "Smite", "#e8d500") || this;
     }
-    TraitSmite.prototype.onAttack = function (item, victim, player, level) {
+    class_16.prototype.onAttack = function (item, victim, player, level) {
         return EntityHelper.isUndead(victim) ? 7 / this.parent.maxLevel * level : 0;
     };
-    return TraitSmite;
+    return class_16;
 }(TconTrait));
-var TraitSpider = (function (_super) {
-    __extends(TraitSpider, _super);
-    function TraitSpider(parent) {
-        return _super.call(this, "spider", "Bane of Arthropods", parent) || this;
+var TraitSpider = new (function (_super) {
+    __extends(class_17, _super);
+    function class_17() {
+        return _super.call(this, "spider", "Bane of Arthropods", "#61ba49") || this;
     }
-    TraitSpider.prototype.onAttack = function (item, victim, player, level) {
+    class_17.prototype.onAttack = function (item, victim, player, level) {
         return EntityHelper.isArthropods(victim) ? 7 / this.parent.maxLevel * level : 0;
     };
-    return TraitSpider;
+    return class_17;
 }(TconTrait));
-var TraitWeb = (function (_super) {
-    __extends(TraitWeb, _super);
-    function TraitWeb(parent) {
-        return _super.call(this, "web", "Web", parent) || this;
+var TraitWeb = new (function (_super) {
+    __extends(class_18, _super);
+    function class_18() {
+        return _super.call(this, "web", "Web", "#ffffff") || this;
     }
-    TraitWeb.prototype.onAttack = function (item, victim, player, level) {
+    class_18.prototype.onAttack = function (item, victim, player, level) {
         Entity.addEffect(victim, EPotionEffect.MOVEMENT_SLOWDOWN, 1, level * 20);
         return 0;
     };
-    return TraitWeb;
+    return class_18;
 }(TconTrait));
 var TinkersMaterial = (function () {
     function TinkersMaterial(name, texIndex, moltenLiquid, isMetal) {
@@ -6894,10 +6939,12 @@ var TinkersMaterial = (function () {
         return this;
     };
     TinkersMaterial.prototype.addHeadTraits = function (trait, level) {
+        if (level === void 0) { level = 1; }
         this.headTraits.push({ trait: trait, level: level });
         return this;
     };
     TinkersMaterial.prototype.addExtraTraits = function (trait, level) {
+        if (level === void 0) { level = 1; }
         this.extraTraits.push({ trait: trait, level: level });
         return this;
     };
@@ -6968,7 +7015,8 @@ var Material = {
         .setItem(ItemID.tcon_paperstack)
         .setHeadStats(12, 0.51, 0.05, MiningLv.STONE)
         .setHandleStats(0.1, 5)
-        .setExtraStats(15),
+        .setExtraStats(15)
+        .addHeadTraits(Traits.writable),
     sponge: new TinkersMaterial("Sponge", 10)
         .setItem("sponge")
         .setHeadStats(1050, 3.02, 0, MiningLv.STONE)
@@ -7867,7 +7915,8 @@ var TconModifier = (function () {
         this.texIndex = -1;
         this.consumeSlots = 1;
         this.hate = {};
-        this.trait = new trait(this);
+        this.trait = trait;
+        this.trait.setParent(this);
         this.maxLevel = maxLevel;
     }
     TconModifier.prototype.setTexIndex = function (index) {
@@ -8029,8 +8078,8 @@ Recipes2.addShaped(BlockID.tcon_partbuilder3, "a:b", { a: ItemID.tcon_pattern_bl
 Recipes2.addShaped(BlockID.tcon_partbuilder4, "a:b", { a: ItemID.tcon_pattern_blank, b: { id: "log2", data: 0 } });
 Recipes2.addShaped(BlockID.tcon_partbuilder5, "a:b", { a: ItemID.tcon_pattern_blank, b: { id: "log2", data: 1 } });
 var PartBuilderWindow = new (function (_super) {
-    __extends(class_1, _super);
-    function class_1() {
+    __extends(class_19, _super);
+    function class_19() {
         var _this = this;
         var elements = {
             slotPattern: { type: "slot", x: 8, y: 136 - 36, bitmap: "tcon.slot.pattern", size: 72 },
@@ -8112,7 +8161,7 @@ var PartBuilderWindow = new (function (_super) {
         });
         return _this;
     }
-    class_1.prototype.addServerEvents = function (container) {
+    class_19.prototype.addServerEvents = function (container) {
         var _this = this;
         container.addServerEventListener("select", function (con, client, data) {
             _this.selectedPattern = data.index;
@@ -8120,7 +8169,7 @@ var PartBuilderWindow = new (function (_super) {
         });
         container.addServerEventListener("craft", function (con, client, data) { return _this.onCraft(con, client); });
     };
-    class_1.prototype.autoSetPattern = function (container, player) {
+    class_19.prototype.autoSetPattern = function (container, player) {
         var slotPattern = container.getSlot("slotPattern");
         if (slotPattern.isEmpty()) {
             var actor = new PlayerActor(player);
@@ -8137,7 +8186,7 @@ var PartBuilderWindow = new (function (_super) {
             }
         }
     };
-    class_1.prototype.isValidAddTransfer = function (container, slotName, id, amount, data, extra, player) {
+    class_19.prototype.isValidAddTransfer = function (container, slotName, id, amount, data, extra, player) {
         switch (slotName) {
             case "slotPattern":
                 if (id === ItemID.tcon_pattern_blank)
@@ -8156,12 +8205,12 @@ var PartBuilderWindow = new (function (_super) {
         }
         return false;
     };
-    class_1.prototype.isValidGetTransfer = function (container, slotName, id, amount, data, extra, player) {
+    class_19.prototype.isValidGetTransfer = function (container, slotName, id, amount, data, extra, player) {
         if (slotName === "slotResult")
             return false;
         return true;
     };
-    class_1.prototype.onUpdate = function (container) {
+    class_19.prototype.onUpdate = function (container) {
         var patternData = PartRegistry.types[this.selectedPattern];
         var slotPattern = container.getSlot("slotPattern");
         var slotMaterial = container.getSlot("slotMaterial");
@@ -8189,7 +8238,7 @@ var PartBuilderWindow = new (function (_super) {
         container.sendChanges();
         container.sendEvent("refresh", { result: resultId, index: this.selectedPattern });
     };
-    class_1.prototype.showMaterial = function (container, key, slotMaterialCount, patternDataCost) {
+    class_19.prototype.showMaterial = function (container, key, slotMaterialCount, patternDataCost) {
         var material = Material[key];
         var packet = {
             material: key,
@@ -8203,7 +8252,7 @@ var PartBuilderWindow = new (function (_super) {
         }
         container.sendEvent("stats", packet);
     };
-    class_1.prototype.onCraft = function (container, client) {
+    class_19.prototype.onCraft = function (container, client) {
         var patternData = PartRegistry.types[this.selectedPattern];
         var slotPattern = container.getSlot("slotPattern");
         var slotMaterial = container.getSlot("slotMaterial");
@@ -8236,7 +8285,7 @@ var PartBuilderWindow = new (function (_super) {
         }
         this.onUpdate(container);
     };
-    return class_1;
+    return class_19;
 }(CraftingWindow));
 PartBuilderWindow.addTargetBlock(BlockID.tcon_partbuilder0);
 PartBuilderWindow.addTargetBlock(BlockID.tcon_partbuilder1);
@@ -8321,6 +8370,7 @@ var ToolCrafterWindow = (function (_super) {
     __extends(ToolCrafterWindow, _super);
     function ToolCrafterWindow(windowName, title, isForge) {
         var _this = this;
+        var TRAITS_LINES = 32;
         var window = new UI.StandardWindow({
             standard: {
                 header: { text: { text: translate(title) }, height: 60 },
@@ -8362,18 +8412,39 @@ var ToolCrafterWindow = (function (_super) {
             }
         });
         window.addWindow("traits", {
-            location: { x: loc.x + loc.windowToGlobal(580 + 20), y: loc.y + loc.windowToGlobal(260 + 20), width: loc.windowToGlobal(400 - 40), height: loc.windowToGlobal(240 - 40), scrollY: 250 },
+            location: { x: loc.x + loc.windowToGlobal(580 + 20), y: loc.y + loc.windowToGlobal(260 + 20), width: loc.windowToGlobal(400 - 40), height: loc.windowToGlobal(240 - 40), scrollY: 800 },
             drawing: [
                 { type: "background", color: Color.TRANSPARENT },
                 { type: "text", x: 500, y: 50, font: { size: 80, color: Color.YELLOW, shadow: 0.5, alignment: UI.Font.ALIGN_CENTER, bold: true }, text: translate("Traits") }
             ],
-            elements: {
-                textTraits: { type: "text", x: 20, y: 120, font: { size: 72, color: Color.WHITE, shadow: 0.5 }, multiline: true }
-            }
+            elements: (function () {
+                var elems = {};
+                for (var i = 0; i < TRAITS_LINES; i++) {
+                    elems["textTrait" + i] = { type: "text", x: 20, y: 120 + 80 * i, font: { size: 64, color: Color.WHITE, shadow: 0.5 }, text: "" };
+                }
+                return elems;
+            })()
         });
         _this = _super.call(this, windowName, window) || this;
         _this.page = 0;
         _this.isForge = !!isForge;
+        var setTextTraitsLines = function (win, lines) {
+            var _a;
+            var content = (_a = win.getWindow("traits")) === null || _a === void 0 ? void 0 : _a.getContent();
+            if (content) {
+                var text = void 0;
+                for (var i = 0; i < TRAITS_LINES; i++) {
+                    text = content.elements["textTrait" + i];
+                    if (lines[i]) {
+                        text.text = lines[i][0];
+                        text.font.color = lines[i][1];
+                    }
+                    else {
+                        text.text = "";
+                    }
+                }
+            }
+        };
         ItemContainer.addClientEventListener(_this.name, "changeLayout", function (container, win, content, data) {
             var centerX = 160;
             var centerY = 210;
@@ -8402,21 +8473,27 @@ var ToolCrafterWindow = (function (_super) {
                 translate("Mining Speed: ") + data.miningSpeed + "\n" +
                 translate("Melee Damage: ") + data.meleeDamage + "\n" +
                 translate("Modifiers: ") + data.modifierSlots));
-            container.setText("textTraits", addLineBreaks(20, data.traits.map(function (t) {
+            setTextTraitsLines(win, data.traits.map(function (t) {
                 var trait = Traits[t.key];
                 if (trait == null) {
-                    return "".concat(translate("Unknown trait %s", t.key), " (").concat(t.level, ")");
+                    return ["".concat(translate("Unknown trait %s", t.key), " (").concat(t.level, ")"), Color.WHITE];
                 }
                 var name = trait.getLocalizedName(t.level);
                 if (trait.parent) {
                     name += " (".concat(t.level, "/").concat(trait.parent.maxLevel, ")");
                 }
-                return name;
-            }).join("\n")));
+                return [name, trait.color];
+            }));
         });
         ItemContainer.addClientEventListener(_this.name, "showHammer", function (container, win, content, data) {
             container.setText("textStats", addLineBreaks(20, translate(data.intro)));
-            container.setText("textTraits", "       .\n     /( _________\n     |  >:=========`\n     )(  \n     \"\"");
+            setTextTraitsLines(win, [
+                ["       .", Color.GRAY],
+                ["     /( _________", Color.GRAY],
+                ["     |  >:=========`", Color.GRAY],
+                ["     )(  ", Color.GRAY],
+                ['     ""', Color.GRAY],
+            ]);
         });
         return _this;
     }
@@ -9694,8 +9771,8 @@ var RV;
 ModAPI.addAPICallback("RecipeViewer", function (api) {
     RV = api;
     api.RecipeTypeRegistry.register("tcon_partbuilder", new (function (_super) {
-        __extends(class_2, _super);
-        function class_2() {
+        __extends(class_20, _super);
+        function class_20() {
             var _this = this;
             var centerY = 80;
             _this = _super.call(this, translate("Part Building"), BlockID.tcon_partbuilder0, {
@@ -9712,17 +9789,17 @@ ModAPI.addAPICallback("RecipeViewer", function (api) {
             _this.setGridView(3, 1, true);
             return _this;
         }
-        class_2.prototype.getAllList = function () {
+        class_20.prototype.getAllList = function () {
             return PartRegistry.getAllPartBuildRecipeForRV();
         };
-        class_2.prototype.onOpen = function (elements, recipe) {
+        class_20.prototype.onOpen = function (elements, recipe) {
             elements.get("imagePattern").setBinding("texture", recipe.pattern ? "tcon.pattern." + recipe.pattern : "_default_slot_empty");
         };
-        return class_2;
+        return class_20;
     }(api.RecipeType)));
     api.RecipeTypeRegistry.register("tcon_melting", new (function (_super) {
-        __extends(class_3, _super);
-        function class_3() {
+        __extends(class_21, _super);
+        function class_21() {
             var _this = _super.call(this, translate("Melting"), BlockID.tcon_smeltery, {
                 drawing: [
                     { type: "bitmap", x: 86, y: 50, bitmap: "tcon.rv.smeltery", scale: 6 },
@@ -9739,17 +9816,17 @@ ModAPI.addAPICallback("RecipeViewer", function (api) {
             _this.setTankLimit(MatValue.BLOCK);
             return _this;
         }
-        class_3.prototype.getAllList = function () {
+        class_21.prototype.getAllList = function () {
             return MeltingRecipe.getAllRecipeForRV();
         };
-        class_3.prototype.onOpen = function (elements, recipe) {
+        class_21.prototype.onOpen = function (elements, recipe) {
             elements.get("textTemp").setBinding("text", translate("%s°C", recipe.temp));
         };
-        return class_3;
+        return class_21;
     }(api.RecipeType)));
     api.RecipeTypeRegistry.register("tcon_alloying", new (function (_super) {
-        __extends(class_4, _super);
-        function class_4() {
+        __extends(class_22, _super);
+        function class_22() {
             var _this = _super.call(this, translate("Alloying"), BlockID.tcon_smeltery, {
                 drawing: [
                     { type: "bitmap", x: 50, y: 50, bitmap: "tcon.rv.smeltery_wide", scale: 6 },
@@ -9771,10 +9848,10 @@ ModAPI.addAPICallback("RecipeViewer", function (api) {
             _this.setDescription(translate("Alloy"));
             return _this;
         }
-        class_4.prototype.getAllList = function () {
+        class_22.prototype.getAllList = function () {
             return AlloyRecipe.getAllRecipeForRV();
         };
-        class_4.prototype.onOpen = function (elements, recipe) {
+        class_22.prototype.onOpen = function (elements, recipe) {
             if (recipe.inputLiq && recipe.outputLiq) {
                 var len = recipe.inputLiq.length;
                 var width = 216 / len;
@@ -9792,7 +9869,7 @@ ModAPI.addAPICallback("RecipeViewer", function (api) {
                 this.setTankLimit(Math.max.apply(Math, __spreadArray(__spreadArray([], recipe.inputLiq.map(function (rec) { return rec.amount; }), false), [recipe.outputLiq[0].amount], false)));
             }
         };
-        return class_4;
+        return class_22;
     }(api.RecipeType)));
     var CastingRV = (function (_super) {
         __extends(CastingRV, _super);

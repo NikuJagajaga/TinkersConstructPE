@@ -49,6 +49,33 @@ const Cfg = {
     checkInsideSmeltery: __config__.getBool("checkInsideSmeltery")
 } as const;
 
+
+const toRoman = (num: number): string => {
+    if(num < 1 || num > 100){
+        return "";
+    }
+    const romanNumerals: [number, string][] = [
+        [100, "C"],
+        [90, "XC"],
+        [50, "L"],
+        [40, "XL"],
+        [10, "X"],
+        [9, "IX"],
+        [5, "V"],
+        [4, "IV"],
+        [1, "I"]
+    ];
+    let roman = "";
+    for(const [value, symbol] of romanNumerals){
+        while(num >= value){
+            roman += symbol;
+            num -= value;
+        }
+    }
+    return roman;
+}
+
+
 const addLineBreaks = (length: number, text: string): string => {
     let characters = 0;
     let bufferedLine = "";

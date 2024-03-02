@@ -16,6 +16,8 @@ class ToolCrafterWindow extends CraftingWindow {
 
     constructor(windowName: string, title: string, isForge: boolean){
 
+        const TRAITS_LINES = 32;
+
         const window = new UI.StandardWindow({
             standard: {
                 header: {text: {text: translate(title)}, height: 60},
@@ -61,20 +63,47 @@ class ToolCrafterWindow extends CraftingWindow {
         });
 
         window.addWindow("traits", {
-            location: {x: loc.x + loc.windowToGlobal(580 + 20), y: loc.y + loc.windowToGlobal(260 + 20), width: loc.windowToGlobal(400 - 40), height: loc.windowToGlobal(240 - 40), scrollY: 250},
+            location: {x: loc.x + loc.windowToGlobal(580 + 20), y: loc.y + loc.windowToGlobal(260 + 20), width: loc.windowToGlobal(400 - 40), height: loc.windowToGlobal(240 - 40), scrollY: 800},
             drawing: [
                 {type: "background", color: Color.TRANSPARENT},
                 {type: "text", x: 500, y: 50, font: {size: 80, color: Color.YELLOW, shadow: 0.5, alignment: UI.Font.ALIGN_CENTER, bold: true}, text: translate("Traits")}
             ],
-            elements: {
-                textTraits: {type: "text", x: 20, y: 120, font: {size: 72, color: Color.WHITE, shadow: 0.5}, multiline: true}
-            }
+            elements: (() => {
+                const elems: UI.ElementSet = {};
+                for(let i = 0; i < TRAITS_LINES; i++){
+                    elems["textTrait" + i] = {type: "text", x: 20, y: 120 + 80 * i, font: {size: 64, color: Color.WHITE, shadow: 0.5}, text: ""}
+                }
+                return elems;
+            })()
+            // elements: {
+            //     textTraits: {type: "text", x: 20, y: 120, font: {size: 64, color: Color.WHITE, shadow: 0.5}, multiline: true}
+            // }
         });
 
         super(windowName, window);
 
         this.page = 0;
         this.isForge = !!isForge;
+
+        const setTextTraitsLines = (win: UI.WindowGroup, lines: [string, number][]) => {
+
+            const content = win.getWindow("traits")?.getContent();
+
+            if(content){
+                let text: UI.UITextElement;
+                for(let i = 0; i < TRAITS_LINES; i++){
+                    text = content.elements["textTrait" + i] as UI.UITextElement;
+                    if(lines[i]){
+                        text.text = lines[i][0];
+                        text.font.color = lines[i][1];
+                    }
+                    else{
+                        text.text = "";
+                    }
+                }
+            }
+
+        }
 
         ItemContainer.addClientEventListener(this.name, "changeLayout", (container, win, content, data: ForgeLayout) => {
 
@@ -102,7 +131,7 @@ class ToolCrafterWindow extends CraftingWindow {
 
         });
 
-        ItemContainer.addClientEventListener(this.name, "showInfo", (container, win, content, data: ForgePageProperties) => {
+        ItemContainer.addClientEventListener(this.name, "showInfo", (container, win: UI.WindowGroup, content, data: ForgePageProperties) => {
             const miningTier = MiningLvName[data.miningTier] ?? "Unknown mining tier %s";
 
             container.setText("textStats", addLineBreaks(20,
@@ -113,23 +142,45 @@ class ToolCrafterWindow extends CraftingWindow {
                 translate("Modifiers: ") + data.modifierSlots
             ));
 
-            container.setText("textTraits", addLineBreaks(20, data.traits.map(t => {
+            // container.setText("textTraits", addLineBreaks(20, data.traits.map(t => {
+            //     const trait = Traits[t.key];
+            //     if(trait == null){
+            //         return `${translate("Unknown trait %s", t.key)} (${t.level})`;
+            //     }
+            //     let name = trait.getLocalizedName(t.level);
+            //     if(trait.parent){
+            //         name += ` (${t.level}/${trait.parent.maxLevel})`
+            //     }
+            //     return name;
+            // }).join("\n")));
+
+            setTextTraitsLines(win, data.traits.map(t => {
                 const trait = Traits[t.key];
                 if(trait == null){
-                    return `${translate("Unknown trait %s", t.key)} (${t.level})`;
+                    return [`${translate("Unknown trait %s", t.key)} (${t.level})`, Color.WHITE];
                 }
                 let name = trait.getLocalizedName(t.level);
                 if(trait.parent){
                     name += ` (${t.level}/${trait.parent.maxLevel})`
                 }
-                return name;
-            }).join("\n")));
+                return [name, trait.color];
+            }));
 
         });
 
-        ItemContainer.addClientEventListener(this.name, "showHammer", (container, win, content, data: ForgeLayout) => {
+        ItemContainer.addClientEventListener(this.name, "showHammer", (container, win: UI.WindowGroup, content, data: ForgeLayout) => {
+
             container.setText("textStats", addLineBreaks(20, translate(data.intro)));
-            container.setText("textTraits", "       .\n     /( _________\n     |  >:=========`\n     )(  \n     \"\"");
+
+            setTextTraitsLines(win, [
+                ["       .", Color.GRAY],
+                ["     /( _________", Color.GRAY],
+                ["     |  >:=========`", Color.GRAY],
+                ["     )(  ", Color.GRAY],
+                ['     ""', Color.GRAY],
+            ]);
+
+            //container.setText("textTraits", "       .\n     /( _________\n     |  >:=========`\n     )(  \n     \"\"");
         });
 
     }

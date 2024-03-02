@@ -1,7 +1,7 @@
-class TraitWeb extends TconTrait {
+const TraitWeb = new class extends TconTrait {
 
-    constructor(parent: TconModifier){
-        super("web", "Web", parent);
+    constructor(){
+        super("web", "Web", "#ffffff");
     }
 
     override onAttack(item: ItemInstance, victim: number, player: number, level: number): number {

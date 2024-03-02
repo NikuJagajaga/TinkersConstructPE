@@ -5,13 +5,18 @@ abstract class TconTrait {
 
     readonly key: string;
     readonly name: string;
-    readonly parent?: TconModifier;
+    readonly color: number;
+    parent?: TconModifier;
 
-    constructor(key: string, name: string, parent?: TconModifier){
+    constructor(key: string, name: string, color?: string){
         this.key = key;
         this.name = name;
-        this.parent = parent;
+        this.color = color ? Color.parseColor(color) : Color.WHITE;
         Traits[key] = this;
+    }
+
+    setParent(modifier: TconModifier): void {
+        this.parent = modifier;
     }
 
     getLocalizedName(level: number): string {

@@ -1,7 +1,7 @@
-class TraitNecrotic extends TconTrait {
+const TraitNecrotic = new class extends TconTrait {
 
-    constructor(parent: TconModifier){
-        super("necrotic", "Necrotic", parent);
+    constructor(){
+        super("necrotic", "Necrotic", "#5e0000");
     }
 
     override onDealDamage(stack: TconToolStack, victim: number, player: number, damageValue: number, damageType: number, level: number): void {

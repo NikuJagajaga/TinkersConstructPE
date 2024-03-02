@@ -1,7 +1,7 @@
-class TraitFiery extends TconTrait {
+const TraitFiery = new class extends TconTrait {
 
-    constructor(parent: TconModifier){
-        super("fiery", "Fiery", parent);
+    constructor(){
+        super("fiery", "Fiery", "#ea9e32");
     }
 
     override onAttack(item: ItemInstance, victim: number, player: number, level: number): number {

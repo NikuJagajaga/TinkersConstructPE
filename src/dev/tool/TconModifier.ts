@@ -7,15 +7,11 @@ class TconModifier {
     private recipe: Tile[];
     private hate: {[key: string]: true} = {};
 
-    constructor(trait: new (parent: TconModifier) => TconTrait, maxLevel: number){
-        this.trait = new trait(this);
+    constructor(trait: TconTrait, maxLevel: number){
+        this.trait = trait;
+        this.trait.setParent(this);
         this.maxLevel = maxLevel;
     }
-
-    // setMaxLevel(max: number): this {
-    //     this.max = max;
-    //     return this;
-    // }
 
     setTexIndex(index: number): this {
         this.texIndex = index;
@@ -38,11 +34,6 @@ class TconModifier {
         }
         return this;
     }
-
-    // getLocalizedName(): string {
-    //     return this.trait.getLocalizedName();
-    //     //return translate(this.name);
-    // }
 
     getTexIndex(): number {
         return this.texIndex;

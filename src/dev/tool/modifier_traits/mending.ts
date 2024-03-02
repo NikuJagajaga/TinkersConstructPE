@@ -1,7 +1,7 @@
-class TraitMending extends TconTrait {
+const TraitMending = new class extends TconTrait {
 
-    constructor(parent: TconModifier){
-        super("mending", "Mending", parent);
+    constructor(){
+        super("mending", "Mending", "#43ab32");
     }
 
     override onTick(stack: TconToolStack, player: number, level: number): void {

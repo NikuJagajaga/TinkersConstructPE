@@ -1,7 +1,7 @@
-class TraitEmerald extends TconTrait {
+const TraitEmerald = new class extends TconTrait {
 
-    constructor(parent: TconModifier){
-        super("emerald", "Emerald", parent);
+    constructor(){
+        super("emerald", "Emerald", "#41f384");
     }
 
     override applyStats(stats: ToolStats, level: number): void {

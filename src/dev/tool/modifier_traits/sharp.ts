@@ -1,7 +1,7 @@
-class TraitSharp extends TconTrait {
+const TraitSharp = new class extends TconTrait {
 
-    constructor(parent: TconModifier){
-        super("sharp", "Sharp", parent);
+    constructor(){
+        super("sharp", "Sharp", "#fff6f6");
     }
 
     override applyStats(stats: ToolStats, level: number): void {

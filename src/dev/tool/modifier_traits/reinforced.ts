@@ -1,7 +1,7 @@
-class TraitReinforced extends TconTrait {
+const TraitReinforced = new class extends TconTrait {
 
-    constructor(parent: TconModifier){
-        super("reinforced", "Reinforced", parent);
+    constructor(){
+        super("reinforced", "Reinforced", "#502e83");
     }
 
     override onConsume(stack: TconToolStack, level: number): boolean {

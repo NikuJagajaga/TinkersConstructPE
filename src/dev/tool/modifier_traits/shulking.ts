@@ -1,7 +1,7 @@
-class TraitShulking extends TconTrait {
+const TraitShulking = new class extends TconTrait {
 
-    constructor(parent: TconModifier){
-        super("shulking", "Shulking", parent);
+    constructor(){
+        super("shulking", "Shulking", "#aaccff");
     }
 
     override onAttack(item: ItemInstance, victim: number, player: number, level: number): number {
