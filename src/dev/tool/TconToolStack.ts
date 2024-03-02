@@ -8,8 +8,8 @@ class TconToolStack implements ItemInstance {
     readonly instance: TconTool;
     readonly materials: TinkersMaterial[];
     readonly modifiers: {[key: string]: number};
-    readonly stats: ToolAPI.ToolMaterial;
     readonly traits: TraitWithLevel[];
+    readonly stats: ToolAPI.ToolMaterial;
 
     constructor(item: ItemInstance){
 
@@ -21,7 +21,7 @@ class TconToolStack implements ItemInstance {
         this.instance = ToolAPI.getToolData(this.id) as TconTool;
         this.materials = new String(this.extra.getString("materials")).split("_").map(mat => Material[mat]);
         this.modifiers = TconModifier.decodeToObj(this.extra.getString("modifiers"));
-        this.stats = this.getStats();
+        this.traits = [];
 
         const headTraits: TraitWithLevel[] = [];
         const extraTraits: TraitWithLevel[] = [];
@@ -52,7 +52,7 @@ class TconToolStack implements ItemInstance {
             }
         }
 
-        this.traits = [...headTraits];
+        this.traits.push(...headTraits);
 
         for(const trait of extraTraits){
             find = this.traits.find(t => t.trait == trait.trait);
@@ -67,6 +67,8 @@ class TconToolStack implements ItemInstance {
         for(let key in this.modifiers){
             this.traits.push({trait: Modifier[key].trait, level: this.modifiers[key]});
         }
+
+        this.stats = this.getStats();
 
     }
 
@@ -160,7 +162,7 @@ class TconToolStack implements ItemInstance {
     }
 
     getModifierInfo(): {modifiers: {type: string, level: number}[], usedCount: number, maxCount: number} {
-        const modifiers = TinkersModifierHandler.decodeToArray(this.extra.getString("modifiers"));
+        const modifiers = TconModifier.decodeToArray(this.extra.getString("modifiers"));
         let usedCount = 0;
         let maxCount = Cfg.modifierSlots + ToolLeveling.getLevel(this.xp, this.instance.is3x3);
         for(const mod of modifiers){

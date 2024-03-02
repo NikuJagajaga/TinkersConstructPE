@@ -5,7 +5,7 @@ interface ForgePageProperties {
     miningSpeed: number,
     meleeDamage: number,
     modifierSlots: number,
-    modifiers: {type: string, level: number}[]
+    traits: {key: string, level: number}[]
 }
 
 class ToolCrafterWindow extends CraftingWindow {
@@ -60,14 +60,14 @@ class ToolCrafterWindow extends CraftingWindow {
             }
         });
 
-        window.addWindow("modifiers", {
+        window.addWindow("traits", {
             location: {x: loc.x + loc.windowToGlobal(580 + 20), y: loc.y + loc.windowToGlobal(260 + 20), width: loc.windowToGlobal(400 - 40), height: loc.windowToGlobal(240 - 40), scrollY: 250},
             drawing: [
                 {type: "background", color: Color.TRANSPARENT},
-                {type: "text", x: 500, y: 50, font: {size: 80, color: Color.YELLOW, shadow: 0.5, alignment: UI.Font.ALIGN_CENTER, bold: true}, text: translate("Modifiers")}
+                {type: "text", x: 500, y: 50, font: {size: 80, color: Color.YELLOW, shadow: 0.5, alignment: UI.Font.ALIGN_CENTER, bold: true}, text: translate("Traits")}
             ],
             elements: {
-                textModifiers: {type: "text", x: 20, y: 120, font: {size: 72, color: Color.WHITE, shadow: 0.5}, multiline: true}
+                textTraits: {type: "text", x: 20, y: 120, font: {size: 72, color: Color.WHITE, shadow: 0.5}, multiline: true}
             }
         });
 
@@ -113,20 +113,23 @@ class ToolCrafterWindow extends CraftingWindow {
                 translate("Modifiers: ") + data.modifierSlots
             ));
 
-            container.setText("textModifiers", addLineBreaks(20, data.modifiers.map(mod => {
-                const modifier = Modifier[mod.type];
-                if (modifier == null) {
-                    return `${translate("Unknown modifier %s", mod.type)} (${mod.level})`;
+            container.setText("textTraits", addLineBreaks(20, data.traits.map(t => {
+                const trait = Traits[t.key];
+                if(trait == null){
+                    return `${translate("Unknown trait %s", t.key)} (${t.level})`;
                 }
-                return `${modifier.getLocalizedName()} (${mod.level}/${modifier.max})`;
+                let name = trait.getLocalizedName(t.level);
+                if(trait.parent){
+                    name += ` (${t.level}/${trait.parent.maxLevel})`
+                }
+                return name;
             }).join("\n")));
 
         });
 
         ItemContainer.addClientEventListener(this.name, "showHammer", (container, win, content, data: ForgeLayout) => {
             container.setText("textStats", addLineBreaks(20, translate(data.intro)));
-            container.setText("textModifiers", "       .\n     /( _________\n     |  >:=========`\n     )(  \n     \"\"");
-
+            container.setText("textTraits", "       .\n     /( _________\n     |  >:=========`\n     )(  \n     \"\"");
         });
 
     }
@@ -186,13 +189,13 @@ class ToolCrafterWindow extends CraftingWindow {
             let find3: {type: string, level: number};
             for(let key in addMod){
                 find3 = modifiers.find(mod => mod.type === key);
-                if(find3 && find3.level < Modifier[key].max){
-                    addMod[key] = Math.min(addMod[key], Modifier[key].max - find3.level);
+                if(find3 && find3.level < Modifier[key].maxLevel){
+                    addMod[key] = Math.min(addMod[key], Modifier[key].maxLevel - find3.level);
                     find3.level += addMod[key];
                     continue;
                 }
                 if(Modifier[key].canBeTogether(modifiers) && usedCount + Modifier[key].getConsumeSlots() <= maxCount){
-                    addMod[key] = Math.min(addMod[key], Modifier[key].max);
+                    addMod[key] = Math.min(addMod[key], Modifier[key].maxLevel);
                     modifiers.push({type: key, level: addMod[key]});
                 }
                 else{
@@ -246,7 +249,7 @@ class ToolCrafterWindow extends CraftingWindow {
                 let result = stack.clone();
                 result.durability = newDur;
                 result.extra.putInt("repair", stack.repairCount + 1);
-                result.extra.putString("modifiers", TinkersModifierHandler.encodeToString(modifiers));
+                result.extra.putString("modifiers", TconModifier.encodeToString(modifiers));
                 result = new TconToolStack(result);
                 container.setSlot("slotResult", result.id, result.count, result.data, result.extra);
             }
@@ -357,14 +360,14 @@ class ToolCrafterWindow extends CraftingWindow {
         const modInfo = stack.getModifierInfo();
 
         container.sendEvent("showInfo", {
-            durability: stack.stats.durability - item.extra.getInt("durability"),
+            durability: stack.stats.durability - stack.durability,
             maxDurability: stack.stats.durability,
             miningTier: stack.stats.level,
             miningSpeed: (stack.stats.efficiency * 100 | 0) / 100,
             meleeDamage: (stack.stats.damage * 100 | 0) / 100,
             modifierSlots: modInfo.maxCount - modInfo.usedCount,
-            modifiers: modInfo.modifiers
-        });
+            traits: stack.traits.map(t => ({key: t.trait.key, level: t.level}))
+        } as ForgePageProperties);
 
     }
 

@@ -1,24 +1,21 @@
 class TconModifier {
 
-    readonly key: string;
-    readonly name: string;
     readonly trait: TconTrait;
-    public max: number;
+    readonly maxLevel: number;
     private texIndex = -1;
     private consumeSlots = 1;
     private recipe: Tile[];
     private hate: {[key: string]: true} = {};
 
-    constructor(key: string, name: string, trait: TconTrait){
-        this.key = key;
-        this.name = name;
-        this.trait = trait;
+    constructor(trait: new (parent: TconModifier) => TconTrait, maxLevel: number){
+        this.trait = new trait(this);
+        this.maxLevel = maxLevel;
     }
 
-    setMaxLevel(max: number): this {
-        this.max = max;
-        return this;
-    }
+    // setMaxLevel(max: number): this {
+    //     this.max = max;
+    //     return this;
+    // }
 
     setTexIndex(index: number): this {
         this.texIndex = index;
@@ -35,14 +32,17 @@ class TconModifier {
         return this;
     }
 
-    addConflict(mod: string): this {
-        this.hate[mod] = true;
+    addConflict(...mods: string[]): this {
+        for(const mod of mods){
+            this.hate[mod] = true;
+        }
         return this;
     }
 
-    getLocalizedName(): string {
-        return translate(this.name);
-    }
+    // getLocalizedName(): string {
+    //     return this.trait.getLocalizedName();
+    //     //return translate(this.name);
+    // }
 
     getTexIndex(): number {
         return this.texIndex;
@@ -98,5 +98,18 @@ class TconModifier {
 
 
 const Modifier: {[key: string]: TconModifier} = {
+
+    haste: new TconModifier(TraitHaste, 50)
+        .setTexIndex(0)
+        .setRecipe(["redstone"]),
+
+    luck: new TconModifier(TraitLuck, 360)
+        .setTexIndex(1)
+        .setRecipe(["lapis_lazuli"])
+        .addConflict("luck", "silk"),
+
+    sharp: new TconModifier(TraitSharp, 72)
+        .setTexIndex(2)
+        .setRecipe(["quartz"])
 
 };

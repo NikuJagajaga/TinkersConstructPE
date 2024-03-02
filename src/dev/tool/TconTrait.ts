@@ -1,14 +1,20 @@
+const Traits: {[key: string]: TconTrait} = {};
+
+
 abstract class TconTrait {
 
-    abstract readonly key: string;
-    abstract readonly name: string;
-    parent: TconModifier;
+    readonly key: string;
+    readonly name: string;
+    readonly parent?: TconModifier;
 
-    setParent(modifier: TconModifier): void {
-        this.parent = modifier;
+    constructor(key: string, name: string, parent?: TconModifier){
+        this.key = key;
+        this.name = name;
+        this.parent = parent;
+        Traits[key] = this;
     }
 
-    getLocalizedName(): string {
+    getLocalizedName(level: number): string {
         return translate(this.name);
     }
 
@@ -38,8 +44,3 @@ abstract class TconTrait {
     onTick(stack: TconToolStack, player: number, level: number): void {}
 
 }
-
-
-const Trait: {[key: string]: TconTrait} = {
-    
-};

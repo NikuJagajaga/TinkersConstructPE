@@ -309,3 +309,7 @@ Translation.addTranslation("XP: ", {
     uk: "Досвід:",
     zh: "經驗值："
 });
+
+
+//Traits
+//"Unknown trait %s"
