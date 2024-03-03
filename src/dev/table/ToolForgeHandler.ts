@@ -53,34 +53,6 @@ class ToolForgeHandler {
 }
 
 
-class RepairHandler {
-
-    private static readonly value = MatValue.SHARD * 4 / MatValue.INGOT | 0;
-
-    static calcRepairAmount(material: ItemInstance): number {
-        let item: Tile;
-        for(let key in Materials){
-            item = Materials[key].getItem();
-            if(item.id === material.id && (item.data === -1 || item.data === material.data)){
-                return Materials[key].getHeadStats().durability * this.value;
-            }
-        }
-        return 0;
-    }
-
-    static calcRepair(toolStack: TconToolStack, amount: number): number {
-        const origDur = toolStack.getBaseStats().durability;
-        const actDur = toolStack.stats.durability;
-        const modCount = TconModifier.decodeToArray(toolStack.extra.getString("modifiers")).length;
-        let increase = Math.max(Math.min(10, actDur / origDur) * amount, actDur / 64);
-        increase *= 1 - Math.min(3, modCount) * 0.05;
-        increase *= Math.max(0.5, 1 - toolStack.repairCount * 0.005);
-        return Math.ceil(increase);
-    }
-
-}
-
-
 ToolForgeHandler.addLayout({
     title: "Repair & Modify",
     background: "tcon.icon.repair",

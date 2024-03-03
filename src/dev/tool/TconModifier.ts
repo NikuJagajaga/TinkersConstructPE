@@ -88,7 +88,7 @@ class TconModifier {
 }
 
 
-const Modifiers = {
+const Modifiers: {[key: string]: TconModifier} = {
 
     haste: new TconModifier(TraitHaste, 50)
         .setTexIndex(0)

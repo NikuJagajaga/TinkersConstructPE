@@ -75,9 +75,6 @@ class ToolCrafterWindow extends CraftingWindow {
                 }
                 return elems;
             })()
-            // elements: {
-            //     textTraits: {type: "text", x: 20, y: 120, font: {size: 64, color: Color.WHITE, shadow: 0.5}, multiline: true}
-            // }
         });
 
         super(windowName, window);
@@ -142,26 +139,18 @@ class ToolCrafterWindow extends CraftingWindow {
                 translate("Modifiers: ") + data.modifierSlots
             ));
 
-            // container.setText("textTraits", addLineBreaks(20, data.traits.map(t => {
-            //     const trait = Traits[t.key];
-            //     if(trait == null){
-            //         return `${translate("Unknown trait %s", t.key)} (${t.level})`;
-            //     }
-            //     let name = trait.getLocalizedName(t.level);
-            //     if(trait.parent){
-            //         name += ` (${t.level}/${trait.parent.maxLevel})`
-            //     }
-            //     return name;
-            // }).join("\n")));
-
             setTextTraitsLines(win, data.traits.map(t => {
                 const trait = Traits[t.key];
                 if(trait == null){
                     return [`${translate("Unknown trait %s", t.key)} (${t.level})`, Color.WHITE];
                 }
                 let name = trait.getLocalizedName(t.level);
-                if(trait.parent){
-                    name += ` (${t.level}/${trait.parent.maxLevel})`
+                if(trait.parent && trait.parent.maxLevel > 1){
+                    let maxLevel = trait.parent.maxLevel;
+                    while(maxLevel < t.level){
+                        maxLevel += trait.parent.maxLevel;
+                    }
+                    name += ` (${t.level}/${maxLevel})`
                 }
                 return [name, trait.color];
             }));
@@ -180,7 +169,6 @@ class ToolCrafterWindow extends CraftingWindow {
                 ['     ""', Color.GRAY],
             ]);
 
-            //container.setText("textTraits", "       .\n     /( _________\n     |  >:=========`\n     )(  \n     \"\"");
         });
 
     }
@@ -211,22 +199,19 @@ class ToolCrafterWindow extends CraftingWindow {
 
             const slots: ItemInstance[] = [];
             const items: ItemInstance[] = [];
-            let slot: ItemContainerSlot;
-            let find: ItemInstance;
             for(let i = 1; i < 6; i++){
-                slot = container.getSlot("slot" + i);
+                const slot = container.getSlot("slot" + i);
                 slots[i] = {id: slot.id, count: slot.count, data: slot.data};
                 if(slot.id === 0){
                     continue;
                 }
-                find = items.find(item => item.id === slot.id && item.data === slot.data);
+                const find = items.find(item => item.id === slot.id && item.data === slot.data);
                 find ? find.count += slot.count : items.push({id: slot.id, count: slot.count, data: slot.data});
             }
 
             const addMod: {[key: string]: number} = {};
-            let count = 0;
             for(let key in Modifiers){
-                count = Math.min(...Modifiers[key].getRecipe().map(recipe => {
+                const count = Math.min(...Modifiers[key].getRecipe().map(recipe => {
                     const find2 = items.find(item => item.id === recipe.id && (recipe.data === -1 || item.data === recipe.data));
                     return find2 ? find2.count : 0;
                 }));
@@ -237,9 +222,8 @@ class ToolCrafterWindow extends CraftingWindow {
 
             const stack = new TconToolStack(slotTool);
             const {modifiers, usedCount, maxCount} = stack.getModifierInfo();
-            let find3: {type: string, level: number};
             for(let key in addMod){
-                find3 = modifiers.find(mod => mod.type === key);
+                const find3 = modifiers.find(mod => mod.type === key);
                 if(find3 && find3.level < Modifiers[key].maxLevel){
                     addMod[key] = Math.min(addMod[key], Modifiers[key].maxLevel - find3.level);
                     find3.level += addMod[key];
@@ -254,44 +238,40 @@ class ToolCrafterWindow extends CraftingWindow {
                 }
             }
 
-            const mat = stack.getRepairItems();
             const space = stack.durability;
             let newDur = space;
-            let value = 0;
-            find = null;
-            count = 0;
+            let findRepair: ItemInstance;
+            let countRepair = 0;
 
-            for(let i = 0; i < mat.length; i++){
-                find = items.find(item => item.id === mat[i].id && (mat[i].data === -1 || item.data === mat[i].data));
-                if(find){
-                    value = RepairHandler.calcRepairAmount(find);
-                    if(value > 0){
-                        value *= stack.instance.getRepairModifierForPart(i);
-                        while(count < find.count && RepairHandler.calcRepair(stack, value * count) < space){
-                            count++;
-                        }
-                        newDur = Math.max(0, space - (RepairHandler.calcRepair(stack, value * count) | 0));
-                        break;
+            for(const item of items){
+                const value = stack.calcRepair(item);
+                if(value > 0){
+                    findRepair = item;
+                    while(countRepair < findRepair.count && value * countRepair < space){
+                        countRepair++;
                     }
+                    newDur = Math.max(0, space - value * countRepair);
+                    break;
                 }
             }
 
-            items.length = 0;
-            for(let key in addMod){
-                items.push(...Modifiers[key].getRecipe().map(item => ({id: item.id, count: addMod[key], data: item.data})));
-            }
-            count > 0 && items.push({id: find.id, count: count, data: 0});
+            const useItems: ItemInstance[] = [];
 
-            if(items.length > 0){
+            for(let key in addMod){
+                useItems.push(...Modifiers[key].getRecipe().map(item => ({id: item.id, count: addMod[key], data: item.data})));
+            }
+            countRepair > 0 && useItems.push({id: findRepair.id, count: countRepair, data: findRepair.data});
+
+            if(useItems.length > 0){
 
                 consume = slots.map(s => {
-                    const i = items.findIndex(item => item.id === s.id && (item.data === -1 || item.data === s.data));
+                    const i = useItems.findIndex(item => item.id === s.id && (item.data === -1 || item.data === s.data));
                     if(i === -1){
                         return 0;
                     }
-                    const min = Math.min(s.count, items[i].count);
-                    items[i].count -= min;
-                    items[i].count <= 0 && items.splice(i, 1);
+                    const min = Math.min(s.count, useItems[i].count);
+                    useItems[i].count -= min;
+                    useItems[i].count <= 0 && useItems.splice(i, 1);
                     return min;
                 });
                 
@@ -303,6 +283,7 @@ class ToolCrafterWindow extends CraftingWindow {
                 result.extra.putString("modifiers", TconModifier.encodeToString(modifiers));
                 result = new TconToolStack(result);
                 container.setSlot("slotResult", result.id, result.count, result.data, result.extra);
+                
             }
             else{
                 container.clearSlot("slotResult");

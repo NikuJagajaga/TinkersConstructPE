@@ -111,13 +111,17 @@ const Materials = {
         .setItem("planks")
         .setHeadStats(35, 2, 2, MiningLv.STONE)
         .setHandleStats(1, 25)
-        .setExtraStats(15),
+        .setExtraStats(15)
+        .addHeadTraits(TraitEcological)
+        .addExtraTraits(TraitEcological),
 
     stone: new TinkersMaterial("Stone", 1)
         .setItem("cobblestone")
         .setHeadStats(120, 4, 3, MiningLv.IRON)
         .setHandleStats(0.5, -50)
-        .setExtraStats(20),
+        .setExtraStats(20)
+        .addHeadTraits(TraitCheapskate)
+        .addExtraTraits(TraitCheap),
 
     flint: new TinkersMaterial("Flint", 2)
         .setItem("flint")
@@ -166,7 +170,8 @@ const Materials = {
         .setHeadStats(12, 0.51, 0.05, MiningLv.STONE)
         .setHandleStats(0.1, 5)
         .setExtraStats(15)
-        .addHeadTraits(Traits.writable),
+        .addHeadTraits(TraitWritable)
+        .addExtraTraits(TraitWritable),
 
     sponge: new TinkersMaterial("Sponge", 10)
         .setItem("sponge")

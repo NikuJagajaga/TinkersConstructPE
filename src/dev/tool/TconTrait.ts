@@ -6,12 +6,14 @@ abstract class TconTrait {
     readonly key: string;
     readonly name: string;
     readonly color: number;
+    readonly leveled: boolean = false;
     parent?: TconModifier;
 
     constructor(key: string, name: string, color?: string){
         this.key = key;
         this.name = name;
         this.color = color ? Color.parseColor(color) : Color.WHITE;
+        this.leveled = false;
         Traits[key] = this;
     }
 
@@ -20,7 +22,15 @@ abstract class TconTrait {
     }
 
     getLocalizedName(level: number): string {
-        return translate(this.name);
+        let name = translate(this.name);
+        let times = level;
+        if(this.parent && this.parent.maxLevel > 1){
+            times = Math.ceil(level / this.parent.maxLevel);
+        }
+        if(times > 1){
+            name += "" + toRoman(times);
+        }
+        return name;
     }
 
     getBonusSlots(level: number): number {
@@ -47,5 +57,24 @@ abstract class TconTrait {
     }
 
     onTick(stack: TconToolStack, player: number, level: number): void {}
+
+}
+
+
+abstract class TconTraitLeveled extends TconTrait {
+
+    override readonly leveled: boolean = true;
+
+    override getLocalizedName(level: number): string {
+        let name = translate(this.name);
+        let times = level;
+        if(this.parent && this.parent.maxLevel > 1){
+            times = Math.ceil(level / this.parent.maxLevel);
+        }
+        if(times > 1){
+            name += "" + toRoman(times);
+        }
+        return name;
+    }
 
 }

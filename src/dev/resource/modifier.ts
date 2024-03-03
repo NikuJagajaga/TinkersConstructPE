@@ -5,6 +5,10 @@ Recipes2.addShaped(ItemID.tcon_silky_jewel, "_a_:aba:_a_", {a: ItemID.tcon_silky
 MeltingRecipe.addRecipe(ItemID.tcon_silky_cloth, "molten_gold", MatValue.INGOT);
 
 
+createItem("tcon_reinforcement", "Reinforcement");
+Recipes2.addShaped(ItemID.tcon_reinforcement, "aaa:aba:aaa", {a: "obsidian", b: ItemID.tcon_cast_largeplate});
+
+
 createBlock("tcon_graveyard_soil", [{name: "Graveyard Soil"}], "dirt");
 createBlock("tcon_consecrated_soil", [{name: "Consecrated Soil"}], "dirt");
 Recipes2.addShapeless(BlockID.tcon_graveyard_soil, ["dirt", "rotten_flesh", "bone_meal"]);

@@ -35,7 +35,7 @@ class TconToolStack implements ItemInstance {
                         find.level = Math.max(find.level, trait.level);
                     }
                     else{
-                        headTraits.push(trait);
+                        headTraits.push({...trait});
                     }
                 }
             }
@@ -46,7 +46,7 @@ class TconToolStack implements ItemInstance {
                         find.level = Math.max(find.level, trait.level);
                     }
                     else{
-                        extraTraits.push(trait);
+                        extraTraits.push({...trait});
                     }
                 }
             }
@@ -57,7 +57,9 @@ class TconToolStack implements ItemInstance {
         for(const trait of extraTraits){
             find = this.traits.find(t => t.trait == trait.trait);
             if(find){
-                find.level += trait.level;
+                if(find.trait.leveled){
+                    find.level += trait.level;
+                }
             }
             else{
                 this.traits.push(trait);
@@ -112,8 +114,26 @@ class TconToolStack implements ItemInstance {
         return toolMaterial;
     }
 
-    getRepairItems(): Tile[] {
-        return this.instance.headParts.map(index => this.materials[index].getItem());
+    calcRepair(item: Tile): number {
+        for(let i = 0; i < this.materials.length; i++){
+            if(this.instance.headParts.indexOf(i) === -1){
+                continue;
+            }
+            const mat = this.materials[i];
+            const matItem = mat.getItem();
+            if(matItem.id === item.id && (matItem.data === -1 || matItem.data === item.data)){
+                const originDur = this.getBaseStats().durability;
+                const actualDur = this.stats.durability;
+                const modCount = this.getModifierInfo().usedCount;
+                let value = mat.getHeadStats().durability * (MatValue.SHARD * 4 / MatValue.INGOT);
+                value *= this.instance.getRepairModifierForPart(i);
+                value = Math.max(Math.min(10, actualDur / originDur) * value, actualDur / 64);
+                value *= 1 - Math.min(3, modCount) * 0.05;
+                value *= Math.max(0.5, 1 - this.repairCount * 0.005);
+                return Math.ceil(value);
+            }
+        }
+        return 0;
     }
 
     forEachTraits(func: (trait: TconTrait, level: number) => void): void {
