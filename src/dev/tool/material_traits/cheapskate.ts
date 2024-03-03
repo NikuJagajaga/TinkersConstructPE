@@ -1,7 +1,7 @@
 const TraitCheapskate = new class extends TconTrait {
 
     constructor(){
-        super("cheapskate", "Cheapskate", "#AAAAAA");
+        super("cheapskate", "Cheapskate", "#999999");
     }
 
     override applyStats(stats: ToolStats, level: number): void {

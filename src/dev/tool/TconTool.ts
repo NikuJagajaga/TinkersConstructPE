@@ -96,11 +96,11 @@ abstract class TconTool extends ItemCommon implements ItemBehavior, ToolAPI.Tool
             return true;
         }
         const stack = new TconToolStack(item);
-        let bonus = 0;
+        let damage = stack.stats.damage;
         stack.forEachTraits((trait, level) => {
-            bonus += trait.onAttack(stack, victim, player, level);
+            damage = trait.onAttack(stack, victim, player, stack.stats.damage, damage, level);
         });
-        this.toolMaterial.damage = stack.stats.damage + bonus;
+        this.toolMaterial.damage = damage;
         if(this.isWeapon){
             stack.consumeDurability(1, player);
             stack.addXp(1, player);
@@ -118,13 +118,13 @@ abstract class TconTool extends ItemCommon implements ItemBehavior, ToolAPI.Tool
             return 0;
         }
         const stack = new TconToolStack(item);
-        let bonus = 0;
+        let damage = stack.stats.damage;
         if(attacker !== 0 && victim !== 0){
             stack.forEachTraits((trait, level) => {
-                bonus += trait.onAttack(stack, victim, attacker, level);
+                damage = trait.onAttack(stack, victim, attacker, stack.stats.damage, damage, level);
             });
         }
-        return stack.stats.damage + bonus;
+        return damage;
     }
 
     onDealDamage(item: ItemInstance, victim: number, player: number, damageValue: number, damageType: number): void {

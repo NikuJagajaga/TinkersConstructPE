@@ -1,7 +1,7 @@
 const TraitEcological = new class extends TconTrait {
 
     constructor(){
-        super("ecological", "Ecological", "#55FF55");
+        super("ecological", "Ecological", "#8e661b");
     }
 
     override onTick(stack: TconToolStack, player: number, level: number): void {

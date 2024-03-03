@@ -4,8 +4,12 @@ const TraitSmite = new class extends TconTrait {
         super("smite", "Smite", "#e8d500");
     }
 
-    override onAttack(item: ItemInstance, victim: number, player: number, level: number): number {
-        return EntityHelper.isUndead(victim) ? 7 / this.parent.maxLevel * level : 0;
+    override onAttack(stack: TconToolStack, victim: number, player: number, baseDamage: number, damage: number, level: number): number {
+        let newDamage = damage;
+        if(EntityHelper.isUndead(victim)){
+            newDamage += 7 / this.parent.maxLevel * level;
+        }
+        return newDamage;
     }
 
 }

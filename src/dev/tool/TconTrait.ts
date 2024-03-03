@@ -37,13 +37,17 @@ abstract class TconTrait {
         return 0;
     }
 
+    getRepairModifier(value: number, level: number): number {
+        return value;
+    }
+
     applyStats(stats: ToolStats, level: number): void {}
     applyEnchant(enchant: ToolAPI.EnchantData, level: number): void {}
 
     onDestroy(stack: TconToolStack, coords: Callback.ItemUseCoordinates, block: Tile, player: number, level: number): void {}
 
-    onAttack(stack: TconToolStack, victim: number, player: number, level: number): number {
-        return 0;
+    onAttack(stack: TconToolStack, victim: number, player: number, baseDamage: number, damage: number, level: number): number {
+        return damage;
     }
 
     onDealDamage(stack: TconToolStack, victim: number, player: number, damageValue: number, damageType: number, level: number): void {}

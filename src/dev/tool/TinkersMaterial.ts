@@ -105,10 +105,10 @@ class TinkersMaterial {
 
 
 //params source: slimeknights.tconstruct.tools.TinkerMaterials.java
-const Materials = {
+const Materials: {[key: string]: TinkersMaterial} = {
 
     wood: new TinkersMaterial("Wooden", 0)
-        .setItem("planks")
+        .setItem(VanillaBlockID.planks)
         .setHeadStats(35, 2, 2, MiningLv.STONE)
         .setHandleStats(1, 25)
         .setExtraStats(15)
@@ -127,7 +127,9 @@ const Materials = {
         .setItem("flint")
         .setHeadStats(150, 5, 2.9, MiningLv.IRON)
         .setHandleStats(0.6, -60)
-        .setExtraStats(40),
+        .setExtraStats(40)
+        .addHeadTraits(TraitCrude, 2)
+        .addExtraTraits(TraitCrude),
 
     cactus: new TinkersMaterial("Cactus", 3)
         .setItem("cactus")
@@ -145,7 +147,8 @@ const Materials = {
         .setItem("prismarine")
         .setHeadStats(430, 5.5, 6.2, MiningLv.IRON)
         .setHandleStats(0.6, -150)
-        .setExtraStats(100),
+        .setExtraStats(100)
+        .addHeadTraits(TraitJagged),
 
     netherrack: new TinkersMaterial("Netherrack", 6)
         .setItem("netherrack")
@@ -163,7 +166,8 @@ const Materials = {
         .setItem("bone")
         .setHeadStats(200, 5.09, 2.5, MiningLv.IRON)
         .setHandleStats(1.1, 50)
-        .setExtraStats(65),
+        .setExtraStats(65)
+        .addExtraTraits(TraitFractured),
 
     paper: new TinkersMaterial("Paper", 9)
         .setItem(ItemID.tcon_paperstack)

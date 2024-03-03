@@ -6648,11 +6648,14 @@ var TconTrait = (function () {
     TconTrait.prototype.getBonusSlots = function (level) {
         return 0;
     };
+    TconTrait.prototype.getRepairModifier = function (value, level) {
+        return value;
+    };
     TconTrait.prototype.applyStats = function (stats, level) { };
     TconTrait.prototype.applyEnchant = function (enchant, level) { };
     TconTrait.prototype.onDestroy = function (stack, coords, block, player, level) { };
-    TconTrait.prototype.onAttack = function (stack, victim, player, level) {
-        return 0;
+    TconTrait.prototype.onAttack = function (stack, victim, player, baseDamage, damage, level) {
+        return damage;
     };
     TconTrait.prototype.onDealDamage = function (stack, victim, player, damageValue, damageType, level) { };
     TconTrait.prototype.onPlayerDamaged = function (stack, victim, player, damageValue, damageType, level) { };
@@ -6687,75 +6690,116 @@ var TconTraitLeveled = (function (_super) {
 var TraitCheap = new (function (_super) {
     __extends(class_1, _super);
     function class_1() {
-        return _super.call(this, "cheap", "Cheap", "#555555") || this;
+        return _super.call(this, "cheap", "Cheap", "#999999") || this;
     }
+    class_1.prototype.getRepairModifier = function (value, level) {
+        return value *= 1.05;
+    };
     return class_1;
 }(TconTrait));
 var TraitCheapskate = new (function (_super) {
     __extends(class_2, _super);
     function class_2() {
-        return _super.call(this, "cheapskate", "Cheapskate", "#AAAAAA") || this;
+        return _super.call(this, "cheapskate", "Cheapskate", "#999999") || this;
     }
     class_2.prototype.applyStats = function (stats, level) {
         stats.durability = Math.max(1, stats.durability * 80 / 100 | 0);
     };
     return class_2;
 }(TconTrait));
-var TraitEcological = new (function (_super) {
+var TraitCrude = new (function (_super) {
     __extends(class_3, _super);
     function class_3() {
-        return _super.call(this, "ecological", "Ecological", "#55FF55") || this;
+        var _this = _super.call(this, "crude", "Crude", "#696969") || this;
+        _this.leveled = true;
+        return _this;
     }
-    class_3.prototype.onTick = function (stack, player, level) {
+    class_3.prototype.onAttack = function (stack, victim, player, baseDamage, damage, level) {
+        var _a;
+        for (var i = 0; i <= 3; i++) {
+            if ((_a = Entity.getArmorSlot(victim, i)) === null || _a === void 0 ? void 0 : _a.id) {
+                return damage;
+            }
+        }
+        return damage + baseDamage * 0.05 * level;
+    };
+    return class_3;
+}(TconTrait));
+var TraitEcological = new (function (_super) {
+    __extends(class_4, _super);
+    function class_4() {
+        return _super.call(this, "ecological", "Ecological", "#8e661b") || this;
+    }
+    class_4.prototype.onTick = function (stack, player, level) {
         if ((Math.random() * 800 | 0) === 0) {
             stack.durability--;
             stack.applyToHand(player);
         }
     };
-    return class_3;
+    return class_4;
+}(TconTrait));
+var TraitFractured = new (function (_super) {
+    __extends(class_5, _super);
+    function class_5() {
+        return _super.call(this, "fractured", "Fractured", "#ede6bf") || this;
+    }
+    class_5.prototype.applyStats = function (stats, level) {
+        stats.damage += 1.5;
+    };
+    return class_5;
+}(TconTrait));
+var TraitJagged = new (function (_super) {
+    __extends(class_6, _super);
+    function class_6() {
+        return _super.call(this, "jagged", "Jagged", "#7edebc") || this;
+    }
+    class_6.prototype.onAttack = function (stack, victim, player, baseDamage, damage, level) {
+        return damage + Math.log((stack.stats.durability - stack.durability) / 72 + 1) * 2;
+    };
+    return class_6;
 }(TconTrait));
 var TraitWritable = new (function (_super) {
-    __extends(class_4, _super);
-    function class_4() {
+    __extends(class_7, _super);
+    function class_7() {
         var _this = _super.call(this, "writable", "Writable", "#ffffff") || this;
         _this.leveled = true;
         return _this;
     }
-    class_4.prototype.getBonusSlots = function (level) {
+    class_7.prototype.getBonusSlots = function (level) {
         return level;
     };
-    return class_4;
+    return class_7;
 }(TconTrait));
 var TraitBeheading = new (function (_super) {
-    __extends(class_5, _super);
-    function class_5() {
+    __extends(class_8, _super);
+    function class_8() {
         return _super.call(this, "beheading", "Beheading", "#10574b") || this;
     }
-    class_5.prototype.onKillEntity = function (stack, victim, player, damageType, level) {
+    class_8.prototype.onKillEntity = function (stack, victim, player, damageType, level) {
         var headMeta = EntityHelper.getHeadMeta(victim);
         if (headMeta !== -1 && Math.random() < 0.1 * level) {
             var region = WorldRegion.getForActor(player);
             region.dropItem(Entity.getPosition(victim), VanillaBlockID.skull, 1, headMeta);
         }
     };
-    return class_5;
+    return class_8;
 }(TconTrait));
 var TraitCreative = new (function (_super) {
-    __extends(class_6, _super);
-    function class_6() {
+    __extends(class_9, _super);
+    function class_9() {
         return _super.call(this, "creative", "Creative") || this;
     }
-    class_6.prototype.getBonusSlots = function (level) {
+    class_9.prototype.getBonusSlots = function (level) {
         return level;
     };
-    return class_6;
+    return class_9;
 }(TconTrait));
 var TraitDiamond = new (function (_super) {
-    __extends(class_7, _super);
-    function class_7() {
+    __extends(class_10, _super);
+    function class_10() {
         return _super.call(this, "diamond", "Diamond", "#8cf4e2") || this;
     }
-    class_7.prototype.applyStats = function (stats, level) {
+    class_10.prototype.applyStats = function (stats, level) {
         stats.durability += 500;
         if (stats.level < MiningLv.OBSIDIAN) {
             stats.level++;
@@ -6763,38 +6807,38 @@ var TraitDiamond = new (function (_super) {
         stats.efficiency += 0.5;
         stats.damage++;
     };
-    return class_7;
+    return class_10;
 }(TconTrait));
 var TraitEmerald = new (function (_super) {
-    __extends(class_8, _super);
-    function class_8() {
+    __extends(class_11, _super);
+    function class_11() {
         return _super.call(this, "emerald", "Emerald", "#41f384") || this;
     }
-    class_8.prototype.applyStats = function (stats, level) {
+    class_11.prototype.applyStats = function (stats, level) {
         stats.durability += stats.durability >> 1;
         if (stats.level < MiningLv.DIAMOND) {
             stats.level++;
         }
     };
-    return class_8;
+    return class_11;
 }(TconTrait));
 var TraitFiery = new (function (_super) {
-    __extends(class_9, _super);
-    function class_9() {
+    __extends(class_12, _super);
+    function class_12() {
         return _super.call(this, "fiery", "Fiery", "#ea9e32") || this;
     }
-    class_9.prototype.onAttack = function (item, victim, player, level) {
+    class_12.prototype.onAttack = function (item, victim, player, level) {
         Entity.setFire(victim, 1 + (level >> 3), true);
         return 0;
     };
-    return class_9;
+    return class_12;
 }(TconTrait));
 var TraitHaste = new (function (_super) {
-    __extends(class_10, _super);
-    function class_10() {
+    __extends(class_13, _super);
+    function class_13() {
         return _super.call(this, "haste", "Haste", "#910000") || this;
     }
-    class_10.prototype.applyStats = function (stats, level) {
+    class_13.prototype.applyStats = function (stats, level) {
         var step1 = 15;
         var step2 = 25;
         for (var i = 0; i < level; i++) {
@@ -6810,86 +6854,86 @@ var TraitHaste = new (function (_super) {
         }
         stats.efficiency += (level / this.parent.maxLevel | 0) * 0.5;
     };
-    return class_10;
+    return class_13;
 }(TconTrait));
 var TraitKnockback = new (function (_super) {
-    __extends(class_11, _super);
-    function class_11() {
+    __extends(class_14, _super);
+    function class_14() {
         return _super.call(this, "knockback", "Knockback", "#9f9f9f") || this;
     }
-    class_11.prototype.onAttack = function (item, victim, player, level) {
+    class_14.prototype.onAttack = function (item, victim, player, level) {
         var vec = Entity.getLookVector(player);
         var speed = 1 + level * 0.1;
         Entity.setVelocity(victim, vec.x * speed, 0.1, vec.z * speed);
         return 0;
     };
-    return class_11;
+    return class_14;
 }(TconTrait));
 var TraitLuck = new (function (_super) {
-    __extends(class_12, _super);
-    function class_12() {
+    __extends(class_15, _super);
+    function class_15() {
         return _super.call(this, "luck", "Luck", "#2d51e2") || this;
     }
-    class_12.prototype.getLuckLevel = function (level) {
+    class_15.prototype.getLuckLevel = function (level) {
         return level < 60 ? 0 : level < 180 ? 1 : level < 360 ? 2 : 3;
     };
-    class_12.prototype.getLocalizedName = function (level) {
+    class_15.prototype.getLocalizedName = function (level) {
         var roman = toRoman(this.getLuckLevel(level));
         return translate(this.name) + " " + roman;
     };
-    class_12.prototype.applyEnchant = function (enchant, level) {
+    class_15.prototype.applyEnchant = function (enchant, level) {
         enchant.fortune = this.getLuckLevel(level);
     };
-    return class_12;
+    return class_15;
 }(TconTrait));
 var TraitMending = new (function (_super) {
-    __extends(class_13, _super);
-    function class_13() {
+    __extends(class_16, _super);
+    function class_16() {
         return _super.call(this, "mending", "Mending", "#43ab32") || this;
     }
-    class_13.prototype.onTick = function (stack, player, level) {
+    class_16.prototype.onTick = function (stack, player, level) {
         if (World.getThreadTime() % 150 === 0) {
             stack.durability -= level;
             stack.applyToHand(player);
         }
     };
-    return class_13;
+    return class_16;
 }(TconTrait));
 var TraitNecrotic = new (function (_super) {
-    __extends(class_14, _super);
-    function class_14() {
+    __extends(class_17, _super);
+    function class_17() {
         return _super.call(this, "necrotic", "Necrotic", "#5e0000") || this;
     }
-    class_14.prototype.onDealDamage = function (stack, victim, player, damageValue, damageType, level) {
+    class_17.prototype.onDealDamage = function (stack, victim, player, damageValue, damageType, level) {
         var add = damageValue * 0.1 * level | 0;
         if (add > 0) {
             Entity.setHealth(player, Math.min(Entity.getHealth(player) + add, Entity.getMaxHealth(player)));
         }
     };
-    return class_14;
+    return class_17;
 }(TconTrait));
 var TraitReinforced = new (function (_super) {
-    __extends(class_15, _super);
-    function class_15() {
+    __extends(class_18, _super);
+    function class_18() {
         return _super.call(this, "reinforced", "Reinforced", "#502e83") || this;
     }
-    class_15.prototype.getLocalizedName = function (level) {
+    class_18.prototype.getLocalizedName = function (level) {
         if (level >= 5) {
             return translate("Unbreakable");
         }
         return _super.prototype.getLocalizedName.call(this, level);
     };
-    class_15.prototype.onConsume = function (stack, level) {
+    class_18.prototype.onConsume = function (stack, level) {
         return level >= 5 ? true : Math.random() < level * 0.2;
     };
-    return class_15;
+    return class_18;
 }(TconTrait));
 var TraitSharp = new (function (_super) {
-    __extends(class_16, _super);
-    function class_16() {
+    __extends(class_19, _super);
+    function class_19() {
         return _super.call(this, "sharp", "Sharp", "#fff6f6") || this;
     }
-    class_16.prototype.applyStats = function (stats, level) {
+    class_19.prototype.applyStats = function (stats, level) {
         for (var i = 0; i < level; i++) {
             if (stats.damage <= 10) {
                 stats.damage += 0.05 - 0.025 * stats.damage / 10;
@@ -6903,63 +6947,71 @@ var TraitSharp = new (function (_super) {
         }
         stats.damage += (level / this.parent.maxLevel | 0) * 0.25;
     };
-    return class_16;
+    return class_19;
 }(TconTrait));
 var TraitShulking = new (function (_super) {
-    __extends(class_17, _super);
-    function class_17() {
+    __extends(class_20, _super);
+    function class_20() {
         return _super.call(this, "shulking", "Shulking", "#aaccff") || this;
     }
-    class_17.prototype.onAttack = function (item, victim, player, level) {
+    class_20.prototype.onAttack = function (item, victim, player, level) {
         Entity.addEffect(victim, EPotionEffect.LEVITATION, 0, (level >> 1) + 10);
         return 0;
     };
-    return class_17;
+    return class_20;
 }(TconTrait));
 var TraitSilk = new (function (_super) {
-    __extends(class_18, _super);
-    function class_18() {
+    __extends(class_21, _super);
+    function class_21() {
         return _super.call(this, "silk", "Silky", "#fbe28b") || this;
     }
-    class_18.prototype.applyStats = function (stats, level) {
+    class_21.prototype.applyStats = function (stats, level) {
         stats.efficiency = Math.max(1, stats.efficiency - 3);
         stats.damage = Math.max(1, stats.damage - 3);
     };
-    class_18.prototype.applyEnchant = function (enchant, level) {
+    class_21.prototype.applyEnchant = function (enchant, level) {
         enchant.silk = true;
     };
-    return class_18;
+    return class_21;
 }(TconTrait));
 var TraitSmite = new (function (_super) {
-    __extends(class_19, _super);
-    function class_19() {
+    __extends(class_22, _super);
+    function class_22() {
         return _super.call(this, "smite", "Smite", "#e8d500") || this;
     }
-    class_19.prototype.onAttack = function (item, victim, player, level) {
-        return EntityHelper.isUndead(victim) ? 7 / this.parent.maxLevel * level : 0;
+    class_22.prototype.onAttack = function (stack, victim, player, baseDamage, damage, level) {
+        var newDamage = damage;
+        if (EntityHelper.isUndead(victim)) {
+            newDamage += 7 / this.parent.maxLevel * level;
+        }
+        return newDamage;
     };
-    return class_19;
+    return class_22;
 }(TconTrait));
 var TraitSpider = new (function (_super) {
-    __extends(class_20, _super);
-    function class_20() {
+    __extends(class_23, _super);
+    function class_23() {
         return _super.call(this, "spider", "Bane of Arthropods", "#61ba49") || this;
     }
-    class_20.prototype.onAttack = function (item, victim, player, level) {
-        return EntityHelper.isArthropods(victim) ? 7 / this.parent.maxLevel * level : 0;
+    class_23.prototype.onAttack = function (stack, victim, player, baseDamage, damage, level) {
+        var newDamage = damage;
+        if (EntityHelper.isArthropods(victim)) {
+            newDamage += 7 / this.parent.maxLevel * level;
+        }
+        return newDamage;
     };
-    return class_20;
+    return class_23;
 }(TconTrait));
 var TraitWeb = new (function (_super) {
-    __extends(class_21, _super);
-    function class_21() {
+    __extends(class_24, _super);
+    function class_24() {
         return _super.call(this, "web", "Web", "#ffffff") || this;
     }
-    class_21.prototype.onAttack = function (item, victim, player, level) {
+    class_24.prototype.onAttack = function (item, victim, player, level) {
         Entity.addEffect(victim, EPotionEffect.MOVEMENT_SLOWDOWN, 1, level * 20);
         return 0;
     };
-    return class_21;
+    return class_24;
 }(TconTrait));
 var TinkersMaterial = (function () {
     function TinkersMaterial(name, texIndex, moltenLiquid, isMetal) {
@@ -7035,7 +7087,7 @@ var TinkersMaterial = (function () {
 }());
 var Materials = {
     wood: new TinkersMaterial("Wooden", 0)
-        .setItem("planks")
+        .setItem(VanillaBlockID.planks)
         .setHeadStats(35, 2, 2, MiningLv.STONE)
         .setHandleStats(1, 25)
         .setExtraStats(15)
@@ -7052,7 +7104,9 @@ var Materials = {
         .setItem("flint")
         .setHeadStats(150, 5, 2.9, MiningLv.IRON)
         .setHandleStats(0.6, -60)
-        .setExtraStats(40),
+        .setExtraStats(40)
+        .addHeadTraits(TraitCrude, 2)
+        .addExtraTraits(TraitCrude),
     cactus: new TinkersMaterial("Cactus", 3)
         .setItem("cactus")
         .setHeadStats(210, 4, 3.4, MiningLv.IRON)
@@ -7067,7 +7121,8 @@ var Materials = {
         .setItem("prismarine")
         .setHeadStats(430, 5.5, 6.2, MiningLv.IRON)
         .setHandleStats(0.6, -150)
-        .setExtraStats(100),
+        .setExtraStats(100)
+        .addHeadTraits(TraitJagged),
     netherrack: new TinkersMaterial("Netherrack", 6)
         .setItem("netherrack")
         .setHeadStats(270, 4.5, 3, MiningLv.IRON)
@@ -7082,7 +7137,8 @@ var Materials = {
         .setItem("bone")
         .setHeadStats(200, 5.09, 2.5, MiningLv.IRON)
         .setHandleStats(1.1, 50)
-        .setExtraStats(65),
+        .setExtraStats(65)
+        .addExtraTraits(TraitFractured),
     paper: new TinkersMaterial("Paper", 9)
         .setItem(ItemID.tcon_paperstack)
         .setHeadStats(12, 0.51, 0.05, MiningLv.STONE)
@@ -7482,24 +7538,32 @@ var TconToolStack = (function () {
         return toolMaterial;
     };
     TconToolStack.prototype.calcRepair = function (item) {
-        for (var i = 0; i < this.materials.length; i++) {
-            if (this.instance.headParts.indexOf(i) === -1) {
-                continue;
+        var _loop_4 = function (i) {
+            if (this_2.instance.headParts.indexOf(i) === -1) {
+                return "continue";
             }
-            var mat = this.materials[i];
+            var mat = this_2.materials[i];
             var matItem = mat.getItem();
-            alert("mat: " + matItem.id + ":" + matItem.data + ", item: " + item.id + ":" + item.data);
             if (matItem.id === item.id && (matItem.data === -1 || matItem.data === item.data)) {
-                var originDur = this.getBaseStats().durability;
-                var actualDur = this.stats.durability;
-                var modCount = this.getModifierInfo().usedCount;
-                var value = mat.getHeadStats().durability * (MatValue.SHARD * 4 / MatValue.INGOT);
-                value *= this.instance.getRepairModifierForPart(i);
-                value = Math.max(Math.min(10, actualDur / originDur) * value, actualDur / 64);
-                value *= 1 - Math.min(3, modCount) * 0.05;
-                value *= Math.max(0.5, 1 - this.repairCount * 0.005);
-                return Math.ceil(value);
+                var originDur = this_2.getBaseStats().durability;
+                var actualDur = this_2.stats.durability;
+                var modCount = this_2.getModifierInfo().usedCount;
+                var value_1 = mat.getHeadStats().durability * (MatValue.SHARD * 4 / MatValue.INGOT);
+                value_1 *= this_2.instance.getRepairModifierForPart(i);
+                value_1 = Math.max(Math.min(10, actualDur / originDur) * value_1, actualDur / 64);
+                value_1 *= 1 - Math.min(3, modCount) * 0.05;
+                value_1 *= Math.max(0.5, 1 - this_2.repairCount * 0.005);
+                this_2.forEachTraits(function (trait, level) {
+                    value_1 = trait.getRepairModifier(value_1, level);
+                });
+                return { value: Math.ceil(value_1) };
             }
+        };
+        var this_2 = this;
+        for (var i = 0; i < this.materials.length; i++) {
+            var state_1 = _loop_4(i);
+            if (typeof state_1 === "object")
+                return state_1.value;
         }
         return 0;
     };
@@ -8223,8 +8287,8 @@ Recipes2.addShaped(BlockID.tcon_partbuilder3, "a:b", { a: ItemID.tcon_pattern_bl
 Recipes2.addShaped(BlockID.tcon_partbuilder4, "a:b", { a: ItemID.tcon_pattern_blank, b: { id: "log2", data: 0 } });
 Recipes2.addShaped(BlockID.tcon_partbuilder5, "a:b", { a: ItemID.tcon_pattern_blank, b: { id: "log2", data: 1 } });
 var PartBuilderWindow = new (function (_super) {
-    __extends(class_22, _super);
-    function class_22() {
+    __extends(class_25, _super);
+    function class_25() {
         var _this = this;
         var elements = {
             slotPattern: { type: "slot", x: 8, y: 136 - 36, bitmap: "tcon.slot.pattern", size: 72 },
@@ -8237,7 +8301,7 @@ var PartBuilderWindow = new (function (_super) {
             btnR: { type: "button", x: 440 + 104 - 36, y: 136 + 52 + 24, bitmap: "classic_button_up", bitmap2: "classic_button_down", scale: 2, clicker: { onClick: function () { return RV === null || RV === void 0 ? void 0 : RV.RecipeTypeRegistry.openRecipePage("tcon_partbuilder"); } } },
             textR: { type: "text", x: 440 + 104 - 22, y: 136 + 52 + 18, z: 1, text: "R", font: { color: Color.WHITE, size: 20, shadow: 0.5, align: UI.Font.ALIGN_CENTER } }
         };
-        var _loop_4 = function (i) {
+        var _loop_5 = function (i) {
             elements["btn" + i] = {
                 type: "button",
                 x: (i % 4) * 64 + 160,
@@ -8250,7 +8314,7 @@ var PartBuilderWindow = new (function (_super) {
             };
         };
         for (var i = 0; i < PartRegistry.types.length; i++) {
-            _loop_4(i);
+            _loop_5(i);
         }
         var window = new UI.StandardWindow({
             standard: {
@@ -8306,7 +8370,7 @@ var PartBuilderWindow = new (function (_super) {
         });
         return _this;
     }
-    class_22.prototype.addServerEvents = function (container) {
+    class_25.prototype.addServerEvents = function (container) {
         var _this = this;
         container.addServerEventListener("select", function (con, client, data) {
             _this.selectedPattern = data.index;
@@ -8314,7 +8378,7 @@ var PartBuilderWindow = new (function (_super) {
         });
         container.addServerEventListener("craft", function (con, client, data) { return _this.onCraft(con, client); });
     };
-    class_22.prototype.autoSetPattern = function (container, player) {
+    class_25.prototype.autoSetPattern = function (container, player) {
         var slotPattern = container.getSlot("slotPattern");
         if (slotPattern.isEmpty()) {
             var actor = new PlayerActor(player);
@@ -8331,7 +8395,7 @@ var PartBuilderWindow = new (function (_super) {
             }
         }
     };
-    class_22.prototype.isValidAddTransfer = function (container, slotName, id, amount, data, extra, player) {
+    class_25.prototype.isValidAddTransfer = function (container, slotName, id, amount, data, extra, player) {
         switch (slotName) {
             case "slotPattern":
                 if (id === ItemID.tcon_pattern_blank)
@@ -8350,12 +8414,12 @@ var PartBuilderWindow = new (function (_super) {
         }
         return false;
     };
-    class_22.prototype.isValidGetTransfer = function (container, slotName, id, amount, data, extra, player) {
+    class_25.prototype.isValidGetTransfer = function (container, slotName, id, amount, data, extra, player) {
         if (slotName === "slotResult")
             return false;
         return true;
     };
-    class_22.prototype.onUpdate = function (container) {
+    class_25.prototype.onUpdate = function (container) {
         var patternData = PartRegistry.types[this.selectedPattern];
         var slotPattern = container.getSlot("slotPattern");
         var slotMaterial = container.getSlot("slotMaterial");
@@ -8383,7 +8447,7 @@ var PartBuilderWindow = new (function (_super) {
         container.sendChanges();
         container.sendEvent("refresh", { result: resultId, index: this.selectedPattern });
     };
-    class_22.prototype.showMaterial = function (container, key, slotMaterialCount, patternDataCost) {
+    class_25.prototype.showMaterial = function (container, key, slotMaterialCount, patternDataCost) {
         var material = Materials[key];
         var packet = {
             material: key,
@@ -8397,7 +8461,7 @@ var PartBuilderWindow = new (function (_super) {
         }
         container.sendEvent("stats", packet);
     };
-    class_22.prototype.onCraft = function (container, client) {
+    class_25.prototype.onCraft = function (container, client) {
         var patternData = PartRegistry.types[this.selectedPattern];
         var slotPattern = container.getSlot("slotPattern");
         var slotMaterial = container.getSlot("slotMaterial");
@@ -8430,7 +8494,7 @@ var PartBuilderWindow = new (function (_super) {
         }
         this.onUpdate(container);
     };
-    return class_22;
+    return class_25;
 }(CraftingWindow));
 PartBuilderWindow.addTargetBlock(BlockID.tcon_partbuilder0);
 PartBuilderWindow.addTargetBlock(BlockID.tcon_partbuilder1);
@@ -8638,7 +8702,7 @@ var ToolCrafterWindow = (function (_super) {
         if (TconToolFactory.isTool(slotTool.id) && slotTool.extra) {
             var slots = [];
             var items_2 = [];
-            var _loop_5 = function (i) {
+            var _loop_6 = function (i) {
                 var slot = container.getSlot("slot" + i);
                 slots[i] = { id: slot.id, count: slot.count, data: slot.data };
                 if (slot.id === 0) {
@@ -8648,7 +8712,7 @@ var ToolCrafterWindow = (function (_super) {
                 find ? find.count += slot.count : items_2.push({ id: slot.id, count: slot.count, data: slot.data });
             };
             for (var i = 1; i < 6; i++) {
-                _loop_5(i);
+                _loop_6(i);
             }
             var addMod_1 = {};
             for (var key in Modifiers) {
@@ -8662,7 +8726,7 @@ var ToolCrafterWindow = (function (_super) {
             }
             var stack = new TconToolStack(slotTool);
             var _a = stack.getModifierInfo(), modifiers = _a.modifiers, usedCount = _a.usedCount, maxCount = _a.maxCount;
-            var _loop_6 = function (key) {
+            var _loop_7 = function (key) {
                 var find3 = modifiers.find(function (mod) { return mod.type === key; });
                 if (find3 && find3.level < Modifiers[key].maxLevel) {
                     addMod_1[key] = Math.min(addMod_1[key], Modifiers[key].maxLevel - find3.level);
@@ -8678,7 +8742,7 @@ var ToolCrafterWindow = (function (_super) {
                 }
             };
             for (var key in addMod_1) {
-                _loop_6(key);
+                _loop_7(key);
             }
             var space = stack.durability;
             var newDur = space;
@@ -8687,7 +8751,6 @@ var ToolCrafterWindow = (function (_super) {
             for (var _i = 0, items_1 = items_2; _i < items_1.length; _i++) {
                 var item = items_1[_i];
                 var value = stack.calcRepair(item);
-                alert("value: " + value);
                 if (value > 0) {
                     findRepair = item;
                     while (countRepair < findRepair.count && value * countRepair < space) {
@@ -8698,11 +8761,11 @@ var ToolCrafterWindow = (function (_super) {
                 }
             }
             var useItems_1 = [];
-            var _loop_7 = function (key) {
+            var _loop_8 = function (key) {
                 useItems_1.push.apply(useItems_1, Modifiers[key].getRecipe().map(function (item) { return ({ id: item.id, count: addMod_1[key], data: item.data }); }));
             };
             for (var key in addMod_1) {
-                _loop_7(key);
+                _loop_8(key);
             }
             countRepair > 0 && useItems_1.push({ id: findRepair.id, count: countRepair, data: findRepair.data });
             if (useItems_1.length > 0) {
@@ -8925,11 +8988,11 @@ var TconTool = (function (_super) {
             return true;
         }
         var stack = new TconToolStack(item);
-        var bonus = 0;
+        var damage = stack.stats.damage;
         stack.forEachTraits(function (trait, level) {
-            bonus += trait.onAttack(stack, victim, player, level);
+            damage = trait.onAttack(stack, victim, player, stack.stats.damage, damage, level);
         });
-        this.toolMaterial.damage = stack.stats.damage + bonus;
+        this.toolMaterial.damage = damage;
         if (this.isWeapon) {
             stack.consumeDurability(1, player);
             stack.addXp(1, player);
@@ -8945,13 +9008,13 @@ var TconTool = (function (_super) {
             return 0;
         }
         var stack = new TconToolStack(item);
-        var bonus = 0;
+        var damage = stack.stats.damage;
         if (attacker !== 0 && victim !== 0) {
             stack.forEachTraits(function (trait, level) {
-                bonus += trait.onAttack(stack, victim, attacker, level);
+                damage = trait.onAttack(stack, victim, attacker, stack.stats.damage, damage, level);
             });
         }
-        return stack.stats.damage + bonus;
+        return damage;
     };
     TconTool.prototype.onDealDamage = function (item, victim, player, damageValue, damageType) {
         if (!item.extra) {
@@ -9570,14 +9633,14 @@ var TconLumberaxe = (function (_super) {
             var center = World.getRelativeCoords(coords.x, coords.y, coords.z, coords.side ^ 1);
             var block2_1;
             var consume = 0;
-            var _loop_8 = function (x) {
-                var _loop_9 = function (y) {
-                    var _loop_10 = function (z) {
+            var _loop_9 = function (x) {
+                var _loop_10 = function (y) {
+                    var _loop_11 = function (z) {
                         if (x === coords.x && y === coords.y && z === coords.z)
                             return "continue";
                         block2_1 = region.getBlock(x, y, z);
                         blockData = ToolAPI.getBlockData(block2_1.id);
-                        if (blockData && this_2.blockTypes.indexOf(blockData.material.name) !== -1 && stack.stats.level >= blockData.level) {
+                        if (blockData && this_3.blockTypes.indexOf(blockData.material.name) !== -1 && stack.stats.level >= blockData.level) {
                             region.destroyBlock(x, y, z, drop, player);
                             stack.forEachTraits(function (trait, level) {
                                 trait.onDestroy(stack, { x: x, y: y, z: z, side: coords.side, relative: World.getRelativeCoords(x, y, z, coords.side) }, block2_1, player, level);
@@ -9586,16 +9649,16 @@ var TconLumberaxe = (function (_super) {
                         }
                     };
                     for (var z = center.z - 1; z <= center.z + 1; z++) {
-                        _loop_10(z);
+                        _loop_11(z);
                     }
                 };
                 for (var y = center.y - 1; y <= center.y + 1; y++) {
-                    _loop_9(y);
+                    _loop_10(y);
                 }
             };
-            var this_2 = this;
+            var this_3 = this;
             for (var x = center.x - 1; x <= center.x + 1; x++) {
-                _loop_8(x);
+                _loop_9(x);
             }
             stack.consumeDurability(consume, player);
             stack.addXp(consume, player);
@@ -9886,8 +9949,8 @@ var RV;
 ModAPI.addAPICallback("RecipeViewer", function (api) {
     RV = api;
     api.RecipeTypeRegistry.register("tcon_partbuilder", new (function (_super) {
-        __extends(class_23, _super);
-        function class_23() {
+        __extends(class_26, _super);
+        function class_26() {
             var _this = this;
             var centerY = 80;
             _this = _super.call(this, translate("Part Building"), BlockID.tcon_partbuilder0, {
@@ -9904,17 +9967,17 @@ ModAPI.addAPICallback("RecipeViewer", function (api) {
             _this.setGridView(3, 1, true);
             return _this;
         }
-        class_23.prototype.getAllList = function () {
+        class_26.prototype.getAllList = function () {
             return PartRegistry.getAllPartBuildRecipeForRV();
         };
-        class_23.prototype.onOpen = function (elements, recipe) {
+        class_26.prototype.onOpen = function (elements, recipe) {
             elements.get("imagePattern").setBinding("texture", recipe.pattern ? "tcon.pattern." + recipe.pattern : "_default_slot_empty");
         };
-        return class_23;
+        return class_26;
     }(api.RecipeType)));
     api.RecipeTypeRegistry.register("tcon_melting", new (function (_super) {
-        __extends(class_24, _super);
-        function class_24() {
+        __extends(class_27, _super);
+        function class_27() {
             var _this = _super.call(this, translate("Melting"), BlockID.tcon_smeltery, {
                 drawing: [
                     { type: "bitmap", x: 86, y: 50, bitmap: "tcon.rv.smeltery", scale: 6 },
@@ -9931,17 +9994,17 @@ ModAPI.addAPICallback("RecipeViewer", function (api) {
             _this.setTankLimit(MatValue.BLOCK);
             return _this;
         }
-        class_24.prototype.getAllList = function () {
+        class_27.prototype.getAllList = function () {
             return MeltingRecipe.getAllRecipeForRV();
         };
-        class_24.prototype.onOpen = function (elements, recipe) {
+        class_27.prototype.onOpen = function (elements, recipe) {
             elements.get("textTemp").setBinding("text", translate("%s°C", recipe.temp));
         };
-        return class_24;
+        return class_27;
     }(api.RecipeType)));
     api.RecipeTypeRegistry.register("tcon_alloying", new (function (_super) {
-        __extends(class_25, _super);
-        function class_25() {
+        __extends(class_28, _super);
+        function class_28() {
             var _this = _super.call(this, translate("Alloying"), BlockID.tcon_smeltery, {
                 drawing: [
                     { type: "bitmap", x: 50, y: 50, bitmap: "tcon.rv.smeltery_wide", scale: 6 },
@@ -9963,10 +10026,10 @@ ModAPI.addAPICallback("RecipeViewer", function (api) {
             _this.setDescription(translate("Alloy"));
             return _this;
         }
-        class_25.prototype.getAllList = function () {
+        class_28.prototype.getAllList = function () {
             return AlloyRecipe.getAllRecipeForRV();
         };
-        class_25.prototype.onOpen = function (elements, recipe) {
+        class_28.prototype.onOpen = function (elements, recipe) {
             if (recipe.inputLiq && recipe.outputLiq) {
                 var len = recipe.inputLiq.length;
                 var width = 216 / len;
@@ -9984,7 +10047,7 @@ ModAPI.addAPICallback("RecipeViewer", function (api) {
                 this.setTankLimit(Math.max.apply(Math, __spreadArray(__spreadArray([], recipe.inputLiq.map(function (rec) { return rec.amount; }), false), [recipe.outputLiq[0].amount], false)));
             }
         };
-        return class_25;
+        return class_28;
     }(api.RecipeType)));
     var CastingRV = (function (_super) {
         __extends(CastingRV, _super);

@@ -4,8 +4,12 @@ const TraitSpider = new class extends TconTrait {
         super("spider", "Bane of Arthropods", "#61ba49");
     }
 
-    override onAttack(item: ItemInstance, victim: number, player: number, level: number): number {
-        return EntityHelper.isArthropods(victim) ? 7 / this.parent.maxLevel * level : 0;
+    override onAttack(stack: TconToolStack, victim: number, player: number, baseDamage: number, damage: number, level: number): number {
+        let newDamage = damage;
+        if(EntityHelper.isArthropods(victim)){
+            newDamage += 7 / this.parent.maxLevel * level;
+        }
+        return newDamage;
     }
     
 }

@@ -130,6 +130,9 @@ class TconToolStack implements ItemInstance {
                 value = Math.max(Math.min(10, actualDur / originDur) * value, actualDur / 64);
                 value *= 1 - Math.min(3, modCount) * 0.05;
                 value *= Math.max(0.5, 1 - this.repairCount * 0.005);
+                this.forEachTraits((trait, level) => {
+                    value = trait.getRepairModifier(value, level);
+                });
                 return Math.ceil(value);
             }
         }
